@@ -23,6 +23,10 @@ type Ui struct {
 	notification *Notification
 }
 
+func (a *Ui) GetTitle() string {
+	return a.title
+}
+
 func (a *Ui) SetTitle(title string) {
 	a.title = title
 }

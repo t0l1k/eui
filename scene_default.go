@@ -1,10 +1,9 @@
 package eui
 
-type SceneDefault struct {
-	Rect      *Rect
-	Container []Drawable
+type ContainerDefault struct {
+	Container []Sprite
 }
 
-func (sc *SceneDefault) Add(d Drawable) {
-	sc.Container = append(sc.Container, d)
+func (c *ContainerDefault) Add(d Sprite) {
+	c.Container = append(c.Container, d)
 }

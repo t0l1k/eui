@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -9,17 +8,16 @@ import (
 )
 
 type SceneCounter struct {
-	counter                 Counter
-	lblCounter              *ui.Label
-	btnQuit, btnInc, btnDec *ui.Button
-	ui.SceneDefault
+	topBar         *TopBar
+	counter        Counter
+	lblCounter     *ui.Label
+	btnInc, btnDec *ui.Button
+	ui.ContainerDefault
 }
 
 func NewSceneCounter() *SceneCounter {
 	sc := &SceneCounter{}
 	rect := []int{0, 0, 1, 1}
-	sc.btnQuit = ui.NewButton("<", rect, ui.GreenYellow, ui.Black, func(b *ui.Button) { ui.Pop() })
-	sc.Add(sc.btnQuit)
 	sc.btnInc = ui.NewButton("+", rect, ui.Green, ui.Black, func(b *ui.Button) {
 		sc.counter.Inc()
 		sc.lblCounter.SetText(strconv.Itoa(int(sc.counter.Get())))
@@ -32,11 +30,9 @@ func NewSceneCounter() *SceneCounter {
 	sc.Add(sc.btnDec)
 	sc.lblCounter = ui.NewLabel(sc.counter.String(), rect, ui.Yellow, ui.Black)
 	sc.Add(sc.lblCounter)
+	sc.topBar = NewTopBar()
+	sc.Add(sc.topBar)
 	return sc
-}
-
-func (sc *SceneCounter) Add(d ui.Drawable) {
-	sc.Container = append(sc.Container, d)
 }
 
 func (sc *SceneCounter) Entered() {
@@ -54,21 +50,20 @@ func (sc *SceneCounter) Draw(surface *ebiten.Image) {
 }
 func (sc *SceneCounter) Resize() {
 	w, h := ebiten.WindowSize()
-	sc.Rect = ui.NewRect([]int{0, 0, w, h})
-	x, y, w, h := 0, 0, int(float64(sc.Rect.H)*0.05), int(float64(sc.Rect.H)*0.05)
-	sc.btnQuit.Resize([]int{x, y, w, h})
-	w, h = int(float64(sc.Rect.H)*0.3), int(float64(sc.Rect.H)*0.1)
-	x, y = sc.Rect.W/2-w/2, y+int(float64(h)*1.1)
+	rect := ui.NewRect([]int{0, 0, w, h})
+	w, h = int(float64(rect.H)*0.3), int(float64(rect.H)*0.1)
+	x, y := rect.W/2-w/2, int(float64(h)*1.1)
 	sc.lblCounter.Resize([]int{x, y, w, h})
-	w2 := int(float64(sc.Rect.W) * 0.2)
+	w2 := int(float64(rect.W) * 0.2)
 	w3 := int(float64(w2) * 0.1)
-	fmt.Println(w, w2, w3)
-	x, y = sc.Rect.W/2-(w2+w3), y+int(float64(h)*2)
+	x, y = rect.W/2-(w2+w3), y+int(float64(h)*2)
 	sc.btnInc.Resize([]int{x, y, w2, h})
-	x = sc.Rect.W/2 + (w3)
+	x = rect.W/2 + (w3)
 	sc.btnDec.Resize([]int{x, y, w2, h})
+	sc.topBar.Resize()
 }
-func (sc *SceneCounter) Quit() {
+
+func (sc *SceneCounter) Close() {
 	for _, v := range sc.Container {
 		v.Close()
 	}

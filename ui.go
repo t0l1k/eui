@@ -74,7 +74,7 @@ func Push(sc Scene) {
 
 func Pop() {
 	if len(GetUi().scenes) > 0 {
-		GetUi().currentScene.Quit()
+		GetUi().currentScene.Close()
 		idx := len(GetUi().scenes) - 1
 		GetUi().scenes = GetUi().scenes[:idx]
 		log.Printf("App Pop Scene Quit done.")
