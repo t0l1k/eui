@@ -8,10 +8,10 @@ import (
 )
 
 type SceneCounter struct {
-	topBar         *TopBar
-	counter        Counter
-	lblCounter     *ui.Label
-	btnInc, btnDec *ui.Button
+	topBar                      *TopBar
+	counter                     Counter
+	lblCounter                  *ui.Label
+	btnInc, btnDec, btnNewScene *ui.Button
 	ui.ContainerDefault
 }
 
@@ -32,6 +32,10 @@ func NewSceneCounter() *SceneCounter {
 	sc.Add(sc.lblCounter)
 	sc.topBar = NewTopBar()
 	sc.Add(sc.topBar)
+	sc.btnNewScene = ui.NewButton("New Scene", rect, ui.Green, ui.Black, func(b *ui.Button) {
+		ui.Push(NewSceneGame())
+	})
+	sc.Add(sc.btnNewScene)
 	return sc
 }
 
@@ -43,11 +47,13 @@ func (sc *SceneCounter) Update(dt int) {
 		v.Update(dt)
 	}
 }
+
 func (sc *SceneCounter) Draw(surface *ebiten.Image) {
 	for _, v := range sc.Container {
 		v.Draw(surface)
 	}
 }
+
 func (sc *SceneCounter) Resize() {
 	w, h := ebiten.WindowSize()
 	rect := ui.NewRect([]int{0, 0, w, h})
@@ -61,6 +67,8 @@ func (sc *SceneCounter) Resize() {
 	x = rect.W/2 + (w3)
 	sc.btnDec.Resize([]int{x, y, w2, h})
 	sc.topBar.Resize()
+	x, y = rect.W/2-w/2, rect.H-h
+	sc.btnNewScene.Resize([]int{x, y, w, h})
 }
 
 func (sc *SceneCounter) Close() {

@@ -57,6 +57,12 @@ func (a *Ui) ShowNotification(text string) {
 	log.Printf("Show Notification %v", text)
 }
 
+func (a *Ui) IsMainScene() bool {
+	fmt.Println("sc:", len(a.scenes))
+	return len(a.scenes) == 0
+
+}
+
 func (a *Ui) setRect(w int, h int) {
 	a.last = a.rect
 	a.rect = NewRect([]int{0, 0, w, h})

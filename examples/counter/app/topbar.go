@@ -6,8 +6,8 @@ import (
 )
 
 type TopBar struct {
-	btnQuit  *ui.Button
-	lblTitle *ui.Label
+	btnQuit         *ui.Button
+	lblTitle, lblTm *ui.Label
 	ui.ContainerDefault
 }
 
@@ -18,12 +18,19 @@ func NewTopBar() *TopBar {
 	fg := ui.Navy
 	tb.lblTitle = ui.NewLabel(ui.GetUi().GetTitle(), rect, bg, fg)
 	tb.Add(tb.lblTitle)
-	tb.btnQuit = ui.NewButton("<", rect, ui.GreenYellow, ui.Black, func(b *ui.Button) { ui.Pop() })
+	sQ := "<"
+	if ui.GetUi().IsMainScene() {
+		sQ = "x"
+	}
+	tb.btnQuit = ui.NewButton(sQ, rect, ui.GreenYellow, ui.Black, func(b *ui.Button) { ui.Pop() })
 	tb.Add(tb.btnQuit)
+	tb.lblTm = ui.NewLabel("", rect, bg, fg)
+	tb.Add(tb.lblTm)
 	return tb
 }
 
 func (tb *TopBar) Update(dt int) {
+	tb.lblTm.SetText(ui.GetUi().UpdateUpTime())
 	for _, v := range tb.Container {
 		v.Update(dt)
 	}
@@ -42,6 +49,8 @@ func (tb *TopBar) Resize() {
 	tb.btnQuit.Resize([]int{x, y, w, h})
 	x, w = h, h*5
 	tb.lblTitle.Resize([]int{x, y, w, h})
+	x = rect.W - w
+	tb.lblTm.Resize([]int{x, y, w, h})
 }
 
 func (tb *TopBar) Close() {
