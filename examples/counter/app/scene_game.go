@@ -19,6 +19,9 @@ func NewSceneGame() *SceneGame {
 
 func (sc *SceneGame) Entered() {
 	sc.Resize()
+
+	sc.topBar.btnQuit.SetBg(ui.Aqua)
+	sc.topBar.btnQuit.SetFg(ui.Black)
 }
 func (sc *SceneGame) Update(dt int) {
 	for _, v := range sc.Container {

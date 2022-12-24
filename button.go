@@ -62,6 +62,22 @@ func (b *Button) SetText(value string) {
 	b.Dirty = true
 }
 
+func (b *Button) SetBg(value color.Color) {
+	if b.bg == value {
+		return
+	}
+	b.bg = value
+	b.Dirty = true
+}
+
+func (b *Button) SetFg(value color.Color) {
+	if b.fg == value {
+		return
+	}
+	b.fg = value
+	b.Dirty = true
+}
+
 func (b *Button) SetFocus(value bool) {
 	if b.focus == value {
 		return
