@@ -33,7 +33,9 @@ func NewSceneCounter() *SceneCounter {
 	sc.topBar = NewTopBar()
 	sc.Add(sc.topBar)
 	sc.btnNewScene = ui.NewButton("New Scene", rect, ui.Green, ui.Black, func(b *ui.Button) {
-		ui.Push(NewSceneGame())
+		if b.IsMouseDownRight() {
+			ui.Push(NewSceneGame())
+		}
 	})
 	sc.Add(sc.btnNewScene)
 	return sc

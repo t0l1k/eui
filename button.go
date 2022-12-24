@@ -14,6 +14,7 @@ type Button struct {
 	text                  string
 	mouseDown             bool
 	onPressed             func(b *Button)
+	left, right, middle   bool
 }
 
 func NewButton(text string, rect []int, bg, fg color.Color, f func(b *Button)) *Button {
@@ -91,8 +92,25 @@ func (b *Button) SetMouseDown(value bool) {
 		return
 	}
 	b.mouseDown = value
+	if b.mouseDown {
+		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+			b.left = true
+		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
+			b.right = true
+		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonMiddle) {
+			b.middle = true
+		}
+	} else {
+		b.left = false
+		b.right = false
+		b.middle = false
+	}
 	b.Dirty = true
 }
+
+func (b *Button) IsMouseDownLeft() bool   { return b.left }
+func (b *Button) IsMouseDownRight() bool  { return b.right }
+func (b *Button) IsMouseDownMiddle() bool { return b.middle }
 
 func (b *Button) Update(dt int) {
 	x, y := ebiten.CursorPosition()
@@ -101,7 +119,7 @@ func (b *Button) Update(dt int) {
 	} else {
 		b.SetFocus(false)
 	}
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
+	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) || ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) || ebiten.IsMouseButtonPressed(ebiten.MouseButtonMiddle) {
 		if b.focus {
 			b.SetMouseDown(true)
 		} else {
