@@ -54,6 +54,10 @@ func (l *Label) SetFg(value color.Color) {
 	l.Dirty = true
 }
 
+func (l *Label) GetText() string {
+	return l.text
+}
+
 func (l *Label) SetText(value string) {
 	if l.text == value {
 		return

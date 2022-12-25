@@ -45,6 +45,12 @@ func (sc *SceneCounter) Entered() {
 	sc.Resize()
 }
 func (sc *SceneCounter) Update(dt int) {
+	if sc.lblCounter.GetText() == "5" {
+		sc.btnDec.Disable()
+	}
+	if sc.lblCounter.GetText() == "10" {
+		sc.btnDec.Enable()
+	}
 	for _, v := range sc.Container {
 		v.Update(dt)
 	}

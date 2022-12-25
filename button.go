@@ -7,14 +7,14 @@ import (
 )
 
 type Button struct {
-	rect                  *Rect
-	Image                 *ebiten.Image
-	Dirty, Visible, focus bool
-	bg, fg                color.Color
-	text                  string
-	mouseDown             bool
-	onPressed             func(b *Button)
-	left, right, middle   bool
+	rect                            *Rect
+	Image                           *ebiten.Image
+	Dirty, Visible, focus, disabled bool
+	bg, fg                          color.Color
+	text                            string
+	mouseDown                       bool
+	onPressed                       func(b *Button)
+	left, right, middle             bool
 }
 
 func NewButton(text string, rect []int, bg, fg color.Color, f func(b *Button)) *Button {
@@ -41,18 +41,22 @@ func (b *Button) Layout() {
 	}
 	lbl := NewLabel(b.text, []int{0, 0, w, h}, b.bg, b.fg)
 	defer lbl.Close()
-	if b.focus && !b.mouseDown {
+	if b.disabled || !b.focus && !b.mouseDown {
+		lbl.SetBg(b.bg)
+		lbl.SetFg(b.fg)
+	} else if !b.disabled && b.focus && !b.mouseDown {
 		lbl.SetBg(b.fg)
 		lbl.SetFg(b.bg)
 		lbl.SetRect(false)
-	} else if !b.focus && !b.mouseDown {
-		lbl.SetBg(b.bg)
-		lbl.SetFg(b.fg)
-	} else if b.focus && b.mouseDown {
+	} else if !b.disabled && b.focus && b.mouseDown {
 		lbl.SetRect(true)
 	}
 	lbl.Draw(b.Image)
 	b.Dirty = false
+}
+
+func (b *Button) GetText() string {
+	return b.text
 }
 
 func (b *Button) SetText(value string) {
@@ -87,6 +91,20 @@ func (b *Button) SetFocus(value bool) {
 	b.Dirty = true
 }
 
+func (b *Button) IsDisabled() bool {
+	return b.disabled
+}
+
+func (b *Button) Enable() {
+	b.disabled = false
+	b.Dirty = true
+}
+
+func (b *Button) Disable() {
+	b.disabled = true
+	b.Dirty = true
+}
+
 func (b *Button) SetMouseDown(value bool) {
 	if b.mouseDown == value {
 		return
@@ -113,6 +131,9 @@ func (b *Button) IsMouseDownRight() bool  { return b.right }
 func (b *Button) IsMouseDownMiddle() bool { return b.middle }
 
 func (b *Button) Update(dt int) {
+	if b.disabled {
+		return
+	}
 	x, y := ebiten.CursorPosition()
 	if b.rect.InRect(x, y) {
 		b.SetFocus(true)
@@ -126,7 +147,7 @@ func (b *Button) Update(dt int) {
 			b.SetMouseDown(false)
 		}
 	} else {
-		if b.mouseDown {
+		if b.mouseDown && !b.disabled {
 			if b.onPressed != nil {
 				b.onPressed(b)
 			}
