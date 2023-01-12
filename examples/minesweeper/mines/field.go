@@ -193,7 +193,35 @@ func (mf *MinedField) GameOver() {
 	mf.state = GameOver
 }
 
-func (mf *MinedField) AutoMarkFlags(x, y int) {
+func (mf *MinedField) GetFirstMovePos() (int, int) { return mf.firstMove.x, mf.firstMove.y }
+
+func (mf *MinedField) GetFlaggedCount() (count int) {
+	for _, cell := range mf.field {
+		if cell.state == flagged {
+			count++
+		}
+	}
+	return count
+}
+
+func (mf *MinedField) AutoMarkAllFlags() {
+	var count int
+	for {
+		for idx := range mf.field {
+			if mf.AutoMarkFlags(mf.GetPos(idx)) {
+				count++
+			}
+		}
+		if count > 0 {
+			mf.AutoMarkAllFlags()
+			count = 0
+		} else {
+			break
+		}
+	}
+}
+
+func (mf *MinedField) AutoMarkFlags(x, y int) (changed bool) {
 	if mf.GetCell(x, y).state == opened {
 		var countClosed, countFlags byte
 		cellValue := mf.GetCell(x, y).count
@@ -209,16 +237,19 @@ func (mf *MinedField) AutoMarkFlags(x, y int) {
 			for _, value := range neighbours {
 				if value.state == closed || value.state == questioned {
 					value.state = flagged
+					changed = true
 				}
 			}
 		} else if countFlags == cellValue {
 			for _, value := range neighbours {
 				if value.state == closed || value.state == questioned {
 					mf.Open(value.position.x, value.position.y)
+					changed = true
 				}
 			}
 		}
 	}
+	return changed
 }
 
 func (mf *MinedField) MarkFlag(x, y int) {

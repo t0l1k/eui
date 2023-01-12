@@ -15,6 +15,7 @@ type SceneGame struct {
 	game              *Game
 	lblMines, lblTime *ui.Label
 	btnStatus         *ui.ButtonIcon
+	btnAF             *ui.Button
 }
 
 func NewSceneGame(r, c, m int) *SceneGame {
@@ -42,6 +43,16 @@ func NewSceneGame(r, c, m int) *SceneGame {
 		}
 	})
 	s.Add(s.btnStatus)
+
+	s.btnAF = ui.NewButton("Auto Mark Flags", rect, ui.GreenYellow, ui.Black, func(b *ui.Button) {
+		switch s.game.field.GetState() {
+		case mines.GamePlay:
+			s.game.field.AutoMarkAllFlags()
+			s.game.redraw()
+		}
+	})
+	s.Add(s.btnAF)
+
 	return s
 }
 
@@ -97,6 +108,9 @@ func (s *SceneGame) Resize() {
 	y = 0
 	r = []int{x, y, hTop, hTop}
 	s.btnStatus.Resize(r)
+	x = rect.CenterX() + hTop*4
+	r = []int{x, y, hTop * 3, hTop}
+	s.btnAF.Resize(r)
 }
 
 func (s *SceneGame) Close() {
