@@ -48,6 +48,10 @@ func (i *Icon) SetIcon(icon *ebiten.Image) {
 	i.Dirty = true
 }
 
+func (i *Icon) Size() (int, int) {
+	return i.rect.Size()
+}
+
 func (i *Icon) Update(dt int) {}
 
 func (i *Icon) Draw(surface *ebiten.Image) {
