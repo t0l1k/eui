@@ -181,7 +181,7 @@ func (g *Game) Resize() {
 
 func (g *Game) getCellSize(rect *ui.Rect) int {
 	var size int
-	r := g.field.GetRow()
+	r := g.field.GetRow() + 1
 	c := g.field.GetColumn() + 1
 	for r*size < rect.W && c*size < rect.H {
 		size += 1
