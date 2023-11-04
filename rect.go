@@ -19,8 +19,51 @@ func (p Point) Get() (float64, float64) {
 	return p.X, p.Y
 }
 
+func (p Point) GetX() float64 {
+	return p.X
+}
+
+func (p Point) GetY() float64 {
+	return p.Y
+}
+
 func (p Point) String() string {
 	return fmt.Sprintf("[%.2f, %.2f]", p.X, p.Y)
+}
+
+type PointInt struct {
+	X, Y int
+}
+
+func NewPointInt(x, y int) *PointInt {
+	return &PointInt{
+		X: x,
+		Y: y,
+	}
+}
+
+func (p PointInt) Get() (int, int) {
+	return p.X, p.Y
+}
+
+func (p PointInt) GetX() int {
+	return p.X
+}
+
+func (p PointInt) GetY() int {
+	return p.Y
+}
+
+func (p PointInt) Equal(a PointInt) bool {
+	return p.X == a.X && p.Y == a.Y
+}
+
+func (p PointInt) Offset(a PointInt) *PointInt {
+	return &PointInt{p.X - a.X, p.Y - a.Y}
+}
+
+func (p PointInt) String() string {
+	return fmt.Sprintf("[%.2d, %.2d]", p.X, p.Y)
 }
 
 type Rect struct {
@@ -45,6 +88,22 @@ func (r Rect) Pos() (int, int) {
 
 func (r Rect) Size() (int, int) {
 	return r.W, r.H
+}
+
+func (r Rect) GetArr() []int {
+	return []int{r.X, r.Y, r.W, r.H}
+}
+
+func (r Rect) GetRect() (int, int, int, int) {
+	return r.X, r.Y, r.W, r.H
+}
+
+func (r Rect) GetRectFloat() (float32, float32, float32, float32) {
+	return float32(r.X), float32(r.Y), float32(r.W), float32(r.H)
+}
+
+func (r Rect) GetRectFloat64() (float64, float64, float64, float64) {
+	return float64(r.X), float64(r.Y), float64(r.W), float64(r.H)
 }
 
 func (r Rect) Left() int {

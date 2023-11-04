@@ -3,224 +3,101 @@ package eui
 import (
 	"fmt"
 	"image/color"
+	"log"
 	"strconv"
-
-	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type Combobox struct {
-	text                       string
-	rect, upRect, downRect     *Rect
-	Image                      *ebiten.Image
-	Dirty, Visible, focus      bool
-	bg, fg                     color.Color
-	mouseUpDown, mouseDownDown bool
-	data                       []interface{}
-	current                    int
-	onChange                   func(c *Combobox)
+type ComboBox struct {
+	View
+	btnPlus, btnMinus *Button
+	lblValue, lblText *Text
+	valueVar          *StringVar
+	data              []interface{}
+	index             int
+	onChange          func(c *ComboBox)
 }
 
-func NewCombobox(text string, rect []int, bg, fg color.Color, data []interface{}, current int, f func(c *Combobox)) *Combobox {
-	return &Combobox{
-		text:          text,
-		rect:          NewRect(rect),
-		Image:         nil,
-		Dirty:         true,
-		Visible:       true,
-		focus:         false,
-		mouseUpDown:   false,
-		mouseDownDown: false,
-		bg:            bg,
-		fg:            fg,
-		data:          data,
-		current:       current,
-		onChange:      f,
-	}
+func NewComboBox(text string, data []interface{}, index int, bg, fg color.Color, f func(*ComboBox)) *ComboBox {
+	c := &ComboBox{}
+	c.SetupView(bg)
+	c.SetupCombo(text, data, index, bg, fg, f)
+	return c
 }
 
-func (c *Combobox) Layout() {
-	w, h := c.rect.Size()
-	if c.Image == nil {
-		c.Image = ebiten.NewImage(w, h)
-	} else {
-		c.Image.Clear()
-	}
-	boxHeight := h
-	m := int(float64(c.rect.GetLowestSize()) * 0.1)
-	x, y, w, h := boxHeight*2, 0, w-h*2, h
-	lblText := NewLabel(c.text, []int{x, y, w, h}, c.bg, c.fg)
-	defer lblText.Close()
-	var result string
-	switch value := c.data[c.current].(type) {
+func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, bg, fg color.Color, f func(*ComboBox)) {
+	c.data = data
+	c.index = index
+	c.onChange = f
+	c.lblValue = NewText(c.GetValueString(), bg, fg)
+	c.valueVar = NewStringVar(c.GetValueString())
+	c.valueVar.Attach(c.lblValue)
+	c.btnPlus = NewButton("+", bg, fg, func(b *Button) {
+		if c.index < len(c.data)-1 {
+			c.index++
+			c.valueVar.Set(c.GetValueString())
+			log.Println("combo: +", c.index, c.Value())
+		}
+		if c.onChange != nil {
+			c.onChange(c)
+			log.Println("combo: exec +")
+		}
+	})
+	c.btnMinus = NewButton("-", bg, fg, func(b *Button) {
+		if c.index > 0 {
+			c.index--
+			c.valueVar.Set(c.GetValueString())
+			log.Println("combo: -", c.index, c.Value())
+		}
+		if c.onChange != nil {
+			c.onChange(c)
+			log.Println("combo: exec -")
+		}
+	})
+	c.lblText = NewText(text, bg, fg)
+	c.Add(c.lblValue)
+	c.Add(c.btnPlus)
+	c.Add(c.btnMinus)
+	c.Add(c.lblText)
+}
+
+func (c *ComboBox) Value() interface{} {
+	return c.data[c.index]
+}
+
+func (c *ComboBox) GetValueString() (result string) {
+	switch c.data[c.index].(type) {
 	case int:
-		result = strconv.Itoa(value)
+		result = strconv.Itoa(c.Value().(int))
 	case float64:
-		result = fmt.Sprintf("%.1f", value)
+		result = fmt.Sprintf("%v", c.Value().(float64))
 	case string:
-		result = fmt.Sprintf("%v", value)
+		result = fmt.Sprintf("%v", c.Value().(string))
 	}
-	lblValue := NewLabel(result, []int{0, 0, boxHeight, h}, c.bg, c.fg)
-	defer lblValue.Close()
-	x, y, w, h = boxHeight+m, m, boxHeight-m*2, (boxHeight-m*2)/2
-	btnUpRect := []int{x, y, w, h}
-	x, y, w, h = boxHeight+m, (boxHeight/2)+m, boxHeight-m*2, (boxHeight-m*2)/2
-	btnDownRect := []int{x, y, w, h}
-	btnUp := NewLabel("+", btnUpRect, c.bg, c.fg)
-	defer btnUp.Close()
-	btnDown := NewLabel("-", btnDownRect, c.bg, c.fg)
-	defer btnDown.Close()
-	var (
-		bg, fg           color.Color
-		rectUp, rectDown bool
-	)
-	if c.focus && !c.mouseUpDown && !c.mouseDownDown {
-		bg = c.fg
-		fg = c.bg
-		rectUp = false
-		rectDown = false
-	} else if !c.focus && !c.mouseUpDown {
-		bg = c.bg
-		fg = c.fg
-	} else if c.focus && c.mouseUpDown {
-		bg = c.fg
-		fg = c.bg
-		rectUp = true
-		rectDown = false
-		m = 2
-	} else if c.focus && c.mouseDownDown {
-		bg = c.fg
-		fg = c.bg
-		rectUp = false
-		rectDown = true
-		m = 2
-	}
-	lblText.SetRect(true)
-	lblText.SetBg(bg)
-	lblText.SetFg(fg)
-	lblText.Draw(c.Image)
-	lblValue.SetRect(true)
-	lblValue.SetBg(bg)
-	lblValue.SetFg(fg)
-	lblValue.Draw(c.Image)
-	btnUp.SetRect(rectUp)
-	btnUp.SetBg(bg)
-	btnUp.SetFg(fg)
-	btnUp.Draw(c.Image)
-	btnDown.SetRect(rectDown)
-	btnDown.SetBg(bg)
-	btnDown.SetFg(fg)
-	btnDown.Draw(c.Image)
-	c.Dirty = false
+	return result
 }
 
-func (c *Combobox) Value() interface{} { return c.data[c.current] }
-
-func (c *Combobox) SetValue(value interface{}) {
+func (c *ComboBox) SetValue(value interface{}) {
 	for i, v := range c.data {
 		if v == value {
-			c.current = i
-			c.Dirty = true
+			c.index = i
+			c.Dirty(true)
 			break
 		}
 	}
 }
 
-func (c *Combobox) SetText(value string) {
-	if c.text == value {
-		return
-	}
-	c.text = value
-	c.Dirty = true
-}
-
-func (c *Combobox) SetFocus(value bool) {
-	if c.focus == value {
-		return
-	}
-	c.focus = value
-	c.Dirty = true
-}
-
-func (c *Combobox) SetMouseUpDown(value bool) {
-	if c.mouseUpDown == value {
-		return
-	}
-	c.mouseUpDown = value
-	c.Dirty = true
-}
-func (c *Combobox) SetMouseDownDown(value bool) {
-	if c.mouseDownDown == value {
-		return
-	}
-	c.mouseDownDown = value
-	c.Dirty = true
-}
-
-func (c *Combobox) Update(dt int) {
-	x, y := ebiten.CursorPosition()
-	if c.rect.InRect(x, y) {
-		c.SetFocus(true)
-	} else {
-		c.SetFocus(false)
-	}
-	if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-		if c.upRect.InRect(x, y) {
-			c.SetMouseUpDown(true)
-		} else {
-			c.SetMouseUpDown(false)
-		}
-		if c.downRect.InRect(x, y) {
-			c.SetMouseDownDown(true)
-		} else {
-			c.SetMouseDownDown(false)
-		}
-	} else {
-		if c.mouseUpDown {
-			if c.current < len(c.data)-1 {
-				c.current++
-			}
-			if c.onChange != nil {
-				c.onChange(c)
-			}
-		}
-		if c.mouseDownDown {
-			if c.current > 0 {
-				c.current--
-			}
-			if c.onChange != nil {
-				c.onChange(c)
-			}
-		}
-		c.SetMouseUpDown(false)
-		c.SetMouseDownDown(false)
-	}
-}
-
-func (c *Combobox) Draw(surface *ebiten.Image) {
-	if c.Dirty {
-		c.Layout()
-	}
-	if c.Visible {
-		op := &ebiten.DrawImageOptions{}
-		x, y := c.rect.Pos()
-		op.GeoM.Translate(float64(x), float64(y))
-		surface.DrawImage(c.Image, op)
-	}
-}
-
-func (c *Combobox) Resize(rect []int) {
-	c.rect = NewRect(rect)
-	boxHeight := c.rect.H
-	x, y, w, h := c.rect.X+boxHeight, c.rect.Y, boxHeight, (boxHeight)/2
-	btnUpRect := []int{x, y, w, h}
-	x, y, w, h = c.rect.X+boxHeight, c.rect.Y+(boxHeight/2), boxHeight, (boxHeight)/2
-	btnDownRect := []int{x, y, w, h}
-	c.upRect = NewRect(btnUpRect)
-	c.downRect = NewRect(btnDownRect)
-	c.Dirty = true
-	c.Image = nil
-}
-
-func (c *Combobox) Close() {
-	c.Image.Dispose()
+func (c *ComboBox) Resize(r []int) {
+	c.Rect(r)
+	x, y, w0, h0 := c.GetRect().GetRect()
+	w, h := h0, h0
+	c.lblValue.Resize([]int{x, y, w, h})
+	x += h0
+	h = h0 / 2
+	c.btnPlus.Resize([]int{x, y, w, h})
+	y += h
+	c.btnMinus.Resize([]int{x, y, w, h})
+	x += h0
+	y -= h
+	w, h = w0-x, h0
+	c.lblText.Resize([]int{x, y, w, h})
 }
