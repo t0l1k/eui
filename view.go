@@ -19,15 +19,16 @@ type View struct {
 	dragStartPoint, dragEndPoint PointInt
 }
 
-func NewView(bg color.Color) *View {
+func NewView() *View {
 	v := &View{}
-	v.SetupView(bg)
+	v.SetupView()
 	return v
 }
 
-func (v *View) SetupView(bg color.Color) {
+func (v *View) SetupView() {
 	v.horizontal = true
-	v.Bg(bg)
+	theme := GetUi().theme
+	v.Bg(theme.Get(ViewBg))
 	v.Name("view")
 	v.Parent(nil)
 	v.SetState(ViewStateNormal)

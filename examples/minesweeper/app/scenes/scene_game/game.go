@@ -18,10 +18,8 @@ func newGame(r, c, m int) *Game {
 	g := &Game{}
 	g.field = game.NewMinedField(r, c, m)
 	g.timer = eui.NewStopwatch()
-	bg := eui.Gray
-	fg := eui.Black
 	for i := 0; i < len(g.field.GetField()); i++ {
-		btn := eui.NewButton("", bg, fg, g.gameLogic)
+		btn := eui.NewButton("", g.gameLogic)
 		g.Add(btn)
 	}
 	return g

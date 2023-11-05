@@ -7,7 +7,7 @@ import (
 )
 
 type SceneTestListView struct {
-	eui.SceneDefault
+	eui.SceneBase
 	lst *eui.ListView
 }
 

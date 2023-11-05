@@ -9,12 +9,11 @@ import (
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/minesweeper/app/game"
 	"github.com/t0l1k/eui/examples/minesweeper/app/res"
-	"github.com/t0l1k/eui/examples/minesweeper/app/scenes"
 )
 
 type SceneGame struct {
-	eui.SceneDefault
-	topBar                 *scenes.TopBar
+	eui.SceneBase
+	topBar                 *eui.TopBar
 	game                   *Game
 	lblMines, lblGameTimer *eui.Text
 	btnStatus              *eui.ButtonIcon
@@ -23,15 +22,13 @@ type SceneGame struct {
 
 func NewSceneGame(title string, r, c, m int) *SceneGame {
 	s := &SceneGame{}
-	s.topBar = scenes.NewTopBar(title)
+	s.topBar = eui.NewTopBar(title)
 	s.Add(s.topBar)
 	s.game = newGame(r, c, m)
 	s.Add(s.game)
-	bg := eui.Yellow
-	fg := eui.Black
-	s.lblMines = eui.NewText(""+strconv.Itoa(s.game.field.GetTotalMines()), bg, fg)
+	s.lblMines = eui.NewText("" + strconv.Itoa(s.game.field.GetTotalMines()))
 	s.Add(s.lblMines)
-	s.lblGameTimer = eui.NewText("00:00", bg, fg)
+	s.lblGameTimer = eui.NewText("00:00")
 	s.Add(s.lblGameTimer)
 	s.btnStatus = eui.NewButtonIcon([]*ebiten.Image{res.SmileSprites[0], res.SmileSprites[1]}, func(b *eui.ButtonIcon) {
 		if b.IsMouseDownLeft() {
@@ -46,7 +43,7 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 	})
 	s.Add(s.btnStatus)
 
-	s.btnAF = eui.NewButton("Auto Mark Flags", eui.GreenYellow, eui.Black, func(b *eui.Button) {
+	s.btnAF = eui.NewButton("Auto Mark Flags", func(b *eui.Button) {
 		switch s.game.field.GetState() {
 		case game.GamePlay:
 			s.game.field.AutoMarkAllFlags()
@@ -74,10 +71,10 @@ func (s *SceneGame) Update(dt int) {
 	case game.GameOver:
 		s.btnStatus.SetReleasedIcon(res.SmileSprites[4])
 	}
-	s.lblGameTimer.SetText(s.game.timer.String2())
+	s.lblGameTimer.SetText(s.game.timer.StringShort())
 	str := strconv.Itoa(s.game.field.GetLeftMines()) + "/" + strconv.Itoa(s.game.field.GetTotalMines())
 	s.lblMines.SetText(str)
-	s.SceneDefault.Update(dt)
+	s.SceneBase.Update(dt)
 }
 
 func (s *SceneGame) Resize() {

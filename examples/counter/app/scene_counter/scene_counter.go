@@ -6,23 +6,23 @@ import (
 )
 
 type SceneCounter struct {
-	eui.SceneDefault
+	eui.SceneBase
 }
 
 func NewSceneCounter() *SceneCounter {
 	sc := &SceneCounter{}
 
 	counter := eui.NewIntVar(model.Value())
-	lblCounter := eui.NewText(counter.String(), eui.Yellow, eui.Black)
+	lblCounter := eui.NewText(counter.String())
 	counter.Attach(lblCounter)
 	sc.Add(lblCounter)
 
-	btnInc := eui.NewButton("+", eui.Green, eui.Black, func(b *eui.Button) {
+	btnInc := eui.NewButton("+", func(b *eui.Button) {
 		model.Inc()
 		counter.Set(model.Value())
 	})
 
-	btnDec := eui.NewButton("-", eui.Red, eui.Black, func(b *eui.Button) {
+	btnDec := eui.NewButton("-", func(b *eui.Button) {
 		model.Dec()
 		counter.Set(model.Value())
 	})

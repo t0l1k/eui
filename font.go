@@ -53,6 +53,7 @@ func (f Fonts) get(size int) font.Face {
 	return f[size]
 }
 
+// Вычисляю размер шрифма в 85% от переданого размера меньшей стороны
 func (f Fonts) calcFontSize(txt string, rect *Rect) int {
 	var fontSize float64
 	percent := 0.85

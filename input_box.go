@@ -2,7 +2,6 @@ package eui
 
 import (
 	"fmt"
-	"image/color"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -20,20 +19,23 @@ type InputBox struct {
 	onReturn      func(*InputBox)
 }
 
-func NewInputBox(text string, size int, bg, fg color.Color, onReturn func(*InputBox)) *InputBox {
+func NewInputBox(text string, size int, onReturn func(*InputBox)) *InputBox {
 	i := &InputBox{
 		timerFlashing: NewTimer(500),
 		size:          size,
 		prompt:        "|",
 		onReturn:      onReturn,
 	}
-	i.setupBox(text, bg, fg)
+	i.setupBox(text)
 	return i
 }
 
-func (inp *InputBox) setupBox(text string, bg, fg color.Color) {
+func (inp *InputBox) setupBox(text string) {
+	theme := GetUi().theme
+	inp.Bg(theme.Get(InputBoxBg))
+	inp.Fg(theme.Get(InputBoxFg))
 	inp._text = text
-	inp.SetupText(text, bg, fg)
+	inp.SetupText(text)
 	inp.setPrompt()
 	GetUi().inputKeyboard.Attach(inp)
 }
@@ -71,7 +73,6 @@ func (inp *InputBox) UpdateInput(value interface{}) {
 					fmt.Println(v)
 					inp.inputNumbers(v)
 				}
-				fmt.Println("Pressed", v)
 			}
 			if len(vl.keys) == 0 {
 				inp.keyboardState = KeyReleased

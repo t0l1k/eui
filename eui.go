@@ -48,6 +48,7 @@ func GetUi() (u *Ui) {
 			inputMouse:    NewMouseInput(),
 			inputTouch:    NewTouchInput(),
 			inputKeyboard: NewKeyboardInput(),
+			theme:         DefaultTheme(),
 		}
 		log.Printf("App init done")
 	} else {
@@ -61,6 +62,7 @@ type Ui struct {
 	title         string
 	scenes        []Scene
 	currentScene  Scene
+	theme         *Theme
 	tick          int
 	start         time.Time
 	size          image.Point
@@ -117,6 +119,9 @@ func (u *Ui) Layout(w, h int) (int, int) {
 	if w != u.size.X || h != u.size.Y {
 		u.size.X, u.size.Y = w, h
 		u.currentScene.Resize()
+		for _, scene := range u.scenes {
+			scene.Resize()
+		}
 	}
 	return w, h
 }
@@ -145,9 +150,6 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 func (a *Ui) ToggleFullscreen() {
 	a.fullScreen = !a.fullScreen
 	ebiten.SetFullscreen(a.fullScreen)
-	for _, scene := range a.scenes {
-		scene.Resize()
-	}
 	log.Println("Toggle FullScreen")
 }
 

@@ -15,17 +15,20 @@ type Button struct {
 	left, right, middle bool
 }
 
-func NewButton(text string, bg, fg color.Color, f func(*Button)) *Button {
+func NewButton(text string, f func(*Button)) *Button {
 	b := &Button{
 		onPressed: f,
 	}
-	b.SetupButton(text, bg, fg, f)
+	b.SetupButton(text, f)
 	return b
 }
 
-func (b *Button) SetupButton(text string, bg, fg color.Color, f func(*Button)) {
-	b.SetupText(text, bg, fg)
+func (b *Button) SetupButton(text string, f func(*Button)) {
+	b.SetupText(text)
 	b.Name("button")
+	theme := GetUi().theme
+	b.Bg(theme.Get(ButtonBg))
+	b.Fg(theme.Get(ButtonFg))
 }
 
 func (b *Button) IsMouseDownLeft() bool {
@@ -43,19 +46,20 @@ func (b *Button) IsMouseDownMiddle() bool {
 func (b *Button) Layout() {
 	b.Text.Layout()
 	var fg color.Color
+	theme := GetUi().theme
 	switch b.state {
 	case ViewStateHover:
-		fg = Yellow
+		fg = theme.Get(ButtonHover)
 	case ViewStateFocus:
-		fg = Red
+		fg = theme.Get(ButtonFocus)
 	case ViewStateNormal:
-		fg = Black
+		fg = theme.Get(ButtonNormal)
 	case ViewStateSelected:
-		fg = Blue
+		fg = theme.Get(ButtonSelected)
 	case ViewStateDisabled:
-		fg = Purple
+		fg = theme.Get(ButtonDisabled)
 	case ViewStateActive:
-		fg = White
+		fg = theme.Get(ButtonActive)
 	}
 	_, _, w, h := b.rect.GetRectFloat()
 	bold := 2

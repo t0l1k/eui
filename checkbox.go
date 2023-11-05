@@ -15,12 +15,12 @@ type Checkbox struct {
 
 func NewCheckbox(text string, bg, fg color.Color, f func(c *Checkbox)) *Checkbox {
 	c := &Checkbox{}
-	c.SetupCheckbox(text, bg, fg, f)
+	c.SetupCheckbox(text, f)
 	return c
 }
 
-func (c *Checkbox) SetupCheckbox(text string, bg, fg color.Color, f func(c *Checkbox)) {
-	c.b = NewButton("", bg, fg, func(b *Button) {
+func (c *Checkbox) SetupCheckbox(text string, f func(c *Checkbox)) {
+	c.b = NewButton("", func(b *Button) {
 		c.checked = !c.checked
 		if c.checked {
 			c.b.SetText("*")
@@ -29,7 +29,7 @@ func (c *Checkbox) SetupCheckbox(text string, bg, fg color.Color, f func(c *Chec
 			c.b.SetText(" ")
 		}
 	})
-	c.t = NewText(text, bg, fg)
+	c.t = NewText(text)
 }
 
 func (c *Checkbox) IsChecked() bool { return c.checked }

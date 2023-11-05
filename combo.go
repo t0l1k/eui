@@ -19,19 +19,19 @@ type ComboBox struct {
 
 func NewComboBox(text string, data []interface{}, index int, bg, fg color.Color, f func(*ComboBox)) *ComboBox {
 	c := &ComboBox{}
-	c.SetupView(bg)
-	c.SetupCombo(text, data, index, bg, fg, f)
+	c.SetupView()
+	c.SetupCombo(text, data, index, f)
 	return c
 }
 
-func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, bg, fg color.Color, f func(*ComboBox)) {
+func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func(*ComboBox)) {
 	c.data = data
 	c.index = index
 	c.onChange = f
-	c.lblValue = NewText(c.GetValueString(), bg, fg)
+	c.lblValue = NewText(c.GetValueString())
 	c.valueVar = NewStringVar(c.GetValueString())
 	c.valueVar.Attach(c.lblValue)
-	c.btnPlus = NewButton("+", bg, fg, func(b *Button) {
+	c.btnPlus = NewButton("+", func(b *Button) {
 		if c.index < len(c.data)-1 {
 			c.index++
 			c.valueVar.Set(c.GetValueString())
@@ -42,7 +42,7 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, bg, fg
 			log.Println("combo: exec +")
 		}
 	})
-	c.btnMinus = NewButton("-", bg, fg, func(b *Button) {
+	c.btnMinus = NewButton("-", func(b *Button) {
 		if c.index > 0 {
 			c.index--
 			c.valueVar.Set(c.GetValueString())
@@ -53,7 +53,7 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, bg, fg
 			log.Println("combo: exec -")
 		}
 	})
-	c.lblText = NewText(text, bg, fg)
+	c.lblText = NewText(text)
 	c.Add(c.lblValue)
 	c.Add(c.btnPlus)
 	c.Add(c.btnMinus)

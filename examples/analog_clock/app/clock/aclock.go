@@ -28,7 +28,7 @@ func NewAnalogClock() *AnalogClock {
 }
 
 func (a *AnalogClock) SetupAnalogClock() {
-	a.SetupView(eui.YellowGreen)
+	a.SetupView()
 	a.Add(a.hourHand)
 	a.Add(a.minuteHand)
 	a.Add(a.secHand)

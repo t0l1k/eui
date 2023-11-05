@@ -2,6 +2,7 @@ package eui
 
 import (
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -21,6 +22,7 @@ func NewStopwatch() *Stopwatch {
 func (s *Stopwatch) Start() {
 	s.startAt = timeNow()
 	s.run = true
+	log.Println("Stopwatch start")
 }
 
 // Остановить или поставить на паузу
@@ -29,12 +31,14 @@ func (s *Stopwatch) Stop() {
 		s.duration += timeNow().Sub(s.startAt)
 	}
 	s.run = false
+	log.Println("Stopwatch stop")
 }
 
 // Обнулить секундомер
 func (s *Stopwatch) Reset() {
 	s.run = false
 	s.duration = 0
+	log.Println("Stopwatch reset")
 }
 
 // Возвращаю сколько прошло времени от запуска секундомера
@@ -51,6 +55,7 @@ var timeNow = func() time.Time {
 	return time.Now()
 }
 
+// Возвращаю строку в формате часов включая миллисекунды, секунды или минуты, или часы
 func (s *Stopwatch) String() string {
 	var (
 		duration time.Duration
@@ -72,7 +77,8 @@ func (s *Stopwatch) String() string {
 	return str
 }
 
-func (s *Stopwatch) String2() string {
+// Возвращаю строку в формате часов включая секунды, минуты или часы
+func (s *Stopwatch) StringShort() string {
 	var (
 		duration time.Duration
 		str      string
@@ -84,8 +90,6 @@ func (s *Stopwatch) String2() string {
 	hour := minutes / 60
 	if hour > 0 {
 		str = fmt.Sprintf("%v:%02v:%02v", hour, minutes, seconds)
-	} else if minutes > 0 {
-		str = fmt.Sprintf("%v:%02v", minutes, seconds)
 	} else {
 		str = fmt.Sprintf("%v:%02v", minutes, seconds)
 	}

@@ -8,12 +8,12 @@ import (
 
 type ListView struct {
 	View
-	list                          []string
-	itemSize                      int
-	contentRect                   *Rect
-	contentImage                  *ebiten.Image
-	offset, lastOffset, offsetSum int
-	cameraRect                    image.Rectangle
+	list               []string
+	itemSize           int
+	contentRect        *Rect
+	contentImage       *ebiten.Image
+	offset, lastOffset int
+	cameraRect         image.Rectangle
 }
 
 func NewListView(list []string, itemSize int) *ListView {
@@ -23,14 +23,32 @@ func NewListView(list []string, itemSize int) *ListView {
 }
 
 func (l *ListView) SetupListView(list []string, itemSize int) {
-	l.SetupView(Gray)
+	theme := GetUi().theme
+	l.SetupView()
 	l.itemSize = itemSize
 	l.list = list
-	bg := Blue
-	fg := Yellow
 	for _, v := range list {
-		lbl := NewText(v, bg, fg)
+		lbl := NewText(v)
+		lbl.Bg(theme.Get(ListViewItemBg))
+		lbl.Fg(theme.Get(ListViewItemFg))
 		l.Add(lbl)
+	}
+}
+
+func (l *ListView) Reset() {
+	l.list = nil
+	l.Container = l.Container[:0]
+	l.contentImage = nil
+	l.offset = 0
+	l.lastOffset = 0
+	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)
+	l.dirty = true
+}
+
+func (l *ListView) Add(d Drawable) {
+	l.ContainerBase.Add(d)
+	if l.rect != nil {
+		l.resizeChilds()
 	}
 }
 
@@ -44,7 +62,6 @@ func (l *ListView) Layout() {
 		l.contentImage.Clear()
 	}
 	l.contentImage.Fill(l.bg)
-	l.image.Fill(Red)
 	for _, v := range l.Container {
 		v.Draw(l.contentImage)
 	}
@@ -68,7 +85,6 @@ func (l *ListView) Update(dt int) {
 		l.cameraRect = image.Rect(0, y, l.rect.W, h)
 		l.lastOffset = l.offset
 	} else if !l.isDragging {
-		l.offsetSum = l.offset
 		l.lastOffset = 0
 	}
 }
@@ -91,6 +107,11 @@ func (l *ListView) Draw(surface *ebiten.Image) {
 
 func (l *ListView) Resize(r []int) {
 	l.Rect(r)
+	l.resizeChilds()
+	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)
+}
+
+func (l *ListView) resizeChilds() {
 	x, y := 0, 0
 	w, h := l.rect.W, l.itemSize
 	for _, v := range l.Container {
@@ -101,5 +122,5 @@ func (l *ListView) Resize(r []int) {
 		y = l.rect.H
 	}
 	l.contentRect = NewRect([]int{0, 0, w, y})
-	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)
+	l.dirty = true
 }

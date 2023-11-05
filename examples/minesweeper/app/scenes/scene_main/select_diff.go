@@ -4,16 +4,15 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/t0l1k/eui/examples/minesweeper/app/scenes"
 	"github.com/t0l1k/eui/examples/minesweeper/app/scenes/scene_game"
 
 	"github.com/t0l1k/eui"
 )
 
 type SelectDiff struct {
-	eui.SceneDefault
+	eui.SceneBase
 	frame                          *eui.BoxLayout
-	topBar                         *scenes.TopBar
+	topBar                         *eui.TopBar
 	comboRow, comboCol, comboMines *eui.ComboBox
 	btnExec                        *eui.Button
 }
@@ -21,7 +20,7 @@ type SelectDiff struct {
 func NewSelectDiff(title string) *SelectDiff {
 	s := &SelectDiff{}
 
-	s.topBar = scenes.NewTopBar(title)
+	s.topBar = eui.NewTopBar(title)
 	s.Add(s.topBar)
 
 	s.frame = eui.NewVLayout()
@@ -29,7 +28,7 @@ func NewSelectDiff(title string) *SelectDiff {
 	bg := eui.Green
 	fg := eui.Yellow
 
-	lblTitle := eui.NewText("Настрой сложность", bg, fg)
+	lblTitle := eui.NewText("Настрой сложность")
 	s.frame.Add(lblTitle)
 
 	column, row, mines := 5, 5, 5
@@ -50,7 +49,7 @@ func NewSelectDiff(title string) *SelectDiff {
 		fmt.Println("set mines", mines)
 	})
 	s.frame.Add(s.comboMines)
-	s.btnExec = eui.NewButton("Запустить игру", bg, fg, func(b *eui.Button) {
+	s.btnExec = eui.NewButton("Запустить игру", func(b *eui.Button) {
 		str := "Игра настроена на " + strconv.Itoa(column) + " рядов" + strconv.Itoa(row) + " рядов" + strconv.Itoa(mines) + " мин"
 		game := scene_game.NewSceneGame(str, row, column, mines)
 		eui.GetUi().Push(game)

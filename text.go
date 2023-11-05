@@ -13,25 +13,25 @@ import (
 type Text struct {
 	View
 	text              string
-	fg, bg            color.Color
+	fg                color.Color
 	fontInit, oneFont bool
 	fontSize          int
 	pos               PointInt
 }
 
-func NewText(text string, bg, fg color.Color) *Text {
+func NewText(text string) *Text {
 	t := &Text{
 		text: text,
-		bg:   bg,
-		fg:   fg,
 	}
-	t.SetupText(text, bg, fg)
+	t.SetupText(text)
 	return t
 }
 
-func (t *Text) SetupText(text string, bg, fg color.Color) {
-	t.SetupView(bg)
-	t.Fg(fg)
+func (t *Text) SetupText(text string) {
+	t.SetupView()
+	theme := GetUi().theme
+	t.Bg(theme.Get(TextBg))
+	t.Fg(theme.Get(TextFg))
 	t.SetText(text)
 	t.Name("text")
 }
@@ -82,7 +82,7 @@ func (t *Text) Layout() {
 		if !t.fontInit {
 			t.fontInit = true
 		}
-	} else {
+	} else if t.oneFont {
 		font = GetFonts().get(t.fontSize)
 		b := text.BoundString(font, t.text)
 		t.pos.X = (t.rect.W - b.Max.X) / 2

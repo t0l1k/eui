@@ -18,7 +18,7 @@ func NewIcon(icon *ebiten.Image) *Icon {
 
 func (i *Icon) SetupIcon(icon *ebiten.Image) {
 	i.icon = icon
-	i.SetupView(Black)
+	i.SetupView()
 	i.Name("icon")
 }
 

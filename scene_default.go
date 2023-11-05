@@ -4,11 +4,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type SceneDefault struct {
+type SceneBase struct {
 	BoxLayout
 }
 
-func (s *SceneDefault) Update(dt int) {
+func (s *SceneBase) Update(dt int) {
 	for _, v := range s.Container {
 		v.Update(dt)
 		vv, ok := v.(*BoxLayout)
@@ -20,7 +20,7 @@ func (s *SceneDefault) Update(dt int) {
 	}
 }
 
-func (s *SceneDefault) Draw(surface *ebiten.Image) {
+func (s *SceneBase) Draw(surface *ebiten.Image) {
 	for _, v := range s.Container {
 		v.Draw(surface)
 		vv, ok := v.(*BoxLayout)
@@ -32,14 +32,14 @@ func (s *SceneDefault) Draw(surface *ebiten.Image) {
 	}
 }
 
-func (s *SceneDefault) Entered() {}
+func (s *SceneBase) Entered() {}
 
-func (s *SceneDefault) Resize() {
+func (s *SceneBase) Resize() {
 	w0, h0 := GetUi().Size()
 	s.BoxLayout.Resize([]int{0, 0, w0, h0})
 }
 
-func (s *SceneDefault) Quit() {
+func (s *SceneBase) Quit() {
 	for _, v := range s.Container {
 		v.Close()
 		vv, ok := v.(*BoxLayout)
