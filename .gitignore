@@ -1,2 +1,6 @@
 go.sum
-
+*.apk
+*.aar
+*.jar
+.idea/*
+mobile/*

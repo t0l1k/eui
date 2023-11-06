@@ -1,8 +1,6 @@
 package eui
 
 import (
-	"image/color"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -13,13 +11,16 @@ type Checkbox struct {
 	checked bool
 }
 
-func NewCheckbox(text string, bg, fg color.Color, f func(c *Checkbox)) *Checkbox {
+func NewCheckbox(text string, f func(c *Checkbox)) *Checkbox {
 	c := &Checkbox{}
 	c.SetupCheckbox(text, f)
 	return c
 }
 
 func (c *Checkbox) SetupCheckbox(text string, f func(c *Checkbox)) {
+	theme := GetUi().theme
+	c.Bg(theme.Get(CheckboxBg))
+	c.Fg(theme.Get(CheckboxFg))
 	c.b = NewButton("", func(b *Button) {
 		c.checked = !c.checked
 		if c.checked {
@@ -30,6 +31,8 @@ func (c *Checkbox) SetupCheckbox(text string, f func(c *Checkbox)) {
 		}
 	})
 	c.t = NewText(text)
+	c.t.Bg(c.bg)
+	c.t.Fg(c.fg)
 }
 
 func (c *Checkbox) IsChecked() bool { return c.checked }

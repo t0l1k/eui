@@ -47,6 +47,9 @@ func (l *ListView) Reset() {
 
 func (l *ListView) Add(d Drawable) {
 	l.ContainerBase.Add(d)
+	theme := GetUi().theme
+	d.(*Text).Bg(theme.Get(ListViewItemBg))
+	d.(*Text).Fg(theme.Get(ListViewItemFg))
 	if l.rect != nil {
 		l.resizeChilds()
 	}

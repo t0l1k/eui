@@ -29,9 +29,13 @@ func (s *Stopwatch) Start() {
 func (s *Stopwatch) Stop() {
 	if s.run {
 		s.duration += timeNow().Sub(s.startAt)
+		s.run = false
+		log.Println("Stopwatch stop")
 	}
-	s.run = false
-	log.Println("Stopwatch stop")
+}
+
+func (s *Stopwatch) IsRun() bool {
+	return s.run
 }
 
 // Обнулить секундомер

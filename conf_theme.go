@@ -67,8 +67,8 @@ func DefaultTheme() *Theme {
 	t.Set(ButtonActive, White)
 	t.Set(ButtonSelected, Maroon)
 	t.Set(ButtonDisabled, Gray)
-	t.Set(TextBg, Blue)
-	t.Set(TextFg, Yellow)
+	t.Set(TextBg, Green)
+	t.Set(TextFg, White)
 	t.Set(CheckboxBg, Teal)
 	t.Set(CheckboxFg, Black)
 	t.Set(ComboBoxBg, Navy)
@@ -81,7 +81,7 @@ func DefaultTheme() *Theme {
 	t.Set(ListViewItemFg, Yellow)
 	t.Set(SceneBg, Gray)
 	t.Set(SceneFg, Yellow)
-	t.Set(ViewBg, White)
+	t.Set(ViewBg, Navy)
 	return &t
 }
 

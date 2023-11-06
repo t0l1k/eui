@@ -2,7 +2,6 @@ package eui
 
 import (
 	"fmt"
-	"image/color"
 	"log"
 	"strconv"
 )
@@ -17,7 +16,7 @@ type ComboBox struct {
 	onChange          func(c *ComboBox)
 }
 
-func NewComboBox(text string, data []interface{}, index int, bg, fg color.Color, f func(*ComboBox)) *ComboBox {
+func NewComboBox(text string, data []interface{}, index int, f func(*ComboBox)) *ComboBox {
 	c := &ComboBox{}
 	c.SetupView()
 	c.SetupCombo(text, data, index, f)
@@ -25,10 +24,15 @@ func NewComboBox(text string, data []interface{}, index int, bg, fg color.Color,
 }
 
 func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func(*ComboBox)) {
+	theme := GetUi().theme
+	c.Bg(theme.Get(ComboBoxBg))
+	c.Fg(theme.Get(ComboBoxFg))
 	c.data = data
 	c.index = index
 	c.onChange = f
 	c.lblValue = NewText(c.GetValueString())
+	c.lblValue.Bg(c.bg)
+	c.lblValue.Fg(c.fg)
 	c.valueVar = NewStringVar(c.GetValueString())
 	c.valueVar.Attach(c.lblValue)
 	c.btnPlus = NewButton("+", func(b *Button) {
@@ -54,6 +58,8 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func
 		}
 	})
 	c.lblText = NewText(text)
+	c.lblText.Bg(c.bg)
+	c.lblText.Fg(c.fg)
 	c.Add(c.lblValue)
 	c.Add(c.btnPlus)
 	c.Add(c.btnMinus)

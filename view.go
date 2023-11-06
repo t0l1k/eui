@@ -14,7 +14,7 @@ type View struct {
 	rect                         *Rect
 	image                        *ebiten.Image
 	dirty, visible, disabled     bool
-	bg                           color.Color
+	bg, fg                       color.Color
 	isDragging                   bool
 	dragStartPoint, dragEndPoint PointInt
 }
@@ -93,7 +93,18 @@ func (v *View) Visible(value bool) {
 }
 
 func (v *View) Bg(bg color.Color) {
+	if v.bg == bg {
+		return
+	}
 	v.bg = bg
+	v.dirty = true
+}
+
+func (v *View) Fg(fg color.Color) {
+	if v.fg == fg {
+		return
+	}
+	v.fg = fg
 	v.dirty = true
 }
 

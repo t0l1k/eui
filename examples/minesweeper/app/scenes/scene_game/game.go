@@ -9,7 +9,7 @@ import (
 )
 
 type Game struct {
-	eui.ContainerBase
+	eui.View
 	field *game.MinedField
 	timer *eui.Stopwatch
 }

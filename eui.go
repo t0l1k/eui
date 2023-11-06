@@ -150,7 +150,7 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 func (a *Ui) ToggleFullscreen() {
 	a.fullScreen = !a.fullScreen
 	ebiten.SetFullscreen(a.fullScreen)
-	log.Println("Toggle FullScreen")
+	log.Println("Toggle FullScreen", a.size)
 }
 
 // Определяю дельту от последнего обновления в миллисекундах

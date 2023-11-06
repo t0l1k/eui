@@ -1,7 +1,6 @@
 package eui
 
 import (
-	"image/color"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -13,7 +12,6 @@ import (
 type Text struct {
 	View
 	text              string
-	fg                color.Color
 	fontInit, oneFont bool
 	fontSize          int
 	pos               PointInt
@@ -38,14 +36,6 @@ func (t *Text) SetupText(text string) {
 
 func (t *Text) OnlyOneFontSize(value bool) {
 	t.oneFont = value
-	t.dirty = true
-}
-
-func (t *Text) Fg(value color.Color) {
-	if t.fg == value {
-		return
-	}
-	t.fg = value
 	t.dirty = true
 }
 

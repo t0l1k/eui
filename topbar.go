@@ -6,11 +6,12 @@ type TopBar struct {
 	lblTitle, tmLbl *Text
 	tmVar           *StringVar
 	sw              *Stopwatch
+	showStopwatch   bool
 }
 
 func NewTopBar(title string) *TopBar {
 	t := &TopBar{}
-	t.sw = NewStopwatch()
+	t.showStopwatch = false
 	t.SetupView()
 	sq := "<"
 	if GetUi().IsMainScene() {
@@ -22,17 +23,23 @@ func NewTopBar(title string) *TopBar {
 	t.Add(t.btnQuit)
 	t.lblTitle = NewText(title)
 	t.Add(t.lblTitle)
-	t.tmVar = NewStringVar(t.sw.StringShort())
-	t.tmLbl = NewText("0:00")
-	t.tmVar.Attach(t.tmLbl)
-	t.Add(t.tmLbl)
-	t.sw.Start()
+	if t.showStopwatch {
+		t.sw = NewStopwatch()
+		t.tmVar = NewStringVar(t.sw.StringShort())
+		t.tmLbl = NewText("0:00")
+		t.tmVar.Attach(t.tmLbl)
+		t.Add(t.tmLbl)
+		t.sw.Start()
+	}
 	return t
 }
 
 func (t *TopBar) Update(dt int) {
-	t.tmVar.Set(t.sw.StringShort())
 	t.View.Update(dt)
+	if !t.showStopwatch {
+		return
+	}
+	t.tmVar.Set(t.sw.StringShort())
 }
 
 func (t *TopBar) Resize(arr []int) {
@@ -42,7 +49,9 @@ func (t *TopBar) Resize(arr []int) {
 	x += h
 	w = int(float64(t.rect.W) * 0.25)
 	t.lblTitle.Resize([]int{x, y, w, h})
-	x = t.GetRect().W - w
-	t.tmLbl.Resize([]int{x, y, w, h})
+	if t.showStopwatch {
+		x = t.GetRect().W - w
+		t.tmLbl.Resize([]int{x, y, w, h})
+	}
 	t.Dirty(true)
 }

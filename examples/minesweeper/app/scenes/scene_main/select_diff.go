@@ -25,9 +25,6 @@ func NewSelectDiff(title string) *SelectDiff {
 
 	s.frame = eui.NewVLayout()
 
-	bg := eui.Green
-	fg := eui.Yellow
-
 	lblTitle := eui.NewText("Настрой сложность")
 	s.frame.Add(lblTitle)
 
@@ -36,15 +33,15 @@ func NewSelectDiff(title string) *SelectDiff {
 	for i := 5; i < 100; i += 5 {
 		data = append(data, i)
 	}
-	s.comboCol = eui.NewComboBox("Сколько рядов", data, 0, bg, fg, func(combo *eui.ComboBox) {
+	s.comboCol = eui.NewComboBox("Сколько рядов", data, 0, func(combo *eui.ComboBox) {
 		row = combo.Value().(int)
 	})
 	s.frame.Add(s.comboCol)
-	s.comboRow = eui.NewComboBox("Сколько столбиков", data, 0, bg, fg, func(combo *eui.ComboBox) {
+	s.comboRow = eui.NewComboBox("Сколько столбиков", data, 0, func(combo *eui.ComboBox) {
 		column = combo.Value().(int)
 	})
 	s.frame.Add(s.comboRow)
-	s.comboMines = eui.NewComboBox("Сколько мин", data, 0, bg, fg, func(combo *eui.ComboBox) {
+	s.comboMines = eui.NewComboBox("Сколько мин", data, 0, func(combo *eui.ComboBox) {
 		mines = combo.Value().(int)
 		fmt.Println("set mines", mines)
 	})
