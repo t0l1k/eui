@@ -32,7 +32,7 @@ func (b *Button) SetupButton(text string, f func(*Button)) {
 }
 
 func (b *Button) IsMouseDownLeft() bool {
-	return b.left
+	return b.left && b.buttonPressed || b.buttonPressed && b.state == ViewStateExec
 }
 
 func (b *Button) IsMouseDownRight() bool {

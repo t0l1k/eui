@@ -47,7 +47,7 @@ func (b *ButtonIcon) SetPressedIcon(icon *ebiten.Image) {
 }
 
 func (b *ButtonIcon) IsMouseDownLeft() bool {
-	return b.left
+	return b.left && b.buttonPressed || b.buttonPressed && b.state == ViewStateExec
 }
 
 func (b *ButtonIcon) IsMouseDownRight() bool {
