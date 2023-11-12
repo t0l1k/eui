@@ -9,9 +9,8 @@ type BoxLayout struct {
 func NewHLayout() *BoxLayout { return &BoxLayout{horizontal: true} }
 func NewVLayout() *BoxLayout { return &BoxLayout{horizontal: false} }
 
-func (d *BoxLayout) SetHorizontal()  { d.horizontal = true }
-func (d *BoxLayout) SetVertical()    { d.horizontal = false }
-func (d *BoxLayout) GetName() string { return "BoxLayout" }
+func (d *BoxLayout) SetHorizontal() { d.horizontal = true }
+func (d *BoxLayout) SetVertical()   { d.horizontal = false }
 
 func (c *BoxLayout) Resize(rect []int) {
 	crect := NewRect(rect)

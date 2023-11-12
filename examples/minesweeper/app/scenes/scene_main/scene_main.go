@@ -26,8 +26,11 @@ func NewSceneSelectGame() *SceneSelectGame {
 		s.frame.Add(button)
 	}
 	s.Add(s.frame)
-	s.Resize()
 	return s
+}
+
+func (s *SceneSelectGame) Entered() {
+	s.Resize()
 }
 
 func (s *SceneSelectGame) selectGameLogic(b *eui.Button) {

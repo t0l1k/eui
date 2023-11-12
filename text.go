@@ -31,7 +31,6 @@ func (t *Text) SetupText(text string) {
 	t.Bg(theme.Get(TextBg))
 	t.Fg(theme.Get(TextFg))
 	t.SetText(text)
-	t.Name("text")
 }
 
 func (t *Text) OnlyOneFontSize(value bool) {

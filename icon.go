@@ -19,17 +19,16 @@ func NewIcon(icon *ebiten.Image) *Icon {
 func (i *Icon) SetupIcon(icon *ebiten.Image) {
 	i.icon = icon
 	i.SetupView()
-	i.Name("icon")
 }
 
 func (i *Icon) Layout() {
 	i.View.Layout()
 	w, h := i.rect.Size()
 	op := &ebiten.DrawImageOptions{}
-	w1, h1 := i.icon.Size()
+	iconSize := i.icon.Bounds().Size()
 	var x1, y1 float64
-	x1 = float64(w) / float64(w1)
-	y1 = float64(h) / float64(h1)
+	x1 = float64(w) / float64(iconSize.X) //w
+	y1 = float64(h) / float64(iconSize.Y) //h
 	op.GeoM.Scale(x1, y1)
 	i.image.DrawImage(i.icon, op)
 	i.dirty = false

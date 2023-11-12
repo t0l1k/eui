@@ -25,7 +25,6 @@ func NewButton(text string, f func(*Button)) *Button {
 
 func (b *Button) SetupButton(text string, f func(*Button)) {
 	b.SetupText(text)
-	b.Name("button")
 	theme := GetUi().theme
 	b.Bg(theme.Get(ButtonBg))
 	b.Fg(theme.Get(ButtonFg))

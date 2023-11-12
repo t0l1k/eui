@@ -8,7 +8,6 @@ import (
 
 // Базовый виджет умею хранить состояние от указателя мыши, при наведении(Hover) при нажатие на виджет(Focus) при покадании курсора мыши(Normal)
 type View struct {
-	name string
 	BoxLayout
 	state                        InputState
 	rect                         *Rect
@@ -29,8 +28,6 @@ func (v *View) SetupView() {
 	v.horizontal = true
 	theme := GetUi().theme
 	v.Bg(theme.Get(ViewBg))
-	v.Name("view")
-	v.Parent(nil)
 	v.SetState(ViewStateNormal)
 	v.Visible(true)
 	GetUi().inputMouse.Attach(v)
@@ -108,19 +105,9 @@ func (v *View) Fg(fg color.Color) {
 	v.dirty = true
 }
 
-func (v *View) Name(name string) {
-	v.name = name
-}
-
 func (v *View) SetState(state InputState) {
 	if v.state == state {
 		return
-	}
-	if v.parent != nil {
-		vrb, ok := v.parent.(*View)
-		if ok {
-			vrb.SetState(ViewStateNormal)
-		}
 	}
 	v.state = state
 	v.dirty = true

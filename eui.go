@@ -170,7 +170,7 @@ func (u *Ui) Push(sc Scene) {
 	u.scenes = append(u.scenes, sc)
 	u.currentScene = sc
 	u.currentScene.Entered()
-	log.Println("Scene push")
+	log.Println("Scene push", u.scenes)
 }
 
 // Закрыть текущую сцену если первая выход, иначе последнюю сделать текущей
@@ -179,14 +179,14 @@ func (u *Ui) Pop() error {
 		u.currentScene.Quit()
 		idx := len(GetUi().scenes) - 1
 		u.scenes = GetUi().scenes[:idx]
-		log.Printf("App Pop Scene Quit done.")
+		log.Println("App Pop Scene Quit done.", u.scenes)
 		if u.IsMainScene() {
 			log.Printf("App Quit.")
 			os.Exit(0)
 		}
 		u.currentScene = GetUi().scenes[len(GetUi().scenes)-1]
 		u.currentScene.Entered()
-		log.Printf("App Pop New Scene Entered.")
+		log.Println("App Pop New Scene Entered.", u.scenes)
 	}
 	return nil
 }
