@@ -2,6 +2,7 @@ package eui
 
 import (
 	"image"
+	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -9,40 +10,27 @@ import (
 type ListView struct {
 	View
 	list               []string
-	itemSize           int
+	itemSize, rows     int
 	contentRect        *Rect
 	contentImage       *ebiten.Image
 	offset, lastOffset int
 	cameraRect         image.Rectangle
 }
 
-func NewListView(list []string, itemSize int) *ListView {
+func NewListView(list []string, itemSize, rows int) *ListView {
 	l := &ListView{}
-	l.SetupListView(list, itemSize)
+	l.SetupListView(list, itemSize, rows)
 	return l
 }
 
-func (l *ListView) SetupListView(list []string, itemSize int) {
-	theme := GetUi().theme
+func (l *ListView) SetupListView(list []string, itemSize, rows int) {
 	l.SetupView()
 	l.itemSize = itemSize
-	l.list = list
-	for _, v := range list {
-		lbl := NewText(v)
-		lbl.Bg(theme.Get(ListViewItemBg))
-		lbl.Fg(theme.Get(ListViewItemFg))
-		l.Add(lbl)
-	}
-}
-
-func (l *ListView) Reset() {
-	l.list = nil
-	l.Container = l.Container[:0]
-	l.contentImage = nil
-	l.offset = 0
-	l.lastOffset = 0
-	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)
-	l.dirty = true
+	l.rows = rows
+	theme := GetUi().theme
+	bg := theme.Get(ListViewItemBg)
+	fg := theme.Get(ListViewItemFg)
+	l.SetListWithBgFgColor(list, bg, fg)
 }
 
 func (l *ListView) Add(d Drawable) {
@@ -53,6 +41,37 @@ func (l *ListView) Add(d Drawable) {
 	if l.rect != nil {
 		l.resizeChilds()
 	}
+}
+
+func (l *ListView) SetListWithBgFgColor(list []string, bg, fg color.Color) {
+	l.list = list
+	for _, v := range list {
+		lbl := NewText(v)
+		l.Add(lbl)
+		lbl.Bg(bg)
+		lbl.Fg(fg)
+	}
+	if l.rect != nil {
+		l.resizeChilds()
+	}
+}
+
+func (l *ListView) Rows(rows int) {
+	if l.rows == rows {
+		return
+	}
+	l.rows = rows
+	l.dirty = true
+}
+
+func (l *ListView) Reset() {
+	l.list = nil
+	l.Container = l.Container[:0]
+	l.contentImage = nil
+	l.offset = 0
+	l.lastOffset = 0
+	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)
+	l.dirty = true
 }
 
 func (l *ListView) Layout() {
@@ -116,14 +135,28 @@ func (l *ListView) Resize(r []int) {
 
 func (l *ListView) resizeChilds() {
 	x, y := 0, 0
-	w, h := l.rect.W, l.itemSize
+	w, h := l.rect.W/l.rows, l.itemSize
+	row := 0
+	col := 1
 	for _, v := range l.Container {
-		v.(*Text).Resize([]int{x, y, w, h})
-		y += h
+		v.(*Text).Resize([]int{x, y, w - 1, h - 1})
+		x += w
+		row++
+		if row > l.rows-1 {
+			row = 0
+			x = 0
+			y += h
+			col++
+		}
 	}
 	if y == 0 {
 		y = l.rect.H
+	} else {
+		if len(l.Container)%l.rows == 0 {
+			col--
+		}
+		y = col * l.itemSize
 	}
-	l.contentRect = NewRect([]int{0, 0, w, y})
+	l.contentRect = NewRect([]int{0, 0, l.rect.W, y})
 	l.dirty = true
 }

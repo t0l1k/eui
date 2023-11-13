@@ -14,10 +14,10 @@ type SceneTestListView struct {
 func NewSceneTestListView() *SceneTestListView {
 	s := &SceneTestListView{}
 	var list []string
-	for i := 0; i < 22; i++ {
+	for i := 0; i < 62; i++ {
 		list = append(list, "Item "+strconv.Itoa(i))
 	}
-	s.lst = eui.NewListView(list, 30)
+	s.lst = eui.NewListView(list, 30, 3)
 	s.Add(s.lst)
 	s.Resize()
 	return s

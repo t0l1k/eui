@@ -49,7 +49,7 @@ func NewSceneStopwatch() *SceneStopwatch {
 	s.frame0.Add(lblTimeSecond)
 	s.var1.Attach(lblTimeSecond)
 
-	s.list = eui.NewListView(nil, 30)
+	s.list = eui.NewListView(nil, 30, 1)
 
 	s.frame1 = eui.NewHLayout()
 	s.sBtns = []string{"Обнулить", "Старт", "Круг"}
