@@ -4,14 +4,16 @@ package eui
 type GridLayoutDownRight struct {
 	row, column int
 	ContainerBase
+	cellMargin int
 }
 
 func NewGridLayoutDownRight(r, c int) *GridLayoutDownRight {
-	return &GridLayoutDownRight{row: r, column: c}
+	return &GridLayoutDownRight{row: r, column: c, cellMargin: 0}
 }
 
-func (d *GridLayoutDownRight) SetRows(r int)    { d.row = r }
-func (d *GridLayoutDownRight) SetColumns(c int) { d.column = c }
+func (d *GridLayoutDownRight) SetRows(r int)       { d.row = r }
+func (d *GridLayoutDownRight) SetColumns(c int)    { d.column = c }
+func (d *GridLayoutDownRight) SetCellMargin(m int) { d.cellMargin = m }
 
 func (c *GridLayoutDownRight) Resize(rect []int) {
 	r := NewRect(rect)
@@ -30,7 +32,7 @@ func (c *GridLayoutDownRight) Resize(rect []int) {
 	x, y := x0+marginX, y0+marginY
 	i := 0
 	for _, icon := range c.Container {
-		icon.Resize([]int{x, y, cellSize, cellSize})
+		icon.Resize([]int{x, y, cellSize - c.cellMargin, cellSize - -c.cellMargin})
 		y += cellSize
 		i++
 		if i > 0 && i%c.column == 0 {

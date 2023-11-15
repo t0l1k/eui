@@ -56,6 +56,19 @@ func (l *ListView) SetListWithBgFgColor(list []string, bg, fg color.Color) {
 	}
 }
 
+func (l *ListView) SetListWithBgFgColors(list []string, bg, fg []color.Color) {
+	l.list = list
+	for i, v := range list {
+		lbl := NewText(v)
+		l.Add(lbl)
+		lbl.Bg(bg[i])
+		lbl.Fg(fg[i])
+	}
+	if l.rect != nil {
+		l.resizeChilds()
+	}
+}
+
 func (l *ListView) Rows(rows int) {
 	if l.rows == rows {
 		return

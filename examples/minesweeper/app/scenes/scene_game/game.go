@@ -18,6 +18,7 @@ type Game struct {
 func newGame(r, c, m int) *Game {
 	g := &Game{}
 	g.layout = eui.NewGridLayoutRightDown(r, c)
+	g.layout.SetCellMargin(1)
 	g.field = game.NewMinedField(r, c, m)
 	g.timer = eui.NewStopwatch()
 	for i := 0; i < len(g.field.GetField()); i++ {
