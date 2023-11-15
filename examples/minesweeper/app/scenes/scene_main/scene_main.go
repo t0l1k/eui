@@ -16,6 +16,7 @@ func NewSceneSelectGame() *SceneSelectGame {
 	s := &SceneSelectGame{}
 
 	s.topBar = eui.NewTopBar("Игра Сапёр")
+	s.topBar.SetShowStopwatch()
 	s.Add(s.topBar)
 	s.frame = eui.NewVLayout()
 	lblTitle := eui.NewText("Выбери сложность")
