@@ -43,7 +43,7 @@ func (f Fonts) add(size int) {
 	f[size] = mplusFont
 }
 
-func (f Fonts) get(size int) font.Face {
+func (f Fonts) Get(size int) font.Face {
 	for k, v := range f {
 		if k == size {
 			return v
@@ -61,7 +61,7 @@ func (f Fonts) calcFontSize(txt string, rect *Rect) int {
 	sz := rect.GetLowestSize()
 	for {
 		fontSize = percent * float64(sz)
-		fnt := f.get(int(fontSize))
+		fnt := f.Get(int(fontSize))
 		defer fnt.Close()
 		bound := text.BoundString(fnt, txt)
 		if w > bound.Max.X && h > bound.Max.Y {

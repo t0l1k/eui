@@ -114,6 +114,10 @@ func (u *Ui) Size() (int, int) {
 	return u.size.X, u.size.Y
 }
 
+func (u *Ui) GetTheme() *Theme {
+	return u.theme
+}
+
 // Отсюда можно следить за изменением размера окна, при изменении обновляются размеры текущей сцены
 func (u *Ui) Layout(w, h int) (int, int) {
 	if w != u.size.X || h != u.size.Y {

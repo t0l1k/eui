@@ -17,35 +17,17 @@ type ListView struct {
 	cameraRect         image.Rectangle
 }
 
-func NewListView(list []string, itemSize, rows int) *ListView {
-	l := &ListView{}
-	l.SetupListView(list, itemSize, rows)
+func NewListView() *ListView {
+	l := &ListView{rows: 1, itemSize: 30}
+	l.SetupView()
 	return l
 }
 
-func (l *ListView) SetupListView(list []string, itemSize, rows int) {
-	l.SetupView()
+func (l *ListView) SetupListView(list []string, itemSize, rows int, bg, fg color.Color) {
 	l.itemSize = itemSize
 	l.rows = rows
-	theme := GetUi().theme
-	bg := theme.Get(ListViewItemBg)
-	fg := theme.Get(ListViewItemFg)
-	l.SetListWithBgFgColor(list, bg, fg)
-}
-
-func (l *ListView) Add(d Drawable) {
-	l.ContainerBase.Add(d)
-	theme := GetUi().theme
-	d.(*Text).Bg(theme.Get(ListViewItemBg))
-	d.(*Text).Fg(theme.Get(ListViewItemFg))
-	if l.rect != nil {
-		l.resizeChilds()
-	}
-}
-
-func (l *ListView) SetListWithBgFgColor(list []string, bg, fg color.Color) {
 	l.list = list
-	for _, v := range list {
+	for _, v := range l.list {
 		lbl := NewText(v)
 		l.Add(lbl)
 		lbl.Bg(bg)
@@ -58,8 +40,8 @@ func (l *ListView) SetListWithBgFgColor(list []string, bg, fg color.Color) {
 
 func (l *ListView) SetListWithBgFgColors(list []string, bg, fg []color.Color) {
 	l.list = list
-	for i, v := range list {
-		lbl := NewText(v)
+	for i, str := range l.list {
+		lbl := NewText(str)
 		l.Add(lbl)
 		lbl.Bg(bg[i])
 		lbl.Fg(fg[i])
@@ -67,6 +49,34 @@ func (l *ListView) SetListWithBgFgColors(list []string, bg, fg []color.Color) {
 	if l.rect != nil {
 		l.resizeChilds()
 	}
+}
+
+func (l *ListView) Add(d Drawable) {
+	l.ContainerBase.Add(d)
+	theme := GetUi().theme
+	bg := theme.Get(ListViewItemBg)
+	fg := theme.Get(ListViewItemFg)
+	switch value := d.(type) {
+	case *Text:
+		value.Bg(bg)
+		value.Fg(fg)
+		l.list = append(l.list, value.GetText())
+	case *Button:
+		value.Bg(bg)
+		value.Fg(fg)
+		l.list = append(l.list, value.GetText())
+	}
+	if l.rect != nil {
+		l.resizeChilds()
+	}
+}
+
+func (l *ListView) Itemsize(itemSize int) {
+	if l.itemSize == itemSize {
+		return
+	}
+	l.itemSize = itemSize
+	l.dirty = true
 }
 
 func (l *ListView) Rows(rows int) {
@@ -98,7 +108,11 @@ func (l *ListView) Layout() {
 	}
 	l.contentImage.Fill(l.bg)
 	for _, v := range l.Container {
-		v.Draw(l.contentImage)
+		switch value := v.(type) {
+		case *Text, *Button:
+			value.Draw(l.contentImage)
+		}
+
 	}
 	l.dirty = false
 }
@@ -152,7 +166,10 @@ func (l *ListView) resizeChilds() {
 	row := 0
 	col := 1
 	for _, v := range l.Container {
-		v.(*Text).Resize([]int{x, y, w - 1, h - 1})
+		switch value := v.(type) {
+		case *Text, *Button:
+			value.Resize([]int{x, y, w - 1, h - 1})
+		}
 		x += w
 		row++
 		if row > l.rows-1 {

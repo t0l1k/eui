@@ -17,7 +17,11 @@ func NewSceneTestListView() *SceneTestListView {
 	for i := 0; i < 62; i++ {
 		list = append(list, "Item "+strconv.Itoa(i))
 	}
-	s.lst = eui.NewListView(list, 30, 3)
+	theme := eui.GetUi().GetTheme()
+	bg := theme.Get(eui.ListViewItemBg)
+	fg := theme.Get(eui.ListViewItemFg)
+	s.lst = eui.NewListView()
+	s.lst.SetupListView(list, 30, 3, bg, fg)
 	s.Add(s.lst)
 	s.Resize()
 	return s

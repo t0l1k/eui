@@ -64,7 +64,7 @@ func (t *Text) Layout() {
 	var font font.Face
 	if !t.oneFont || !t.fontInit {
 		t.fontSize = GetFonts().calcFontSize(t.text, t.rect)
-		font = GetFonts().get(t.fontSize)
+		font = GetFonts().Get(t.fontSize)
 		b := text.BoundString(font, t.text)
 		t.pos.X = (t.rect.W - b.Max.X) / 2
 		t.pos.Y = t.rect.H - (t.rect.H+b.Min.Y)/2
@@ -72,7 +72,7 @@ func (t *Text) Layout() {
 			t.fontInit = true
 		}
 	} else if t.oneFont {
-		font = GetFonts().get(t.fontSize)
+		font = GetFonts().Get(t.fontSize)
 		b := text.BoundString(font, t.text)
 		t.pos.X = (t.rect.W - b.Max.X) / 2
 		t.pos.Y = t.rect.H - (t.rect.H+b.Min.Y)/2

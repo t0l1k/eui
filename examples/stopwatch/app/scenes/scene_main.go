@@ -49,7 +49,7 @@ func NewSceneStopwatch() *SceneStopwatch {
 	s.frame0.Add(lblTimeSecond)
 	s.var1.Attach(lblTimeSecond)
 
-	s.list = eui.NewListView(nil, 30, 1)
+	s.list = eui.NewListView()
 
 	s.frame1 = eui.NewHLayout()
 	s.sBtns = []string{"Обнулить", "Старт", "Круг"}
@@ -111,7 +111,6 @@ func (s *SceneStopwatch) stopwatchAppLogic(b *eui.Button) {
 			s.swRing.Reset()
 			txt := eui.NewText(str)
 			s.list.Add(txt)
-			// s.Resize()
 			s.swRing.Start()
 			s.dirty = true
 		}
@@ -153,6 +152,7 @@ func (s *SceneStopwatch) Resize() {
 	s.frame0.Resize([]int{x, y, w0, h1 * 2})
 	y += h1 * 2
 	s.list.Resize([]int{x, y, w0, h1 * 2})
+	s.list.Itemsize(hTop)
 	y += h1 * 2
 	s.frame1.Resize([]int{x, y, w0, h1})
 }
