@@ -37,9 +37,7 @@ func (a *AnalogClock) SetupAnalogClock() {
 
 func (a *AnalogClock) Layout() {
 	a.View.Layout()
-	// a.drawBack()
 	a.drawClockFace()
-	// a.drawDebugLines()
 	log.Println("update analog clock layout done")
 }
 
@@ -62,7 +60,11 @@ func (a *AnalogClock) drawClockFace() {
 		} else {
 			rad = m
 		}
-		tip = GetTip(center, float64(i)/60, center.Y-m*4, 0, 0)
+		sz := center.Y
+		if center.Y > center.X {
+			sz = center.X
+		}
+		tip = GetTip(center, float64(i)/60, sz-m*4, 0, 0)
 		vector.DrawFilledCircle(a.GetImage(), float32(tip.X), float32(tip.Y), float32(rad), bg, true)
 		vector.DrawFilledCircle(a.GetImage(), float32(tip.X), float32(tip.Y), float32(rad)/2, fg, true)
 	}
@@ -135,26 +137,3 @@ func (a *AnalogClock) setupHands() {
 	lenght = float64(sz/2) - m*12
 	a.hourHand.Setup(center, lenght, eui.Blue, 8)
 }
-
-// func (a *AnalogClock) drawDebugLines() {
-// 	_, _, w, h := a.GetRect().GetRectFloat()
-// 	vector.StrokeLine(a.GetImage(), 0, 0, w, h, 2, eui.Red, true)
-// 	vector.StrokeLine(a.GetImage(), 0, h, w, 0, 2, eui.Red, true)
-// 	vector.StrokeLine(a.GetImage(), 0, h/2, w, h/2, 2, eui.Red, true)
-// 	vector.StrokeLine(a.GetImage(), w/2, h, w/2, 0, 2, eui.Red, true)
-// }
-
-// func (a *AnalogClock) drawBack() {
-// 	m := float64(a.GetRect().GetLowestSize()) * 0.01
-// 	_, _, w0, h0 := a.GetRect().GetRectFloat()
-// 	bg := eui.Aqua
-// 	fg := eui.Black
-// 	a.GetImage().Fill(bg)
-// 	vector.StrokeRect(a.GetImage(), 0, 0, w0, h0, 3, fg, true)
-// 	for y := 0; y < a.GetRect().H; y += int(m) {
-// 		for x := 0; x < a.GetRect().W; x += int(m) {
-// 			vector.StrokeRect(a.GetImage(), float32(x), 0, float32(x), h0, 1, fg, true)
-// 			vector.StrokeRect(a.GetImage(), 0, float32(y), w0, float32(y), 1, fg, true)
-// 		}
-// 	}
-// }
