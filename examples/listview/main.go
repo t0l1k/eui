@@ -1,6 +1,7 @@
 package main
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/t0l1k/eui"
@@ -8,7 +9,7 @@ import (
 
 type SceneTestListView struct {
 	eui.SceneBase
-	lst *eui.ListView
+	lstText, lstButtons *eui.ListView
 }
 
 func NewSceneTestListView() *SceneTestListView {
@@ -20,22 +21,30 @@ func NewSceneTestListView() *SceneTestListView {
 	theme := eui.GetUi().GetTheme()
 	bg := theme.Get(eui.ListViewItemBg)
 	fg := theme.Get(eui.ListViewItemFg)
-	s.lst = eui.NewListView()
-	s.lst.SetupListView(list, 30, 3, bg, fg)
-	s.Add(s.lst)
+	s.lstText = eui.NewListView()
+	s.lstText.SetupListViewText(list, 30, 2, bg, fg)
+	s.Add(s.lstText)
+
+	s.lstButtons = eui.NewListView()
+	s.lstButtons.SetupListViewButtons(list, 30, 2, bg, fg, func(b *eui.Button) {
+		log.Println("pressed:", b.GetText())
+	})
+	s.Add(s.lstButtons)
+
 	s.Resize()
 	return s
 }
 
 func (s *SceneTestListView) Resize() {
-	s.lst.Resize([]int{25, 25, 350, 350})
+	s.lstText.Resize([]int{25, 25, 350, 350})
+	s.lstButtons.Resize([]int{400, 25, 350, 350})
 }
 
 func NewGame() *eui.Ui {
 	u := eui.GetUi()
 	u.SetTitle("Test ListView")
 	k := 2
-	w, h := 200*k, 200*k
+	w, h := 400*k, 200*k
 	u.SetSize(w, h)
 	return u
 }

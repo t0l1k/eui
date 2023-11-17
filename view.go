@@ -153,8 +153,8 @@ func (v *View) UpdateInput(value interface{}) {
 					v.isDragging = true
 					v.dragStartPoint = PointInt{x, y}
 				}
-				v.dragEndPoint = PointInt{x, y}
 			}
+			v.dragEndPoint = PointInt{x, y}
 		} else if v.state != ViewStateNormal {
 			v.SetState(ViewStateNormal)
 		}
@@ -171,8 +171,8 @@ func (v *View) UpdateInput(value interface{}) {
 						v.isDragging = true
 						v.dragStartPoint = PointInt{x, y}
 					}
-					v.dragEndPoint = PointInt{x, y}
 				}
+				v.dragEndPoint = PointInt{x, y}
 				if b == -1 {
 					if v.state == ViewStateFocus {
 						v.SetState(ViewStateExec)

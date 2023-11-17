@@ -23,7 +23,22 @@ func NewListView() *ListView {
 	return l
 }
 
-func (l *ListView) SetupListView(list []string, itemSize, rows int, bg, fg color.Color) {
+func (l *ListView) SetupListViewButtons(list []string, itemSize, rows int, bg, fg color.Color, f func(b *Button)) {
+	l.itemSize = itemSize
+	l.rows = rows
+	l.list = list
+	for _, v := range l.list {
+		btn := NewButton(v, f)
+		l.Add(btn)
+		btn.Bg(bg)
+		btn.Fg(fg)
+	}
+	if l.rect != nil {
+		l.resizeChilds()
+	}
+}
+
+func (l *ListView) SetupListViewText(list []string, itemSize, rows int, bg, fg color.Color) {
 	l.itemSize = itemSize
 	l.rows = rows
 	l.list = list
@@ -38,7 +53,7 @@ func (l *ListView) SetupListView(list []string, itemSize, rows int, bg, fg color
 	}
 }
 
-func (l *ListView) SetListWithBgFgColors(list []string, bg, fg []color.Color) {
+func (l *ListView) SetListViewTextWithBgFgColors(list []string, bg, fg []color.Color) {
 	l.list = list
 	for i, str := range l.list {
 		lbl := NewText(str)
@@ -135,6 +150,26 @@ func (l *ListView) Update(dt int) {
 		l.lastOffset = l.offset
 	} else if !l.isDragging {
 		l.lastOffset = 0
+	}
+	if l.state != ViewStateNormal {
+		x0 := l.dragEndPoint.X - l.rect.X + l.cameraRect.Min.X
+		y0 := l.dragEndPoint.Y - l.rect.Y + l.cameraRect.Min.Y
+		for _, v := range l.Container {
+			switch value := v.(type) {
+			case *Button:
+				r := value.rect
+				if r.InRect(x0, y0) {
+					if value.state != l.state {
+						value.SetState(l.state)
+						if l.lastOffset == 0 && l.offset == 0 {
+							value.Update(dt)
+						}
+						l.dirty = true
+						break
+					}
+				}
+			}
+		}
 	}
 }
 
