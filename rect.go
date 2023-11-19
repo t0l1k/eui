@@ -27,6 +27,10 @@ func (p Point) GetY() float64 {
 	return p.Y
 }
 
+func (p *Point) Equal(value *Point) bool {
+	return p.X == value.X && p.Y == value.Y
+}
+
 func (p Point) String() string {
 	return fmt.Sprintf("[%.2f, %.2f]", p.X, p.Y)
 }

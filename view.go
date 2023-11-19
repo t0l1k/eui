@@ -89,6 +89,10 @@ func (v *View) Visible(value bool) {
 	v.dirty = true
 }
 
+func (v *View) GetBg() color.Color {
+	return v.bg
+}
+
 func (v *View) Bg(bg color.Color) {
 	if v.bg == bg {
 		return
@@ -97,12 +101,20 @@ func (v *View) Bg(bg color.Color) {
 	v.dirty = true
 }
 
+func (v *View) GetFg() color.Color {
+	return v.fg
+}
+
 func (v *View) Fg(fg color.Color) {
 	if v.fg == fg {
 		return
 	}
 	v.fg = fg
 	v.dirty = true
+}
+
+func (v *View) GetState() InputState {
+	return v.state
 }
 
 func (v *View) SetState(state InputState) {

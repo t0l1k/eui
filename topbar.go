@@ -23,13 +23,26 @@ func NewTopBar(title string) *TopBar {
 	t.Add(t.btnQuit)
 	t.lblTitle = NewText(title)
 	t.Add(t.lblTitle)
+	t.setTheme()
 	return t
+}
+
+func (t *TopBar) setTheme() {
+	theme := GetUi().GetTheme()
+	t.bg = theme.Get(TopBarBg)
+	t.btnQuit.bg = theme.Get(TopBarQuitBg)
+	t.btnQuit.fg = theme.Get(TopBarQuitFg)
+	t.lblTitle.bg = theme.Get(TopBarTitleBg)
+	t.lblTitle.fg = theme.Get(TopBarTitleFg)
 }
 
 func (t *TopBar) initStopwatch() {
 	t.Stopwatch = NewStopwatch()
 	t.tmVar = NewStringVar(t.Stopwatch.StringShort())
 	t.tmLbl = NewText("0:00")
+	theme := GetUi().GetTheme()
+	t.tmLbl.bg = theme.Get(TopBarStopwatchBg)
+	t.tmLbl.fg = theme.Get(TopBarStopwatchFg)
 	t.tmVar.Attach(t.tmLbl)
 	t.Add(t.tmLbl)
 	t.Stopwatch.Start()

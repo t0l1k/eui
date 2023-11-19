@@ -23,7 +23,7 @@ func Init(f *Ui) {
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	ebiten.SetWindowSize(f.size.X, f.size.Y)
 	log.Println("Set Window Size:", f.size.X, f.size.Y)
-	ebiten.SetFullscreen(false)
+	ebiten.SetFullscreen(f.settings.Get(UiFullscreen).(bool))
 }
 
 // Переход в вечный цикл...
@@ -49,6 +49,7 @@ func GetUi() (u *Ui) {
 			inputTouch:    NewTouchInput(),
 			inputKeyboard: NewKeyboardInput(),
 			theme:         DefaultTheme(),
+			settings:      DefaultSettings(),
 		}
 		log.Printf("App init done")
 	} else {
@@ -63,13 +64,13 @@ type Ui struct {
 	scenes        []Scene
 	currentScene  Scene
 	theme         *Theme
+	settings      *Setting
 	tick          int
 	start         time.Time
 	size          image.Point
 	inputMouse    *MouseInput
 	inputTouch    *TouchInput
 	inputKeyboard *KeyboardInput
-	fullScreen    bool
 }
 
 func (u *Ui) GetStartTime() time.Time {
@@ -97,7 +98,7 @@ func (u *Ui) SetTitle(value string) {
 }
 
 func (u *Ui) SetFullscreen(value bool) {
-	u.fullScreen = value
+	u.settings.Set(UiFullscreen, value)
 }
 
 func (u *Ui) SetSize(w, h int) {
@@ -116,6 +117,10 @@ func (u *Ui) Size() (int, int) {
 
 func (u *Ui) GetTheme() *Theme {
 	return u.theme
+}
+
+func (u *Ui) GetSettings() *Setting {
+	return u.settings
 }
 
 // Отсюда можно следить за изменением размера окна, при изменении обновляются размеры текущей сцены
@@ -152,8 +157,10 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 }
 
 func (a *Ui) ToggleFullscreen() {
-	a.fullScreen = !a.fullScreen
-	ebiten.SetFullscreen(a.fullScreen)
+	fullscreen := a.settings.Get(UiFullscreen).(bool)
+	fullscreen = !fullscreen
+	ebiten.SetFullscreen(fullscreen)
+	a.settings.Set(UiFullscreen, fullscreen)
 	log.Println("Toggle FullScreen", a.size)
 }
 

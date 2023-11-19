@@ -23,12 +23,8 @@ func (c *Checkbox) SetupCheckbox(text string, f func(c *Checkbox)) {
 	c.Fg(theme.Get(CheckboxFg))
 	c.b = NewButton("", func(b *Button) {
 		c.checked = !c.checked
-		if c.checked {
-			c.b.SetText("*")
-			f(c)
-		} else {
-			c.b.SetText(" ")
-		}
+		f(c)
+		c.SetChecked(c.checked)
 	})
 	c.t = NewText(text)
 	c.t.Bg(c.bg)
@@ -37,10 +33,12 @@ func (c *Checkbox) SetupCheckbox(text string, f func(c *Checkbox)) {
 
 func (c *Checkbox) IsChecked() bool { return c.checked }
 func (c *Checkbox) SetChecked(value bool) {
-	if c.checked == value {
-		return
-	}
 	c.checked = value
+	if c.checked {
+		c.b.SetText("*")
+	} else {
+		c.b.SetText(" ")
+	}
 	c.dirty = true
 }
 

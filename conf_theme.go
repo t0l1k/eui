@@ -28,6 +28,13 @@ const (
 	SceneBg
 	SceneFg
 	ViewBg
+	TopBarBg
+	TopBarQuitBg
+	TopBarQuitFg
+	TopBarTitleBg
+	TopBarTitleFg
+	TopBarStopwatchBg
+	TopBarStopwatchFg
 )
 
 var (
@@ -82,6 +89,13 @@ func DefaultTheme() *Theme {
 	t.Set(SceneBg, Gray)
 	t.Set(SceneFg, Yellow)
 	t.Set(ViewBg, Navy)
+	t.Set(TopBarBg, Gray)
+	t.Set(TopBarQuitBg, Silver)
+	t.Set(TopBarQuitFg, Black)
+	t.Set(TopBarTitleBg, YellowGreen)
+	t.Set(TopBarTitleFg, Black)
+	t.Set(TopBarStopwatchBg, YellowGreen)
+	t.Set(TopBarStopwatchFg, Black)
 	return &t
 }
 
