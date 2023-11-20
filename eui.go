@@ -153,6 +153,7 @@ func (u *Ui) Update() error {
 }
 
 func (u *Ui) Draw(screen *ebiten.Image) {
+	screen.Fill(u.theme.Get(SceneBg))
 	u.currentScene.Draw(screen)
 }
 

@@ -86,7 +86,7 @@ func DefaultTheme() *Theme {
 	t.Set(ListViewFg, Orange)
 	t.Set(ListViewItemBg, Blue)
 	t.Set(ListViewItemFg, Yellow)
-	t.Set(SceneBg, Gray)
+	t.Set(SceneBg, Navy)
 	t.Set(SceneFg, Yellow)
 	t.Set(ViewBg, Navy)
 	t.Set(TopBarBg, Gray)

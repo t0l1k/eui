@@ -127,7 +127,6 @@ func (l *ListView) Layout() {
 		case *Text, *Button:
 			value.Draw(l.contentImage)
 		}
-
 	}
 	l.dirty = false
 }
@@ -158,15 +157,14 @@ func (l *ListView) Update(dt int) {
 			switch value := v.(type) {
 			case *Button:
 				r := value.rect
-				if r.InRect(x0, y0) {
-					if value.state != l.state {
-						value.SetState(l.state)
-						if l.lastOffset == 0 && l.offset == 0 {
-							value.Update(dt)
-						}
-						l.dirty = true
-						break
+				if r.InRect(x0, y0) && value.state != l.state {
+					value.SetState(l.state)
+					if l.lastOffset == 0 && l.offset == 0 {
+						value.Update(dt)
 					}
+					l.dirty = true
+				} else if value.state != ViewStateNormal {
+					value.SetState(ViewStateNormal)
 				}
 			}
 		}
@@ -179,9 +177,6 @@ func (l *ListView) Draw(surface *ebiten.Image) {
 	}
 	if l.dirty {
 		l.Layout()
-		for _, c := range l.Container {
-			c.Layout()
-		}
 	}
 	op := &ebiten.DrawImageOptions{}
 	x0, y0 := l.rect.Pos()

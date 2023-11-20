@@ -26,7 +26,7 @@ func NewSceneTestListView() *SceneTestListView {
 	s.Add(s.lstText)
 
 	s.lstButtons = eui.NewListView()
-	s.lstButtons.SetupListViewButtons(list, 30, 2, bg, fg, func(b *eui.Button) {
+	s.lstButtons.SetupListViewButtons(list, 30, 1, bg, fg, func(b *eui.Button) {
 		log.Println("pressed:", b.GetText())
 	})
 	s.Add(s.lstButtons)
@@ -36,8 +36,8 @@ func NewSceneTestListView() *SceneTestListView {
 }
 
 func (s *SceneTestListView) Resize() {
-	s.lstText.Resize([]int{25, 25, 350, 350})
-	s.lstButtons.Resize([]int{400, 25, 350, 350})
+	s.lstButtons.Resize([]int{25, 25, 350, 350})
+	s.lstText.Resize([]int{400, 25, 350, 350})
 }
 
 func NewGame() *eui.Ui {
