@@ -131,6 +131,7 @@ func (u *Ui) Layout(w, h int) (int, int) {
 		for _, scene := range u.scenes {
 			scene.Resize()
 		}
+		log.Println("Resize app done, new size:", w, h)
 	}
 	return w, h
 }
