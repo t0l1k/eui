@@ -23,6 +23,8 @@ func newGame(r, c, m int) *Game {
 	g.timer = eui.NewStopwatch()
 	for i := 0; i < len(g.field.GetField()); i++ {
 		btn := eui.NewButton("", g.gameLogic)
+		btn.Bg(eui.Gray)
+		btn.Fg(eui.Red)
 		g.layout.Add(btn)
 	}
 	g.Add(g.layout)

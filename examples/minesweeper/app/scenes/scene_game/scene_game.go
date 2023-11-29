@@ -80,10 +80,11 @@ func (s *SceneGame) Update(dt int) {
 func (s *SceneGame) Resize() {
 	w, h := eui.GetUi().Size()
 	hTop := int(float64(h) * 0.05) // topbar height
+	hTopHalf := int((float64(h) * 0.05) / 2)
 	rect := eui.NewRect([]int{0, hTop, w, h - hTop})
 
 	s.topBar.Resize([]int{0, 0, w, hTop})
-	s.game.Resize([]int{0, hTop, w, h - hTop})
+	s.game.Resize([]int{hTopHalf, hTop + hTopHalf, w - hTop, h - hTop*2})
 
 	x := rect.CenterX() - hTop*3
 	y := 0

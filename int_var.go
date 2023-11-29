@@ -38,6 +38,9 @@ func (s *IntVar) Get() int {
 }
 
 func (s *IntVar) Set(value int) {
+	if s.value == value {
+		return
+	}
 	s.value = value
 	s.Notify()
 }

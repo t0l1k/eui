@@ -9,21 +9,23 @@ type SceneSelectGame struct {
 	eui.SceneBase
 	topBar *eui.TopBar
 	frame  *eui.BoxLayout
-	sDiff  []string
+	sDiff  map[string][]int
 }
 
 func NewSceneSelectGame() *SceneSelectGame {
 	s := &SceneSelectGame{}
-
 	s.topBar = eui.NewTopBar("Игра Сапёр")
 	s.topBar.SetShowStopwatch()
 	s.Add(s.topBar)
 	s.frame = eui.NewVLayout()
 	lblTitle := eui.NewText("Выбери сложность")
 	s.frame.Add(lblTitle)
-	s.sDiff = []string{"Игра новичку", "Игра Легко", "Игра Средне", "Игра Сложно", "Настроить сложность"}
-	for _, value := range s.sDiff {
-		button := eui.NewButton(value, s.selectGameLogic)
+	s.sDiff = make(map[string][]int)
+	keys := []string{"Игра новичку", "Игра Легко", "Игра Средне", "Игра Сложно", "Настроить сложность"}
+	v := [][]int{{5, 5, 5}, {8, 8, 10}, {16, 16, 40}, {40, 16, 99}, {5, 5, 5}}
+	for i, k := range keys {
+		s.sDiff[k] = v[i]
+		button := eui.NewButton(k, s.selectGameLogic)
 		s.frame.Add(button)
 	}
 	s.Add(s.frame)
@@ -35,30 +37,20 @@ func (s *SceneSelectGame) Entered() {
 }
 
 func (s *SceneSelectGame) selectGameLogic(b *eui.Button) {
-	switch b.GetText() {
-	case s.sDiff[0]:
-		game := scene_game.NewSceneGame(b.GetText(), 5, 5, 5)
-		eui.GetUi().Push(game)
-	case s.sDiff[1]:
-		game := scene_game.NewSceneGame(b.GetText(), 8, 8, 10)
-		eui.GetUi().Push(game)
-	case s.sDiff[2]:
-		game := scene_game.NewSceneGame(b.GetText(), 16, 16, 40)
-		eui.GetUi().Push(game)
-	case s.sDiff[3]:
-		game := scene_game.NewSceneGame(b.GetText(), 40, 16, 99)
-		eui.GetUi().Push(game)
-	case s.sDiff[4]:
+	if b.GetText() == "Настроить сложность" {
 		game := NewSelectDiff(b.GetText())
 		eui.GetUi().Push(game)
+	} else {
+		r, c, m := s.sDiff[b.GetText()][0], s.sDiff[b.GetText()][1], s.sDiff[b.GetText()][2]
+		game := scene_game.NewSceneGame(b.GetText(), r, c, m)
+		eui.GetUi().Push(game)
 	}
-
 }
 
 func (s *SceneSelectGame) Resize() {
 	w, h := eui.GetUi().Size()
 	rect := eui.NewRect([]int{0, 0, w, h})
-	hTop := int(float64(rect.GetLowestSize()) * 0.05)
-	s.topBar.Resize([]int{0, 0, w, hTop})
-	s.frame.Resize([]int{0, hTop, w, h - hTop})
+	hT := int(float64(rect.GetLowestSize()) * 0.05)
+	s.topBar.Resize([]int{0, 0, w, hT})
+	s.frame.Resize([]int{hT / 2, hT + hT/2, w - hT, h - hT*2})
 }
