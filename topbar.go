@@ -62,7 +62,7 @@ func (t *TopBar) Update(dt int) {
 	if !t.showStopwatch {
 		return
 	}
-	t.tmVar.Set(t.Stopwatch.StringShort())
+	t.tmVar.SetValue(t.Stopwatch.StringShort())
 }
 
 func (t *TopBar) Resize(arr []int) {

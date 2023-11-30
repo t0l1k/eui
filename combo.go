@@ -38,7 +38,7 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func
 	c.btnPlus = NewButton("+", func(b *Button) {
 		if c.index < len(c.data)-1 {
 			c.index++
-			c.valueVar.Set(c.GetValueString())
+			c.valueVar.SetValue(c.GetValueString())
 			log.Println("combo: +", c.index, c.Value())
 		}
 		if c.onChange != nil {
@@ -49,7 +49,7 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func
 	c.btnMinus = NewButton("-", func(b *Button) {
 		if c.index > 0 {
 			c.index--
-			c.valueVar.Set(c.GetValueString())
+			c.valueVar.SetValue(c.GetValueString())
 			log.Println("combo: -", c.index, c.Value())
 		}
 		if c.onChange != nil {

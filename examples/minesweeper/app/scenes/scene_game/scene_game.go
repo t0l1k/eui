@@ -26,6 +26,7 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 	s.Add(s.topBar)
 	s.game = newGame(r, c, m)
 	s.Add(s.game)
+	s.game.field.State.Attach(s)
 	s.lblMines = eui.NewText("" + strconv.Itoa(s.game.field.GetTotalMines()))
 	s.Add(s.lblMines)
 	s.lblGameTimer = eui.NewText("00:00")
@@ -44,8 +45,7 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 	s.Add(s.btnStatus)
 
 	s.btnAF = eui.NewButton("Auto Mark Flags", func(b *eui.Button) {
-		switch s.game.field.GetState() {
-		case game.GamePlay:
+		if s.game.field.State.Value() == game.GamePlay {
 			s.game.field.AutoMarkAllFlags()
 			s.game.redraw()
 		}
@@ -57,24 +57,40 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 }
 
 func (s *SceneGame) Update(dt int) {
-	switch s.game.field.GetState() {
-	case game.GameStart, game.GamePlay:
-		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
-			s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
-			log.Println("smile0")
-		} else if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			s.btnStatus.SetReleasedIcon(res.SmileSprites[2])
-			log.Println("smile2")
-		}
-	case game.GameWin:
-		s.btnStatus.SetReleasedIcon(res.SmileSprites[3])
-	case game.GameOver:
-		s.btnStatus.SetReleasedIcon(res.SmileSprites[4])
-	}
+	s.checkBtnStatus()
 	s.lblGameTimer.SetText(s.game.timer.StringShort())
 	str := strconv.Itoa(s.game.field.GetLeftMines()) + "/" + strconv.Itoa(s.game.field.GetTotalMines())
 	s.lblMines.SetText(str)
 	s.SceneBase.Update(dt)
+}
+
+func (s *SceneGame) checkBtnStatus() {
+	if s.game.field.State.Value() == game.GamePlay {
+		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+			s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
+			log.Println("set smile0")
+		} else if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
+			s.btnStatus.SetReleasedIcon(res.SmileSprites[2])
+			log.Println("set smile2")
+		}
+	}
+}
+
+func (s *SceneGame) UpdateData(value interface{}) {
+	switch v := value.(type) {
+	case string:
+		switch v {
+		case game.GameStart:
+			s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
+			log.Println("set smile0")
+		case game.GameWin:
+			s.btnStatus.SetReleasedIcon(res.SmileSprites[3])
+			log.Println("set smile3")
+		case game.GameOver:
+			s.btnStatus.SetReleasedIcon(res.SmileSprites[4])
+			log.Println("set smile4")
+		}
+	}
 }
 
 func (s *SceneGame) Resize() {

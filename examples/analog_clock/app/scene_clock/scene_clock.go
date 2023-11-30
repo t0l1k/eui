@@ -54,7 +54,7 @@ func (s *SceneAnalogClock) setupTheme() {
 func (s *SceneAnalogClock) Update(dt int) {
 	dtFormat := "2006-01-02 15:04:05"
 	tm := time.Now().Format(dtFormat)
-	s.tmVar.Set(tm)
+	s.tmVar.SetValue(tm)
 	s.SceneBase.Update(dt)
 }
 

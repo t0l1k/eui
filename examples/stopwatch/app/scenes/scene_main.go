@@ -118,8 +118,8 @@ func (s *SceneStopwatch) stopwatchAppLogic(b *eui.Button) {
 }
 
 func (s *SceneStopwatch) Update(dt int) {
-	s.var0.Set(s.swMain.String())
-	s.var1.Set(s.swRing.String())
+	s.var0.SetValue(s.swMain.String())
+	s.var1.SetValue(s.swRing.String())
 
 	s.SceneBase.Update(dt)
 	if s.dirty {

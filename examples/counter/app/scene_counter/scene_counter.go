@@ -19,12 +19,12 @@ func NewSceneCounter() *SceneCounter {
 
 	btnInc := eui.NewButton("+", func(b *eui.Button) {
 		model.Inc()
-		counter.Set(model.Value())
+		counter.SetValue(model.Value())
 	})
 
 	btnDec := eui.NewButton("-", func(b *eui.Button) {
 		model.Dec()
-		counter.Set(model.Value())
+		counter.SetValue(model.Value())
 	})
 
 	horLayout := eui.NewHLayout()

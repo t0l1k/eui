@@ -20,6 +20,7 @@ func newGame(r, c, m int) *Game {
 	g.layout = eui.NewGridLayoutRightDown(r, c)
 	g.layout.SetCellMargin(1)
 	g.field = game.NewMinedField(r, c, m)
+	g.field.State.Attach(g)
 	g.timer = eui.NewStopwatch()
 	for i := 0; i < len(g.field.GetField()); i++ {
 		btn := eui.NewButton("", g.gameLogic)
@@ -114,7 +115,7 @@ func (g *Game) redraw() {
 
 func (g *Game) gameLogic(b *eui.Button) {
 	defer g.redraw()
-	switch g.field.GetState() {
+	switch g.field.State.Value() {
 	case game.GameStart:
 		for i, v := range g.layout.Container {
 			if b == v {
@@ -144,34 +145,53 @@ func (g *Game) gameLogic(b *eui.Button) {
 				break
 			}
 		}
-	case game.GamePause:
-	case game.GameWin:
-	case game.GameOver:
 	}
 }
 
 func (g *Game) Update(dt int) {
-	switch g.field.GetState() {
+	switch g.field.State.Value() {
 	case game.GameStart, game.GamePlay:
-		for _, cell := range g.layout.Container {
-			if cell.(*eui.Button).IsDisabled() {
-				cell.(*eui.Button).Enable()
+		if !ebiten.IsFocused() && g.field.State.Value() == game.GamePlay {
+			g.field.State.SetValue(game.GamePause)
+			g.timer.Stop()
+			for _, cell := range g.layout.Container {
+				cell.(*eui.Button).Visible(false)
 			}
+			log.Println("Paused!!!")
 		}
 	case game.GamePause:
-		if !ebiten.IsFocused() {
-			g.timer.Stop()
-		}
-	case game.GameWin, game.GameOver:
-		g.timer.Stop()
-		for _, cell := range g.layout.Container {
-			if !cell.(*eui.Button).IsDisabled() {
-				cell.(*eui.Button).Disable()
+		if ebiten.IsFocused() {
+			g.field.State.SetValue(game.GamePlay)
+			g.timer.Start()
+			for _, cell := range g.layout.Container {
+				cell.(*eui.Button).Visible(true)
 			}
+			log.Println("Resume!!!")
 		}
 	}
 	for _, cell := range g.layout.Container {
 		cell.Update(dt)
+	}
+}
+
+func (g *Game) UpdateData(value interface{}) {
+	switch v := value.(type) {
+	case string:
+		switch v {
+		case game.GameStart:
+			for _, cell := range g.layout.Container {
+				if cell.(*eui.Button).IsDisabled() {
+					cell.(*eui.Button).Enable()
+				}
+			}
+		case game.GameWin, game.GameOver:
+			g.timer.Stop()
+			for _, cell := range g.layout.Container {
+				if !cell.(*eui.Button).IsDisabled() {
+					cell.(*eui.Button).Disable()
+				}
+			}
+		}
 	}
 }
 

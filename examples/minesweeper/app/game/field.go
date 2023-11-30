@@ -6,18 +6,8 @@ import (
 	"time"
 )
 
-type GameState string
-
-const (
-	GameStart GameState = "start"
-	GamePlay  GameState = "play"
-	GamePause GameState = "pause"
-	GameWin   GameState = "win"
-	GameOver  GameState = "game over"
-)
-
 type MinedField struct {
-	state                   GameState
+	State                   *gameState
 	field                   []*cell
 	saved                   []cellState
 	row, column, totalMines int
@@ -30,12 +20,13 @@ func NewMinedField(r, c, m int) *MinedField {
 		column:     c,
 		totalMines: m,
 	}
+	mf.State = newGameState()
 	mf.New()
 	return mf
 }
 
 func (mf *MinedField) New() {
-	mf.state = GameStart
+	mf.State.SetValue(GameStart)
 	if mf.field != nil {
 		mf.field = mf.field[:0]
 	}
@@ -51,7 +42,7 @@ func (mf *MinedField) Reset() {
 		cell.reset()
 	}
 	mf.Open(mf.firstMove.x, mf.firstMove.y)
-	mf.state = GamePlay
+	mf.State.SetValue(GamePlay)
 }
 
 func (mf *MinedField) GetField() []*cell  { return mf.field }
@@ -67,7 +58,7 @@ func (mf *MinedField) GetLeftMines() int {
 	}
 	return leftMines
 }
-func (mf *MinedField) GetState() GameState       { return mf.state }
+
 func (mf *MinedField) GetPos(idx int) (int, int) { return idx % mf.row, idx / mf.row }
 func (mf *MinedField) GetIdx(x, y int) int       { return y*mf.row + x }
 func (mf *MinedField) isFieldEdge(x, y int) bool {
@@ -97,7 +88,7 @@ func (mx *MinedField) GetCell(x, y int) *cell {
 }
 
 func (mf *MinedField) Shuffle(fX, fY int) {
-	if mf.state != GameStart {
+	if mf.State.Value() != GameStart {
 		return
 	}
 	mf.firstMove.x, mf.firstMove.y = fX, fY
@@ -126,7 +117,7 @@ func (mf *MinedField) Shuffle(fX, fY int) {
 			mf.field[idx].count = count
 		}
 	}
-	mf.state = GamePlay
+	mf.State.SetValue(GamePlay)
 }
 
 func (mf *MinedField) Open(x, y int) {
@@ -167,7 +158,7 @@ func (mf *MinedField) Winned() bool {
 				cell.state = saved
 			}
 		}
-		mf.state = GameWin
+		mf.State.SetValue(GameWin)
 		return true
 	}
 	return false
@@ -190,7 +181,7 @@ func (mf *MinedField) GameOver() {
 			}
 		}
 	}
-	mf.state = GameOver
+	mf.State.SetValue(GameOver)
 }
 
 func (mf *MinedField) GetFirstMovePos() (int, int) { return mf.firstMove.x, mf.firstMove.y }
@@ -257,7 +248,7 @@ func (mf *MinedField) MarkFlag(x, y int) {
 }
 
 func (mf *MinedField) SaveGame() {
-	if mf.state != GamePlay {
+	if mf.State.Value() != GamePlay {
 		return
 	}
 	mf.saved = mf.saved[:0]
@@ -270,8 +261,8 @@ func (mf *MinedField) RestoreGame() {
 	for idx, cell := range mf.field {
 		cell.state = mf.saved[idx]
 	}
-	if mf.state == GameWin || mf.state == GameOver {
-		mf.state = GamePlay
+	if mf.State.Value() == GameWin || mf.State.Value() == GameOver {
+		mf.State.SetValue(GamePlay)
 	}
 }
 
