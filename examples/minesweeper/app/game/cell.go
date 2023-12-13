@@ -1,90 +1,84 @@
 package game
 
-import "strconv"
+import (
+	"strconv"
 
-type position struct {
-	x, y int
-}
-
-type cellState string
+	"github.com/t0l1k/eui"
+)
 
 const (
-	closed       cellState = "closed"        // начальное состояние
-	flagged      cellState = "flagged"       // отмечена флагом
-	questioned   cellState = "questioned"    // отмечена вопросом
-	saved        cellState = "saved"         // если помечена флагом
-	blown        cellState = "blown"         // есть мина, не отмечена флагом
-	wrongFlagged cellState = "wrong flagged" // помечена флагом, без мины
-	opened       cellState = "opened"        // открыта
-	firstMined   cellState = "first mined"   // взорваная первой
-	cellEmpty              = 9
+	cellClosed       = " "
+	cellFlagged      = "F"
+	cellQuestioned   = "Q"
+	cellFirstMined   = "f"
+	cellSaved        = "v"
+	cellBlown        = "b"
+	cellWrongFlagged = "w"
+	cellMined        = "*"
+	cellZero         = "0"
 )
 
 type cell struct {
-	state cellState
+	state *cellState
 	count byte
 	mined bool
-	position
+	pos   *eui.PointInt
 }
 
-func newCell(p position) *cell {
+func newCell(pos *eui.PointInt) *cell {
 	return &cell{
-		state:    closed,
-		count:    cellEmpty,
-		mined:    false,
-		position: p,
+		state: newCellState(closed, pos),
+		count: cellEmpty,
+		mined: false,
+		pos:   pos,
 	}
 }
 
-func (c *cell) reset() {
-	c.state = closed
-}
+func (c *cell) reset() { c.state.SetValue(newCellData(closed, cellClosed, c.pos)) }
 
 func (c *cell) open() {
-	if c.state == closed || c.state == questioned {
-		c.state = opened
+	if c.state.Value() == closed || c.state.Value() == questioned {
+		c.state.SetValue(newCellData(opened, c.String(), c.pos))
 	}
 }
 
 func (c *cell) mark() {
-	switch c.state {
+	switch c.state.Value() {
 	case closed:
-		c.state = flagged
+		c.state.SetValue(newCellData(flagged, cellFlagged, c.pos))
 	case flagged:
-		c.state = questioned
+		c.state.SetValue(newCellData(questioned, cellQuestioned, c.pos))
 	case questioned:
-		c.state = closed
+		c.state.SetValue(newCellData(closed, cellClosed, c.pos))
 	}
 }
 
-func (c *cell) Pos() (int, int) {
-	return c.position.x, c.position.y
-}
+func (c *cell) Pos() (int, int) { return c.pos.X, c.pos.Y }
 
 func (c *cell) String() string {
 	var str string
-	switch c.state {
+	switch c.state.Value() {
 	case closed:
-		str += " "
+		str += cellClosed
 	case flagged:
-		str += "F"
+		str += cellFlagged
 	case questioned:
-		str += "Q"
+		str += cellQuestioned
 	case firstMined:
-		str += "f"
+		str += cellFirstMined
 	case saved:
-		str += "v"
+		str += cellSaved
 	case blown:
-		str += "b"
+		str += cellBlown
 	case wrongFlagged:
-		str += "w"
+		str += cellWrongFlagged
 	case opened:
 		if c.count == cellEmpty && c.mined {
-			str += "*"
+			str += cellMined
 		} else if c.count != cellEmpty && !c.mined {
 			switch c.count {
 			case 0:
-				str += "0"
+				str += cellZero
 			default:
 				str += strconv.Itoa(int(c.count))
 			}

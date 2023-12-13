@@ -59,7 +59,7 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 func (s *SceneGame) Update(dt int) {
 	s.checkBtnStatus()
 	s.lblGameTimer.SetText(s.game.timer.StringShort())
-	str := strconv.Itoa(s.game.field.GetLeftMines()) + "/" + strconv.Itoa(s.game.field.GetTotalMines())
+	str := strconv.Itoa(s.game.field.GetMarkedMines()) + "/" + strconv.Itoa(s.game.field.GetTotalMines())
 	s.lblMines.SetText(str)
 	s.SceneBase.Update(dt)
 }

@@ -1,17 +1,20 @@
 package game
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
+
+	"github.com/t0l1k/eui"
 )
 
 type MinedField struct {
-	State                   *gameState
-	field                   []*cell
-	saved                   []cellState
-	row, column, totalMines int
-	firstMove               position
+	State                                                *gameState
+	field                                                []*cell
+	saved                                                []string
+	row, column, totalMines, markedMines, totalOpenCells int
+	firstMove                                            *eui.PointInt
 }
 
 func NewMinedField(r, c, m int) *MinedField {
@@ -27,47 +30,41 @@ func NewMinedField(r, c, m int) *MinedField {
 
 func (mf *MinedField) New() {
 	mf.State.SetValue(GameStart)
+	mf.resetMarkedMines()
 	if mf.field != nil {
 		mf.field = mf.field[:0]
 	}
 	for y := 0; y < mf.column; y++ {
 		for x := 0; x < mf.row; x++ {
-			mf.field = append(mf.field, newCell(position{x, y}))
+			cell := newCell(eui.NewPointInt(x, y))
+			cell.state.Attach(mf)
+			mf.field = append(mf.field, cell)
 		}
 	}
 }
 
 func (mf *MinedField) Reset() {
+	mf.State.SetValue(GameStart)
+	mf.resetMarkedMines()
 	for _, cell := range mf.field {
 		cell.reset()
 	}
-	mf.Open(mf.firstMove.x, mf.firstMove.y)
 	mf.State.SetValue(GamePlay)
+	mf.Open(mf.firstMove.X, mf.firstMove.Y)
 }
 
-func (mf *MinedField) GetField() []*cell  { return mf.field }
-func (mf *MinedField) GetRow() int        { return mf.row }
-func (mf *MinedField) GetColumn() int     { return mf.column }
-func (mf *MinedField) GetTotalMines() int { return mf.totalMines }
-func (mf *MinedField) GetLeftMines() int {
-	leftMines := 0
-	for _, cell := range mf.GetField() {
-		if cell.state == flagged || cell.state == saved {
-			leftMines++
-		}
-	}
-	return leftMines
-}
-
+func (mf *MinedField) GetField() []*cell         { return mf.field }
+func (mf *MinedField) GetRow() int               { return mf.row }
+func (mf *MinedField) GetColumn() int            { return mf.column }
+func (mf *MinedField) GetTotalMines() int        { return mf.totalMines }
+func (mf *MinedField) GetMarkedMines() int       { return mf.markedMines }
 func (mf *MinedField) GetPos(idx int) (int, int) { return idx % mf.row, idx / mf.row }
 func (mf *MinedField) GetIdx(x, y int) int       { return y*mf.row + x }
+func (mx *MinedField) GetCell(x, y int) *cell    { return mx.field[mx.GetIdx(x, y)] }
 func (mf *MinedField) isFieldEdge(x, y int) bool {
 	return x < 0 || x > mf.row-1 || y < 0 || y > mf.column-1
 }
-
-func (mf *MinedField) IsCellOpen(idx int) bool {
-	return mf.field[idx].state == opened
-}
+func (mf *MinedField) IsCellOpen(idx int) bool { return mf.field[idx].state.Value() == opened }
 
 func (mf *MinedField) getNeighbours(x, y int) (cells []*cell) {
 	for dy := -1; dy < 2; dy++ {
@@ -83,15 +80,11 @@ func (mf *MinedField) getNeighbours(x, y int) (cells []*cell) {
 	return cells
 }
 
-func (mx *MinedField) GetCell(x, y int) *cell {
-	return mx.field[mx.GetIdx(x, y)]
-}
-
 func (mf *MinedField) Shuffle(fX, fY int) {
 	if mf.State.Value() != GameStart {
 		return
 	}
-	mf.firstMove.x, mf.firstMove.y = fX, fY
+	mf.firstMove = eui.NewPointInt(fX, fY)
 	rand.Seed(time.Now().UTC().UnixNano())
 	var mines int
 	for mines < mf.totalMines {
@@ -125,12 +118,12 @@ func (mf *MinedField) Open(x, y int) {
 		return
 	}
 	cell := mf.GetCell(x, y)
-	if cell.state == flagged || cell.state == opened {
+	if cell.state.Value() == flagged || cell.state.Value() == opened {
 		return
 	}
 	cell.open()
 	if cell.mined {
-		cell.state = firstMined
+		cell.state.SetValue(newCellData(firstMined, cellFirstMined, cell.pos))
 		mf.GameOver()
 		return
 	}
@@ -141,58 +134,43 @@ func (mf *MinedField) Open(x, y int) {
 		return
 	}
 	for _, newCell := range mf.getNeighbours(x, y) {
-		mf.Open(newCell.position.x, newCell.position.y)
+		mf.Open(newCell.pos.X, newCell.pos.Y)
 	}
 }
 
 func (mf *MinedField) Winned() bool {
-	var count int
-	for _, cell := range mf.field {
-		if cell.state == opened {
-			count++
-		}
-	}
-	if count+mf.totalMines == mf.row*mf.column {
+	if mf.totalOpenCells+mf.totalMines == mf.row*mf.column {
+		mf.State.SetValue(GameWin)
+		mf.resetMarkedMines()
 		for _, cell := range mf.field {
 			if cell.mined {
-				cell.state = saved
+				cell.state.SetValue(newCellData(saved, cellSaved, cell.pos))
 			}
 		}
-		mf.State.SetValue(GameWin)
 		return true
 	}
 	return false
 }
 
 func (mf *MinedField) GameOver() {
+	mf.State.SetValue(GameOver)
+	mf.resetMarkedMines()
 	for _, cell := range mf.field {
 		if cell.mined {
-			switch cell.state {
+			switch cell.state.Value() {
 			case closed:
-				cell.state = blown
+				cell.state.SetValue(newCellData(blown, cellBlown, cell.pos))
 			case questioned:
-				cell.state = blown
+				cell.state.SetValue(newCellData(blown, cellBlown, cell.pos))
 			case flagged:
-				cell.state = saved
+				cell.state.SetValue(newCellData(saved, cellBlown, cell.pos))
 			}
-		} else if cell.state == flagged {
+		} else if cell.state.Value() == flagged {
 			if !cell.mined {
-				cell.state = wrongFlagged
+				cell.state.SetValue(newCellData(wrongFlagged, cellWrongFlagged, cell.pos))
 			}
 		}
 	}
-	mf.State.SetValue(GameOver)
-}
-
-func (mf *MinedField) GetFirstMovePos() (int, int) { return mf.firstMove.x, mf.firstMove.y }
-
-func (mf *MinedField) GetFlaggedCount() (count int) {
-	for _, cell := range mf.field {
-		if cell.state == flagged {
-			count++
-		}
-	}
-	return count
 }
 
 func (mf *MinedField) AutoMarkAllFlags() {
@@ -213,28 +191,28 @@ func (mf *MinedField) AutoMarkAllFlags() {
 }
 
 func (mf *MinedField) AutoMarkFlags(x, y int) (changed bool) {
-	if mf.GetCell(x, y).state == opened {
+	if mf.GetCell(x, y).state.Value() == opened {
 		var countClosed, countFlags byte
 		cellValue := mf.GetCell(x, y).count
 		neighbours := mf.getNeighbours(x, y)
-		for _, value := range neighbours {
-			if value.state == flagged {
+		for _, cell := range neighbours {
+			if cell.state.Value() == flagged {
 				countFlags++
-			} else if value.state == closed || value.state == questioned {
+			} else if cell.state.Value() == closed || cell.state.Value() == questioned {
 				countClosed++
 			}
 		}
 		if countClosed+countFlags == cellValue {
-			for _, value := range neighbours {
-				if value.state == closed || value.state == questioned {
-					value.state = flagged
+			for _, cell := range neighbours {
+				if cell.state.Value() == closed || cell.state.Value() == questioned {
+					cell.state.SetValue(newCellData(flagged, cellFlagged, cell.pos))
 					changed = true
 				}
 			}
 		} else if countFlags == cellValue {
-			for _, value := range neighbours {
-				if value.state == closed || value.state == questioned {
-					mf.Open(value.position.x, value.position.y)
+			for _, cell := range neighbours {
+				if cell.state.Value() == closed || cell.state.Value() == questioned {
+					mf.Open(cell.pos.X, cell.pos.Y)
 					changed = true
 				}
 			}
@@ -253,16 +231,48 @@ func (mf *MinedField) SaveGame() {
 	}
 	mf.saved = mf.saved[:0]
 	for _, cell := range mf.field {
-		mf.saved = append(mf.saved, cell.state)
+		mf.saved = append(mf.saved, cell.state.Value())
 	}
 }
 
 func (mf *MinedField) RestoreGame() {
 	for idx, cell := range mf.field {
-		cell.state = mf.saved[idx]
+		cell.state.SetValue(newCellData(mf.saved[idx], cell.String(), cell.pos))
 	}
 	if mf.State.Value() == GameWin || mf.State.Value() == GameOver {
 		mf.State.SetValue(GamePlay)
+	}
+}
+
+func (mf *MinedField) UpdateData(value interface{}) {
+	switch v := value.(type) {
+	case *cellData:
+		fmt.Println("field got message:", v)
+		mf.setMarkedMines(v)
+	default:
+	}
+}
+
+func (mf *MinedField) resetMarkedMines() {
+	mf.markedMines = 0
+	mf.totalOpenCells = 0
+}
+
+func (mf *MinedField) setMarkedMines(v *cellData) {
+	switch mf.State.Value() {
+	case GamePlay:
+		switch v.state {
+		case opened:
+			mf.totalOpenCells++
+		case flagged:
+			mf.markedMines++
+		case questioned:
+			mf.markedMines--
+		}
+	case GameWin, GameOver:
+		if v.state == saved {
+			mf.markedMines++
+		}
 	}
 }
 
