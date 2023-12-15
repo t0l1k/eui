@@ -12,6 +12,7 @@ const (
 	GameOver  = "game over"
 )
 
+// Умею оповестить подписчиков о смене состояния игры
 type gameState struct {
 	eui.SubjectBase
 }

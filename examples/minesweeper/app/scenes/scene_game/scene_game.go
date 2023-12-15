@@ -1,7 +1,6 @@
 package scene_game
 
 import (
-	"log"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -52,7 +51,6 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 	})
 	s.Add(s.btnAF)
 	s.Resize()
-	log.Println("Game init done")
 	return s
 }
 
@@ -68,10 +66,8 @@ func (s *SceneGame) checkBtnStatus() {
 	if s.game.field.State.Value() == game.GamePlay {
 		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 			s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
-			log.Println("set smile0")
 		} else if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
 			s.btnStatus.SetReleasedIcon(res.SmileSprites[2])
-			log.Println("set smile2")
 		}
 	}
 }
@@ -82,13 +78,10 @@ func (s *SceneGame) UpdateData(value interface{}) {
 		switch v {
 		case game.GameStart:
 			s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
-			log.Println("set smile0")
 		case game.GameWin:
 			s.btnStatus.SetReleasedIcon(res.SmileSprites[3])
-			log.Println("set smile3")
 		case game.GameOver:
 			s.btnStatus.SetReleasedIcon(res.SmileSprites[4])
-			log.Println("set smile4")
 		}
 	}
 }

@@ -19,22 +19,38 @@ func newGame(r, c, m int) *Game {
 	g := &Game{}
 	g.layout = eui.NewGridLayoutRightDown(r, c)
 	g.layout.SetCellMargin(1)
+	g.Add(g.layout)
 	g.field = game.NewMinedField(r, c, m)
 	g.field.State.Attach(g)
 	g.timer = eui.NewStopwatch()
+	g.New()
+	return g
+}
+
+func (g *Game) setupBoard() {
+	g.field.New()
+	var firstStart bool
+	if g.layout.Container == nil {
+		firstStart = true
+	}
 	for i := 0; i < len(g.field.GetField()); i++ {
-		btn := eui.NewButton("", g.gameLogic)
-		btn.Bg(eui.Gray)
-		btn.Fg(eui.Red)
+		var btn *game.CellIcon
+		if firstStart {
+			btn = game.NewCellIcon(g.field, g.gameLogic)
+		} else {
+			btn = g.layout.Container[i].(*game.CellIcon)
+			btn.Setup(g.field, g.gameLogic)
+		}
+		x, y := g.field.GetPos(i)
+		cell := g.field.GetCell(x, y)
+		cell.State.Attach(btn)
 		g.layout.Add(btn)
 	}
-	g.Add(g.layout)
-	return g
 }
 
 func (g *Game) New() {
 	g.timer.Reset()
-	g.field.New()
+	g.setupBoard()
 	g.redraw()
 }
 
@@ -46,71 +62,7 @@ func (g *Game) Reset() {
 }
 
 func (g *Game) redraw() {
-	for idx, cell := range g.field.GetField() {
-		switch cell.String() {
-		case " ":
-			g.layout.Container[idx].(*eui.Button).SetText(" ")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Gray)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Red)
-		case "0":
-			g.layout.Container[idx].(*eui.Button).SetText(" ")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Silver)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Red)
-		case "F":
-			g.layout.Container[idx].(*eui.Button).SetText("F")
-		case "v":
-			g.layout.Container[idx].(*eui.Button).SetText("v")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Silver)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Aqua)
-		case "Q":
-			g.layout.Container[idx].(*eui.Button).SetText("Q")
-		case "f":
-			g.layout.Container[idx].(*eui.Button).SetText("f")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Red)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Black)
-		case "b":
-			g.layout.Container[idx].(*eui.Button).SetText("b")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Red)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Gray)
-		case "w":
-			g.layout.Container[idx].(*eui.Button).SetText("w")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Red)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Gray)
-
-		case "1":
-			g.layout.Container[idx].(*eui.Button).SetText("1")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Silver)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Blue)
-		case "2":
-			g.layout.Container[idx].(*eui.Button).SetText("2")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Silver)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Orange)
-		case "3":
-			g.layout.Container[idx].(*eui.Button).SetText("3")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Silver)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Green)
-		case "4":
-			g.layout.Container[idx].(*eui.Button).SetText("4")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Silver)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Aqua)
-		case "5":
-			g.layout.Container[idx].(*eui.Button).SetText("5")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Silver)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Navy)
-		case "6":
-			g.layout.Container[idx].(*eui.Button).SetText("6")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Silver)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Fuchsia)
-		case "7":
-			g.layout.Container[idx].(*eui.Button).SetText("7")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Silver)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Purple)
-		case "8":
-			g.layout.Container[idx].(*eui.Button).SetText("8")
-			g.layout.Container[idx].(*eui.Button).Bg(eui.Silver)
-			g.layout.Container[idx].(*eui.Button).Fg(eui.Black)
-		}
-	}
+	log.Println(g.field)
 }
 
 func (g *Game) gameLogic(b *eui.Button) {
@@ -118,13 +70,12 @@ func (g *Game) gameLogic(b *eui.Button) {
 	switch g.field.State.Value() {
 	case game.GameStart:
 		for i, v := range g.layout.Container {
-			if b == v {
+			if b == v.(*game.CellIcon).Btn {
 				x, y := g.field.GetPos(i)
 				if b.IsMouseDownLeft() {
 					g.field.Shuffle(x, y)
 					g.field.Open(x, y)
 					g.timer.Start()
-					log.Println("game: begin new game")
 					break
 				}
 			}
@@ -132,11 +83,10 @@ func (g *Game) gameLogic(b *eui.Button) {
 	case game.GamePlay:
 		g.field.SaveGame()
 		for i, v := range g.layout.Container {
-			if b == v {
+			if b == v.(*game.CellIcon).Btn {
 				x, y := g.field.GetPos(i)
 				if b.IsMouseDownLeft() && !g.field.IsCellOpen(i) {
 					g.field.Open(x, y)
-					log.Println("game: manual cell open at:", x, y)
 				} else if b.IsMouseDownLeft() && g.field.IsCellOpen(i) {
 					g.field.AutoMarkFlags(x, y)
 				} else if b.IsMouseDownRight() {
@@ -155,18 +105,16 @@ func (g *Game) Update(dt int) {
 			g.field.State.SetValue(game.GamePause)
 			g.timer.Stop()
 			for _, cell := range g.layout.Container {
-				cell.(*eui.Button).Visible(false)
+				cell.(*game.CellIcon).Visible(false)
 			}
-			log.Println("Paused!!!")
 		}
 	case game.GamePause:
 		if ebiten.IsFocused() {
 			g.field.State.SetValue(game.GamePlay)
 			g.timer.Start()
 			for _, cell := range g.layout.Container {
-				cell.(*eui.Button).Visible(true)
+				cell.(*game.CellIcon).Visible(true)
 			}
-			log.Println("Resume!!!")
 		}
 	}
 	for _, cell := range g.layout.Container {
@@ -178,17 +126,17 @@ func (g *Game) UpdateData(value interface{}) {
 	switch v := value.(type) {
 	case string:
 		switch v {
-		case game.GameStart:
+		case game.GameStart, game.GamePlay:
 			for _, cell := range g.layout.Container {
-				if cell.(*eui.Button).IsDisabled() {
-					cell.(*eui.Button).Enable()
+				if cell.(*game.CellIcon).Btn.IsDisabled() {
+					cell.(*game.CellIcon).Btn.Enable()
 				}
 			}
 		case game.GameWin, game.GameOver:
 			g.timer.Stop()
 			for _, cell := range g.layout.Container {
-				if !cell.(*eui.Button).IsDisabled() {
-					cell.(*eui.Button).Disable()
+				if !cell.(*game.CellIcon).Btn.IsDisabled() {
+					cell.(*game.CellIcon).Btn.Disable()
 				}
 			}
 		}

@@ -27,6 +27,7 @@ func newCellData(state, value string, pos *eui.PointInt) *cellData {
 
 func (cd *cellData) String() string { return "cell[" + cd.value + "]at:" + cd.pos.String() + cd.state }
 
+// Умею оповестить подписчиков о смене состояния в ячейке
 type cellState struct {
 	listener []eui.Observer
 	data     *cellData

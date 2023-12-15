@@ -1,7 +1,6 @@
 package game
 
 import (
-	"fmt"
 	"math/rand"
 	"strconv"
 	"time"
@@ -24,7 +23,6 @@ func NewMinedField(r, c, m int) *MinedField {
 		totalMines: m,
 	}
 	mf.State = newGameState()
-	mf.New()
 	return mf
 }
 
@@ -37,7 +35,7 @@ func (mf *MinedField) New() {
 	for y := 0; y < mf.column; y++ {
 		for x := 0; x < mf.row; x++ {
 			cell := newCell(eui.NewPointInt(x, y))
-			cell.state.Attach(mf)
+			cell.State.Attach(mf)
 			mf.field = append(mf.field, cell)
 		}
 	}
@@ -64,7 +62,7 @@ func (mx *MinedField) GetCell(x, y int) *cell    { return mx.field[mx.GetIdx(x, 
 func (mf *MinedField) isFieldEdge(x, y int) bool {
 	return x < 0 || x > mf.row-1 || y < 0 || y > mf.column-1
 }
-func (mf *MinedField) IsCellOpen(idx int) bool { return mf.field[idx].state.Value() == opened }
+func (mf *MinedField) IsCellOpen(idx int) bool { return mf.field[idx].State.Value() == opened }
 
 func (mf *MinedField) getNeighbours(x, y int) (cells []*cell) {
 	for dy := -1; dy < 2; dy++ {
@@ -118,12 +116,12 @@ func (mf *MinedField) Open(x, y int) {
 		return
 	}
 	cell := mf.GetCell(x, y)
-	if cell.state.Value() == flagged || cell.state.Value() == opened {
+	if cell.State.Value() == flagged || cell.State.Value() == opened {
 		return
 	}
 	cell.open()
 	if cell.mined {
-		cell.state.SetValue(newCellData(firstMined, cellFirstMined, cell.pos))
+		cell.State.SetValue(newCellData(firstMined, cellFirstMined, cell.pos))
 		mf.GameOver()
 		return
 	}
@@ -144,7 +142,7 @@ func (mf *MinedField) Winned() bool {
 		mf.resetMarkedMines()
 		for _, cell := range mf.field {
 			if cell.mined {
-				cell.state.SetValue(newCellData(saved, cellSaved, cell.pos))
+				cell.State.SetValue(newCellData(saved, cellSaved, cell.pos))
 			}
 		}
 		return true
@@ -157,17 +155,17 @@ func (mf *MinedField) GameOver() {
 	mf.resetMarkedMines()
 	for _, cell := range mf.field {
 		if cell.mined {
-			switch cell.state.Value() {
+			switch cell.State.Value() {
 			case closed:
-				cell.state.SetValue(newCellData(blown, cellBlown, cell.pos))
+				cell.State.SetValue(newCellData(blown, cellBlown, cell.pos))
 			case questioned:
-				cell.state.SetValue(newCellData(blown, cellBlown, cell.pos))
+				cell.State.SetValue(newCellData(blown, cellBlown, cell.pos))
 			case flagged:
-				cell.state.SetValue(newCellData(saved, cellBlown, cell.pos))
+				cell.State.SetValue(newCellData(saved, cellBlown, cell.pos))
 			}
-		} else if cell.state.Value() == flagged {
+		} else if cell.State.Value() == flagged {
 			if !cell.mined {
-				cell.state.SetValue(newCellData(wrongFlagged, cellWrongFlagged, cell.pos))
+				cell.State.SetValue(newCellData(wrongFlagged, cellWrongFlagged, cell.pos))
 			}
 		}
 	}
@@ -191,27 +189,27 @@ func (mf *MinedField) AutoMarkAllFlags() {
 }
 
 func (mf *MinedField) AutoMarkFlags(x, y int) (changed bool) {
-	if mf.GetCell(x, y).state.Value() == opened {
+	if mf.GetCell(x, y).State.Value() == opened {
 		var countClosed, countFlags byte
 		cellValue := mf.GetCell(x, y).count
 		neighbours := mf.getNeighbours(x, y)
 		for _, cell := range neighbours {
-			if cell.state.Value() == flagged {
+			if cell.State.Value() == flagged {
 				countFlags++
-			} else if cell.state.Value() == closed || cell.state.Value() == questioned {
+			} else if cell.State.Value() == closed || cell.State.Value() == questioned {
 				countClosed++
 			}
 		}
 		if countClosed+countFlags == cellValue {
 			for _, cell := range neighbours {
-				if cell.state.Value() == closed || cell.state.Value() == questioned {
-					cell.state.SetValue(newCellData(flagged, cellFlagged, cell.pos))
+				if cell.State.Value() == closed || cell.State.Value() == questioned {
+					cell.State.SetValue(newCellData(flagged, cellFlagged, cell.pos))
 					changed = true
 				}
 			}
 		} else if countFlags == cellValue {
 			for _, cell := range neighbours {
-				if cell.state.Value() == closed || cell.state.Value() == questioned {
+				if cell.State.Value() == closed || cell.State.Value() == questioned {
 					mf.Open(cell.pos.X, cell.pos.Y)
 					changed = true
 				}
@@ -231,13 +229,13 @@ func (mf *MinedField) SaveGame() {
 	}
 	mf.saved = mf.saved[:0]
 	for _, cell := range mf.field {
-		mf.saved = append(mf.saved, cell.state.Value())
+		mf.saved = append(mf.saved, cell.State.Value())
 	}
 }
 
 func (mf *MinedField) RestoreGame() {
 	for idx, cell := range mf.field {
-		cell.state.SetValue(newCellData(mf.saved[idx], cell.String(), cell.pos))
+		cell.State.SetValue(newCellData(mf.saved[idx], cell.String(), cell.pos))
 	}
 	if mf.State.Value() == GameWin || mf.State.Value() == GameOver {
 		mf.State.SetValue(GamePlay)
@@ -247,7 +245,6 @@ func (mf *MinedField) RestoreGame() {
 func (mf *MinedField) UpdateData(value interface{}) {
 	switch v := value.(type) {
 	case *cellData:
-		fmt.Println("field got message:", v)
 		mf.setMarkedMines(v)
 	default:
 	}
@@ -278,8 +275,10 @@ func (mf *MinedField) setMarkedMines(v *cellData) {
 
 func (mf *MinedField) String() string {
 	str := strconv.Itoa(mf.row) + ","
-	str += strconv.Itoa(mf.column) + ","
-	str += strconv.Itoa(mf.totalMines) + "\n"
+	str += strconv.Itoa(mf.column) + ",("
+	str += strconv.Itoa(mf.markedMines) + "/"
+	str += strconv.Itoa(mf.totalMines) + ")"
+	str += mf.State.Value().(string) + "\n"
 	for y := 0; y < mf.column; y++ {
 		for x := 0; x < mf.row; x++ {
 			str += mf.field[mf.GetIdx(x, y)].String()
