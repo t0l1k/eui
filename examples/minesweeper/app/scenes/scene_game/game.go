@@ -1,8 +1,6 @@
 package scene_game
 
 import (
-	"log"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/minesweeper/app/game"
@@ -51,22 +49,15 @@ func (g *Game) setupBoard() {
 func (g *Game) New() {
 	g.timer.Reset()
 	g.setupBoard()
-	g.redraw()
 }
 
 func (g *Game) Reset() {
 	g.timer.Reset()
 	g.field.Reset()
-	g.redraw()
 	g.timer.Start()
 }
 
-func (g *Game) redraw() {
-	log.Println(g.field)
-}
-
 func (g *Game) gameLogic(b *eui.Button) {
-	defer g.redraw()
 	switch g.field.State.Value() {
 	case game.GameStart:
 		for i, v := range g.layout.Container {

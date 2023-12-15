@@ -1,7 +1,6 @@
 package scene_main
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/t0l1k/eui/examples/minesweeper/app/scenes/scene_game"
@@ -28,9 +27,9 @@ func NewSelectDiff(title string) *SelectDiff {
 	lblTitle := eui.NewText("Настрой сложность")
 	s.frame.Add(lblTitle)
 
-	column, row, mines := 5, 5, 5
+	column, row, percent := 5, 5, 15
 	var data []interface{}
-	for i := 5; i < 100; i += 5 {
+	for i := 5; i <= 50; i += 5 {
 		data = append(data, i)
 	}
 	s.comboCol = eui.NewComboBox("Сколько рядов", data, 0, func(combo *eui.ComboBox) {
@@ -41,13 +40,18 @@ func NewSelectDiff(title string) *SelectDiff {
 		column = combo.Value().(int)
 	})
 	s.frame.Add(s.comboRow)
-	s.comboMines = eui.NewComboBox("Сколько мин", data, 0, func(combo *eui.ComboBox) {
-		mines = combo.Value().(int)
-		fmt.Println("set mines", mines)
+	s.comboMines = eui.NewComboBox("Сколько % мин", func() (arr []interface{}) {
+		for i := 10; i <= 30; i++ {
+			arr = append(arr, i)
+		}
+		return arr
+	}(), 5, func(combo *eui.ComboBox) {
+		percent = combo.Value().(int)
 	})
 	s.frame.Add(s.comboMines)
 	s.btnExec = eui.NewButton("Запустить игру", func(b *eui.Button) {
-		str := "Игра настроена на " + strconv.Itoa(column) + " рядов" + strconv.Itoa(row) + " рядов" + strconv.Itoa(mines) + " мин"
+		mines := percent * (row * column) / 100
+		str := "Игра на " + strconv.Itoa(column) + " столбиков" + strconv.Itoa(row) + " рядов " + strconv.Itoa(mines) + " мин"
 		game := scene_game.NewSceneGame(str, row, column, mines)
 		eui.GetUi().Push(game)
 	})

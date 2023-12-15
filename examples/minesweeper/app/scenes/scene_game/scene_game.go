@@ -37,7 +37,6 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 			s.game.Reset()
 		} else if b.IsMouseDownMiddle() {
 			s.game.field.RestoreGame()
-			s.game.redraw()
 			s.game.timer.Start()
 		}
 	})
@@ -46,7 +45,6 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 	s.btnAF = eui.NewButton("Auto Mark Flags", func(b *eui.Button) {
 		if s.game.field.State.Value() == game.GamePlay {
 			s.game.field.AutoMarkAllFlags()
-			s.game.redraw()
 		}
 	})
 	s.Add(s.btnAF)
