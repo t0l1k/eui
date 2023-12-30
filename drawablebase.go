@@ -3,8 +3,9 @@ package eui
 import "github.com/hajimehoshi/ebiten/v2"
 
 type DrawableBase struct {
-	Dirty bool
-	Rect  *Rect
+	Dirty, Visible bool
+	Rect           *Rect
+	Image          *ebiten.Image
 }
 
 func (d *DrawableBase) Update(dt int)              {}

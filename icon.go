@@ -47,7 +47,10 @@ func (i *Icon) SetIcon(icon *ebiten.Image) {
 }
 
 func (i *Icon) Draw(surface *ebiten.Image) {
-	if i.dirty {
+	if !i.IsVisible() {
+		return
+	}
+	if i.IsDirty() {
 		i.Layout()
 	}
 	op := &ebiten.DrawImageOptions{}

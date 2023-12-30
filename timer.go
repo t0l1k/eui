@@ -1,39 +1,27 @@
 package eui
 
-import (
-	"strconv"
-	"time"
-)
+import "strconv"
 
-// Умею определеленную паузу отсчитывать обратно в миллисекундах. Умею отсчитывать регулярно обновляя таймер через метод update, или после разовой проверки методом endCheck
+// Умею определеленную длительность времени в миллисекундах отсчитывать обратно. Умею отсчитывать регулярно обновляя таймер через метод update
 type Timer struct {
-	startAt       time.Time
-	timer         int
-	pauseDuration int
-	run           bool
+	timer    int
+	duration int
+	run      bool
 }
 
-func NewTimer(duration int) *Timer { return &Timer{pauseDuration: duration} }
+func NewTimer(duration int) *Timer { return &Timer{duration: duration} }
 
-func (t *Timer) Reset() { t.timer = t.pauseDuration }
-
-func (t *Timer) IsOn() bool { return t.run }
+func (t *Timer) SetDuration(value int) { t.duration = value }
+func (t *Timer) Reset()                { t.timer = t.duration }
+func (t *Timer) IsOn() bool            { return t.run }
+func (t *Timer) IsOff() bool           { return !t.run }
+func (t *Timer) IsDone() bool          { return !(t.timer > 0) }
 
 func (t *Timer) On() {
 	t.Reset()
 	t.run = true
-	t.startAt = time.Now()
 }
-
-func (t *Timer) IsDone() bool { return !(t.timer > 0) }
-func (t *Timer) Off()         { t.run = false }
-
-func (t *Timer) EndCheck() {
-	dt := time.Since(t.startAt).Milliseconds()
-	if dt > int64(t.pauseDuration) {
-		t.Off()
-	}
-}
+func (t *Timer) Off() { t.run = false }
 
 func (t *Timer) Update(dt int) {
 	if t.IsOn() {
@@ -41,13 +29,9 @@ func (t *Timer) Update(dt int) {
 	}
 }
 
+func (t *Timer) TimePassed() int { return t.duration - t.timer }
+func (t *Timer) TimeLeft() int   { return t.timer }
+
 func (t *Timer) String() string {
-	s := "timer "
-	if t.run {
-		s += "on:"
-	} else {
-		s += "off:"
-	}
-	s += strconv.Itoa(t.timer)
-	return s
+	return strconv.Itoa(t.timer/1000 + 1)
 }

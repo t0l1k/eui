@@ -29,9 +29,6 @@ func (s *SubjectBase) Value() interface{} {
 }
 
 func (s *SubjectBase) SetValue(value interface{}) {
-	if s.value == value {
-		return
-	}
 	s.value = value
 	s.Notify()
 }

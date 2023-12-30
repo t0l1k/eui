@@ -13,7 +13,6 @@ type Hand struct {
 	faceCenter, tip          eui.Point
 	value, lenght, thickness float64
 	fg                       color.Color
-	visible                  bool
 }
 
 func NewHand(clr color.Color) *Hand {
@@ -25,11 +24,11 @@ func (h *Hand) Setup(center eui.Point, lenght float64, thickness float64, visibl
 	h.faceCenter = center
 	h.lenght = lenght
 	h.thickness = thickness
-	h.visible = visible
+	h.Visible = visible
 }
 
 func (h *Hand) ToggleVisible() {
-	h.visible = !h.visible
+	h.Visible = !h.Visible
 	h.Dirty = true
 }
 
@@ -47,7 +46,7 @@ func (h *Hand) Set(value float64) {
 }
 
 func (h *Hand) Draw(surface *ebiten.Image) {
-	if !h.Dirty || !h.visible {
+	if !h.Dirty || !h.Visible {
 		return
 	}
 	x := h.Rect.X

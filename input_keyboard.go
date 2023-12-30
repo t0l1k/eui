@@ -5,9 +5,9 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-type KeyboardData struct {
-	keys []ebiten.Key
-}
+type KeyboardData struct{ keys []ebiten.Key }
+
+func (k *KeyboardData) GetKeys() []ebiten.Key { return k.keys }
 
 // Умею передать подписчикам события от клавиатуры, пока только цифры. При нажатой клавише, более 250 мс символ дублируется.
 type KeyboardInput struct {
@@ -39,18 +39,17 @@ func (s *KeyboardInput) Notify() {
 // Передать новое или повторное нажатие после истечения паузы
 func (s *KeyboardInput) update(dt int) {
 	s.value.keys = inpututil.AppendPressedKeys(s.value.keys[:0])
+	if len(s.value.keys) == 0 {
+		s.timer.Off()
+		return
+	}
 	if len(s.value.keys) > 0 && !s.timer.IsOn() {
 		s.timer.On()
 		s.Notify()
 	}
-	if s.timer.IsOn() {
-		s.timer.Update(dt)
-	}
+	s.timer.Update(dt)
 	if s.timer.IsDone() {
 		s.Notify()
 		s.timer.Reset()
-	}
-	if len(s.value.keys) == 0 {
-		s.timer.Off()
 	}
 }
