@@ -30,6 +30,12 @@ func (s *KeyboardInput) Detach(o Input) {
 	}
 }
 
+func (s *KeyboardInput) SetValue(keys []ebiten.Key) {
+	s.value.keys = nil
+	s.value.keys = append(s.value.keys, keys[len(keys)-1])
+	s.Notify()
+}
+
 func (s *KeyboardInput) Notify() {
 	for _, observer := range s.listener {
 		observer.UpdateInput(s.value)
@@ -38,18 +44,20 @@ func (s *KeyboardInput) Notify() {
 
 // Передать новое или повторное нажатие после истечения паузы
 func (s *KeyboardInput) update(dt int) {
-	s.value.keys = inpututil.AppendPressedKeys(s.value.keys[:0])
-	if len(s.value.keys) == 0 {
+	keys := inpututil.AppendPressedKeys(s.value.keys[:0])
+	if len(keys) == 0 {
 		s.timer.Off()
 		return
 	}
-	if len(s.value.keys) > 0 && !s.timer.IsOn() {
-		s.timer.On()
-		s.Notify()
-	}
 	s.timer.Update(dt)
-	if s.timer.IsDone() {
-		s.Notify()
-		s.timer.Reset()
+	if len(keys) > 0 {
+		if !s.timer.IsOn() {
+			s.SetValue(keys)
+			s.timer.On()
+		}
+		if s.timer.IsDone() {
+			s.SetValue(keys)
+			s.timer.Reset()
+		}
 	}
 }

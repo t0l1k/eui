@@ -167,12 +167,13 @@ func (a *Ui) ToggleFullscreen() {
 }
 
 // Определяю дельту от последнего обновления в миллисекундах
-func (u *Ui) getTick() int {
+func (u *Ui) getTick() (ticks int) {
 	tm := time.Now()
 	dt := tm.Nanosecond() / 1e6
-	ticks := dt - u.tick
 	if dt < u.tick {
 		ticks = 999 - u.tick + dt
+	} else {
+		ticks = dt - u.tick
 	}
 	u.tick = dt
 	return ticks
