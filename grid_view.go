@@ -79,7 +79,7 @@ func (g *GridView) Layout() {
 			g.GetImage(),
 			float32(x0),
 			float32(y),
-			float32(x0)+float32(cellSize)*float32(g.c),
+			float32(x0)+float32(cellSize)*float32(g.r),
 			float32(y),
 			float32(g.strokeWidth), g.fg, true)
 	}

@@ -2,15 +2,16 @@ package eui
 
 type TopBar struct {
 	View
-	btnQuit         *Button
-	lblTitle, tmLbl *Text
-	tmVar           *StringVar
-	Stopwatch       *Stopwatch
-	showStopwatch   bool
+	btnQuit                    *Button
+	lblTitle, tmLbl            *Text
+	tmVar                      *StringVar
+	Stopwatch                  *Stopwatch
+	showStopwatch              bool
+	coverTitle, coverStopwatch float64
 }
 
 func NewTopBar(title string) *TopBar {
-	t := &TopBar{}
+	t := &TopBar{coverTitle: 0.25, coverStopwatch: 0.1}
 	t.showStopwatch = false
 	t.SetupView()
 	sq := "<"
@@ -25,6 +26,16 @@ func NewTopBar(title string) *TopBar {
 	t.Add(t.lblTitle)
 	t.setTheme()
 	return t
+}
+
+func (t *TopBar) SetTitleCoverArea(value float64) {
+	t.coverTitle = value
+	t.Dirty(true)
+}
+
+func (t *TopBar) SetStopwatchCoverArea(value float64) {
+	t.coverStopwatch = value
+	t.Dirty(true)
 }
 
 func (t *TopBar) setTheme() {
@@ -70,10 +81,10 @@ func (t *TopBar) Resize(arr []int) {
 	x, y, w, h := 0, 0, t.GetRect().H, t.GetRect().H
 	t.btnQuit.Resize([]int{x, y, w, h})
 	x += h
-	w = int(float64(t.rect.W) * 0.25)
+	w = int(float64(t.rect.W) * t.coverTitle)
 	t.lblTitle.Resize([]int{x, y, w, h})
-	w = int(float64(t.rect.W) * 0.1)
 	if t.showStopwatch {
+		w = int(float64(t.rect.W) * t.coverStopwatch)
 		x = t.GetRect().W - w
 		t.tmLbl.Resize([]int{x, y, w, h})
 	}

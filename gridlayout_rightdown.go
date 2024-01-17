@@ -11,15 +11,28 @@ func NewGridLayoutRightDown(r, c int) *GridLayoutRightDown {
 	return &GridLayoutRightDown{row: r, column: c, cellMargin: 0}
 }
 
-func (d *GridLayoutRightDown) SetRows(r int)       { d.row = r }
-func (d *GridLayoutRightDown) SetColumns(c int)    { d.column = c }
-func (d *GridLayoutRightDown) SetCellMargin(m int) { d.cellMargin = m }
+func (d *GridLayoutRightDown) SetDim(r, c int) {
+	d.row = r
+	d.column = c
+	d.resize()
+}
+
+func (d *GridLayoutRightDown) SetRows(r int)       { d.row = r; d.resize() }
+func (d *GridLayoutRightDown) SetColumns(c int)    { d.column = c; d.resize() }
+func (d *GridLayoutRightDown) SetCellMargin(m int) { d.cellMargin = m; d.resize() }
+
+func (c *GridLayoutRightDown) resize() {
+	if c.Rect == nil {
+		return
+	}
+	c.Resize(c.Rect.GetArr())
+}
 
 func (c *GridLayoutRightDown) Resize(rect []int) {
-	r := NewRect(rect)
-	w0, h0 := r.Size()
-	x0, y0 := r.Pos()
-	cellSize := c.getCellSize(r)
+	c.Rect = NewRect(rect)
+	w0, h0 := c.Rect.Size()
+	x0, y0 := c.Rect.Pos()
+	cellSize := c.getCellSize(c.Rect)
 	marginX := (w0 - cellSize*c.row) / 2
 	marginY := (h0 - cellSize*c.column) / 2
 	x, y := x0+marginX, y0+marginY

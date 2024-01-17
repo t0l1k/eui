@@ -9,13 +9,20 @@ type BoxLayout struct {
 func NewHLayout() *BoxLayout { return &BoxLayout{horizontal: true} }
 func NewVLayout() *BoxLayout { return &BoxLayout{horizontal: false} }
 
-func (d *BoxLayout) SetHorizontal() { d.horizontal = true }
-func (d *BoxLayout) SetVertical()   { d.horizontal = false }
+func (d *BoxLayout) SetHorizontal() { d.horizontal = true; d.resize() }
+func (d *BoxLayout) SetVertical()   { d.horizontal = false; d.resize() }
+
+func (c *BoxLayout) resize() {
+	if c.Rect == nil {
+		return
+	}
+	c.Resize(c.Rect.GetArr())
+}
 
 func (c *BoxLayout) Resize(rect []int) {
-	crect := NewRect(rect)
-	w0, h0 := crect.Size()
-	x0, y0 := crect.Pos()
+	c.Rect = NewRect(rect)
+	w0, h0 := c.Rect.Size()
+	x0, y0 := c.Rect.Pos()
 	if count := len(c.Container); count > 0 {
 		if c.horizontal {
 			w, h := w0/count, h0
