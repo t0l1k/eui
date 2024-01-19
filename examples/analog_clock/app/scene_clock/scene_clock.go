@@ -19,7 +19,7 @@ type SceneAnalogClock struct {
 
 func NewSceneAnalogClock() *SceneAnalogClock {
 	s := &SceneAnalogClock{}
-	s.topBar = eui.NewTopBar("Analog Clock Example")
+	s.topBar = eui.NewTopBar("Analog Clock Example", nil)
 	s.Add(s.topBar)
 	s.clock = clock.NewAnalogClock()
 	s.Add(s.clock)

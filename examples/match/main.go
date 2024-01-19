@@ -58,6 +58,8 @@ func NewCell(x, y int) *Cell {
 func (c *Cell) Pos() (int, int)    { return c.pos.X, c.pos.Y }
 func (c *Cell) SetPos(x, y int)    { c.pos = eui.NewPointInt(x, y) }
 func (c *Cell) SetValue(value int) { c.sym = value }
+func (c *Cell) IsOpen() bool       { return c.open }
+func (c *Cell) IsMatch() bool      { return c.match }
 
 func (c *Cell) SetMatch() {
 	c.match = true
@@ -99,7 +101,6 @@ type Field struct {
 
 func NewField() *Field {
 	f := &Field{dim: eui.NewPointInt(3, 2)}
-	f.NewGame()
 	return f
 }
 
@@ -159,13 +160,16 @@ func (f *Field) shuffle() {
 }
 
 func (f *Field) Open(x, y int) {
-	f.moves = append(f.moves, f.GetCell(x, y))
-	f.checkSame()
+	if f.field[f.idx(x, y)].IsOpen() {
+		return
+	}
 	f.field[f.idx(x, y)].Open()
+	f.moves = append(f.moves, f.GetCell(x, y))
+	f.checkPair()
 	f.ClickCount++
 }
 
-func (f *Field) checkSame() {
+func (f *Field) checkPair() {
 	var (
 		a1, a2, a3 *Cell
 	)
@@ -175,8 +179,7 @@ func (f *Field) checkSame() {
 			a1.SetMatch()
 			a2.SetMatch()
 		}
-	}
-	if len(f.moves) == 3 {
+	} else if len(f.moves) == 3 {
 		a1, a2, a3 = f.moves[0], f.moves[1], f.moves[2]
 		if a1.sym == a2.sym {
 			a1.SetMatch()
@@ -188,6 +191,15 @@ func (f *Field) checkSame() {
 		f.moves = nil
 		f.moves = append(f.moves, a3)
 	}
+}
+
+func (f *Field) IsWin() bool {
+	for _, v := range f.field {
+		if !v.IsMatch() {
+			return false
+		}
+	}
+	return true
 }
 
 func (f *Field) Dim() (int, int)        { return f.dim.X, f.dim.GetY() }
@@ -249,23 +261,42 @@ func (c *CellIcon) UpdateData(value interface{}) {
 
 type Board struct {
 	eui.View
-	field   *Field
-	varArea *eui.StringVar
-	layout  *eui.GridLayoutRightDown
+	dialog    *Dialog
+	field     *Field
+	varArea   *eui.StringVar
+	layout    *eui.GridLayoutRightDown
+	stopwatch *eui.Stopwatch
+	inGame    bool
 }
 
 func NewBoard() *Board {
 	b := &Board{}
 	b.SetupView()
+	b.dialog = NewDialog("Выбор игры", func(btn *eui.Button) {
+		if btn.GetText() == bNew {
+			b.NewGame()
+		}
+		if btn.GetText() == bReset {
+			b.Reset()
+		}
+		if btn.GetText() == bNext {
+			b.NextLevel()
+		}
+		b.dialog.Visible(false)
+	})
+	b.dialog.Visible(false)
+	b.Add(b.dialog)
 	b.varArea = eui.NewStringVar("")
 	b.field = NewField()
-	b.layout = eui.NewGridLayoutRightDown(3, 2)
-	b.layout.SetCellMargin(1)
+	b.layout = eui.NewGridLayoutRightDown(b.field.Dim())
+	b.stopwatch = eui.NewStopwatch()
 	b.NewGame()
 	return b
 }
 
 func (b *Board) NewGame() {
+	b.inGame = false
+	b.stopwatch.Reset()
 	b.layout.Container = nil
 	b.field.NewGame()
 	for i := 0; i < len(b.field.field); i++ {
@@ -275,8 +306,18 @@ func (b *Board) NewGame() {
 		cell.state.Attach(btn)
 		b.layout.Add(btn)
 	}
-	r, c := b.field.Dim()
-	b.layout.SetDim(r, c)
+	b.layout.SetDim(b.field.Dim())
+}
+
+func (b *Board) Reset() {
+	b.inGame = false
+	b.field.ResetGame()
+	b.stopwatch.Reset()
+	for _, v := range b.layout.Container {
+		v.(*CellIcon).btn.Enable()
+		v.(*CellIcon).btn.Bg(eui.Teal)
+		v.(*CellIcon).btn.Fg(eui.Yellow)
+	}
 }
 
 func (b *Board) gameLogic(c *eui.Button) {
@@ -284,18 +325,15 @@ func (b *Board) gameLogic(c *eui.Button) {
 		if v.(*CellIcon).btn == c {
 			x, y := b.field.pos(i)
 			if c.IsMouseDownLeft() {
-				b.field.Open(x, y)
+				if !b.inGame {
+					b.stopwatch.Start()
+					b.inGame = true
+				}
+				if b.inGame {
+					b.field.Open(x, y)
+				}
 			}
 		}
-	}
-}
-
-func (b *Board) Reset() {
-	b.field.ResetGame()
-	for _, v := range b.layout.Container {
-		v.(*CellIcon).btn.Enable()
-		v.(*CellIcon).btn.Bg(eui.Teal)
-		v.(*CellIcon).btn.Fg(eui.Yellow)
 	}
 }
 
@@ -305,14 +343,32 @@ func (b *Board) NextLevel() {
 }
 
 func (b *Board) Update(dt int) {
-	str := fmt.Sprintf("Нажатий: %v Размер поля: %v", b.field.ClickCount, b.field.dim.String())
+	if b.inGame && b.field.IsWin() {
+		b.stopwatch.Stop()
+		b.inGame = false
+		b.dialog.Visible(true)
+		b.dialog.lblTitle.SetText("Победа!")
+	}
+	str := fmt.Sprintf("Время:[%v] Нажатий: %v Размер поля: %v", b.stopwatch, b.field.ClickCount, b.field.dim.String())
 	b.varArea.SetValue(str)
+	for _, v := range b.Container {
+		v.Update(dt)
+	}
+	if b.dialog.IsVisible() {
+		return
+	}
 	for _, v := range b.layout.Container {
 		v.Update(dt)
 	}
 }
 
 func (b *Board) Draw(surface *ebiten.Image) {
+	for _, v := range b.Container {
+		v.Draw(surface)
+	}
+	if b.dialog.IsVisible() {
+		return
+	}
 	for _, v := range b.layout.Container {
 		v.Draw(surface)
 	}
@@ -320,76 +376,85 @@ func (b *Board) Draw(surface *ebiten.Image) {
 
 func (b *Board) Resize(rect []int) {
 	b.View.Resize(rect)
+	b.layout.SetCellMargin(int(float64(b.GetRect().GetLowestSize()) * 0.008))
 	b.layout.Resize(rect)
+	w0, h0 := b.GetRect().Size()
+	x, y := b.GetRect().Pos()
+	w := w0 / 2
+	h := h0 / 2
+	x += (w0 - w) / 2
+	y += (h0 - h) / 2
+	b.dialog.Resize([]int{x, y, w, h})
 	b.Dirty(true)
 }
 
-type BottomBar struct {
+type Dialog struct {
 	eui.View
-	btnNew, btnReset, btnNext *eui.Button
-	lblArea                   *eui.Text
-	board                     *Board
+	btnHide, btnNew, btnReset, btnNext *eui.Button
+	lblTitle, lblArea                  *eui.Text
+	dialFunc                           func(d *eui.Button)
 }
 
-func NewBottomBar(board *Board) *BottomBar {
-	t := &BottomBar{}
+func NewDialog(title string, f func(d *eui.Button)) *Dialog {
+	t := &Dialog{}
 	t.SetupView()
-	t.board = board
-	t.btnNew = eui.NewButton(bNew, t.buttonLogic)
+	t.dialFunc = f
+	t.lblTitle = eui.NewText(title)
+	t.Add(t.lblTitle)
+	t.btnHide = eui.NewButton("x", func(b *eui.Button) {
+		t.Visible(false)
+	})
+	t.Add(t.btnHide)
+	t.btnNew = eui.NewButton(bNew, f)
 	t.Add(t.btnNew)
-	t.btnReset = eui.NewButton(bReset, t.buttonLogic)
+	t.btnReset = eui.NewButton(bReset, f)
 	t.Add(t.btnReset)
-	t.btnNext = eui.NewButton(bNext, t.buttonLogic)
+	t.btnNext = eui.NewButton(bNext, f)
 	t.Add(t.btnNext)
 	t.lblArea = eui.NewText("")
 	t.Add(t.lblArea)
 	return t
 }
 
-func (t *BottomBar) buttonLogic(b *eui.Button) {
-	if b.GetText() == bNew {
-		t.board.NewGame()
-	}
-	if b.GetText() == bReset {
-		t.board.Reset()
-	}
-	if b.GetText() == bNext {
-		t.board.NextLevel()
-	}
+func (t *Dialog) SetTitle(title string) {
+	t.lblTitle.SetText(title)
 }
 
-func (t *BottomBar) Resize(rect []int) {
+func (t *Dialog) Resize(rect []int) {
 	t.View.Resize(rect)
 	x, y := t.GetRect().Pos()
-	w, h := t.GetRect().W/5, t.GetRect().H
+	w, h := t.GetRect().W/3, t.GetRect().H/3
+	t.lblTitle.Resize([]int{x, y, w*3 - h, h})
+	t.btnHide.Resize([]int{x + w*3 - h, y, h, h})
+	y += h
+	t.lblArea.Resize([]int{x, y, w * 3, h})
+	y += h
 	t.btnNew.Resize([]int{x, y, w, h})
 	x += w
 	t.btnReset.Resize([]int{x, y, w, h})
 	x += w
 	t.btnNext.Resize([]int{x, y, w, h})
-	x += w
-	t.lblArea.Resize([]int{x, y, w * 2, h})
 	t.Dirty(true)
 }
 
 type SceneGame struct {
 	eui.SceneBase
-	topBar    *eui.TopBar
-	board     *Board
-	bottomBar *BottomBar
+	topBar *eui.TopBar
+	board  *Board
 }
 
 func NewSceneGame() *SceneGame {
 	s := &SceneGame{}
-	s.topBar = eui.NewTopBar("Найди пару")
+	s.topBar = eui.NewTopBar("Найди пару", func(b *eui.Button) {
+		s.board.dialog.SetTitle("Выбор игры")
+		s.board.dialog.Visible(true)
+	})
 	s.topBar.SetShowStopwatch()
 	s.topBar.SetTitleCoverArea(0.5)
 	s.Add(s.topBar)
 	s.board = NewBoard()
 	s.Add(s.board)
-	s.bottomBar = NewBottomBar(s.board)
-	s.Add(s.bottomBar)
-	s.board.varArea.Attach(s.bottomBar.lblArea)
+	s.board.varArea.Attach(s.board.dialog.lblArea)
 	s.Resize()
 	return s
 }
@@ -399,7 +464,6 @@ func (s *SceneGame) Resize() {
 	rect := eui.NewRect([]int{0, 0, w, h})
 	hT := int(float64(rect.GetLowestSize()) * 0.0382)
 	s.topBar.Resize([]int{0, 0, w, hT})
-	s.bottomBar.Resize([]int{0, h - hT, w, hT})
 	s.board.Resize([]int{hT / 2, hT + hT/2, w - hT, h - hT*3})
 }
 

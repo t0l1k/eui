@@ -25,9 +25,14 @@ func NewButton(text string, f func(*Button)) *Button {
 
 func (b *Button) SetupButton(text string, f func(*Button)) {
 	b.SetupText(text)
+	b.onPressed = f
 	theme := GetUi().theme
 	b.Bg(theme.Get(ButtonBg))
 	b.Fg(theme.Get(ButtonFg))
+}
+
+func (b *Button) SetFunc(f func(*Button)) {
+	b.onPressed = f
 }
 
 func (b *Button) IsMouseDownLeft() bool {

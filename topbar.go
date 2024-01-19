@@ -2,7 +2,8 @@ package eui
 
 type TopBar struct {
 	View
-	btnQuit                    *Button
+	btnMenu                    *Button
+	btnFunc                    func(b *Button)
 	lblTitle, tmLbl            *Text
 	tmVar                      *StringVar
 	Stopwatch                  *Stopwatch
@@ -10,22 +11,30 @@ type TopBar struct {
 	coverTitle, coverStopwatch float64
 }
 
-func NewTopBar(title string) *TopBar {
+func NewTopBar(title string, f func(b *Button)) *TopBar {
 	t := &TopBar{coverTitle: 0.25, coverStopwatch: 0.1}
 	t.showStopwatch = false
 	t.SetupView()
+	t.btnFunc = f
+	if f == nil {
+		t.btnFunc = func(b *Button) {
+			GetUi().Pop()
+		}
+	}
 	sq := "<"
 	if GetUi().IsMainScene() {
 		sq = "x"
 	}
-	t.btnQuit = NewButton(sq, func(b *Button) {
-		GetUi().Pop()
-	})
-	t.Add(t.btnQuit)
+	t.btnMenu = NewButton(sq, t.btnFunc)
+	t.Add(t.btnMenu)
 	t.lblTitle = NewText(title)
 	t.Add(t.lblTitle)
 	t.setTheme()
 	return t
+}
+
+func (t *TopBar) SetButtonFunc(f func(b *Button)) {
+	t.btnFunc = f
 }
 
 func (t *TopBar) SetTitleCoverArea(value float64) {
@@ -41,8 +50,8 @@ func (t *TopBar) SetStopwatchCoverArea(value float64) {
 func (t *TopBar) setTheme() {
 	theme := GetUi().GetTheme()
 	t.bg = theme.Get(TopBarBg)
-	t.btnQuit.bg = theme.Get(TopBarQuitBg)
-	t.btnQuit.fg = theme.Get(TopBarQuitFg)
+	t.btnMenu.bg = theme.Get(TopBarQuitBg)
+	t.btnMenu.fg = theme.Get(TopBarQuitFg)
 	t.lblTitle.bg = theme.Get(TopBarTitleBg)
 	t.lblTitle.fg = theme.Get(TopBarTitleFg)
 }
@@ -79,7 +88,7 @@ func (t *TopBar) Update(dt int) {
 func (t *TopBar) Resize(arr []int) {
 	t.View.Resize(arr)
 	x, y, w, h := 0, 0, t.GetRect().H, t.GetRect().H
-	t.btnQuit.Resize([]int{x, y, w, h})
+	t.btnMenu.Resize([]int{x, y, w, h})
 	x += h
 	w = int(float64(t.rect.W) * t.coverTitle)
 	t.lblTitle.Resize([]int{x, y, w, h})

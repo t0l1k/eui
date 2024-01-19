@@ -58,7 +58,7 @@ func (p PointInt) GetY() int {
 	return p.Y
 }
 
-func (p PointInt) Equal(a PointInt) bool {
+func (p PointInt) Equal(a *PointInt) bool {
 	return p.X == a.X && p.Y == a.Y
 }
 

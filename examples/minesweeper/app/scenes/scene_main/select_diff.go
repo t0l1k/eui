@@ -21,7 +21,7 @@ type SelectDiff struct {
 
 func NewSelectDiff(title string) *SelectDiff {
 	s := &SelectDiff{}
-	s.topBar = eui.NewTopBar(title)
+	s.topBar = eui.NewTopBar(title, nil)
 	s.Add(s.topBar)
 	s.frame = eui.NewVLayout()
 	lblTitle := eui.NewText("Настрой сложность")

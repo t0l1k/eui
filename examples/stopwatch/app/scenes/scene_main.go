@@ -36,7 +36,7 @@ func NewSceneStopwatch() *SceneStopwatch {
 	s.var0 = eui.NewStringVar(s.swMain.String())
 	s.var1 = eui.NewStringVar(s.swRing.String())
 
-	s.topBar = eui.NewTopBar("Секундомер")
+	s.topBar = eui.NewTopBar("Секундомер", nil)
 
 	s.frame0 = eui.NewVLayout()
 	lblTimeMain := eui.NewText("Нажми старт")

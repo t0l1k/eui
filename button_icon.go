@@ -26,7 +26,12 @@ func NewButtonIcon(icons []*ebiten.Image, f func(*ButtonIcon)) *ButtonIcon {
 
 func (b *ButtonIcon) SetupButtonIcon(icons []*ebiten.Image, f func(*ButtonIcon)) {
 	b.icons = icons
+	b.onPressed = f
 	b.SetupIcon(icons[0])
+}
+
+func (b *ButtonIcon) SetFunc(f func(*ButtonIcon)) {
+	b.onPressed = f
 }
 
 func (b *ButtonIcon) SetReleasedIcon(icon *ebiten.Image) {

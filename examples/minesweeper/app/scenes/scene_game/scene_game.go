@@ -21,7 +21,7 @@ type SceneGame struct {
 
 func NewSceneGame(title string, r, c, m int) *SceneGame {
 	s := &SceneGame{}
-	s.topBar = eui.NewTopBar(title)
+	s.topBar = eui.NewTopBar(title, nil)
 	s.Add(s.topBar)
 	s.game = newGame(r, c, m)
 	s.Add(s.game)
