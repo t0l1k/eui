@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -9,13 +10,14 @@ import (
 
 type SceneTestListView struct {
 	eui.SceneBase
-	lstText, lstButtons *eui.ListView
+	lstText, lstButtons, lstCheckBoxs *eui.ListView
+	btnRemoveSelected                 *eui.Button
 }
 
 func NewSceneTestListView() *SceneTestListView {
 	s := &SceneTestListView{}
 	var list []string
-	for i := 0; i < 62; i++ {
+	for i := 0; i < 24; i++ {
 		list = append(list, "Item "+strconv.Itoa(i))
 	}
 	theme := eui.GetUi().GetTheme()
@@ -31,20 +33,45 @@ func NewSceneTestListView() *SceneTestListView {
 	})
 	s.Add(s.lstButtons)
 
+	s.lstCheckBoxs = eui.NewListView()
+	s.lstCheckBoxs.SetupListViewCheckBoxs(list, 30, 1, bg, fg, func(b *eui.Checkbox) {
+		log.Println("pressed:", b.GetText())
+	})
+	s.Add(s.lstCheckBoxs)
+
+	s.btnRemoveSelected = eui.NewButton("Remove Selected", func(b *eui.Button) {
+		list = nil
+		for _, v := range s.lstCheckBoxs.GetCheckBoxes() {
+			if v.IsChecked() {
+				fmt.Println("selected:", v.GetText())
+				continue
+			}
+			list = append(list, v.GetText())
+		}
+		s.lstCheckBoxs.Reset()
+		s.lstCheckBoxs.SetupListViewCheckBoxs(list, 30, 1, bg, fg, func(b *eui.Checkbox) {
+			log.Println("pressed:", b.GetText())
+		})
+
+	})
+	s.Add(s.btnRemoveSelected)
+
 	s.Resize()
 	return s
 }
 
 func (s *SceneTestListView) Resize() {
-	s.lstButtons.Resize([]int{25, 25, 350, 350})
-	s.lstText.Resize([]int{400, 25, 350, 350})
+	s.lstButtons.Resize([]int{25, 25, 250, 250})
+	s.lstText.Resize([]int{300, 25, 250, 250})
+	s.lstCheckBoxs.Resize([]int{600, 25, 250, 250})
+	s.btnRemoveSelected.Resize([]int{600, 300, 250, 50})
 }
 
 func NewGame() *eui.Ui {
 	u := eui.GetUi()
 	u.SetTitle("Test ListView")
 	k := 2
-	w, h := 400*k, 200*k
+	w, h := 500*k, 200*k
 	u.SetSize(w, h)
 	return u
 }

@@ -38,6 +38,31 @@ func (l *ListView) SetupListViewButtons(list []string, itemSize, rows int, bg, f
 	}
 }
 
+func (l *ListView) SetupListViewCheckBoxs(list []string, itemSize, rows int, bg, fg color.Color, f func(b *Checkbox)) {
+	l.itemSize = itemSize
+	l.rows = rows
+	l.list = list
+	for _, v := range l.list {
+		chkBox := NewCheckbox(v, f)
+		l.Add(chkBox)
+		chkBox.Bg(bg)
+		chkBox.Fg(fg)
+	}
+	if l.rect != nil {
+		l.resizeChilds()
+	}
+}
+
+func (l *ListView) GetCheckBoxes() (values []*Checkbox) {
+	for _, v := range l.Container {
+		switch value := v.(type) {
+		case *Checkbox:
+			values = append(values, value)
+		}
+	}
+	return values
+}
+
 func (l *ListView) SetupListViewText(list []string, itemSize, rows int, bg, fg color.Color) {
 	l.itemSize = itemSize
 	l.rows = rows
@@ -77,6 +102,10 @@ func (l *ListView) Add(d Drawable) {
 		value.Fg(fg)
 		l.list = append(l.list, value.GetText())
 	case *Button:
+		value.Bg(bg)
+		value.Fg(fg)
+		l.list = append(l.list, value.GetText())
+	case *Checkbox:
 		value.Bg(bg)
 		value.Fg(fg)
 		l.list = append(l.list, value.GetText())
@@ -124,7 +153,7 @@ func (l *ListView) Layout() {
 	l.contentImage.Fill(l.bg)
 	for _, v := range l.Container {
 		switch value := v.(type) {
-		case *Text, *Button:
+		case *Text, *Button, *Checkbox:
 			value.Draw(l.contentImage)
 		}
 	}
@@ -166,6 +195,17 @@ func (l *ListView) Update(dt int) {
 				} else if value.state != ViewStateNormal {
 					value.SetState(ViewStateNormal)
 				}
+			case *Checkbox:
+				r := value.btn.rect
+				if r.InRect(x0, y0) && value.btn.state != l.state {
+					value.btn.SetState(l.state)
+					if l.lastOffset == 0 && l.offset == 0 {
+						value.btn.Update(dt)
+					}
+					l.dirty = true
+				} else if value.btn.state != ViewStateNormal {
+					value.btn.SetState(ViewStateNormal)
+				}
 			}
 		}
 	}
@@ -197,7 +237,7 @@ func (l *ListView) resizeChilds() {
 	col := 1
 	for _, v := range l.Container {
 		switch value := v.(type) {
-		case *Text, *Button:
+		case *Text, *Button, *Checkbox:
 			value.Resize([]int{x, y, w - 1, h - 1})
 		}
 		x += w

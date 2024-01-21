@@ -30,6 +30,7 @@ func (c *Checkbox) SetupCheckbox(text string, f func(c *Checkbox)) {
 	c.Add(c.txt)
 }
 
+func (c *Checkbox) GetText() string { return c.txt.GetText() }
 func (c *Checkbox) IsChecked() bool { return c.checked }
 func (c *Checkbox) SetChecked(value bool) {
 	c.checked = value
