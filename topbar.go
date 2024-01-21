@@ -11,26 +11,32 @@ type TopBar struct {
 	coverTitle, coverStopwatch float64
 }
 
+// Умею показать вверху строку с меткой текста с кнопкой выход из сцены(если nil) или переопределенной функцией(для вызова диалога, например) в параметре и секундомером нахождения на сцене
 func NewTopBar(title string, f func(b *Button)) *TopBar {
 	t := &TopBar{coverTitle: 0.25, coverStopwatch: 0.1}
 	t.showStopwatch = false
 	t.SetupView()
 	t.btnFunc = f
+	btnText := "Menu"
 	if f == nil {
+		btnText = "<"
 		t.btnFunc = func(b *Button) {
 			GetUi().Pop()
 		}
+		if GetUi().IsMainScene() {
+			btnText = "x"
+		}
 	}
-	sq := "<"
-	if GetUi().IsMainScene() {
-		sq = "x"
-	}
-	t.btnMenu = NewButton(sq, t.btnFunc)
+	t.btnMenu = NewButton(btnText, t.btnFunc)
 	t.Add(t.btnMenu)
 	t.lblTitle = NewText(title)
 	t.Add(t.lblTitle)
 	t.setTheme()
 	return t
+}
+
+func (t *TopBar) SetButtonText(text string) {
+	t.btnMenu.SetText(text)
 }
 
 func (t *TopBar) SetButtonFunc(f func(b *Button)) {
