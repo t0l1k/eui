@@ -18,6 +18,11 @@ type Layout interface {
 	Resize([]int)
 }
 
+type Container interface {
+	Add(Drawable)
+	GetContainer() []Drawable
+}
+
 type Scene interface {
 	Sprite
 	Entered()

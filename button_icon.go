@@ -34,6 +34,11 @@ func (b *ButtonIcon) SetFunc(f func(*ButtonIcon)) {
 	b.onPressed = f
 }
 
+func (b *ButtonIcon) SetIcons(icons []*ebiten.Image) {
+	b.icons = icons
+	b.Layout()
+}
+
 func (b *ButtonIcon) SetReleasedIcon(icon *ebiten.Image) {
 	if b.icons[0] == icon {
 		return
@@ -80,11 +85,11 @@ func (b *ButtonIcon) Layout() {
 		fg = White
 	}
 	_, _, w, h := b.rect.GetRectFloat()
-	bold := 2
+	bold := float32(1.0)
 	if b.buttonPressed {
-		bold = 5
+		bold = 3
 	}
-	vector.StrokeRect(b.image, 0, 0, w, h, float32(bold), fg, true)
+	vector.StrokeRect(b.image, 0, 0, w, h, bold, fg, true)
 	b.dirty = false
 }
 

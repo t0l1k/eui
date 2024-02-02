@@ -93,7 +93,7 @@ func (c *ComboBox) SetValue(value interface{}) {
 }
 
 func (c *ComboBox) Resize(r []int) {
-	c.Rect(r)
+	c.View.Resize(r)
 	x, y, w0, h0 := c.GetRect().GetRect()
 	w, h := h0, h0
 	c.lblValue.Resize([]int{x, y, w, h})
@@ -104,6 +104,6 @@ func (c *ComboBox) Resize(r []int) {
 	c.btnMinus.Resize([]int{x, y, w, h})
 	x += h0
 	y -= h
-	w, h = w0-x, h0
+	w, h = w0-h0*2, h0
 	c.lblText.Resize([]int{x, y, w, h})
 }

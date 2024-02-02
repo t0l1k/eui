@@ -387,6 +387,9 @@ func (b *Board) Update(dt int) {
 	for _, v := range b.Container {
 		v.Update(dt)
 	}
+	if b.dialog.IsVisible() {
+		return
+	}
 	for _, v := range b.layout.Container {
 		v.Update(dt)
 	}
