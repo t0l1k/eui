@@ -61,7 +61,7 @@ func (b *Board) gameLogic(btn *eui.ButtonIcon) {
 			cell := b.field.GetField()[i]
 			cellData := cell.State.Value().(*game.CellData)
 			state := cellData.State
-			if btn.IsMouseDownLeft() {
+			if btn.IsMouseDownLeft() && b.field.InGame {
 				if state == game.CellFilled || state == game.CellEmpty || state == game.CellFilledNext {
 					if col, way := b.field.MakeMove(b.field.Pos(i)); len(way) > 0 {
 						b.showWay = true

@@ -23,9 +23,10 @@ func NewFieldConf(dim int) *FieldConf {
 }
 
 type Field struct {
-	field []*Cell
-	Conf  *FieldConf
-	score int
+	field  []*Cell
+	Conf   *FieldConf
+	score  int
+	InGame bool
 }
 
 func NewField(dim int) *Field { return &Field{Conf: NewFieldConf(dim)} }
@@ -39,6 +40,7 @@ func (f *Field) NewGame(dim int) {
 			f.field = append(f.field, NewCell(x, y))
 		}
 	}
+	f.InGame = true
 	log.Println("поле игры создано", f.Conf)
 }
 
@@ -87,11 +89,15 @@ func (f *Field) CheckNextMove(x, y int) {
 		return
 	}
 	f.NextMoveBalls()
+	if f.EmptyCellsCount() == 0 {
+		f.ShowFilledNext()
+		f.InGame = false
+	}
 }
 
 func (f *Field) ShowFilledNext() {
 	for i, cell := range f.field {
-		if cell.State.Value().(*CellData).State == CellFilledNext {
+		if cell.IsFilledNext() {
 			cell.SetFilled()
 			x, y := f.Pos(i)
 			f.checkWinLines(x, y)
