@@ -1,7 +1,6 @@
 package eui
 
 import (
-	"image"
 	"log"
 	"os"
 	"time"
@@ -17,17 +16,17 @@ func init() {
 }
 
 // Инициализация и настройка размеров окна
-func Init(f *Ui) {
+func Init(u *Ui) {
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
-	ebiten.SetWindowTitle(f.title)
+	ebiten.SetWindowTitle(u.title)
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
-	ebiten.SetWindowSize(f.size.X, f.size.Y)
-	log.Println("Set Window Size:", f.size.X, f.size.Y)
-	ebiten.SetFullscreen(f.settings.Get(UiFullscreen).(bool))
+	ebiten.SetWindowSize(u.size.X, u.size.Y)
+	log.Println("Set Window Size:", u.size.X, u.size.Y)
+	ebiten.SetFullscreen(u.settings.Get(UiFullscreen).(bool))
 }
 
 // Переход в вечный цикл...
-func Run(sc Scene) {
+func Run(sc Sceneer) {
 	GetUi().Push(sc)
 	if err := ebiten.RunGame(GetUi()); err != nil {
 		log.Fatal(err)
@@ -44,7 +43,7 @@ func GetUi() (u *Ui) {
 		u = &Ui{
 			start:         time.Now(),
 			tick:          tm.Nanosecond() / 1e6,
-			scenes:        []Scene{},
+			scenes:        []Sceneer{},
 			inputMouse:    NewMouseInput(),
 			inputTouch:    NewTouchInput(),
 			inputKeyboard: NewKeyboardInput(),
@@ -58,70 +57,42 @@ func GetUi() (u *Ui) {
 	return u
 }
 
-// Умею иницализировать для Ebitenengine приложение, затем запускается сцена в которой отслеживаются через подписку от клавиатуры, мыши, касания экрана события и передаются структуре View(только мышь), InputBox(клавиатуры, пока только цифры). Остальным виджетам это текстовая метка(Text) и изображение(Image) встаивается структура View, которая определяет события от мыши(InputState) и меняет состояние виджета это при наведении, в фокусе, покидание курсором виджета. Все происходит в сцене, где есть обновление и дельта от последнего обновления и рисование, затем уже сцена передает внутри себя виджетам события. После создания сцены по умолчанию создается раскладка по вертикали и при переопределении метода Resize уже в нем производится раскладка виджетов внутри сцены.
+// Умею иницализировать для Ebitenengine приложение, затем запускается сцена в которой отслеживаются через подписку от клавиатуры, мыши, касания экрана события и передаются структуре View, InputBox(клавиатуры, пока только цифры). Остальным виджетам это текстовая метка(Text) и изображение(Image) встаивается структура View, которая определяет события от мыши(InputState) и меняет состояние виджета это при наведении, в фокусе, покидание курсором виджета. Все происходит в сцене, где есть обновление и дельта от последнего обновления и рисование, затем уже сцена передает внутри себя виджетам события. После создания сцены по умолчанию создается раскладка по вертикали и при переопределении метода Resize уже в нем производится раскладка виджетов внутри сцены.
 type Ui struct {
 	title         string
-	scenes        []Scene
-	currentScene  Scene
+	scenes        []Sceneer
+	currentScene  Sceneer
 	theme         *Theme
 	settings      *Setting
 	tick          int
 	start         time.Time
-	size          image.Point
+	size          *PointInt
 	inputMouse    *MouseInput
 	inputTouch    *TouchInput
 	inputKeyboard *KeyboardInput
 }
 
-func (u *Ui) GetStartTime() time.Time {
-	return u.start
-}
+func (u *Ui) GetStartTime() time.Time { return u.start }
 
-func (u *Ui) GetInputTouch() *TouchInput {
-	return u.inputTouch
-}
+func (u *Ui) GetInputTouch() *TouchInput { return u.inputTouch }
 
-func (u *Ui) GetInputMouse() *MouseInput {
-	return u.inputMouse
-}
+func (u *Ui) GetInputMouse() *MouseInput { return u.inputMouse }
 
-func (u *Ui) GetInputKeyboard() *KeyboardInput {
-	return u.inputKeyboard
-}
+func (u *Ui) GetInputKeyboard() *KeyboardInput { return u.inputKeyboard }
 
-func (u *Ui) GetTitle() string {
-	return u.title
-}
+func (u *Ui) GetTitle() string      { return u.title }
+func (u *Ui) SetTitle(value string) { u.title = value }
 
-func (u *Ui) SetTitle(value string) {
-	u.title = value
-}
+func (u *Ui) SetFullscreen(value bool) { u.settings.Set(UiFullscreen, value) }
 
-func (u *Ui) SetFullscreen(value bool) {
-	u.settings.Set(UiFullscreen, value)
-}
+func (u *Ui) Size() (int, int) { return u.size.X, u.size.Y }
+func (u *Ui) SetSize(w, h int) { u.size = NewPointInt(w, h) }
 
-func (u *Ui) SetSize(w, h int) {
-	u.size.X = w
-	u.size.Y = h
-}
+func (u *Ui) IsMainScene() bool { return len(u.scenes) == 0 }
 
-func (u *Ui) IsMainScene() bool {
-	return len(u.scenes) == 0
+func (u *Ui) GetTheme() *Theme { return u.theme }
 
-}
-
-func (u *Ui) Size() (int, int) {
-	return u.size.X, u.size.Y
-}
-
-func (u *Ui) GetTheme() *Theme {
-	return u.theme
-}
-
-func (u *Ui) GetSettings() *Setting {
-	return u.settings
-}
+func (u *Ui) GetSettings() *Setting { return u.settings }
 
 // Отсюда можно следить за изменением размера окна, при изменении обновляются размеры текущей сцены
 func (u *Ui) Layout(w, h int) (int, int) {
@@ -180,7 +151,7 @@ func (u *Ui) getTick() (ticks int) {
 }
 
 // Добавить сцену и сделать текущей
-func (u *Ui) Push(sc Scene) {
+func (u *Ui) Push(sc Sceneer) {
 	u.scenes = append(u.scenes, sc)
 	u.currentScene = sc
 	u.currentScene.Entered()

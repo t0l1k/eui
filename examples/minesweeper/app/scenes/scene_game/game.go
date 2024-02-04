@@ -17,7 +17,6 @@ func newGame(r, c, m int) *Game {
 	g := &Game{}
 	g.layout = eui.NewGridLayoutRightDown(r, c)
 	g.layout.SetCellMargin(1)
-	g.Add(g.layout)
 	g.field = game.NewMinedField(r, c, m)
 	g.field.State.Attach(g)
 	g.timer = eui.NewStopwatch()
@@ -28,7 +27,7 @@ func newGame(r, c, m int) *Game {
 func (g *Game) setupBoard() {
 	g.field.New()
 	var firstStart bool
-	if g.layout.Container == nil {
+	if g.layout.GetContainer() == nil {
 		firstStart = true
 	}
 	for i := 0; i < len(g.field.GetField()); i++ {
@@ -36,7 +35,7 @@ func (g *Game) setupBoard() {
 		if firstStart {
 			btn = game.NewCellIcon(g.field, g.gameLogic)
 		} else {
-			btn = g.layout.Container[i].(*game.CellIcon)
+			btn = g.layout.GetContainer()[i].(*game.CellIcon)
 			btn.Setup(g.field, g.gameLogic)
 		}
 		x, y := g.field.GetPos(i)
@@ -60,7 +59,7 @@ func (g *Game) Reset() {
 func (g *Game) gameLogic(b *eui.Button) {
 	switch g.field.State.Value() {
 	case game.GameStart:
-		for i, v := range g.layout.Container {
+		for i, v := range g.layout.GetContainer() {
 			if b == v.(*game.CellIcon).Btn {
 				x, y := g.field.GetPos(i)
 				if b.IsMouseDownLeft() {
@@ -73,7 +72,7 @@ func (g *Game) gameLogic(b *eui.Button) {
 		}
 	case game.GamePlay:
 		g.field.SaveGame()
-		for i, v := range g.layout.Container {
+		for i, v := range g.layout.GetContainer() {
 			if b == v.(*game.CellIcon).Btn {
 				x, y := g.field.GetPos(i)
 				if b.IsMouseDownLeft() && !g.field.IsCellOpen(i) {
@@ -95,20 +94,20 @@ func (g *Game) Update(dt int) {
 		if !ebiten.IsFocused() && g.field.State.Value() == game.GamePlay {
 			g.field.State.SetValue(game.GamePause)
 			g.timer.Stop()
-			for _, cell := range g.layout.Container {
-				cell.(*game.CellIcon).Visible(false)
+			for _, cell := range g.layout.GetContainer() {
+				cell.(*game.CellIcon).Visible = false
 			}
 		}
 	case game.GamePause:
 		if ebiten.IsFocused() {
 			g.field.State.SetValue(game.GamePlay)
 			g.timer.Start()
-			for _, cell := range g.layout.Container {
-				cell.(*game.CellIcon).Visible(true)
+			for _, cell := range g.layout.GetContainer() {
+				cell.(*game.CellIcon).Visible = true
 			}
 		}
 	}
-	for _, cell := range g.layout.Container {
+	for _, cell := range g.layout.GetContainer() {
 		cell.Update(dt)
 	}
 }
@@ -118,14 +117,14 @@ func (g *Game) UpdateData(value interface{}) {
 	case string:
 		switch v {
 		case game.GameStart, game.GamePlay:
-			for _, cell := range g.layout.Container {
+			for _, cell := range g.layout.GetContainer() {
 				if cell.(*game.CellIcon).Btn.IsDisabled() {
 					cell.(*game.CellIcon).Btn.Enable()
 				}
 			}
 		case game.GameWin, game.GameOver:
 			g.timer.Stop()
-			for _, cell := range g.layout.Container {
+			for _, cell := range g.layout.GetContainer() {
 				if !cell.(*game.CellIcon).Btn.IsDisabled() {
 					cell.(*game.CellIcon).Btn.Disable()
 				}
@@ -135,7 +134,11 @@ func (g *Game) UpdateData(value interface{}) {
 }
 
 func (g *Game) Draw(surface *ebiten.Image) {
-	for _, cell := range g.layout.Container {
+	for _, cell := range g.layout.GetContainer() {
 		cell.Draw(surface)
 	}
+}
+
+func (g *Game) Resize(rect []int) {
+	g.layout.Resize(rect)
 }

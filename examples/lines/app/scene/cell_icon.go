@@ -136,7 +136,7 @@ func (c *CellIcon) UpdateData(value interface{}) {
 
 func (c *CellIcon) updateIcon(ballStatus BallStatusType) {
 	bg := game.BallNoColor.Color()
-	rect := c.Rect.GetArr()
+	rect := c.GetRect().GetArr()
 	c.icon = NewBallIcon(ballStatus, bg, c.fg)
 	c.icon.setup(ballStatus)
 	c.icon.Resize(rect)
@@ -154,15 +154,17 @@ func (c *CellIcon) Draw(surface *ebiten.Image) {
 	}
 	if c.anim == BallAnimJump || c.anim == BallAnimFilled {
 		op := &ebiten.DrawImageOptions{}
-		x, y := c.Rect.Pos()
+		x, y := c.GetRect().Pos()
 		op.GeoM.Translate(float64(x), float64(y))
-		surface.DrawImage(c.icon.Image, op)
+		surface.DrawImage(c.icon.Image(), op)
 	}
 }
 
+func (c *CellIcon) Layout() {}
+
 func (c *CellIcon) Resize(rect []int) {
-	c.Rect = eui.NewRect(rect)
+	c.Rect(eui.NewRect(rect))
 	c.btn.Resize(rect)
 	c.icon.Resize(rect)
-	c.Dirty = true
+	c.ImageReset()
 }

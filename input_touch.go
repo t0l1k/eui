@@ -17,16 +17,16 @@ func (t TouchData) Equal(a TouchData) bool {
 // Умею передать подписчикам события касания экрана это текущее местоположение на экране и сколько нажатий
 type TouchInput struct {
 	touches  []TouchData
-	listener []Input
+	listener []Inputer
 }
 
 func NewTouchInput() *TouchInput { return &TouchInput{} }
 
-func (s *TouchInput) Attach(o Input) {
+func (s *TouchInput) Attach(o Inputer) {
 	s.listener = append(s.listener, o)
 }
 
-func (s *TouchInput) Detach(o Input) {
+func (s *TouchInput) Detach(o Inputer) {
 	for i, observer := range s.listener {
 		if observer == o {
 			s.listener = append(s.listener[:i], s.listener[i+1:]...)

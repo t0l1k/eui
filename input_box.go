@@ -9,8 +9,9 @@ import (
 
 // Умею получить от клавиатуры нажатый символ(пока только цифры и точка), backspace удаляет последний введенный символ, enter запускает прикрепленный метод. Умею мигать курсором. Только при фокусе от клавиатуры доступен ввод, активированый нажатием левой кнопки мыши(меняется виджет обрамление былым).
 type InputBox struct {
-	_text string
-	Button
+	View
+	btn           *Button
+	_text         string
 	size          int
 	prompt        string
 	isPrompt      bool
@@ -31,12 +32,14 @@ func NewInputBox(text string, size int, onReturn func(*InputBox)) *InputBox {
 }
 
 func (inp *InputBox) setupBox(text string) {
-	theme := GetUi().theme
-	inp.Bg(theme.Get(InputBoxBg))
-	inp.Fg(theme.Get(InputBoxFg))
+	inp.SetupView()
+	inp.btn = NewButton(text, func(b *Button) {})
 	inp._text = text
-	inp.SetupText(text)
+	inp.btn.SetText(text)
 	inp.setPrompt()
+	theme := GetUi().theme
+	inp.btn.Bg(theme.Get(InputBoxBg))
+	inp.btn.Fg(theme.Get(InputBoxFg))
 	GetUi().inputKeyboard.Attach(inp)
 }
 
@@ -108,10 +111,11 @@ func (inp *InputBox) inputNumbers(key ebiten.Key) {
 	case ebiten.KeyPeriod:
 		inp._text += "."
 	}
-	inp.SetText(inp.setPrompt())
+	inp.btn.SetText(inp.setPrompt())
 }
 
 func (inp *InputBox) Update(dt int) {
+	inp.btn.Update(dt)
 	inp.updatePrompt(dt)
 	if inp.state == ViewStateFocus {
 		inp.SetState(ViewStateActive)
@@ -121,9 +125,8 @@ func (inp *InputBox) Update(dt int) {
 		if inp.keyboardState == KeyBackspace {
 			if len(inp._text) > 0 {
 				inp._text = inp._text[:len(inp._text)-1]
-				inp.SetText(inp.setPrompt())
+				inp.btn.SetText(inp.setPrompt())
 				inp.keyboardState = KeyReleased
-
 			}
 		}
 		if inp.keyboardState == KeyEnter {
@@ -140,11 +143,11 @@ func (inp *InputBox) updatePrompt(dt int) {
 	if inp.state == ViewStateActive || inp.state == ViewStateFocus {
 		if !inp.timerFlashing.IsOn() {
 			inp.timerFlashing.On()
-			inp.SetText(inp.setPrompt())
+			inp.btn.SetText(inp.setPrompt())
 		}
 		if inp.timerFlashing.IsDone() {
 			inp.timerFlashing.On()
-			inp.SetText(inp.setPrompt())
+			inp.btn.SetText(inp.setPrompt())
 		}
 	} else {
 		inp.timerFlashing.Off()
@@ -162,6 +165,15 @@ func (inp *InputBox) GetDigit() float64 {
 
 func (inp *InputBox) SetDigit(value string) {
 	inp._text = value
-	inp.Text.SetText(inp.setPrompt())
+	inp.btn.SetText(inp.setPrompt())
 	inp.dirty = true
+}
+
+func (inp *InputBox) Draw(surface *ebiten.Image) {
+	inp.btn.Draw(surface)
+}
+
+func (inp *InputBox) Resize(rect []int) {
+	inp.View.Resize(rect)
+	inp.btn.Resize(rect)
 }

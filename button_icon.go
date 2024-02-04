@@ -139,7 +139,7 @@ func (b *ButtonIcon) Draw(surface *ebiten.Image) {
 	}
 	if b.dirty {
 		b.Layout()
-		for _, c := range b.Container {
+		for _, c := range b.GetContainer() {
 			c.Layout()
 		}
 	}
@@ -147,7 +147,7 @@ func (b *ButtonIcon) Draw(surface *ebiten.Image) {
 	x, y := b.rect.Pos()
 	op.GeoM.Translate(float64(x), float64(y))
 	surface.DrawImage(b.image, op)
-	for _, v := range b.Container {
+	for _, v := range b.GetContainer() {
 		v.Draw(surface)
 	}
 }

@@ -2,6 +2,7 @@ package eui
 
 // Умею размеры виджетов во мне разделить одинаково на указаное число строк и рядов, начинаю из угла вверх-слева вправо указаное число строк, потом вниз на один ряд и опять с первой строчки вправо потом вниз и т.д
 type GridLayoutRightDown struct {
+	LayoutBase
 	row, column int
 	ContainerBase
 	cellMargin int
@@ -22,22 +23,22 @@ func (d *GridLayoutRightDown) SetColumns(c int)    { d.column = c; d.resize() }
 func (d *GridLayoutRightDown) SetCellMargin(m int) { d.cellMargin = m; d.resize() }
 
 func (c *GridLayoutRightDown) resize() {
-	if c.Rect == nil {
+	if c.GetRect() == nil {
 		return
 	}
-	c.Resize(c.Rect.GetArr())
+	c.Resize(c.GetRect().GetArr())
 }
 
 func (c *GridLayoutRightDown) Resize(rect []int) {
-	c.Rect = NewRect(rect)
-	w0, h0 := c.Rect.Size()
-	x0, y0 := c.Rect.Pos()
-	cellSize := c.getCellSize(c.Rect)
+	c.Rect(NewRect(rect))
+	w0, h0 := c.GetRect().Size()
+	x0, y0 := c.GetRect().Pos()
+	cellSize := c.getCellSize(c.GetRect())
 	marginX := (w0 - cellSize*c.row) / 2
 	marginY := (h0 - cellSize*c.column) / 2
 	x, y := x0+marginX, y0+marginY
 	i := 0
-	for _, icon := range c.Container {
+	for _, icon := range c.GetContainer() {
 		icon.Resize([]int{x, y, cellSize - c.cellMargin, cellSize - c.cellMargin})
 		x += cellSize
 		i++

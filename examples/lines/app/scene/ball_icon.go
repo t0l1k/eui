@@ -43,32 +43,24 @@ func (i *BallIcon) setup(status BallStatusType) {
 }
 
 func (i *BallIcon) Layout() {
-	if i.Rect == nil {
-		return
-	}
-	w0, h0 := i.Rect.Size()
-	if i.Image == nil {
-		i.Image = ebiten.NewImage(w0, h0)
-	} else {
-		i.Image.Clear()
-	}
+	i.SpriteBase.Layout()
 	r, g, b, _ := i.bg.RGBA()
 	a := 0
 	bg := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
-	i.Image.Fill(bg)
+	i.Image().Fill(bg)
 	if i.size > 0 {
-		rad := float32(i.Rect.GetLowestSize()) * i.size
-		x, y := float32(i.Rect.W/2), float32(i.Rect.H/2)
-		margin := (float32(i.Rect.W) - rad*2) / 3
+		rad := float32(i.GetRect().GetLowestSize()) * i.size
+		x, y := float32(i.GetRect().W/2), float32(i.GetRect().H/2)
+		margin := (float32(i.GetRect().W) - rad*2) / 3
 		switch i.status {
 		case BallJumpUp:
-			y = float32(i.Rect.H/2) - margin
+			y = float32(i.GetRect().H/2) - margin
 		case BallJumpCenter:
-			y = float32(i.Rect.H / 2)
+			y = float32(i.GetRect().H / 2)
 		case BallJumpDown:
-			y = float32(i.Rect.H/2) + margin
+			y = float32(i.GetRect().H/2) + margin
 		}
-		vector.DrawFilledCircle(i.Image, x, y, rad, i.fg, true)
+		vector.DrawFilledCircle(i.Image(), x, y, rad, i.fg, true)
 	}
 	i.Dirty = false
 }
@@ -77,10 +69,11 @@ func (i *BallIcon) GetImage() *ebiten.Image {
 	if i.Dirty {
 		i.Layout()
 	}
-	return i.Image
+	return i.Image()
 }
 
 func (i *BallIcon) Resize(rect []int) {
-	i.Rect = eui.NewRect(rect)
-	i.Dirty = true
+	i.Rect(eui.NewRect(rect))
+	i.SpriteBase.Rect(eui.NewRect(rect))
+	i.ImageReset()
 }

@@ -29,7 +29,7 @@ func (cd *cellData) String() string { return "cell[" + cd.value + "]at:" + cd.po
 
 // Умею оповестить подписчиков о смене состояния в ячейке
 type cellState struct {
-	listener []eui.Observer
+	listener []eui.Observerer
 	data     *cellData
 }
 
@@ -49,9 +49,9 @@ func (s *cellState) SetValue(value *cellData) {
 	s.Notify()
 }
 
-func (s *cellState) Attach(o eui.Observer) { s.listener = append(s.listener, o) }
+func (s *cellState) Attach(o eui.Observerer) { s.listener = append(s.listener, o) }
 
-func (s *cellState) Detach(o eui.Observer) {
+func (s *cellState) Detach(o eui.Observerer) {
 	for i, observer := range s.listener {
 		if observer == o {
 			s.listener = append(s.listener[:i], s.listener[i+1:]...)

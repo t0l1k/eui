@@ -52,7 +52,6 @@ func NewSelectDiff(title string) *SelectDiff {
 		s.runGame()
 	})
 	s.frame.Add(s.btnExec)
-	s.Add(s.frame)
 	return s
 }
 
@@ -80,6 +79,24 @@ func (s *SelectDiff) runGame() {
 	eui.GetUi().GetInputKeyboard().Detach(s)
 	eui.GetUi().Push(game)
 	log.Println("run game", s.row, s.column, mines)
+}
+
+func (s *SelectDiff) Update(dt int) {
+	for _, v := range s.frame.GetContainer() {
+		v.Update(dt)
+	}
+	for _, v := range s.GetContainer() {
+		v.Update(dt)
+	}
+}
+
+func (s *SelectDiff) Draw(surface *ebiten.Image) {
+	for _, v := range s.frame.GetContainer() {
+		v.Draw(surface)
+	}
+	for _, v := range s.GetContainer() {
+		v.Draw(surface)
+	}
 }
 
 func (s *SelectDiff) Resize() {

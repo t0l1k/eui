@@ -1,6 +1,7 @@
 package scene_main
 
 import (
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/minesweeper/app/scenes/scene_game"
 )
@@ -28,12 +29,8 @@ func NewSceneSelectGame() *SceneSelectGame {
 		button := eui.NewButton(k, s.selectGameLogic)
 		s.frame.Add(button)
 	}
-	s.Add(s.frame)
-	return s
-}
-
-func (s *SceneSelectGame) Entered() {
 	s.Resize()
+	return s
 }
 
 func (s *SceneSelectGame) selectGameLogic(b *eui.Button) {
@@ -44,6 +41,24 @@ func (s *SceneSelectGame) selectGameLogic(b *eui.Button) {
 		r, c, m := s.sDiff[b.GetText()][0], s.sDiff[b.GetText()][1], s.sDiff[b.GetText()][2]
 		game := scene_game.NewSceneGame(b.GetText(), r, c, m)
 		eui.GetUi().Push(game)
+	}
+}
+
+func (s *SceneSelectGame) Update(dt int) {
+	for _, v := range s.frame.GetContainer() {
+		v.Update(dt)
+	}
+	for _, v := range s.GetContainer() {
+		v.Update(dt)
+	}
+}
+
+func (s *SceneSelectGame) Draw(surface *ebiten.Image) {
+	for _, v := range s.frame.GetContainer() {
+		v.Draw(surface)
+	}
+	for _, v := range s.GetContainer() {
+		v.Draw(surface)
 	}
 }
 

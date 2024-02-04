@@ -54,7 +54,7 @@ func (l *ListView) SetupListViewCheckBoxs(list []string, itemSize, rows int, bg,
 }
 
 func (l *ListView) GetCheckBoxes() (values []*Checkbox) {
-	for _, v := range l.Container {
+	for _, v := range l.GetContainer() {
 		switch value := v.(type) {
 		case *Checkbox:
 			values = append(values, value)
@@ -91,7 +91,7 @@ func (l *ListView) SetListViewTextWithBgFgColors(list []string, bg, fg []color.C
 	}
 }
 
-func (l *ListView) Add(d Drawable) {
+func (l *ListView) Add(d Drawabler) {
 	l.ContainerBase.Add(d)
 	theme := GetUi().theme
 	bg := theme.Get(ListViewItemBg)
@@ -133,7 +133,7 @@ func (l *ListView) Rows(rows int) {
 
 func (l *ListView) Reset() {
 	l.list = nil
-	l.Container = l.Container[:0]
+	l.ResetContainerBase()
 	l.contentImage = nil
 	l.offset = 0
 	l.lastOffset = 0
@@ -151,7 +151,7 @@ func (l *ListView) Layout() {
 		l.contentImage.Clear()
 	}
 	l.contentImage.Fill(l.bg)
-	for _, v := range l.Container {
+	for _, v := range l.GetContainer() {
 		switch value := v.(type) {
 		case *Text, *Button, *Checkbox:
 			value.Draw(l.contentImage)
@@ -182,7 +182,7 @@ func (l *ListView) Update(dt int) {
 	if l.state != ViewStateNormal {
 		x0 := l.dragEndPoint.X - l.rect.X + l.cameraRect.Min.X
 		y0 := l.dragEndPoint.Y - l.rect.Y + l.cameraRect.Min.Y
-		for _, v := range l.Container {
+		for _, v := range l.GetContainer() {
 			switch value := v.(type) {
 			case *Button:
 				r := value.rect
@@ -235,7 +235,7 @@ func (l *ListView) resizeChilds() {
 	w, h := l.rect.W/l.rows, l.itemSize
 	row := 0
 	col := 1
-	for _, v := range l.Container {
+	for _, v := range l.GetContainer() {
 		switch value := v.(type) {
 		case *Text, *Button, *Checkbox:
 			value.Resize([]int{x, y, w - 1, h - 1})
@@ -252,7 +252,7 @@ func (l *ListView) resizeChilds() {
 	if y == 0 {
 		y = l.rect.H
 	} else {
-		if len(l.Container)%l.rows == 0 {
+		if len(l.GetContainer())%l.rows == 0 {
 			col--
 		}
 		y = col * l.itemSize

@@ -19,16 +19,16 @@ type MouseData struct {
 // Умею передать подписчикам события от мыши это текущее местоположение на экране и нажатие кнопок левая средняя или правая
 type MouseInput struct {
 	value    MouseData
-	listener []Input
+	listener []Inputer
 }
 
 func NewMouseInput() *MouseInput { return &MouseInput{} }
 
-func (s *MouseInput) Attach(o Input) {
+func (s *MouseInput) Attach(o Inputer) {
 	s.listener = append(s.listener, o)
 }
 
-func (s *MouseInput) Detach(o Input) {
+func (s *MouseInput) Detach(o Inputer) {
 	for i, observer := range s.listener {
 		if observer == o {
 			s.listener = append(s.listener[:i], s.listener[i+1:]...)

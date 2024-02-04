@@ -28,7 +28,6 @@ func NewBoard(dim int) *Board {
 	b.table.Visible(false)
 	b.Add(b.table)
 	b.gameLayout = eui.NewGridLayoutRightDown(b.field.Dim())
-	b.Add(b.gameLayout)
 	b.varScore = eui.NewIntVar(0)
 	b.varScore.Attach(b.table.leftLbl)
 	b.bestScore = 10
@@ -39,7 +38,7 @@ func NewBoard(dim int) *Board {
 }
 
 func (b *Board) NewGame(dim int) {
-	b.gameLayout.Container = nil
+	b.gameLayout.ResetContainerBase()
 	b.field.NewGame(dim)
 	for _, cell := range b.field.GetField() {
 		cell.Reset()
@@ -56,8 +55,8 @@ func (b *Board) NewGame(dim int) {
 }
 
 func (b *Board) gameLogic(btn *eui.ButtonIcon) {
-	for i := range b.gameLayout.Container {
-		if b.gameLayout.Container[i].(*CellIcon).btn == btn {
+	for i := range b.gameLayout.GetContainer() {
+		if b.gameLayout.GetContainer()[i].(*CellIcon).btn == btn {
 			cell := b.field.GetField()[i]
 			cellData := cell.State.Value().(*game.CellData)
 			state := cellData.State
@@ -84,8 +83,8 @@ func (b *Board) setWayCells(col game.BallColor, way []int) {
 		bg := game.BallNoColor.Color()
 		fg := col.Color()
 		icon := NewBallIcon(BallSmall, bg, fg)
-		cell := b.gameLayout.Container[value].(*CellIcon)
-		icon.Resize(cell.Rect.GetArr())
+		cell := b.gameLayout.GetContainer()[value].(*CellIcon)
+		icon.Resize(cell.GetRect().GetArr())
 		image := icon.GetImage()
 		cell.btn.SetIcons([]*ebiten.Image{image, image})
 	}
@@ -106,10 +105,10 @@ func (b *Board) Update(dt int) {
 			b.showWay = false
 		}
 	}
-	for _, v := range b.Container {
+	for _, v := range b.GetContainer() {
 		v.Update(dt)
 	}
-	for _, v := range b.gameLayout.Container {
+	for _, v := range b.gameLayout.GetContainer() {
 		v.Update(dt)
 	}
 	if b.IsDirty() && !b.showWay {
@@ -135,8 +134,8 @@ func (b *Board) drawCellIcons() {
 			size = BallNormal
 		}
 		icon := NewBallIcon(size, bg, fg)
-		cell := b.gameLayout.Container[i].(*CellIcon)
-		icon.Resize(cell.Rect.GetArr())
+		cell := b.gameLayout.GetContainer()[i].(*CellIcon)
+		icon.Resize(cell.GetRect().GetArr())
 		image := icon.GetImage()
 		cell.btn.SetIcons([]*ebiten.Image{image, image})
 	}
@@ -146,10 +145,10 @@ func (b *Board) Draw(surface *ebiten.Image) {
 	if !b.IsVisible() {
 		return
 	}
-	for _, v := range b.Container {
+	for _, v := range b.GetContainer() {
 		v.Draw(surface)
 	}
-	for _, v := range b.gameLayout.Container {
+	for _, v := range b.gameLayout.GetContainer() {
 		v.Draw(surface)
 	}
 }

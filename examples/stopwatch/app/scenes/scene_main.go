@@ -4,6 +4,7 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 )
 
@@ -59,9 +60,7 @@ func NewSceneStopwatch() *SceneStopwatch {
 	}
 	s.state = watchStart
 	s.Add(s.topBar)
-	s.Add(s.frame0)
 	s.Add(s.list)
-	s.Add(s.frame1)
 	s.dirty = true
 	s.Resize()
 	return s
@@ -121,22 +120,39 @@ func (s *SceneStopwatch) Update(dt int) {
 	s.var0.SetValue(s.swMain.String())
 	s.var1.SetValue(s.swRing.String())
 
-	s.SceneBase.Update(dt)
 	if s.dirty {
 		switch s.state {
 		case watchStart:
-			s.frame1.Container[1].(*eui.Button).SetText(s.sBtns[1])
-			s.frame1.Container[0].(*eui.Button).Visible(false)
-			s.frame1.Container[2].(*eui.Button).Visible(false)
+			s.frame1.GetContainer()[1].(*eui.Button).SetText(s.sBtns[1])
+			s.frame1.GetContainer()[0].(*eui.Button).Visible(false)
+			s.frame1.GetContainer()[2].(*eui.Button).Visible(false)
 			s.list.Reset()
 		case watchPlay:
-			s.frame1.Container[0].(*eui.Button).Visible(false)
-			s.frame1.Container[2].(*eui.Button).Visible(true)
+			s.frame1.GetContainer()[0].(*eui.Button).Visible(false)
+			s.frame1.GetContainer()[2].(*eui.Button).Visible(true)
 		case watchPause:
-			s.frame1.Container[0].(*eui.Button).Visible(true)
-			s.frame1.Container[2].(*eui.Button).Visible(false)
+			s.frame1.GetContainer()[0].(*eui.Button).Visible(true)
+			s.frame1.GetContainer()[2].(*eui.Button).Visible(false)
 		}
 		s.dirty = false
+	}
+	s.SceneBase.Update(dt)
+
+	for _, v := range s.frame0.GetContainer() {
+		v.Update(dt)
+	}
+	for _, v := range s.frame1.GetContainer() {
+		v.Update(dt)
+	}
+}
+
+func (s *SceneStopwatch) Draw(surface *ebiten.Image) {
+	s.SceneBase.Draw(surface)
+	for _, v := range s.frame0.GetContainer() {
+		v.Draw(surface)
+	}
+	for _, v := range s.frame1.GetContainer() {
+		v.Draw(surface)
 	}
 }
 

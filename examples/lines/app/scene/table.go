@@ -22,15 +22,14 @@ func NewTable() *Table {
 	t.rightLbl = eui.NewText("100")
 	t.Add(t.rightLbl)
 	t.nextBallsLayout = eui.NewHLayout()
-	t.Add(t.nextBallsLayout)
 	return t
 }
 
 func (t *Table) Setup(balls int) {
-	t.nextBallsLayout.Container = nil
+	t.nextBallsLayout.ResetContainerBase()
 	for i := 0; i < balls; i++ {
 		icon := NewBallIcon(BallHidden, game.BallNoColor.Color(), game.BallNoColor.Color())
-		x, y, w, h := t.nextBallsLayout.Rect.GetRect()
+		x, y, w, h := t.nextBallsLayout.GetRect().GetRect()
 		icon.Resize([]int{x, y, w / 3, h})
 		t.nextBallsLayout.Add(eui.NewIcon(icon.GetImage()))
 	}
@@ -52,17 +51,17 @@ func (t *Table) SetNextMoveBalls(cells []*game.Cell) {
 		}
 		icon := NewBallIcon(size, bg, fg)
 		icon.setup(size)
-		x, y, w, h := t.nextBallsLayout.Rect.GetRect()
+		x, y, w, h := t.nextBallsLayout.GetRect().GetRect()
 		icon.Resize([]int{x, y, w / len(cells), h})
-		t.nextBallsLayout.Container[i].(*eui.Icon).SetIcon(icon.GetImage())
+		t.nextBallsLayout.GetContainer()[i].(*eui.Icon).SetIcon(icon.GetImage())
 	}
 }
 
 func (t *Table) Update(dt int) {
-	for _, v := range t.nextBallsLayout.Container {
+	for _, v := range t.nextBallsLayout.GetContainer() {
 		v.Update(dt)
 	}
-	for _, v := range t.Container {
+	for _, v := range t.GetContainer() {
 		v.Update(dt)
 	}
 }
@@ -71,10 +70,10 @@ func (t *Table) Draw(surface *ebiten.Image) {
 	if !t.IsVisible() {
 		return
 	}
-	for _, v := range t.nextBallsLayout.Container {
+	for _, v := range t.nextBallsLayout.GetContainer() {
 		v.Draw(surface)
 	}
-	for _, v := range t.Container {
+	for _, v := range t.GetContainer() {
 		v.Draw(surface)
 	}
 }

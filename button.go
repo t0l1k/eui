@@ -9,26 +9,60 @@ import (
 
 // Умею показать кнопку под мышкой выделенной, или нажатой, или отпущенной(после отпускания исполняется прикрепленный метод)
 type Button struct {
-	Text
+	View
+	text                *Text
 	onPressed           func(*Button)
 	buttonPressed       bool
 	left, right, middle bool
+	margin              int
 }
 
 func NewButton(text string, f func(*Button)) *Button {
 	b := &Button{
 		onPressed: f,
 	}
+	b.text = NewText(text)
+	b.Add(b.text)
+	theme := GetUi().theme
+	bg := theme.Get(ButtonBg)
+	fg := theme.Get(ButtonFg)
+	b.Bg(bg)
+	b.Fg(fg)
 	b.SetupButton(text, f)
 	return b
 }
 
 func (b *Button) SetupButton(text string, f func(*Button)) {
-	b.SetupText(text)
+	b.SetupView()
 	b.onPressed = f
-	theme := GetUi().theme
-	b.Bg(theme.Get(ButtonBg))
-	b.Fg(theme.Get(ButtonFg))
+	b.text.SetText(text)
+}
+
+func (b *Button) GetText() string { return b.text.GetText() }
+func (b *Button) SetText(value string) {
+	if b.text.GetText() == value {
+		return
+	}
+	b.text.SetText(value)
+	b.Dirty(true)
+}
+
+func (b *Button) Bg(bg color.Color) {
+	if b.bg == bg {
+		return
+	}
+	b.bg = bg
+	b.text.Bg(bg)
+	b.dirty = true
+}
+
+func (b *Button) Fg(fg color.Color) {
+	if b.fg == fg {
+		return
+	}
+	b.fg = fg
+	b.text.Fg(fg)
+	b.dirty = true
 }
 
 func (b *Button) SetFunc(f func(*Button)) {
@@ -48,7 +82,7 @@ func (b *Button) IsMouseDownMiddle() bool {
 }
 
 func (b *Button) Layout() {
-	b.Text.Layout()
+	b.View.Layout()
 	var fg color.Color
 	theme := GetUi().theme
 	switch b.state {
@@ -65,13 +99,13 @@ func (b *Button) Layout() {
 	case ViewStateActive:
 		fg = theme.Get(ButtonActive)
 	}
-	_, _, w, h := b.rect.GetRectFloat()
-	bold := 2
+	_, _, w, h := b.GetRect().GetRectFloat()
+	bold := b.margin
 	if b.buttonPressed {
-		bold = 5
+		bold = b.margin * 2
 	}
-	vector.StrokeRect(b.image, 0, 0, w, h, float32(bold), fg, true)
-	b.dirty = false
+	vector.StrokeRect(b.GetImage(), 0, 0, w, h, float32(bold), fg, true)
+	b.Dirty(false)
 }
 
 func (b *Button) Pressed(value bool) {
@@ -92,7 +126,7 @@ func (b *Button) Pressed(value bool) {
 }
 
 func (b *Button) Update(dt int) {
-	if b.disabled {
+	if b.IsDisabled() {
 		return
 	}
 	if b.state == ViewStateFocus && !b.buttonPressed {
@@ -113,20 +147,28 @@ func (b *Button) Update(dt int) {
 }
 
 func (b *Button) Draw(surface *ebiten.Image) {
-	if !b.visible {
+	if !b.IsVisible() {
 		return
 	}
-	if b.dirty {
+	if b.IsDirty() {
 		b.Layout()
-		for _, c := range b.Container {
+		for _, c := range b.GetContainer() {
 			c.Layout()
 		}
 	}
 	op := &ebiten.DrawImageOptions{}
-	x, y := b.rect.Pos()
+	x, y := b.GetRect().Pos()
 	op.GeoM.Translate(float64(x), float64(y))
-	surface.DrawImage(b.image, op)
-	for _, v := range b.Container {
+	surface.DrawImage(b.GetImage(), op)
+	for _, v := range b.GetContainer() {
 		v.Draw(surface)
 	}
+}
+
+func (b *Button) Resize(rect []int) {
+	b.View.Resize(rect)
+	b.margin = int(float64(b.GetRect().GetLowestSize()) * 0.03)
+	x, y, w, h := b.GetRect().GetRect()
+	b.text.Resize([]int{x + b.margin, y + b.margin, w - b.margin*2, h - b.margin*2})
+	b.Dirty(true)
 }

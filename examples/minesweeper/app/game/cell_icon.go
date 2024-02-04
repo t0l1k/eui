@@ -3,21 +3,20 @@ package game
 import (
 	"strconv"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 )
 
 // Умею обновить клетку игры по подписке на состояние клетки поля
 type CellIcon struct {
-	eui.View
+	eui.DrawableBase
 	Btn   *eui.Button
 	field *MinedField
 }
 
 func NewCellIcon(field *MinedField, f func(b *eui.Button)) *CellIcon {
 	c := &CellIcon{}
-	c.SetupView()
 	c.Btn = eui.NewButton(cellClosed, f)
-	c.Add(c.Btn)
 	c.Setup(field, f)
 	return c
 }
@@ -91,4 +90,20 @@ func (c *CellIcon) UpdateData(value interface{}) {
 			}
 		}
 	}
+}
+
+func (c *CellIcon) Update(dt int) {
+	c.Btn.Update(dt)
+}
+
+func (c *CellIcon) Draw(surface *ebiten.Image) {
+	c.Btn.Draw(surface)
+}
+
+func (c *CellIcon) Layout() {
+}
+
+func (c *CellIcon) Resize(rect []int) {
+	c.Rect(eui.NewRect(rect))
+	c.Btn.Resize(rect)
 }

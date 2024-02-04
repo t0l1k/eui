@@ -13,15 +13,15 @@ func (k *KeyboardData) GetKeys() []ebiten.Key { return k.keys }
 type KeyboardInput struct {
 	value    KeyboardData
 	timer    *Timer
-	listener []Input
+	listener []Inputer
 }
 
 // Пауза 250мс до следующего нажатия
 func NewKeyboardInput() *KeyboardInput { return &KeyboardInput{timer: NewTimer(250)} }
 
-func (s *KeyboardInput) Attach(o Input) { s.listener = append(s.listener, o) }
+func (s *KeyboardInput) Attach(o Inputer) { s.listener = append(s.listener, o) }
 
-func (s *KeyboardInput) Detach(o Input) {
+func (s *KeyboardInput) Detach(o Inputer) {
 	for i, observer := range s.listener {
 		if observer == o {
 			s.listener = append(s.listener[:i], s.listener[i+1:]...)

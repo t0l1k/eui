@@ -2,38 +2,38 @@ package eui
 
 import "github.com/hajimehoshi/ebiten/v2"
 
-type Drawable interface {
-	Layout
-	Sprite
+type Drawabler interface {
+	Layouter
+	Spriter
 	Close()
 }
 
-type Sprite interface {
+type Spriter interface {
 	Update(dt int)
 	Draw(*ebiten.Image)
 }
 
-type Layout interface {
+type Layouter interface {
 	Layout()
 	Resize([]int)
 }
 
-type Container interface {
-	Add(Drawable)
-	GetContainer() []Drawable
+type Containerer interface {
+	Add(Drawabler)
+	GetContainer() []Layouter
 }
 
-type Scene interface {
-	Sprite
+type Sceneer interface {
+	Spriter
 	Entered()
 	Resize()
 	Quit()
 }
 
-type Observer interface {
+type Observerer interface {
 	UpdateData(interface{})
 }
 
-type Input interface {
+type Inputer interface {
 	UpdateInput(interface{})
 }

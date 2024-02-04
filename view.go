@@ -126,7 +126,7 @@ func (v *View) SetState(state InputState) {
 }
 
 func (v *View) Layout() {
-	w0, h0 := v.rect.Size()
+	w0, h0 := v.GetRect().Size()
 	if v.image == nil {
 		v.image = ebiten.NewImage(w0, h0)
 	} else {
@@ -205,7 +205,7 @@ func (v *View) Update(dt int) {
 	if !v.visible || v.disabled {
 		return
 	}
-	for _, c := range v.Container {
+	for _, c := range v.GetContainer() {
 		c.Update(dt)
 	}
 }
@@ -216,7 +216,7 @@ func (v *View) Draw(surface *ebiten.Image) {
 	}
 	if v.dirty {
 		v.Layout()
-		for _, c := range v.Container {
+		for _, c := range v.GetContainer() {
 			c.Layout()
 		}
 	}
@@ -224,7 +224,7 @@ func (v *View) Draw(surface *ebiten.Image) {
 	x, y := v.rect.Pos()
 	op.GeoM.Translate(float64(x), float64(y))
 	surface.DrawImage(v.image, op)
-	for _, v := range v.Container {
+	for _, v := range v.GetContainer() {
 		v.Draw(surface)
 	}
 }
@@ -237,7 +237,9 @@ func (v *View) Resize(rect []int) {
 }
 
 func (v *View) Close() {
-	for _, c := range v.Container {
+	GetUi().GetInputMouse().Detach(v)
+	GetUi().GetInputTouch().Detach(v)
+	for _, c := range v.GetContainer() {
 		c.Close()
 	}
 }

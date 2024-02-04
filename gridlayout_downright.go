@@ -31,7 +31,7 @@ func (c *GridLayoutDownRight) Resize(rect []int) {
 	marginY := (h0 - cellSize*c.column) / 2
 	x, y := x0+marginX, y0+marginY
 	i := 0
-	for _, icon := range c.Container {
+	for _, icon := range c.GetContainer() {
 		icon.Resize([]int{x, y, cellSize - c.cellMargin, cellSize - -c.cellMargin})
 		y += cellSize
 		i++

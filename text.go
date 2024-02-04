@@ -10,44 +10,38 @@ import (
 
 // Метка текста в одной строке, размер текста вычисляется исходя из размера
 type Text struct {
-	View
-	text              string
+	DrawableBase
+	txt               string
 	fontInit, oneFont bool
 	fontSize          int
 	pos               PointInt
 }
 
-func NewText(text string) *Text {
+func NewText(txt string) *Text {
 	t := &Text{
-		text: text,
+		txt: txt,
 	}
-	t.SetupText(text)
-	return t
-}
-
-func (t *Text) SetupText(text string) {
-	t.SetupView()
 	theme := GetUi().theme
 	t.Bg(theme.Get(TextBg))
 	t.Fg(theme.Get(TextFg))
-	t.SetText(text)
+	t.SetText(txt)
+	t.Visible = true
+	t.Enable()
+	return t
 }
 
 func (t *Text) OnlyOneFontSize(value bool) {
 	t.oneFont = value
-	t.dirty = true
+	t.Dirty = true
 }
 
-func (t *Text) GetText() string {
-	return t.text
-}
-
+func (t *Text) GetText() string { return t.txt }
 func (t *Text) SetText(value string) {
-	if t.text == value {
+	if t.txt == value {
 		return
 	}
-	t.text = value
-	t.dirty = true
+	t.txt = value
+	t.Dirty = true
 }
 
 func (t *Text) UpdateData(value interface{}) {
@@ -60,12 +54,13 @@ func (t *Text) UpdateData(value interface{}) {
 }
 
 func (t *Text) Layout() {
-	t.View.Layout()
+	t.SpriteBase.Layout()
+	t.Image().Fill(t.GetBg())
 	var font font.Face
 	if !t.oneFont || !t.fontInit {
-		t.fontSize = GetFonts().calcFontSize(t.text, t.rect)
+		t.fontSize = GetFonts().calcFontSize(t.txt, t.rect)
 		font = GetFonts().Get(t.fontSize)
-		b := text.BoundString(font, t.text)
+		b := text.BoundString(font, t.txt)
 		t.pos.X = (t.rect.W - b.Max.X) / 2
 		t.pos.Y = t.rect.H - (t.rect.H+b.Min.Y)/2
 		if !t.fontInit {
@@ -73,29 +68,30 @@ func (t *Text) Layout() {
 		}
 	} else if t.oneFont {
 		font = GetFonts().Get(t.fontSize)
-		b := text.BoundString(font, t.text)
+		b := text.BoundString(font, t.txt)
 		t.pos.X = (t.rect.W - b.Max.X) / 2
 		t.pos.Y = t.rect.H - (t.rect.H+b.Min.Y)/2
 	}
-	text.Draw(t.image, t.text, font, t.pos.X, t.pos.Y, t.fg)
-	t.dirty = false
+	text.Draw(t.image, t.txt, font, t.pos.X, t.pos.Y, t.fg)
+	t.Dirty = false
 }
 
 func (t *Text) Draw(surface *ebiten.Image) {
-	if !t.visible {
+	if !t.Visible || t.IsDisabled() {
 		return
 	}
-	if t.dirty {
+	if t.Dirty {
 		t.Layout()
-		for _, c := range t.Container {
-			c.Layout()
-		}
 	}
 	op := &ebiten.DrawImageOptions{}
-	x, y := t.rect.Pos()
+	x, y := t.GetRect().Pos()
 	op.GeoM.Translate(float64(x), float64(y))
-	surface.DrawImage(t.image, op)
-	for _, v := range t.Container {
-		v.Draw(surface)
-	}
+	surface.DrawImage(t.Image(), op)
+}
+
+func (t *Text) Resize(rect []int) {
+	t.Rect(NewRect(rect))
+	t.SpriteBase.Rect(NewRect(rect))
+	t.Dirty = true
+	t.ImageReset()
 }

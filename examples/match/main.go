@@ -321,7 +321,7 @@ func NewBoard() *Board {
 
 func (b *Board) NewGame() {
 	b.stopwatch.Reset()
-	b.layout.Container = nil
+	b.layout.ResetContainerBase()
 	b.field.NewGame()
 	for i := 0; i < len(b.field.field); i++ {
 		btn := NewCellIcon(b.field, b.gameLogic)
@@ -336,7 +336,7 @@ func (b *Board) NewGame() {
 func (b *Board) Reset() {
 	b.field.ResetGame()
 	b.stopwatch.Reset()
-	for _, v := range b.layout.Container {
+	for _, v := range b.layout.GetContainer() {
 		v.(*CellIcon).btn.Enable()
 		v.(*CellIcon).btn.Bg(eui.Teal)
 		v.(*CellIcon).btn.Fg(eui.Yellow)
@@ -349,7 +349,7 @@ func (b *Board) NextLevel() {
 }
 
 func (b *Board) gameLogic(c *eui.Button) {
-	for i, v := range b.layout.Container {
+	for i, v := range b.layout.GetContainer() {
 		if v.(*CellIcon).btn == c {
 			x, y := b.field.pos(i)
 			if c.IsMouseDownLeft() {
@@ -384,13 +384,13 @@ func (b *Board) Update(dt int) {
 	}
 	str := fmt.Sprintf("Время:[%v] Нажатий: %v Размер поля: %v", b.stopwatch, b.field.ClickCount, b.field.dim.String())
 	b.varArea.SetValue(str)
-	for _, v := range b.Container {
+	for _, v := range b.GetContainer() {
 		v.Update(dt)
 	}
 	if b.dialog.IsVisible() {
 		return
 	}
-	for _, v := range b.layout.Container {
+	for _, v := range b.layout.GetContainer() {
 		v.Update(dt)
 	}
 }
@@ -409,13 +409,13 @@ func (b *Board) UpdateData(value interface{}) {
 }
 
 func (b *Board) Draw(surface *ebiten.Image) {
-	for _, v := range b.Container {
+	for _, v := range b.GetContainer() {
 		v.Draw(surface)
 	}
 	if b.dialog.IsVisible() {
 		return
 	}
-	for _, v := range b.layout.Container {
+	for _, v := range b.layout.GetContainer() {
 		v.Draw(surface)
 	}
 }
