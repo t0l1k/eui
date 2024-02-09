@@ -66,6 +66,10 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func
 	c.Add(c.lblText)
 }
 
+func (c *ComboBox) SetText(text string) {
+	c.lblText.SetText(text)
+}
+
 func (c *ComboBox) Value() interface{} {
 	return c.data[c.index]
 }
