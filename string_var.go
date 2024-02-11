@@ -7,6 +7,6 @@ type StringVar struct {
 
 func NewStringVar(value string) *StringVar {
 	s := &StringVar{}
-	s.value = value
+	s.SetValue(value)
 	return s
 }

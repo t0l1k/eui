@@ -90,10 +90,10 @@ func (c *ComboBox) SetValue(value interface{}) {
 	for i, v := range c.data {
 		if v == value {
 			c.index = i
-			c.Dirty(true)
 			break
 		}
 	}
+	c.lblValue.SetText(c.GetValueString())
 }
 
 func (c *ComboBox) Resize(r []int) {

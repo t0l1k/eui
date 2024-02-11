@@ -7,11 +7,11 @@ import (
 
 type Dialog struct {
 	eui.View
-	btnHide, btnNew *eui.Button
-	title, message  *eui.Text
-	selGame         *eui.ComboBox
-	diff            int
-	dialogFunc      func(b *eui.Button)
+	btnHide, btnNew  *eui.Button
+	title, message   *eui.Text
+	comboSelGameDiff *eui.ComboBox
+	diff             int
+	dialogFunc       func(b *eui.Button)
 }
 
 func NewDialog(title string, f func(btn *eui.Button)) *Dialog {
@@ -29,11 +29,11 @@ func NewDialog(title string, f func(btn *eui.Button)) *Dialog {
 	d.message = eui.NewText("")
 	d.Add(d.message)
 	data := []interface{}{app.FieldSizeSmall, app.FieldSizeNormal, app.FieldSizeBig}
-	d.diff = data[1].(int)
-	d.selGame = eui.NewComboBox("Выбор размер поля", data, 1, func(cb *eui.ComboBox) {
+	d.diff = data[0].(int)
+	d.comboSelGameDiff = eui.NewComboBox("Выбор размер поля", data, 0, func(cb *eui.ComboBox) {
 		d.diff = cb.Value().(int)
 	})
-	d.Add(d.selGame)
+	d.Add(d.comboSelGameDiff)
 	return d
 }
 
@@ -50,7 +50,7 @@ func (d *Dialog) Resize(rect []int) {
 	y += h
 	d.message.Resize([]int{x, y, w, h})
 	y += h
-	d.selGame.Resize([]int{x, y, w, h})
+	d.comboSelGameDiff.Resize([]int{x, y, w, h})
 	y += h
 	d.btnNew.Resize([]int{x, y, w, h})
 }

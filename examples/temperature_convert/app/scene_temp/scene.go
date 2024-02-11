@@ -17,18 +17,22 @@ func NewSceneTemp() *SceneTemp {
 	var a, c *eui.InputBox
 	s := &SceneTemp{}
 	s.layout = eui.NewHLayout()
-	a = eui.NewInputBox("0", 10, func(ib *eui.InputBox) {
-		n := model.GetFahrenheitFromCelsius(ib.GetDigit())
-		c.SetDigit(fmt.Sprintf("%.2f", n))
-		fmt.Println(c.GetDigit(), n)
+	a = eui.NewDigitInputBox("01234", 5, func(ib *eui.InputBox) {
+		if digit, err := ib.GetDigit(); err == nil {
+			n := model.GetFahrenheitFromCelsius(digit)
+			c.SetText(fmt.Sprintf("%.2f", n))
+			fmt.Println(digit, n, a.GetText())
+		}
 	})
 	s.layout.Add(a)
 	b := eui.NewText("Celsius =")
 	s.layout.Add(b)
-	c = eui.NewInputBox("0", 10, func(ib *eui.InputBox) {
-		n := model.GetCelsiusFromFahrenheit(ib.GetDigit())
-		a.SetDigit(fmt.Sprintf("%.2f", n))
-		fmt.Println(a.GetDigit(), n)
+	c = eui.NewDigitInputBox("01234", 5, func(ib *eui.InputBox) {
+		if digit, err := ib.GetDigit(); err == nil {
+			n := model.GetCelsiusFromFahrenheit(digit)
+			a.SetText(fmt.Sprintf("%.2f", n))
+			fmt.Println(digit, n, c.GetText())
+		}
 	})
 	s.layout.Add(c)
 	d := eui.NewText("Fahrenheit")

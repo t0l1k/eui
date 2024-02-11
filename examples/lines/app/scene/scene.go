@@ -32,8 +32,13 @@ func NewSceneGame() *SceneGame {
 	s.Add(s.dialog)
 	s.board = NewBoard(s.dialog.diff)
 	s.Add(s.board)
-	s.Resize()
 	return s
+}
+
+func (s *SceneGame) Entered() {
+	s.Resize()
+	s.dialog.comboSelGameDiff.SetValue(app.FieldSizeNormal)
+	s.dialog.diff = s.dialog.comboSelGameDiff.Value().(int)
 }
 
 func (s *SceneGame) Resize() {
