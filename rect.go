@@ -74,8 +74,8 @@ type Rect struct {
 	X, Y, W, H int
 }
 
-func NewRect(arr []int) *Rect {
-	return &Rect{
+func NewRect(arr []int) Rect {
+	return Rect{
 		X: arr[0],
 		Y: arr[1],
 		W: arr[2],

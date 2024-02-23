@@ -1,9 +1,13 @@
 package eui
 
+import "fmt"
+
 type SubjectBase struct {
 	value    interface{}
 	listener []Observerer
 }
+
+func NewSubject() *SubjectBase { return &SubjectBase{} }
 
 func (s *SubjectBase) Attach(o Observerer) {
 	s.listener = append(s.listener, o)
@@ -31,4 +35,8 @@ func (s *SubjectBase) Value() interface{} {
 func (s *SubjectBase) SetValue(value interface{}) {
 	s.value = value
 	s.Notify()
+}
+
+func (s *SubjectBase) String() string {
+	return fmt.Sprintf("%v", s.value)
 }

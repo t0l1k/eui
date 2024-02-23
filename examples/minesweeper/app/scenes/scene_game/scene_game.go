@@ -30,7 +30,7 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 	s.Add(s.lblMines)
 	s.lblGameTimer = eui.NewText("00:00")
 	s.Add(s.lblGameTimer)
-	s.btnStatus = eui.NewButtonIcon([]*ebiten.Image{res.SmileSprites[0], res.SmileSprites[1]}, func(b *eui.ButtonIcon) {
+	s.btnStatus = eui.NewButtonIcon([]*ebiten.Image{res.SmileSprites[0], res.SmileSprites[1]}, func(b *eui.Button) {
 		if b.IsMouseDownLeft() {
 			s.game.New()
 		} else if b.IsMouseDownRight() {

@@ -44,9 +44,9 @@ func (f *Field) NewGame(dim int) {
 	log.Println("поле игры создано", f.Conf)
 }
 
-func (f *Field) MakeMove(x, y int) (col BallColor, way []int) {
+func (f *Field) MakeMove(x, y int) (way []int) {
 	moveCell := f.field[f.Idx(x, y)]
-	col = moveCell.color
+	col := moveCell.color
 	if moveCell.IsFilled() || moveCell.IsFilledAfterMove() {
 		for _, cell := range f.field {
 			if cell.IsMarkedForMove() {
@@ -62,9 +62,9 @@ func (f *Field) MakeMove(x, y int) (col BallColor, way []int) {
 				way = f.getWaveWay(i, f.Idx(x, y))
 				if len(way) == 0 {
 					log.Println("шарик недоступен!!!", len(way), way)
-					return col, way
+					return way
 				}
-				log.Println("путь к шарику:", way, col)
+				log.Println("путь к шарику:", way)
 				if moveCell.IsFilledNext() {
 					moveCell.SetFilledAfterMove(cell.color)
 					f.NextMoveBall(col)
@@ -80,7 +80,7 @@ func (f *Field) MakeMove(x, y int) (col BallColor, way []int) {
 			}
 		}
 	}
-	return col, way
+	return way
 }
 
 func (f *Field) CheckNextMove(x, y int) {

@@ -21,11 +21,11 @@ func NewBallIcon(status BallStatusType, bg, fg color.RGBA) *BallIcon {
 		fg:     fg,
 		status: status,
 	}
-	i.setup(status)
+	i.setup(status, bg, fg)
 	return i
 }
 
-func (i *BallIcon) setup(status BallStatusType) {
+func (i *BallIcon) setup(status BallStatusType, bg, fg color.RGBA) {
 	i.status = status
 	switch status {
 	case BallHidden:
@@ -39,13 +39,15 @@ func (i *BallIcon) setup(status BallStatusType) {
 	case BallBig:
 		i.size = 0.5
 	}
+	i.bg = bg
+	i.fg = fg
 	i.Dirty = true
 }
 
 func (i *BallIcon) Layout() {
 	i.SpriteBase.Layout()
 	r, g, b, _ := i.bg.RGBA()
-	a := 0
+	a := 255
 	bg := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
 	i.Image().Fill(bg)
 	if i.size > 0 {

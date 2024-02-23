@@ -22,7 +22,7 @@ const (
 
 type CellIcon struct {
 	eui.DrawableBase
-	btn        *eui.ButtonIcon
+	btn        *eui.Button
 	cell       *game.Cell
 	anim       BallAnimType
 	animStatus BallStatusType
@@ -31,16 +31,14 @@ type CellIcon struct {
 	fg         color.RGBA
 }
 
-func NewCellIcon(cell *game.Cell, f func(b *eui.ButtonIcon)) *CellIcon {
+func NewCellIcon(cell *game.Cell, f func(b *eui.Button)) *CellIcon {
 	c := &CellIcon{}
 	c.cell = cell
 	c.icon = NewBallIcon(BallHidden, game.BallNoColor.Color(), game.BallNoColor.Color())
 	c.icon.Resize([]int{0, 0, 1, 1})
 	c.icon.Visible = true
 	c.Visible = true
-	c.btn = eui.NewButtonIcon([]*ebiten.Image{c.icon.GetImage(), c.icon.GetImage()}, f)
-	c.btn.Bg(game.BallNoColor.Color())
-	c.btn.Fg(game.BallNoColor.Color())
+	c.btn = eui.NewButton("", f)
 	c.anim = BallAnimNo
 	c.animStatus = BallHidden
 	return c
@@ -137,27 +135,22 @@ func (c *CellIcon) UpdateData(value interface{}) {
 func (c *CellIcon) updateIcon(ballStatus BallStatusType) {
 	bg := game.BallNoColor.Color()
 	rect := c.GetRect().GetArr()
-	c.icon = NewBallIcon(ballStatus, bg, c.fg)
-	c.icon.setup(ballStatus)
+	// c.icon = NewBallIcon(ballStatus, bg, c.fg)
+	c.icon.setup(ballStatus, bg, c.fg)
 	c.icon.Resize(rect)
-	c.btn.SetIcons([]*ebiten.Image{c.icon.GetImage(), c.icon.GetImage()})
 }
 
 func (c *CellIcon) Draw(surface *ebiten.Image) {
 	if !c.Visible {
 		return
 	}
-	c.btn.Draw(surface)
 	if c.Dirty {
-		c.btn.Layout()
 		c.icon.Layout()
 	}
-	if c.anim == BallAnimJump || c.anim == BallAnimFilled {
-		op := &ebiten.DrawImageOptions{}
-		x, y := c.GetRect().Pos()
-		op.GeoM.Translate(float64(x), float64(y))
-		surface.DrawImage(c.icon.Image(), op)
-	}
+	op := &ebiten.DrawImageOptions{}
+	x, y := c.GetRect().Pos()
+	op.GeoM.Translate(float64(x), float64(y))
+	surface.DrawImage(c.icon.Image(), op)
 }
 
 func (c *CellIcon) Layout() {}

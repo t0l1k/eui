@@ -1,7 +1,9 @@
 package eui
 
+import "github.com/hajimehoshi/ebiten/v2"
+
 type Checkbox struct {
-	View
+	DrawableBase
 	btn     *Button
 	txt     *Text
 	checked bool
@@ -10,11 +12,11 @@ type Checkbox struct {
 func NewCheckbox(text string, f func(c *Checkbox)) *Checkbox {
 	c := &Checkbox{}
 	c.SetupCheckbox(text, f)
+	c.Visible = true
 	return c
 }
 
 func (c *Checkbox) SetupCheckbox(text string, f func(c *Checkbox)) {
-	c.SetupView()
 	theme := GetUi().theme
 	c.Bg(theme.Get(CheckboxBg))
 	c.Fg(theme.Get(CheckboxFg))
@@ -23,11 +25,9 @@ func (c *Checkbox) SetupCheckbox(text string, f func(c *Checkbox)) {
 		f(c)
 		c.SetChecked(c.checked)
 	})
-	c.Add(c.btn)
 	c.txt = NewText(text)
 	c.txt.Bg(c.bg)
 	c.txt.Fg(c.fg)
-	c.Add(c.txt)
 }
 
 func (c *Checkbox) GetText() string      { return c.txt.GetText() }
@@ -40,11 +40,37 @@ func (c *Checkbox) SetChecked(value bool) {
 	} else {
 		c.btn.SetText(" ")
 	}
-	c.dirty = true
+	c.Dirty = true
+}
+
+func (c *Checkbox) Layout() {
+	c.SpriteBase.Layout()
+	c.Dirty = false
+}
+
+func (c *Checkbox) Update(dt int) {
+	if c.disabled {
+		return
+	}
+	c.btn.Update(dt)
+}
+
+func (b *Checkbox) Draw(surface *ebiten.Image) {
+	if !b.Visible {
+		return
+	}
+	if b.Dirty {
+		b.Layout()
+		b.btn.Layout()
+		b.txt.Layout()
+	}
+	b.txt.Draw(surface)
+	b.btn.Draw(surface)
 }
 
 func (c *Checkbox) Resize(rect []int) {
-	c.Rect(rect)
+	c.Rect(NewRect(rect))
+	c.SpriteBase.Rect(NewRect(rect))
 	w0, h0 := c.rect.Size()
 	x, y := c.rect.X, c.rect.Y
 	c.btn.Resize([]int{x, y, h0, h0})

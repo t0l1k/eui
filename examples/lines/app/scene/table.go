@@ -50,7 +50,8 @@ func (t *Table) SetNextMoveBalls(cells []*game.Cell) {
 			fg = cells[i].Color().Color()
 		}
 		icon := NewBallIcon(size, bg, fg)
-		icon.setup(size)
+		defer icon.Close()
+		icon.setup(size, bg, fg)
 		x, y, w, h := t.nextBallsLayout.GetRect().GetRect()
 		icon.Resize([]int{x, y, w / len(cells), h})
 		t.nextBallsLayout.GetContainer()[i].(*eui.Icon).SetIcon(icon.GetImage())

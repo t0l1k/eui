@@ -108,6 +108,8 @@ func (b *Button) Layout() {
 	b.Dirty(false)
 }
 
+func (b *Button) IsPressed() bool { return b.buttonPressed }
+
 func (b *Button) Pressed(value bool) {
 	b.buttonPressed = value
 	if value {

@@ -22,7 +22,7 @@ type SceneStopwatch struct {
 	frame0, frame1 *eui.BoxLayout
 	list           *eui.ListView
 	swMain, swRing *eui.Stopwatch
-	var0, var1     *eui.StringVar
+	var0, var1     *eui.SubjectBase
 	sBtns          []string
 	state          watchState
 	count          int
@@ -34,8 +34,8 @@ func NewSceneStopwatch() *SceneStopwatch {
 	s.swMain = eui.NewStopwatch()
 	s.swRing = eui.NewStopwatch()
 
-	s.var0 = eui.NewStringVar(s.swMain.String())
-	s.var1 = eui.NewStringVar(s.swRing.String())
+	s.var0 = eui.NewSubject()
+	s.var1 = eui.NewSubject()
 
 	s.topBar = eui.NewTopBar("Секундомер", nil)
 

@@ -13,12 +13,7 @@ func NewVLayout() *BoxLayout { return &BoxLayout{horizontal: false} }
 func (d *BoxLayout) SetHorizontal() { d.horizontal = true; d.resize() }
 func (d *BoxLayout) SetVertical()   { d.horizontal = false; d.resize() }
 
-func (c *BoxLayout) resize() {
-	if c.GetRect() == nil {
-		return
-	}
-	c.Resize(c.GetRect().GetArr())
-}
+func (c *BoxLayout) resize() { c.Resize(c.GetRect().GetArr()) }
 
 func (c *BoxLayout) Resize(rect []int) {
 	c.Rect(NewRect(rect))

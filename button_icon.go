@@ -1,153 +1,88 @@
 package eui
 
 import (
-	"image/color"
-
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
 // Умею показать кнопку под мышкой выделенной, или нажатой, или отпущенной(после отпускания исполняется прикрепленный метод), вторая иконка нажатая.
 type ButtonIcon struct {
-	Icon
-	icons               []*ebiten.Image
-	onPressed           func(*ButtonIcon)
-	buttonPressed       bool
-	left, right, middle bool
+	DrawableBase
+	btn          *Button
+	icon1, icon2 *Icon
 }
 
-func NewButtonIcon(icons []*ebiten.Image, f func(*ButtonIcon)) *ButtonIcon {
-	b := &ButtonIcon{
-		onPressed: f,
-	}
+func NewButtonIcon(icons []*ebiten.Image, f func(*Button)) *ButtonIcon {
+	b := &ButtonIcon{}
 	b.SetupButtonIcon(icons, f)
+	b.Visible = true
 	return b
 }
 
-func (b *ButtonIcon) SetupButtonIcon(icons []*ebiten.Image, f func(*ButtonIcon)) {
-	b.icons = icons
-	b.onPressed = f
-	b.SetupIcon(icons[0])
+func (b *ButtonIcon) SetupButtonIcon(icons []*ebiten.Image, f func(*Button)) {
+	b.btn = NewButton("", f)
+	b.icon1 = NewIcon(icons[0])
+	b.icon2 = NewIcon(icons[1])
+	b.SetImage(b.icon1.GetIcon())
 }
 
-func (b *ButtonIcon) SetFunc(f func(*ButtonIcon)) {
-	b.onPressed = f
+func (b *ButtonIcon) SetFunc(f func(*Button)) {
+	b.btn.onPressed = f
 }
 
 func (b *ButtonIcon) SetIcons(icons []*ebiten.Image) {
-	b.icons = icons
-	b.Layout()
+	b.icon1.SetIcon(icons[0])
+	b.icon2.SetIcon(icons[1])
+	b.Dirty = true
 }
 
 func (b *ButtonIcon) SetReleasedIcon(icon *ebiten.Image) {
-	if b.icons[0] == icon {
-		return
-	}
-	b.icons[0] = icon
-	b.dirty = true
+	b.icon1.SetIcon(icon)
+	b.Dirty = true
 }
 
 func (b *ButtonIcon) SetPressedIcon(icon *ebiten.Image) {
-	if b.icons[1] == icon {
-		return
-	}
-	b.icons[1] = icon
-	b.dirty = true
-}
-
-func (b *ButtonIcon) IsMouseDownLeft() bool {
-	return b.left && b.buttonPressed || b.buttonPressed && b.state == ViewStateExec
-}
-
-func (b *ButtonIcon) IsMouseDownRight() bool {
-	return b.right
-}
-
-func (b *ButtonIcon) IsMouseDownMiddle() bool {
-	return b.middle
+	b.icon2.SetIcon(icon)
+	b.Dirty = true
 }
 
 func (b *ButtonIcon) Layout() {
-	b.Icon.Layout()
-	var fg color.Color
-	switch b.state {
-	case ViewStateHover:
-		fg = Yellow
-	case ViewStateFocus:
-		fg = Red
-	case ViewStateNormal:
-		fg = Black
-	case ViewStateSelected:
-		fg = Blue
-	case ViewStateDisabled:
-		fg = Purple
-	case ViewStateActive:
-		fg = White
-	}
-	_, _, w, h := b.rect.GetRectFloat()
-	bold := float32(1.0)
-	if b.buttonPressed {
-		bold = 3
-	}
-	vector.StrokeRect(b.image, 0, 0, w, h, bold, fg, true)
-	b.dirty = false
-}
-
-func (b *ButtonIcon) Pressed(value bool) {
-	b.buttonPressed = value
-	if value {
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			b.left = true
-		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
-			b.right = true
-		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonMiddle) {
-			b.middle = true
-		}
-		b.SetIcon(b.icons[1])
-	} else {
-		b.left = false
-		b.right = false
-		b.middle = false
-		b.SetIcon(b.icons[0])
-	}
+	b.SpriteBase.Layout()
+	b.Dirty = false
 }
 
 func (b *ButtonIcon) Update(dt int) {
 	if b.disabled {
 		return
 	}
-	if b.state == ViewStateFocus && !b.buttonPressed {
-		b.Pressed(true)
-	}
-	if (b.state == ViewStateHover || b.state == ViewStateExec) && b.buttonPressed {
-		if b.onPressed != nil {
-			b.onPressed(b)
-		}
-		b.Pressed(false)
-		if b.state == ViewStateExec {
-			b.state = ViewStateNormal
-		}
-	}
-	if b.state == ViewStateNormal {
-		b.Pressed(false)
+	b.btn.Update(dt)
+	if b.btn.IsPressed() {
+		b.SetImage(b.icon2.GetIcon())
+	} else {
+		b.SetImage(b.icon1.GetIcon())
 	}
 }
 
 func (b *ButtonIcon) Draw(surface *ebiten.Image) {
-	if !b.visible {
+	if !b.Visible {
 		return
 	}
-	if b.dirty {
+	if b.Dirty {
 		b.Layout()
-		for _, c := range b.GetContainer() {
-			c.Layout()
-		}
+		b.icon1.Layout()
+		b.icon2.Layout()
 	}
 	op := &ebiten.DrawImageOptions{}
 	x, y := b.rect.Pos()
 	op.GeoM.Translate(float64(x), float64(y))
-	surface.DrawImage(b.image, op)
-	for _, v := range b.GetContainer() {
-		v.Draw(surface)
-	}
+	surface.DrawImage(b.Image(), op)
+}
+
+func (b *ButtonIcon) Resize(rect []int) {
+	b.Rect(NewRect(rect))
+	b.btn.Resize(rect)
+	b.icon1.Resize(rect)
+	b.icon2.Resize(rect)
+	b.SpriteBase.Rect(NewRect(rect))
+	b.Dirty = true
+	b.ImageReset()
 }

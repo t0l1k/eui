@@ -22,8 +22,9 @@ func (s *SpriteBase) IsDisabled() bool { return !s.disabled }
 func (s *SpriteBase) Enable()          { s.disabled = true }
 func (s *SpriteBase) Disable()         { s.disabled = false }
 
-func (s *SpriteBase) Image() *ebiten.Image { return s.image }
-func (s *SpriteBase) ImageReset()          { s.image = nil; s.Dirty = true }
+func (s *SpriteBase) Image() *ebiten.Image         { return s.image }
+func (s *SpriteBase) SetImage(image *ebiten.Image) { s.image = image }
+func (s *SpriteBase) ImageReset()                  { s.image = nil; s.Dirty = true }
 func (s *SpriteBase) Layout() {
 	if s.Image() == nil {
 		w0, h0 := s.GetRect().Size()

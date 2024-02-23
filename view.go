@@ -10,7 +10,7 @@ import (
 type View struct {
 	BoxLayout
 	state                        InputState
-	rect                         *Rect
+	rect                         Rect
 	image                        *ebiten.Image
 	dirty, visible, disabled     bool
 	bg, fg                       color.Color
@@ -43,7 +43,7 @@ func (v *View) Image(image *ebiten.Image) {
 	v.dirty = true
 }
 
-func (v *View) GetRect() *Rect {
+func (v *View) GetRect() Rect {
 	return v.rect
 }
 func (v *View) Rect(rect []int) {

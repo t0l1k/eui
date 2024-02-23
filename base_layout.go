@@ -2,10 +2,10 @@ package eui
 
 type LayoutBase struct {
 	Dirty bool
-	rect  *Rect
+	rect  Rect
 }
 
-func (*LayoutBase) Layout()             {}
-func (d *LayoutBase) GetRect() *Rect    { return d.rect }
-func (d *LayoutBase) Rect(value *Rect)  { d.rect = value; d.Dirty = true }
-func (d *LayoutBase) Resize(rect []int) { d.Rect(NewRect(rect)) }
+func (l *LayoutBase) Layout()           {}
+func (l *LayoutBase) GetRect() Rect     { return l.rect }
+func (l *LayoutBase) Rect(value Rect)   { l.rect = value; l.Dirty = true }
+func (l *LayoutBase) Resize(rect []int) { l.Rect(NewRect(rect)) }

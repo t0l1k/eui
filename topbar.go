@@ -5,7 +5,7 @@ type TopBar struct {
 	btnMenu                    *Button
 	btnFunc                    func(b *Button)
 	lblTitle, tmLbl            *Text
-	tmVar                      *StringVar
+	tmVar                      *SubjectBase
 	Stopwatch                  *Stopwatch
 	showStopwatch              bool
 	coverTitle, coverStopwatch float64
@@ -64,7 +64,7 @@ func (t *TopBar) setTheme() {
 
 func (t *TopBar) initStopwatch() {
 	t.Stopwatch = NewStopwatch()
-	t.tmVar = NewStringVar(t.Stopwatch.StringShort())
+	t.tmVar = NewSubject()
 	t.tmLbl = NewText("0:00")
 	theme := GetUi().GetTheme()
 	t.tmLbl.bg = theme.Get(TopBarStopwatchBg)

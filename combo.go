@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type ComboBox struct {
-	View
+	DrawableBase
 	btnPlus, btnMinus *Button
 	lblValue, lblText *Text
-	valueVar          *StringVar
+	valueVar          *SubjectBase
 	data              []interface{}
 	index             int
 	onChange          func(c *ComboBox)
@@ -18,8 +20,8 @@ type ComboBox struct {
 
 func NewComboBox(text string, data []interface{}, index int, f func(*ComboBox)) *ComboBox {
 	c := &ComboBox{}
-	c.SetupView()
 	c.SetupCombo(text, data, index, f)
+	c.Visible = true
 	return c
 }
 
@@ -33,7 +35,7 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func
 	c.lblValue = NewText(c.GetValueString())
 	c.lblValue.Bg(c.bg)
 	c.lblValue.Fg(c.fg)
-	c.valueVar = NewStringVar(c.GetValueString())
+	c.valueVar = NewSubject()
 	c.valueVar.Attach(c.lblValue)
 	c.btnPlus = NewButton("+", func(b *Button) {
 		if c.index < len(c.data)-1 {
@@ -60,10 +62,6 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func
 	c.lblText = NewText(text)
 	c.lblText.Bg(c.bg)
 	c.lblText.Fg(c.fg)
-	c.Add(c.lblValue)
-	c.Add(c.btnPlus)
-	c.Add(c.btnMinus)
-	c.Add(c.lblText)
 }
 
 func (c *ComboBox) SetText(text string) {
@@ -96,8 +94,39 @@ func (c *ComboBox) SetValue(value interface{}) {
 	c.lblValue.SetText(c.GetValueString())
 }
 
-func (c *ComboBox) Resize(r []int) {
-	c.View.Resize(r)
+func (c *ComboBox) Layout() {
+	c.SpriteBase.Layout()
+	c.Dirty = false
+}
+
+func (c *ComboBox) Update(dt int) {
+	if c.disabled {
+		return
+	}
+	c.btnPlus.Update(dt)
+	c.btnMinus.Update(dt)
+}
+
+func (b *ComboBox) Draw(surface *ebiten.Image) {
+	if !b.Visible {
+		return
+	}
+	if b.Dirty {
+		b.Layout()
+		b.btnPlus.Layout()
+		b.btnMinus.Layout()
+		b.lblValue.Layout()
+		b.lblText.Layout()
+	}
+	b.lblValue.Draw(surface)
+	b.lblText.Draw(surface)
+	b.btnPlus.Draw(surface)
+	b.btnMinus.Draw(surface)
+}
+
+func (c *ComboBox) Resize(rect []int) {
+	c.Rect(NewRect(rect))
+	c.SpriteBase.Rect(NewRect(rect))
 	x, y, w0, h0 := c.GetRect().GetRect()
 	w, h := h0, h0
 	c.lblValue.Resize([]int{x, y, w, h})

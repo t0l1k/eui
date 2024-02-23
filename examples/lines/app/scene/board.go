@@ -16,7 +16,7 @@ type Board struct {
 	field                  *game.Field
 	showWay                bool
 	showWayDt              int
-	varScore, varScoreBest *eui.IntVar
+	varScore, varScoreBest *eui.SubjectBase
 	bestScore              int
 }
 
@@ -28,10 +28,10 @@ func NewBoard(dim int) *Board {
 	b.table.Visible(false)
 	b.Add(b.table)
 	b.gameLayout = eui.NewGridLayoutRightDown(b.field.Dim())
-	b.varScore = eui.NewIntVar(0)
+	b.varScore = eui.NewSubject()
 	b.varScore.Attach(b.table.leftLbl)
 	b.bestScore = 10
-	b.varScoreBest = eui.NewIntVar(0)
+	b.varScoreBest = eui.NewSubject()
 	b.varScoreBest.Attach(b.table.rightLbl)
 	b.varScoreBest.SetValue(b.bestScore)
 	return b
@@ -54,7 +54,7 @@ func (b *Board) NewGame(dim int) {
 	b.table.Visible(true)
 }
 
-func (b *Board) gameLogic(btn *eui.ButtonIcon) {
+func (b *Board) gameLogic(btn *eui.Button) {
 	for i := range b.gameLayout.GetContainer() {
 		if b.gameLayout.GetContainer()[i].(*CellIcon).btn == btn {
 			cell := b.field.GetField()[i]
@@ -62,10 +62,10 @@ func (b *Board) gameLogic(btn *eui.ButtonIcon) {
 			state := cellData.State
 			if btn.IsMouseDownLeft() && b.field.InGame {
 				if state == game.CellFilled || state == game.CellEmpty || state == game.CellFilledNext {
-					if col, way := b.field.MakeMove(b.field.Pos(i)); len(way) > 0 {
+					if way := b.field.MakeMove(b.field.Pos(i)); len(way) > 0 {
 						b.showWay = true
 						b.showWayDt = 250
-						b.setWayCells(col, way)
+						b.setWayCells(cell.Color(), way)
 						b.table.SetNextMoveBalls(b.field.GetFilledNext())
 						log.Println("make move for:", cell, cell.Color().String(), cellData, state, way)
 					}
@@ -82,13 +82,10 @@ func (b *Board) setWayCells(col game.BallColor, way []int) {
 	for _, value := range way {
 		bg := game.BallNoColor.Color()
 		fg := col.Color()
-		icon := NewBallIcon(BallSmall, bg, fg)
 		cell := b.gameLayout.GetContainer()[value].(*CellIcon)
-		icon.Resize(cell.GetRect().GetArr())
-		image := icon.GetImage()
-		cell.btn.SetIcons([]*ebiten.Image{image, image})
+		cell.icon.setup(BallSmall, bg, fg)
 	}
-	log.Println("set way colors done", way)
+	log.Println("set way colors done", way, col)
 }
 
 func (b *Board) Update(dt int) {
@@ -111,9 +108,6 @@ func (b *Board) Update(dt int) {
 	for _, v := range b.gameLayout.GetContainer() {
 		v.Update(dt)
 	}
-	if b.IsDirty() && !b.showWay {
-		b.drawCellIcons()
-	}
 }
 
 func (b *Board) drawCellIcons() {
@@ -133,11 +127,8 @@ func (b *Board) drawCellIcons() {
 		case cell.IsMarkedForMove():
 			size = BallNormal
 		}
-		icon := NewBallIcon(size, bg, fg)
-		cell := b.gameLayout.GetContainer()[i].(*CellIcon)
-		icon.Resize(cell.GetRect().GetArr())
-		image := icon.GetImage()
-		cell.btn.SetIcons([]*ebiten.Image{image, image})
+		cl := b.gameLayout.GetContainer()[i].(*CellIcon)
+		cl.icon.setup(size, bg, fg)
 	}
 }
 
@@ -166,7 +157,7 @@ func (b *Board) Resize(rect []int) {
 	log.Println("board resize done")
 }
 
-func getCellSize(rect *eui.Rect, dim int) (size int) {
+func getCellSize(rect eui.Rect, dim int) (size int) {
 	r := dim
 	c := dim
 	for r*size < rect.W && c*size < rect.H {

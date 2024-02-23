@@ -22,12 +22,7 @@ func (d *GridLayoutRightDown) SetRows(r int)       { d.row = r; d.resize() }
 func (d *GridLayoutRightDown) SetColumns(c int)    { d.column = c; d.resize() }
 func (d *GridLayoutRightDown) SetCellMargin(m int) { d.cellMargin = m; d.resize() }
 
-func (c *GridLayoutRightDown) resize() {
-	if c.GetRect() == nil {
-		return
-	}
-	c.Resize(c.GetRect().GetArr())
-}
+func (c *GridLayoutRightDown) resize() { c.Resize(c.GetRect().GetArr()) }
 
 func (c *GridLayoutRightDown) Resize(rect []int) {
 	c.Rect(NewRect(rect))
@@ -49,7 +44,7 @@ func (c *GridLayoutRightDown) Resize(rect []int) {
 	}
 }
 
-func (g *GridLayoutRightDown) getCellSize(rect *Rect) (size int) {
+func (g *GridLayoutRightDown) getCellSize(rect Rect) (size int) {
 	r := g.row
 	c := g.column
 	for r*size < rect.W && c*size < rect.H {

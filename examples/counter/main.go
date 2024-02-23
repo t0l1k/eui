@@ -37,10 +37,11 @@ func NewSceneCounter() *SceneCounter {
 	sc.lay1 = eui.NewVLayout() // Контейнер по вертикали
 	sc.lay2 = eui.NewHLayout() // Контейнер по горизонтали
 
-	counter := eui.NewIntVar(Value())           // Подписчикам передать оповещение при изменении переменной
+	counter := eui.NewSubject()                 // Подписчикам передать оповещение при изменении переменной
 	lblCounter := eui.NewText(counter.String()) // Текстовая метка
 	counter.Attach(lblCounter)                  // Подписка на уведомления от этой переменной
-	sc.lay1.Add(lblCounter)                     // Добавить в контейнер метку
+	counter.SetValue(Value())
+	sc.lay1.Add(lblCounter) // Добавить в контейнер метку
 
 	btnInc := eui.NewButton("+", func(b *eui.Button) {
 		Inc()

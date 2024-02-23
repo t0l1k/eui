@@ -17,7 +17,7 @@ type SceneTestListView struct {
 func NewSceneTestListView() *SceneTestListView {
 	s := &SceneTestListView{}
 	var list []string
-	for i := 0; i < 24; i++ {
+	for i := 0; i < 54; i++ {
 		list = append(list, "Item "+strconv.Itoa(i))
 	}
 	theme := eui.GetUi().GetTheme()
@@ -61,10 +61,20 @@ func NewSceneTestListView() *SceneTestListView {
 }
 
 func (s *SceneTestListView) Resize() {
-	s.lstButtons.Resize([]int{25, 25, 250, 250})
-	s.lstText.Resize([]int{300, 25, 250, 250})
-	s.lstCheckBoxs.Resize([]int{600, 25, 250, 250})
-	s.btnRemoveSelected.Resize([]int{600, 300, 250, 50})
+	w0, h0 := eui.GetUi().Size()
+	rect := eui.NewRect([]int{0, 0, w0, h0})
+	margin := int(float64(rect.GetLowestSize()) * 0.1)
+	x, y := margin, margin
+	w, h := margin*3, h0-margin*2
+	s.lstButtons.Resize([]int{x, y, w, h})
+	x += margin*3 + margin
+	s.lstText.Resize([]int{x, y, w, h})
+	x += margin*3 + margin
+	h -= margin * 3
+	s.lstCheckBoxs.Resize([]int{x, y, w, h})
+	y += h + margin
+	h = margin
+	s.btnRemoveSelected.Resize([]int{x, y, w, h})
 }
 
 func NewGame() *eui.Ui {

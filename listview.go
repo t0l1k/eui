@@ -11,7 +11,7 @@ type ListView struct {
 	View
 	list               []string
 	itemSize, rows     int
-	contentRect        *Rect
+	contentRect        Rect
 	contentImage       *ebiten.Image
 	offset, lastOffset int
 	cameraRect         image.Rectangle
@@ -33,9 +33,7 @@ func (l *ListView) SetupListViewButtons(list []string, itemSize, rows int, bg, f
 		btn.Bg(bg)
 		btn.Fg(fg)
 	}
-	if l.rect != nil {
-		l.resizeChilds()
-	}
+	l.resizeChilds()
 }
 
 func (l *ListView) SetupListViewCheckBoxs(list []string, itemSize, rows int, bg, fg color.Color, f func(b *Checkbox)) {
@@ -48,9 +46,7 @@ func (l *ListView) SetupListViewCheckBoxs(list []string, itemSize, rows int, bg,
 		chkBox.Bg(bg)
 		chkBox.Fg(fg)
 	}
-	if l.rect != nil {
-		l.resizeChilds()
-	}
+	l.resizeChilds()
 }
 
 func (l *ListView) GetCheckBoxes() (values []*Checkbox) {
@@ -73,9 +69,7 @@ func (l *ListView) SetupListViewText(list []string, itemSize, rows int, bg, fg c
 		lbl.Bg(bg)
 		lbl.Fg(fg)
 	}
-	if l.rect != nil {
-		l.resizeChilds()
-	}
+	l.resizeChilds()
 }
 
 func (l *ListView) SetListViewTextWithBgFgColors(list []string, bg, fg []color.Color) {
@@ -86,9 +80,7 @@ func (l *ListView) SetListViewTextWithBgFgColors(list []string, bg, fg []color.C
 		lbl.Bg(bg[i])
 		lbl.Fg(fg[i])
 	}
-	if l.rect != nil {
-		l.resizeChilds()
-	}
+	l.resizeChilds()
 }
 
 func (l *ListView) Add(d Drawabler) {
@@ -110,9 +102,7 @@ func (l *ListView) Add(d Drawabler) {
 		value.Fg(fg)
 		l.list = append(l.list, value.GetText())
 	}
-	if l.rect != nil {
-		l.resizeChilds()
-	}
+	l.resizeChilds()
 }
 
 func (l *ListView) Itemsize(itemSize int) {

@@ -287,7 +287,7 @@ type Board struct {
 	eui.View
 	dialog    *Dialog
 	field     *Field
-	varArea   *eui.StringVar
+	varArea   *eui.SubjectBase
 	layout    *eui.GridLayoutRightDown
 	stopwatch *eui.Stopwatch
 }
@@ -309,7 +309,7 @@ func NewBoard() *Board {
 	})
 	b.dialog.Visible(false)
 	b.Add(b.dialog)
-	b.varArea = eui.NewStringVar("")
+	b.varArea = eui.NewSubject()
 	b.varArea.Attach(b.dialog.message)
 	b.field = NewField()
 	b.field.State.Attach(b)
