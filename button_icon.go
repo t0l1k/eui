@@ -79,10 +79,9 @@ func (b *ButtonIcon) Draw(surface *ebiten.Image) {
 
 func (b *ButtonIcon) Resize(rect []int) {
 	b.Rect(NewRect(rect))
+	b.SpriteBase.Rect(NewRect(rect))
 	b.btn.Resize(rect)
 	b.icon1.Resize(rect)
 	b.icon2.Resize(rect)
-	b.SpriteBase.Rect(NewRect(rect))
-	b.Dirty = true
 	b.ImageReset()
 }

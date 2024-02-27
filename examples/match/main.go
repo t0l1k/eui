@@ -243,18 +243,18 @@ func (f *Field) String() (result string) {
 }
 
 type CellIcon struct {
-	eui.View
+	eui.DrawableBase
 	btn   *eui.Button
 	field *Field
 }
 
 func NewCellIcon(field *Field, f func(b *eui.Button)) *CellIcon {
 	c := &CellIcon{}
-	c.SetupView()
 	c.field = field
 	c.btn = eui.NewButton(CellClosed, f)
 	c.Add(c.btn)
 	c.Setup(f)
+	c.Visible = true
 	return c
 }
 
@@ -284,7 +284,7 @@ func (c *CellIcon) UpdateData(value interface{}) {
 }
 
 type Board struct {
-	eui.View
+	eui.DrawableBase
 	dialog    *Dialog
 	field     *Field
 	varArea   *eui.SubjectBase
@@ -294,7 +294,7 @@ type Board struct {
 
 func NewBoard() *Board {
 	b := &Board{}
-	b.SetupView()
+	b.Visible = true
 	b.dialog = NewDialog("Выбор игры", func(btn *eui.Button) {
 		if btn.GetText() == bNew {
 			b.NewGame()
@@ -421,7 +421,8 @@ func (b *Board) Draw(surface *ebiten.Image) {
 }
 
 func (b *Board) Resize(rect []int) {
-	b.View.Resize(rect)
+	b.Rect(eui.NewRect(rect))
+	b.SpriteBase.Resize(rect)
 	b.layout.SetCellMargin(int(float64(b.GetRect().GetLowestSize()) * 0.008))
 	b.layout.Resize(rect)
 	w0, h0 := b.GetRect().Size()
@@ -431,19 +432,19 @@ func (b *Board) Resize(rect []int) {
 	x += (w0 - w) / 2
 	y += (h0 - h) / 2
 	b.dialog.Resize([]int{x, y, w, h})
-	b.Dirty(true)
+	b.ImageReset()
 }
 
 type Dialog struct {
-	eui.View
+	eui.DrawableBase
 	btnHide, btnNew, btnReset, btnNext *eui.Button
 	title, message                     *eui.Text
 	dialFunc                           func(d *eui.Button)
+	visible                            bool
 }
 
 func NewDialog(title string, f func(d *eui.Button)) *Dialog {
 	t := &Dialog{}
-	t.SetupView()
 	t.dialFunc = f
 	t.title = eui.NewText(title)
 	t.Add(t.title)
@@ -462,12 +463,27 @@ func NewDialog(title string, f func(d *eui.Button)) *Dialog {
 	return t
 }
 
+func (t *Dialog) IsVisible() bool { return t.visible }
+
+func (t *Dialog) Visible(value bool) {
+	for _, v := range t.GetContainer() {
+		switch vv := v.(type) {
+		case *eui.Text:
+			vv.Visible = value
+		case *eui.Button:
+			vv.Visible(value)
+		}
+	}
+	t.visible = value
+}
+
 func (t *Dialog) SetTitle(title string) {
 	t.title.SetText(title)
 }
 
 func (t *Dialog) Resize(rect []int) {
-	t.View.Resize(rect)
+	t.Rect(eui.NewRect(rect))
+	t.SpriteBase.Resize(rect)
 	x, y := t.GetRect().Pos()
 	w, h := t.GetRect().W/3, t.GetRect().H/3
 	t.title.Resize([]int{x, y, w*3 - h, h})
@@ -480,7 +496,7 @@ func (t *Dialog) Resize(rect []int) {
 	t.btnReset.Resize([]int{x, y, w, h})
 	x += w
 	t.btnNext.Resize([]int{x, y, w, h})
-	t.Dirty(true)
+	t.ImageReset()
 }
 
 type SceneGame struct {

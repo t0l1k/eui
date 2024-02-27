@@ -29,7 +29,6 @@ func NewHand(bg, fg color.Color) *Hand {
 	h.Bg(col)
 	h.Fg(fg)
 	h.Visible = true
-	h.Enable()
 	return h
 }
 
@@ -89,7 +88,7 @@ func (t *Hand) Resize(rect []int) {
 
 // Сами часы, рисуется "лицо часов", а поверх него стрелки в порядке добавления друг поверх друга.
 type AnalogClock struct {
-	eui.View
+	eui.DrawableBase
 	MsHand, secHand, minuteHand, hourHand *Hand
 	FaceBg, FaceFg                        color.Color
 }
@@ -103,32 +102,29 @@ func NewAnalogClock() *AnalogClock {
 		minuteHand: NewHand(bg, theme.Get(AppMinuteHandFg)),
 		hourHand:   NewHand(bg, theme.Get(AppHourHandFg)),
 	}
-	a.SetupAnalogClock()
-	return a
-}
-
-func (a *AnalogClock) SetupAnalogClock() {
-	a.SetupView()
 	a.Add(a.hourHand)
 	a.Add(a.minuteHand)
 	a.Add(a.secHand)
 	a.Add(a.MsHand)
+	a.Visible = true
+	return a
 }
 
 func (a *AnalogClock) Layout() {
-	a.View.Layout()
+	a.SpriteBase.Layout()
+	a.Image().Fill(a.GetBg())
 	a.drawClockFace()
 	log.Println("update analog clock layout done")
-	a.Dirty(false)
+	a.Dirty = false
 }
 
 func (a *AnalogClock) drawClockFace() {
 	x, y := a.GetRect().Center()
 	m := float64(a.GetRect().GetLowestSize()) * 0.01
-	vector.DrawFilledCircle(a.GetImage(), float32(x), float32(y), float32(m)*3, a.GetBg(), true)
+	vector.DrawFilledCircle(a.Image(), float32(x), float32(y), float32(m)*3, a.GetBg(), true)
 	center := eui.Point{X: float64(x), Y: float64(y)}
-	vector.DrawFilledCircle(a.GetImage(), float32(center.X), float32(center.Y), float32(m)*2, a.FaceBg, true)
-	vector.DrawFilledCircle(a.GetImage(), float32(center.X), float32(center.Y), float32(m), a.FaceFg, true)
+	vector.DrawFilledCircle(a.Image(), float32(center.X), float32(center.Y), float32(m)*2, a.FaceBg, true)
+	vector.DrawFilledCircle(a.Image(), float32(center.X), float32(center.Y), float32(m), a.FaceFg, true)
 	for i := 0; i < 60; i++ {
 		var (
 			tip eui.Point
@@ -144,8 +140,8 @@ func (a *AnalogClock) drawClockFace() {
 			sz = center.X
 		}
 		tip = GetTip(center, float64(i)/60, sz-m*4, 0, 0)
-		vector.DrawFilledCircle(a.GetImage(), float32(tip.X), float32(tip.Y), float32(rad), a.FaceBg, true)
-		vector.DrawFilledCircle(a.GetImage(), float32(tip.X), float32(tip.Y), float32(rad)/2, a.FaceFg, true)
+		vector.DrawFilledCircle(a.Image(), float32(tip.X), float32(tip.Y), float32(rad), a.FaceBg, true)
+		vector.DrawFilledCircle(a.Image(), float32(tip.X), float32(tip.Y), float32(rad)/2, a.FaceFg, true)
 	}
 }
 
@@ -167,10 +163,10 @@ func (g *AnalogClock) Update(dt int) {
 }
 
 func (t *AnalogClock) Draw(surface *ebiten.Image) {
-	if !t.IsVisible() {
+	if !t.Visible {
 		return
 	}
-	if t.IsDirty() {
+	if t.Dirty {
 		t.Layout()
 		for _, c := range t.GetContainer() {
 			c.Layout()
@@ -179,19 +175,21 @@ func (t *AnalogClock) Draw(surface *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	x, y := t.GetRect().Pos()
 	op.GeoM.Translate(float64(x), float64(y))
-	surface.DrawImage(t.GetImage(), op)
+	surface.DrawImage(t.Image(), op)
 	for _, v := range t.GetContainer() {
 		v.Draw(surface)
 	}
 }
 
 func (a *AnalogClock) Resize(r []int) {
-	a.View.Resize(r)
+	a.Rect(eui.NewRect(r))
+	a.SpriteBase.Resize(r)
 	a.MsHand.Resize(r)
 	a.secHand.Resize(r)
 	a.minuteHand.Resize(r)
 	a.hourHand.Resize(r)
 	a.setupHands()
+	a.ImageReset()
 }
 
 func (a *AnalogClock) setupHands() {

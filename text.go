@@ -26,7 +26,6 @@ func NewText(txt string) *Text {
 	t.Fg(theme.Get(TextFg))
 	t.SetText(txt)
 	t.Visible = true
-	t.Enable()
 	return t
 }
 
