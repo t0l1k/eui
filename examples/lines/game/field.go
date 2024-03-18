@@ -148,13 +148,13 @@ func (f *Field) checkWinLines(x, y int) bool {
 	return count > 0
 }
 
-func (f *Field) checkHorizontal(x, y int) bool {
+func (f *Field) checkHorizontal(_, y int) bool {
 	arr := f.field[f.Idx(0, y):f.Idx(f.Conf.Dim, y)]
 	log.Println("проверка собрано ли что-то для удаления по горизонтали", arr)
 	return f.checkWinLine(arr)
 }
 
-func (f *Field) checkVertical(x, y int) bool {
+func (f *Field) checkVertical(x, _ int) bool {
 	var arr []*Cell
 	for i := 0; i < f.Conf.Dim; i++ {
 		arr = append(arr, f.field[f.Idx(x, i)])

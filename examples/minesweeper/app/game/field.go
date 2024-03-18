@@ -13,7 +13,7 @@ type MinedField struct {
 	field                                                []*cell
 	saved                                                []string
 	row, column, totalMines, markedMines, totalOpenCells int
-	firstMove                                            *eui.PointInt
+	firstMove                                            eui.PointInt
 }
 
 func NewMinedField(r, c, m int) *MinedField {

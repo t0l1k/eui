@@ -35,6 +35,10 @@ func NewTopBar(title string, f func(b *Button)) *TopBar {
 	return t
 }
 
+func (t *TopBar) SetTitle(text string) {
+	t.lblTitle.SetText(text)
+}
+
 func (t *TopBar) SetButtonText(text string) {
 	t.btnMenu.SetText(text)
 }

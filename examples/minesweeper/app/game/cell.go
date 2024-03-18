@@ -22,10 +22,10 @@ type cell struct {
 	State *cellState
 	count byte
 	mined bool
-	pos   *eui.PointInt
+	pos   eui.PointInt
 }
 
-func newCell(pos *eui.PointInt) *cell {
+func newCell(pos eui.PointInt) *cell {
 	return &cell{
 		State: newCellState(closed, pos),
 		count: cellEmpty,

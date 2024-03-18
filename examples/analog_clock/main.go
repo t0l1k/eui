@@ -196,7 +196,7 @@ func (a *AnalogClock) setupHands() {
 	sz := a.GetRect().GetLowestSize()
 	m := (float64(sz) * 0.01)
 	x, y := a.GetRect().Center()
-	center := *eui.NewPoint(float64(x), float64(y))
+	center := eui.NewPoint(float64(x), float64(y))
 	lenght := float64(sz/2) - m*4
 
 	conf := eui.GetUi().GetSettings()

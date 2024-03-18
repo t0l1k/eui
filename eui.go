@@ -66,7 +66,7 @@ type Ui struct {
 	settings      *Setting
 	tick          int
 	start         time.Time
-	size          *PointInt
+	size          PointInt
 	inputMouse    *MouseInput
 	inputTouch    *TouchInput
 	inputKeyboard *KeyboardInput

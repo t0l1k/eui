@@ -9,7 +9,7 @@ import (
 type Cell struct {
 	State *CellState
 	color BallColor
-	pos   *eui.PointInt
+	pos   eui.PointInt
 }
 
 func NewCell(x, y int) *Cell {
@@ -20,7 +20,7 @@ func NewCell(x, y int) *Cell {
 	}
 }
 
-func (c *Cell) Pos() *eui.PointInt {
+func (c *Cell) Pos() eui.PointInt {
 	return c.pos
 }
 

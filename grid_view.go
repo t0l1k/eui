@@ -40,9 +40,9 @@ func (g *GridView) Set(r, c int) {
 	g.Dirty = true
 }
 
-func (d *GridView) SetRow(r int)         { d.r = r }
-func (d *GridView) SetColumn(c int)      { d.c = c }
-func (g *GridView) SetStrokewidth(w int) { g.strokeWidth = w }
+func (g *GridView) SetRow(r int)         { g.r = r; g.Dirty = true }
+func (g *GridView) SetColumn(c int)      { g.c = c; g.Dirty = true }
+func (g *GridView) SetStrokewidth(w int) { g.strokeWidth = w; g.Dirty = true }
 
 func (g *GridView) Layout() {
 	g.SpriteBase.Layout()

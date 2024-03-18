@@ -8,8 +8,8 @@ type Point struct {
 	X, Y float64
 }
 
-func NewPoint(x, y float64) *Point {
-	return &Point{
+func NewPoint(x, y float64) Point {
+	return Point{
 		X: x,
 		Y: y,
 	}
@@ -27,7 +27,7 @@ func (p Point) GetY() float64 {
 	return p.Y
 }
 
-func (p *Point) Equal(value *Point) bool {
+func (p Point) Equal(value Point) bool {
 	return p.X == value.X && p.Y == value.Y
 }
 
@@ -39,8 +39,8 @@ type PointInt struct {
 	X, Y int
 }
 
-func NewPointInt(x, y int) *PointInt {
-	return &PointInt{
+func NewPointInt(x, y int) PointInt {
+	return PointInt{
 		X: x,
 		Y: y,
 	}

@@ -2,6 +2,7 @@ package eui
 
 import (
 	"image/color"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -36,6 +37,15 @@ func (b *Button) SetupButton(text string, f func(*Button)) {
 	b.SetupView()
 	b.onPressed = f
 	b.text.SetText(text)
+}
+
+func (b *Button) UpdateData(value interface{}) {
+	switch v := value.(type) {
+	case string:
+		b.text.SetText(v)
+	case int:
+		b.text.SetText(strconv.Itoa(v))
+	}
 }
 
 func (b *Button) GetText() string { return b.text.GetText() }

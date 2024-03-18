@@ -32,10 +32,10 @@ const (
 
 type CellData struct {
 	state string
-	pos   *eui.PointInt
+	pos   eui.PointInt
 }
 
-func NewCellData(state string, pos *eui.PointInt) *CellData {
+func NewCellData(state string, pos eui.PointInt) *CellData {
 	return &CellData{state: state, pos: pos}
 }
 
@@ -43,7 +43,7 @@ type CellState struct {
 	eui.SubjectBase
 }
 
-func NewCellState(state string, pos *eui.PointInt) *CellState {
+func NewCellState(state string, pos eui.PointInt) *CellState {
 	c := &CellState{}
 	c.SetValue(NewCellData(state, pos))
 	return c
@@ -51,7 +51,7 @@ func NewCellState(state string, pos *eui.PointInt) *CellState {
 
 type Cell struct {
 	state       *CellState
-	pos         *eui.PointInt
+	pos         eui.PointInt
 	sym         int
 	open, match bool
 }
@@ -113,7 +113,7 @@ func NewFieldState() *FieldState {
 type Field struct {
 	State        *FieldState
 	field, moves []*Cell
-	dim          *eui.PointInt
+	dim          eui.PointInt
 	ClickCount   int
 }
 

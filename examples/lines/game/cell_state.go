@@ -32,20 +32,20 @@ func (c CellStateType) String() (res string) {
 type CellData struct {
 	State CellStateType
 	Color BallColor
-	Pos   *eui.PointInt
+	Pos   eui.PointInt
 }
 
 func (c CellData) String() string {
 	return "cell data:" + c.State.String() + "," + c.Color.String() + "," + c.Pos.String()
 }
 
-func NewCellData(state CellStateType, color BallColor, pos *eui.PointInt) *CellData {
+func NewCellData(state CellStateType, color BallColor, pos eui.PointInt) *CellData {
 	return &CellData{State: state, Color: color, Pos: pos}
 }
 
 type CellState struct{ eui.SubjectBase }
 
-func NewCellState(state CellStateType, color BallColor, pos *eui.PointInt) *CellState {
+func NewCellState(state CellStateType, color BallColor, pos eui.PointInt) *CellState {
 	c := &CellState{}
 	c.SetValue(NewCellData(state, color, pos))
 	return c
