@@ -46,7 +46,7 @@ func (s *TouchInput) set(value []TouchData) {
 	s.Notify()
 }
 
-func (s *TouchInput) update(dt int) {
+func (s *TouchInput) update(_ int) {
 	s.touches = s.touches[:0]
 	for _, id := range ebiten.AppendTouchIDs(nil) {
 		x, y := ebiten.TouchPosition(id)

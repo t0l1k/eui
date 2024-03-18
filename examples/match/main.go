@@ -254,7 +254,7 @@ func NewCellIcon(field *Field, f func(b *eui.Button)) *CellIcon {
 	c.btn = eui.NewButton(CellClosed, f)
 	c.Add(c.btn)
 	c.Setup(f)
-	c.Visible = true
+	c.Visible(true)
 	return c
 }
 
@@ -294,7 +294,7 @@ type Board struct {
 
 func NewBoard() *Board {
 	b := &Board{}
-	b.Visible = true
+	b.Visible(true)
 	b.dialog = NewDialog("Выбор игры", func(btn *eui.Button) {
 		if btn.GetText() == bNew {
 			b.NewGame()
@@ -469,7 +469,7 @@ func (t *Dialog) Visible(value bool) {
 	for _, v := range t.GetContainer() {
 		switch vv := v.(type) {
 		case *eui.Text:
-			vv.Visible = value
+			vv.Visible(value)
 		case *eui.Button:
 			vv.Visible(value)
 		}

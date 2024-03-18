@@ -80,7 +80,7 @@ func NewHotkeyDialog() *HotkeyDialog {
 	d.title = eui.NewText(title)
 	d.Add(d.title)
 	d.btnHide = eui.NewButton("X", func(b *eui.Button) {
-		d.Visible = false
+		d.Visible(false)
 		for _, v := range d.layV.GetContainer() {
 			log.Println("hide dialog, result:", v.(*InputKey).String())
 		}
@@ -96,7 +96,7 @@ func NewHotkeyDialog() *HotkeyDialog {
 }
 
 func (d *HotkeyDialog) Update(dt int) {
-	if !d.Visible {
+	if !d.IsVisible() {
 		return
 	}
 	d.DrawableBase.Update(dt)
@@ -106,7 +106,7 @@ func (d *HotkeyDialog) Update(dt int) {
 }
 
 func (d *HotkeyDialog) Draw(surface *ebiten.Image) {
-	if !d.Visible {
+	if !d.IsVisible() {
 		return
 	}
 	d.DrawableBase.Draw(surface)
@@ -137,7 +137,7 @@ type SceneSelectHotkey struct {
 func NewSceneSelectHotkey() *SceneSelectHotkey {
 	s := &SceneSelectHotkey{}
 	s.topBar = eui.NewTopBar(title, func(b *eui.Button) {
-		s.dialog.Visible = true
+		s.dialog.Visible(true)
 		log.Println("selrct menu: dialog visible")
 	})
 	s.Add(s.topBar)

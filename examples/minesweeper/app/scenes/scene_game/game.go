@@ -7,7 +7,7 @@ import (
 )
 
 type Game struct {
-	eui.View
+	eui.DrawableBase
 	field  *game.MinedField
 	timer  *eui.Stopwatch
 	layout *eui.GridLayoutRightDown
@@ -95,7 +95,7 @@ func (g *Game) Update(dt int) {
 			g.field.State.SetValue(game.GamePause)
 			g.timer.Stop()
 			for _, cell := range g.layout.GetContainer() {
-				cell.(*game.CellIcon).Visible = false
+				cell.(*game.CellIcon).Visible(false)
 			}
 		}
 	case game.GamePause:
@@ -103,7 +103,7 @@ func (g *Game) Update(dt int) {
 			g.field.State.SetValue(game.GamePlay)
 			g.timer.Start()
 			for _, cell := range g.layout.GetContainer() {
-				cell.(*game.CellIcon).Visible = true
+				cell.(*game.CellIcon).Visible(true)
 			}
 		}
 	}

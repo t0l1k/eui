@@ -9,14 +9,13 @@ import (
 )
 
 type Table struct {
-	eui.View
+	eui.DrawableBase
 	leftLbl, rightLbl *eui.Text
 	nextBallsLayout   *eui.BoxLayout
 }
 
 func NewTable() *Table {
 	t := &Table{}
-	t.SetupView()
 	t.leftLbl = eui.NewText("0")
 	t.Add(t.leftLbl)
 	t.rightLbl = eui.NewText("100")
@@ -80,7 +79,8 @@ func (t *Table) Draw(surface *ebiten.Image) {
 }
 
 func (t *Table) Resize(rect []int) {
-	t.View.Resize(rect)
+	t.Rect(eui.NewRect(rect))
+	t.SpriteBase.Resize(rect)
 	w0 := t.GetRect().W
 	x, y := t.GetRect().Pos()
 	w, h := int(float64(t.GetRect().W)*0.3), t.GetRect().H

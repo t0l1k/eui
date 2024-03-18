@@ -10,7 +10,7 @@ import (
 )
 
 type Board struct {
-	eui.View
+	eui.DrawableBase
 	table                  *Table
 	gameLayout             *eui.GridLayoutRightDown
 	field                  *game.Field
@@ -22,7 +22,6 @@ type Board struct {
 
 func NewBoard(dim int) *Board {
 	b := &Board{}
-	b.SetupView()
 	b.field = game.NewField(dim)
 	b.table = NewTable()
 	b.table.Visible(false)
@@ -145,7 +144,8 @@ func (b *Board) Draw(surface *ebiten.Image) {
 }
 
 func (b *Board) Resize(rect []int) {
-	b.View.Resize(rect)
+	b.Rect(eui.NewRect(rect))
+	b.SpriteBase.Resize(rect)
 	b.gameLayout.SetCellMargin(int(float64(b.GetRect().GetLowestSize()) * 0.008))
 	w0, h0 := b.GetRect().Size()
 	x0, y0 := b.GetRect().Pos()
@@ -153,7 +153,7 @@ func (b *Board) Resize(rect []int) {
 	cellSize := getCellSize(b.GetRect(), dim)
 	b.gameLayout.Resize([]int{x0, y0 + cellSize, w0, h0 - cellSize})
 	b.table.Resize([]int{x0 + (w0-cellSize*dim)/2, y0, cellSize * dim, cellSize})
-	b.Dirty(true)
+	b.Dirty = true
 	log.Println("board resize done")
 }
 

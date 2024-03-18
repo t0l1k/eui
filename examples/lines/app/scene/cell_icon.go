@@ -36,8 +36,8 @@ func NewCellIcon(cell *game.Cell, f func(b *eui.Button)) *CellIcon {
 	c.cell = cell
 	c.icon = NewBallIcon(BallHidden, game.BallNoColor.Color(), game.BallNoColor.Color())
 	c.icon.Resize([]int{0, 0, 1, 1})
-	c.icon.Visible = true
-	c.Visible = true
+	c.icon.Visible(true)
+	c.Visible(true)
 	c.btn = eui.NewButton("", f)
 	c.anim = BallAnimNo
 	c.animStatus = BallHidden
@@ -135,13 +135,12 @@ func (c *CellIcon) UpdateData(value interface{}) {
 func (c *CellIcon) updateIcon(ballStatus BallStatusType) {
 	bg := game.BallNoColor.Color()
 	rect := c.GetRect().GetArr()
-	// c.icon = NewBallIcon(ballStatus, bg, c.fg)
 	c.icon.setup(ballStatus, bg, c.fg)
 	c.icon.Resize(rect)
 }
 
 func (c *CellIcon) Draw(surface *ebiten.Image) {
-	if !c.Visible {
+	if !c.IsVisible() {
 		return
 	}
 	if c.Dirty {

@@ -1,7 +1,7 @@
 package eui
 
 type TopBar struct {
-	View
+	DrawableBase
 	btnMenu                    *Button
 	btnFunc                    func(b *Button)
 	lblTitle, tmLbl            *Text
@@ -15,7 +15,6 @@ type TopBar struct {
 func NewTopBar(title string, f func(b *Button)) *TopBar {
 	t := &TopBar{coverTitle: 0.25, coverStopwatch: 0.1}
 	t.showStopwatch = false
-	t.SetupView()
 	t.btnFunc = f
 	btnText := "Menu"
 	if f == nil {
@@ -49,12 +48,12 @@ func (t *TopBar) SetButtonFunc(f func(b *Button)) {
 
 func (t *TopBar) SetTitleCoverArea(value float64) {
 	t.coverTitle = value
-	t.Dirty(true)
+	t.Dirty = true
 }
 
 func (t *TopBar) SetStopwatchCoverArea(value float64) {
 	t.coverStopwatch = value
-	t.Dirty(true)
+	t.Dirty = true
 }
 
 func (t *TopBar) setTheme() {
@@ -88,15 +87,16 @@ func (t *TopBar) SetShowStopwatch() {
 }
 
 func (t *TopBar) Update(dt int) {
-	t.View.Update(dt)
+	t.DrawableBase.Update(dt)
 	if !t.showStopwatch {
 		return
 	}
 	t.tmVar.SetValue(t.Stopwatch.StringShort())
 }
 
-func (t *TopBar) Resize(arr []int) {
-	t.View.Resize(arr)
+func (t *TopBar) Resize(rect []int) {
+	t.Rect(NewRect(rect))
+	t.SpriteBase.Resize(rect)
 	x, y, w, h := 0, 0, t.GetRect().H, t.GetRect().H
 	t.btnMenu.Resize([]int{x, y, w, h})
 	x += h
@@ -107,5 +107,5 @@ func (t *TopBar) Resize(arr []int) {
 		x = t.GetRect().W - w
 		t.tmLbl.Resize([]int{x, y, w, h})
 	}
-	t.Dirty(true)
+	t.ImageReset()
 }

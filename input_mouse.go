@@ -56,7 +56,7 @@ func (s *MouseInput) set(value MouseData) {
 	s.Notify()
 }
 
-func (s *MouseInput) update(dt int) {
+func (s *MouseInput) update(_ int) {
 	x0, y0 := ebiten.CursorPosition()
 	b0 := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) ||
 		ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) ||

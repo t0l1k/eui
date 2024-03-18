@@ -17,6 +17,7 @@ func NewSceneSudoku() *SceneSudoku {
 	s := &SceneSudoku{}
 	s.topBar = eui.NewTopBar("Sudoku", func(b *eui.Button) {
 		s.dialogSelect.Visible(true)
+		s.board.Visible(false)
 	})
 	s.topBar.SetShowStopwatch()
 	s.topBar.SetTitleCoverArea(0.85)

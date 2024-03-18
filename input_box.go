@@ -195,7 +195,7 @@ func (inp *InputBox) GetDigit() (float64, error) {
 func (inp *InputBox) SetDigit(value string) {
 	inp._text = value
 	inp.btn.SetText(inp.setPrompt())
-	inp.dirty = true
+	inp.Dirty = true
 }
 
 func (inp *InputBox) Draw(surface *ebiten.Image) { inp.btn.Draw(surface) }

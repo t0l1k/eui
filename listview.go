@@ -110,7 +110,7 @@ func (l *ListView) Itemsize(itemSize int) {
 		return
 	}
 	l.itemSize = itemSize
-	l.dirty = true
+	l.Dirty = true
 }
 
 func (l *ListView) Rows(rows int) {
@@ -118,7 +118,7 @@ func (l *ListView) Rows(rows int) {
 		return
 	}
 	l.rows = rows
-	l.dirty = true
+	l.Dirty = true
 }
 
 func (l *ListView) Reset() {
@@ -128,7 +128,7 @@ func (l *ListView) Reset() {
 	l.offset = 0
 	l.lastOffset = 0
 	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)
-	l.dirty = true
+	l.Dirty = true
 }
 
 func (l *ListView) Layout() {
@@ -147,7 +147,7 @@ func (l *ListView) Layout() {
 			value.Draw(l.contentImage)
 		}
 	}
-	l.dirty = false
+	l.Dirty = false
 }
 
 func (l *ListView) Update(dt int) {
@@ -181,7 +181,7 @@ func (l *ListView) Update(dt int) {
 					if l.lastOffset == 0 && l.offset == 0 {
 						value.Update(dt)
 					}
-					l.dirty = true
+					l.Dirty = true
 				} else if value.state != ViewStateNormal {
 					value.SetState(ViewStateNormal)
 				}
@@ -192,7 +192,7 @@ func (l *ListView) Update(dt int) {
 					if l.lastOffset == 0 && l.offset == 0 {
 						value.btn.Update(dt)
 					}
-					l.dirty = true
+					l.Dirty = true
 				} else if value.btn.state != ViewStateNormal {
 					value.btn.SetState(ViewStateNormal)
 				}
@@ -205,7 +205,7 @@ func (l *ListView) Draw(surface *ebiten.Image) {
 	if !l.visible || l.disabled {
 		return
 	}
-	if l.dirty {
+	if l.Dirty {
 		l.Layout()
 	}
 	op := &ebiten.DrawImageOptions{}
@@ -215,7 +215,7 @@ func (l *ListView) Draw(surface *ebiten.Image) {
 }
 
 func (l *ListView) Resize(r []int) {
-	l.Rect(r)
+	l.Rect(NewRect(r))
 	l.resizeChilds()
 	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)
 }
@@ -248,5 +248,5 @@ func (l *ListView) resizeChilds() {
 		y = col * l.itemSize
 	}
 	l.contentRect = NewRect([]int{0, 0, l.rect.W, y})
-	l.dirty = true
+	l.Dirty = true
 }

@@ -65,7 +65,7 @@ func (d *DiffButton) Visible(value bool) {
 	for _, v := range d.GetContainer() {
 		switch vT := v.(type) {
 		case *eui.Text:
-			vT.Visible = value
+			vT.Visible(value)
 		case *eui.Button:
 			vT.Visible(value)
 		}

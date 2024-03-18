@@ -6,7 +6,7 @@ import (
 )
 
 type Dialog struct {
-	eui.View
+	eui.DrawableBase
 	btnHide, btnNew  *eui.Button
 	title, message   *eui.Text
 	comboSelGameDiff *eui.ComboBox
@@ -16,7 +16,6 @@ type Dialog struct {
 
 func NewDialog(title string, f func(btn *eui.Button)) *Dialog {
 	d := &Dialog{}
-	d.SetupView()
 	d.dialogFunc = f
 	d.title = eui.NewText(title)
 	d.Add(d.title)
@@ -37,12 +36,41 @@ func NewDialog(title string, f func(btn *eui.Button)) *Dialog {
 	return d
 }
 
+func (d *Dialog) Visible(value bool) {
+	for _, v := range d.GetContainer() {
+		switch vT := v.(type) {
+		case *eui.Text:
+			vT.Visible(value)
+			if value {
+				vT.Enable()
+			} else {
+				vT.Disable()
+			}
+		case *eui.Button:
+			vT.Visible(value)
+			if value {
+				vT.Enable()
+			} else {
+				vT.Disable()
+			}
+		case *eui.ComboBox:
+			vT.Visible(value)
+			if value {
+				vT.Enable()
+			} else {
+				vT.Disable()
+			}
+		}
+	}
+}
+
 func (d *Dialog) SetTitle(title string) {
 	d.title.SetText(title)
 }
 
 func (d *Dialog) Resize(rect []int) {
-	d.View.Resize(rect)
+	d.Rect(eui.NewRect(rect))
+	d.SpriteBase.Resize(rect)
 	x, y := d.GetRect().Pos()
 	w, h := d.GetRect().W, d.GetRect().H/4
 	d.title.Resize([]int{x, y, w - h, h})

@@ -54,7 +54,7 @@ func (b *Button) SetText(value string) {
 		return
 	}
 	b.text.SetText(value)
-	b.Dirty(true)
+	b.Dirty = true
 }
 
 func (b *Button) Bg(bg color.Color) {
@@ -63,7 +63,7 @@ func (b *Button) Bg(bg color.Color) {
 	}
 	b.bg = bg
 	b.text.Bg(bg)
-	b.dirty = true
+	b.Dirty = true
 }
 
 func (b *Button) Fg(fg color.Color) {
@@ -72,7 +72,7 @@ func (b *Button) Fg(fg color.Color) {
 	}
 	b.fg = fg
 	b.text.Fg(fg)
-	b.dirty = true
+	b.Dirty = true
 }
 
 func (b *Button) SetFunc(f func(*Button)) {
@@ -114,8 +114,8 @@ func (b *Button) Layout() {
 	if b.buttonPressed {
 		bold = b.margin * 2
 	}
-	vector.StrokeRect(b.GetImage(), 0, 0, w, h, float32(bold), fg, true)
-	b.Dirty(false)
+	vector.StrokeRect(b.Image(), 0, 0, w, h, float32(bold), fg, true)
+	b.Dirty = false
 }
 
 func (b *Button) IsPressed() bool { return b.buttonPressed }
@@ -162,7 +162,7 @@ func (b *Button) Draw(surface *ebiten.Image) {
 	if !b.IsVisible() {
 		return
 	}
-	if b.IsDirty() {
+	if b.Dirty {
 		b.Layout()
 		for _, c := range b.GetContainer() {
 			c.Layout()
@@ -171,7 +171,7 @@ func (b *Button) Draw(surface *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	x, y := b.GetRect().Pos()
 	op.GeoM.Translate(float64(x), float64(y))
-	surface.DrawImage(b.GetImage(), op)
+	surface.DrawImage(b.Image(), op)
 	for _, v := range b.GetContainer() {
 		v.Draw(surface)
 	}
@@ -182,5 +182,5 @@ func (b *Button) Resize(rect []int) {
 	b.margin = int(float64(b.GetRect().GetLowestSize()) * 0.03)
 	x, y, w, h := b.GetRect().GetRect()
 	b.text.Resize([]int{x + b.margin, y + b.margin, w - b.margin*2, h - b.margin*2})
-	b.Dirty(true)
+	b.ImageReset()
 }

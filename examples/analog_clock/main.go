@@ -28,7 +28,7 @@ func NewHand(bg, fg color.Color) *Hand {
 	col := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
 	h.Bg(col)
 	h.Fg(fg)
-	h.Visible = true
+	h.Visible(true)
 	return h
 }
 
@@ -36,11 +36,11 @@ func (h *Hand) Setup(center eui.Point, lenght float64, thickness float64, visibl
 	h.faceCenter = center
 	h.lenght = lenght
 	h.thickness = thickness
-	h.Visible = visible
+	h.Visible(visible)
 }
 
 func (h *Hand) ToggleVisible() {
-	h.Visible = !h.Visible
+	h.Visible(!h.IsVisible())
 	h.Dirty = true
 }
 
@@ -68,7 +68,7 @@ func (h *Hand) Layout() {
 }
 
 func (h *Hand) Draw(surface *ebiten.Image) {
-	if !h.Visible || h.IsDisabled() {
+	if !h.IsVisible() || h.IsDisabled() {
 		return
 	}
 	if h.Dirty {
@@ -106,7 +106,7 @@ func NewAnalogClock() *AnalogClock {
 	a.Add(a.minuteHand)
 	a.Add(a.secHand)
 	a.Add(a.MsHand)
-	a.Visible = true
+	a.Visible(true)
 	return a
 }
 
@@ -163,7 +163,7 @@ func (g *AnalogClock) Update(dt int) {
 }
 
 func (t *AnalogClock) Draw(surface *ebiten.Image) {
-	if !t.Visible {
+	if !t.IsVisible() {
 		return
 	}
 	if t.Dirty {

@@ -44,7 +44,7 @@ func (d *DialogSelect) Visible(value bool) {
 	for _, v := range d.GetContainer() {
 		switch vT := v.(type) {
 		case *eui.Text:
-			vT.Visible = value
+			vT.Visible(value)
 			if value {
 				vT.Enable()
 			} else {
@@ -58,7 +58,7 @@ func (d *DialogSelect) Visible(value bool) {
 				vT.Disable()
 			}
 		case *eui.ComboBox:
-			vT.Visible = value
+			vT.Visible(value)
 			if value {
 				vT.Enable()
 			} else {
