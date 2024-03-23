@@ -21,6 +21,7 @@ func NewBoard() *Board {
 	b.dim = 2
 	b.layout = eui.NewGridLayoutRightDown(b.dim, b.dim)
 	b.grid = eui.NewGridView(2, 2)
+	b.grid.Visible(false)
 	b.grid.DrawRect = true
 	b.grid.Fg(eui.Red)
 	b.grid.Bg(eui.Black)
@@ -45,6 +46,26 @@ func (b *Board) Setup(dim int) {
 	b.layout.SetDim(size, size)
 }
 
+func (b *Board) Visible(value bool) {
+	for _, v := range b.GetContainer() {
+		switch vT := v.(type) {
+		case *eui.GridView:
+			vT.Visible(value)
+		}
+	}
+	for _, v := range b.layout.GetContainer() {
+		switch vT := v.(type) {
+		case *eui.Button:
+			vT.Visible(value)
+			if value {
+				vT.Enable()
+			} else {
+				vT.Disable()
+			}
+		}
+	}
+}
+
 func (b *Board) buttonsLogic(btn *eui.Button) {
 	fmt.Println("pressed")
 }
@@ -59,6 +80,9 @@ func (b *Board) Update(dt int) {
 }
 
 func (b *Board) Draw(surface *ebiten.Image) {
+	// if !b.IsVisible() {
+	// 	return
+	// }
 	for _, v := range b.layout.GetContainer() {
 		v.Draw(surface)
 	}

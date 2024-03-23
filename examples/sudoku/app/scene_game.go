@@ -30,6 +30,7 @@ func NewSceneSudoku() *SceneSudoku {
 				s.topBar.SetTitle("Sudoku " + c.String())
 				s.dialogSelect.Visible(false)
 				s.board.Setup(a)
+				s.board.Visible(true)
 			}
 		}
 	})

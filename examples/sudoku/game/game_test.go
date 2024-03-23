@@ -92,19 +92,19 @@ func TestFieldIsValidVertical(t *testing.T) {
 func TestFieldIsValidHorAndVer(t *testing.T) {
 	c := NewField(2)
 	c.cells[0].SetValue(1)
-	gotB := c.IsValid(1, 0, 2)
+	gotB := c.IsValidMove(1, 0, 2)
 	wantB := true
 	if gotB != wantB {
 		t.Errorf("isValid(1,0,2) got %v want %v", gotB, wantB)
 	}
 
-	gotB = c.IsValid(1, 0, 1)
+	gotB = c.IsValidMove(1, 0, 1)
 	wantB = false
 	if gotB != wantB {
 		t.Errorf("isValid(1,0,1) got %v want %v", gotB, wantB)
 	}
 
-	gotB = c.IsValid(1, 0, 3)
+	gotB = c.IsValidMove(1, 0, 3)
 	wantB = true
 	if gotB != wantB {
 		t.Errorf("isValid(1,0,3) got %v want %v", gotB, wantB)
@@ -124,7 +124,7 @@ func TestFieldIsValidRect(t *testing.T) {
 	c.cells[0].SetValue(1)
 	c.cells[1].SetValue(2)
 
-	gotB := c.IsValid(0, 1, 3)
+	gotB := c.IsValidMove(0, 1, 3)
 	wantB := true
 	if gotB != wantB {
 		t.Errorf("isValidRect(0,1,3) got %v want %v", gotB, wantB)
@@ -140,7 +140,7 @@ func TestFieldIsValidRect(t *testing.T) {
 		t.Errorf("isValidRect(1,1,4) got %v want %v", gotB, wantB)
 	}
 
-	gotB = c.IsValid(1, 1, 1)
+	gotB = c.IsValidMove(1, 1, 1)
 	wantB = false
 	if gotB != wantB {
 		t.Errorf("isValidRect(1,1,1) got %v want %v", gotB, wantB)
@@ -152,7 +152,7 @@ func TestFieldIsValidRect(t *testing.T) {
 	c.cells[8].SetValue(2)
 	c.cells[9].SetValue(3)
 
-	gotB = c.IsValid(2, 2, 4)
+	gotB = c.IsValidMove(2, 2, 4)
 	wantB = true
 	if gotB != wantB {
 		t.Errorf("isValidRect(2,2,4) got %v want %v", gotB, wantB)
@@ -163,13 +163,13 @@ func TestFieldIsValidRect(t *testing.T) {
 	c.cells[12].SetValue(4)
 	c.cells[13].SetValue(1)
 
-	gotB = c.IsValid(2, 3, 2)
+	gotB = c.IsValidMove(2, 3, 2)
 	wantB = true
 	if gotB != wantB {
 		t.Errorf("isValidRect(2,3,2) got %v want %v", gotB, wantB)
 	}
 
-	gotB = c.IsValid(2, 3, 4)
+	gotB = c.IsValidMove(2, 3, 4)
 	wantB = false
 	if gotB != wantB {
 		t.Errorf("isValidRect(2,3,4) got %v want %v", gotB, wantB)

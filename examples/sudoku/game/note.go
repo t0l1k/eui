@@ -15,18 +15,27 @@ func NewNote(dim int) *Note {
 	return n
 }
 
+func (n *Note) Reset() {
+	n.excess = nil
+	n.values = nil
+	for i := 1; i <= n.dim*n.dim; i++ {
+		n.values = append(n.values, i)
+	}
+}
+
 func (n Note) IsFound(value int) bool {
-	found, _ := n.isContain(n.values, value)
-	return found
+	return ArrIsContain(n.values, value)
 }
 
 func (n Note) IsExcess(value int) bool {
-	found, _ := n.isContain(n.excess, value)
-	return found
+	return ArrIsContain(n.excess, value)
 }
 
 func (n *Note) AddNote(value int) {
-	found, _ := n.isContain(n.values, value)
+	if value == 0 {
+		panic("Note found 0")
+	}
+	found := ArrIsContain(n.values, value)
 	if found {
 		n.excess = append(n.excess, value)
 	} else {
@@ -35,8 +44,11 @@ func (n *Note) AddNote(value int) {
 }
 
 func (n *Note) RemoveNote(value int) {
-	n.values = n.removeFrom(n.values, value)
-	n.excess = n.removeFrom(n.excess, value)
+	if value == 0 {
+		panic("Note found 0")
+	}
+	n.values = RemoveFromArr(n.values, value)
+	n.excess = RemoveFromArr(n.excess, value)
 }
 
 func (n Note) String() (result string) {
@@ -44,36 +56,40 @@ func (n Note) String() (result string) {
 		size := n.dim * n.dim
 		for i := 1; i <= size; i++ {
 			if n.IsFound(i) && !n.IsExcess(i) {
-				result += fmt.Sprintf("%v", i)
+				result += fmt.Sprintf("(%v)", i)
 			} else if n.IsExcess(i) {
-				result += fmt.Sprintf("%v!", i)
-			} else {
-				result += "."
-			}
-			if i%n.dim == 0 {
-				result += "\n"
+				result += fmt.Sprintf("(%v!)", i)
 			}
 		}
 	}
 	return result
 }
 
-func (n Note) removeFrom(arr []int, value int) []int {
-	found, idx := n.isContain(arr, value)
-	if !found {
+func RemoveFromArr(arr []int, value int) []int {
+	if !ArrIsContain(arr, value) {
 		return arr
 	}
+	idx := ArrIsContainGetIdx(arr, value)
 	copy(arr[idx:], arr[idx+1:])
-	arr[len(arr)-1] = 0
+	arr[len(arr)-1] = value
 	arr = arr[:len(arr)-1]
 	return arr
 }
 
-func (n Note) isContain(arr []int, value int) (bool, int) {
-	for i, v := range arr {
+func ArrIsContain(arr []int, value int) bool {
+	for _, v := range arr {
 		if value == v {
-			return true, i
+			return true
 		}
 	}
-	return false, -1
+	return false
+}
+
+func ArrIsContainGetIdx(arr []int, value int) int {
+	for i, v := range arr {
+		if value == v {
+			return i
+		}
+	}
+	return -1
 }
