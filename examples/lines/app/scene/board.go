@@ -26,7 +26,8 @@ func NewBoard(dim int) *Board {
 	b.table = NewTable()
 	b.table.Visible(false)
 	b.Add(b.table)
-	b.gameLayout = eui.NewGridLayoutRightDown(b.field.Dim())
+	r, c := b.field.Dim()
+	b.gameLayout = eui.NewGridLayoutRightDown(float64(r), float64(c))
 	b.varScore = eui.NewSubject()
 	b.varScore.Attach(b.table.leftLbl)
 	b.bestScore = 10
@@ -45,7 +46,8 @@ func (b *Board) NewGame(dim int) {
 		cell.State.Attach(btn)
 		b.gameLayout.Add(btn)
 	}
-	b.gameLayout.SetDim(b.field.Dim())
+	r, c := b.field.Dim()
+	b.gameLayout.SetDim(float64(r), float64(c))
 	b.field.NextMoveBalls()
 	b.field.ShowFilledNext()
 	b.field.NextMoveBalls()
@@ -146,7 +148,7 @@ func (b *Board) Draw(surface *ebiten.Image) {
 func (b *Board) Resize(rect []int) {
 	b.Rect(eui.NewRect(rect))
 	b.SpriteBase.Resize(rect)
-	b.gameLayout.SetCellMargin(int(float64(b.GetRect().GetLowestSize()) * 0.008))
+	b.gameLayout.SetCellMargin(float64(b.GetRect().GetLowestSize()) * 0.008)
 	w0, h0 := b.GetRect().Size()
 	x0, y0 := b.GetRect().Pos()
 	dim := b.field.Conf.Dim

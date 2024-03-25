@@ -313,7 +313,8 @@ func NewBoard() *Board {
 	b.varArea.Attach(b.dialog.message)
 	b.field = NewField()
 	b.field.State.Attach(b)
-	b.layout = eui.NewGridLayoutRightDown(b.field.Dim())
+	r, c := b.field.Dim()
+	b.layout = eui.NewGridLayoutRightDown(float64(r), float64(c))
 	b.stopwatch = eui.NewStopwatch()
 	b.NewGame()
 	return b
@@ -330,7 +331,8 @@ func (b *Board) NewGame() {
 		cell.state.Attach(btn)
 		b.layout.Add(btn)
 	}
-	b.layout.SetDim(b.field.Dim())
+	r, c := b.field.Dim()
+	b.layout.SetDim(float64(r), float64(c))
 }
 
 func (b *Board) Reset() {
@@ -423,7 +425,7 @@ func (b *Board) Draw(surface *ebiten.Image) {
 func (b *Board) Resize(rect []int) {
 	b.Rect(eui.NewRect(rect))
 	b.SpriteBase.Resize(rect)
-	b.layout.SetCellMargin(int(float64(b.GetRect().GetLowestSize()) * 0.008))
+	b.layout.SetCellMargin(float64(b.GetRect().GetLowestSize()) * 0.008)
 	b.layout.Resize(rect)
 	w0, h0 := b.GetRect().Size()
 	x, y := b.GetRect().Pos()

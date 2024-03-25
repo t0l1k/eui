@@ -15,3 +15,32 @@ func DrawDebugLines(surface *ebiten.Image, rect *Rect) {
 	vector.StrokeLine(surface, x, h/2, w, h/2, 1, Red, true)
 	vector.StrokeLine(surface, w/2, h, w/2, y, 1, Red, true)
 }
+
+func RemoveFromIntSliceValue(arr []int, value int) []int {
+	if !IntSliceContains(arr, value) {
+		return arr
+	}
+	idx := GetIdxValueFromIntSlice(arr, value)
+	copy(arr[idx:], arr[idx+1:])
+	arr[len(arr)-1] = value
+	arr = arr[:len(arr)-1]
+	return arr
+}
+
+func IntSliceContains(arr []int, value int) bool {
+	for _, v := range arr {
+		if value == v {
+			return true
+		}
+	}
+	return false
+}
+
+func GetIdxValueFromIntSlice(arr []int, value int) int {
+	for i, v := range arr {
+		if value == v {
+			return i
+		}
+	}
+	return -1
+}

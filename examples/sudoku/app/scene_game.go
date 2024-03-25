@@ -25,11 +25,11 @@ func NewSceneSudoku() *SceneSudoku {
 	s.dialogSelect = NewDialogSelect(func(b *eui.Button) {
 		for _, v := range s.dialogSelect.btnsDiff {
 			if v.btn.IsPressed() {
-				a, b, c := v.GetData()
-				fmt.Println("pressed:", v.title.GetText(), a, b, c)
-				s.topBar.SetTitle("Sudoku " + c.String())
+				size, score, diff := v.GetData()
+				fmt.Println("pressed selected:", v.title.GetText(), size, score, diff)
+				s.topBar.SetTitle("Sudoku " + diff.String())
 				s.dialogSelect.Visible(false)
-				s.board.Setup(a)
+				s.board.Setup(size, diff)
 				s.board.Visible(true)
 			}
 		}

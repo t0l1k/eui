@@ -6,11 +6,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/sudoku/game"
+	"github.com/t0l1k/eui/examples/sudoku/game/dynamo"
 )
 
 type Board struct {
 	eui.DrawableBase
 	dim    int
+	diff   game.Difficult
 	field  *game.Field
 	layout *eui.GridLayoutRightDown
 	grid   *eui.GridView
@@ -18,8 +20,7 @@ type Board struct {
 
 func NewBoard() *Board {
 	b := &Board{}
-	b.dim = 2
-	b.layout = eui.NewGridLayoutRightDown(b.dim, b.dim)
+	b.layout = eui.NewGridLayoutRightDown(2, 2)
 	b.grid = eui.NewGridView(2, 2)
 	b.grid.Visible(false)
 	b.grid.DrawRect = true
@@ -29,21 +30,24 @@ func NewBoard() *Board {
 	return b
 }
 
-func (b *Board) Setup(dim int) {
+func (b *Board) Setup(dim int, diff game.Difficult) {
 	b.dim = dim
 	size := b.dim * b.dim
-	b.layout.ResetContainerBase()
+	b.diff = diff
+	gen := dynamo.NewGenSudokuField(dim, diff)
 	b.field = game.NewField(b.dim)
-	go b.field.New()
+	b.field.Load(gen.GetField())
+	b.layout.ResetContainerBase()
 	for y := 0; y < size; y++ {
 		for x := 0; x < size; x++ {
-			btn := eui.NewButton(" ", b.buttonsLogic)
-			b.field.GetCells()[b.field.Idx(x, y)].Attach(btn)
+			idx := y*size + x
+			btn := NewCellIcon(b.field.GetCells()[idx], b.buttonsLogic, eui.Silver, eui.Black)
+			b.field.GetCells()[idx].Attach(btn)
 			b.layout.Add(btn)
 		}
 	}
-	b.grid.Set(dim, dim)
-	b.layout.SetDim(size, size)
+	b.grid.Set(float64(dim), float64(dim))
+	b.layout.SetDim(float64(size), float64(size))
 }
 
 func (b *Board) Visible(value bool) {
@@ -55,7 +59,7 @@ func (b *Board) Visible(value bool) {
 	}
 	for _, v := range b.layout.GetContainer() {
 		switch vT := v.(type) {
-		case *eui.Button:
+		case *CellIcon:
 			vT.Visible(value)
 			if value {
 				vT.Enable()
@@ -67,7 +71,13 @@ func (b *Board) Visible(value bool) {
 }
 
 func (b *Board) buttonsLogic(btn *eui.Button) {
-	fmt.Println("pressed")
+	for i := range b.layout.GetContainer() {
+		icon := b.layout.GetContainer()[i].(*CellIcon)
+		if icon.btn == btn {
+			cell := b.field.GetCells()[i]
+			fmt.Println("pressed", cell.Value(), cell)
+		}
+	}
 }
 
 func (b *Board) Update(dt int) {
@@ -95,6 +105,6 @@ func (b *Board) Resize(rect []int) {
 	b.layout.Resize(rect)
 	b.grid.Resize(rect)
 	margin := float64(b.layout.GetRect().GetLowestSize()) * 0.005
-	b.layout.SetCellMargin(int(margin))
-	b.grid.SetStrokewidth(int(margin) * 2)
+	b.layout.SetCellMargin(margin)
+	b.grid.SetStrokewidth(margin * 2)
 }

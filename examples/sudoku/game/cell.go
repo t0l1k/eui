@@ -32,7 +32,9 @@ func (c *Cell) Add(value int) {
 	c.notes.RemoveNote(value)
 }
 
-func (c *Cell) GetNotes() (value []int) { return c.notes.values }
+func (c *Cell) GetDim() int                     { return c.notes.dim }
+func (c *Cell) GetValue() int                   { return c.Value().(int) }
+func (c *Cell) GetNotes() ([]int, []int, []int) { return c.notes.GetNoteValues() }
 
 func (c *Cell) AddNote(value int) {
 	c.notes.AddNote(value)
@@ -40,16 +42,16 @@ func (c *Cell) AddNote(value int) {
 
 func (c Cell) StringValueShort() (result string) {
 	if c.Value().(int) > 0 {
-		result = fmt.Sprintf("[%10v]", c.Value())
+		result = fmt.Sprintf("[%5v]", c.Value())
 	} else {
-		result = fmt.Sprintf("[%10v]", c.notes.String())
+		result = fmt.Sprintf("[%5v]", c.notes.String())
 	}
 	return result
 }
 
 func (c Cell) String() (result string) {
 	if c.Value().(int) > 0 {
-		result = fmt.Sprintf("\n%3v\n", c.Value().(int))
+		result = fmt.Sprintf("%3v", c.Value().(int))
 	} else {
 		result = c.notes.String()
 	}

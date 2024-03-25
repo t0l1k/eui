@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/examples/sudoku/game"
 )
 
 type DialogSelect struct {
@@ -32,7 +33,7 @@ func NewDialogSelect(f func(b *eui.Button)) *DialogSelect {
 	})
 	d.Add(d.cSize)
 	for i := 0; i < 3; i++ {
-		btn := NewDiffButton(d.size.Value().(int), Difficult(i), "3:00", f)
+		btn := NewDiffButton(d.size.Value().(int), game.Difficult(i), "3:00", f)
 		d.size.Attach(btn)
 		d.btnsDiff = append(d.btnsDiff, btn)
 		d.Add(btn)

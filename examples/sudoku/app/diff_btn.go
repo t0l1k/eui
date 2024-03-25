@@ -2,40 +2,20 @@ package app
 
 import (
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/examples/sudoku/game"
 )
-
-type Difficult int
-
-const (
-	Easy Difficult = iota
-	Normal
-	Hard
-)
-
-func (d Difficult) Size() int { return int(Hard) }
-func (d Difficult) String() (res string) {
-	switch d {
-	case Easy:
-		res = "Легко"
-	case Normal:
-		res = "Нормально"
-	case Hard:
-		res = "Сложно"
-	}
-	return res
-}
 
 type DiffButton struct {
 	eui.DrawableBase
 	title, bestScore *eui.Text
 	btn              *eui.Button
 	size             int
-	diff             Difficult
+	diff             game.Difficult
 	score            string
 	f                func(b *eui.Button)
 }
 
-func NewDiffButton(size int, diff Difficult, score string, f func(b *eui.Button)) *DiffButton {
+func NewDiffButton(size int, diff game.Difficult, score string, f func(b *eui.Button)) *DiffButton {
 	d := &DiffButton{}
 	d.size = size
 	d.score = score
@@ -50,7 +30,7 @@ func NewDiffButton(size int, diff Difficult, score string, f func(b *eui.Button)
 	return d
 }
 
-func (d *DiffButton) GetData() (int, string, Difficult) {
+func (d *DiffButton) GetData() (int, string, game.Difficult) {
 	return d.size, d.score, d.diff
 }
 

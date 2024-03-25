@@ -1,10 +1,14 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/t0l1k/eui"
+)
 
 type Note struct {
-	dim            int
-	values, excess []int
+	dim                  int
+	values, excess, user []int
 }
 
 func NewNote(dim int) *Note {
@@ -18,24 +22,29 @@ func NewNote(dim int) *Note {
 func (n *Note) Reset() {
 	n.excess = nil
 	n.values = nil
+	n.user = nil
 	for i := 1; i <= n.dim*n.dim; i++ {
 		n.values = append(n.values, i)
 	}
 }
 
+func (n *Note) GetNoteValues() ([]int, []int, []int) {
+	return n.values, n.excess, n.user
+}
+
 func (n Note) IsFound(value int) bool {
-	return ArrIsContain(n.values, value)
+	return eui.IntSliceContains(n.values, value)
 }
 
 func (n Note) IsExcess(value int) bool {
-	return ArrIsContain(n.excess, value)
+	return eui.IntSliceContains(n.excess, value)
 }
 
 func (n *Note) AddNote(value int) {
 	if value == 0 {
 		panic("Note found 0")
 	}
-	found := ArrIsContain(n.values, value)
+	found := eui.IntSliceContains(n.values, value)
 	if found {
 		n.excess = append(n.excess, value)
 	} else {
@@ -47,8 +56,8 @@ func (n *Note) RemoveNote(value int) {
 	if value == 0 {
 		panic("Note found 0")
 	}
-	n.values = RemoveFromArr(n.values, value)
-	n.excess = RemoveFromArr(n.excess, value)
+	n.values = eui.RemoveFromIntSliceValue(n.values, value)
+	n.excess = eui.RemoveFromIntSliceValue(n.excess, value)
 }
 
 func (n Note) String() (result string) {
@@ -63,33 +72,4 @@ func (n Note) String() (result string) {
 		}
 	}
 	return result
-}
-
-func RemoveFromArr(arr []int, value int) []int {
-	if !ArrIsContain(arr, value) {
-		return arr
-	}
-	idx := ArrIsContainGetIdx(arr, value)
-	copy(arr[idx:], arr[idx+1:])
-	arr[len(arr)-1] = value
-	arr = arr[:len(arr)-1]
-	return arr
-}
-
-func ArrIsContain(arr []int, value int) bool {
-	for _, v := range arr {
-		if value == v {
-			return true
-		}
-	}
-	return false
-}
-
-func ArrIsContainGetIdx(arr []int, value int) int {
-	for i, v := range arr {
-		if value == v {
-			return i
-		}
-	}
-	return -1
 }
