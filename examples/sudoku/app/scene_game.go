@@ -11,6 +11,7 @@ type SceneSudoku struct {
 	topBar       *eui.TopBar
 	dialogSelect *DialogSelect
 	board        *Board
+	bottomBar    *BottomBar
 }
 
 func NewSceneSudoku() *SceneSudoku {
@@ -18,6 +19,7 @@ func NewSceneSudoku() *SceneSudoku {
 	s.topBar = eui.NewTopBar("Sudoku", func(b *eui.Button) {
 		s.dialogSelect.Visible(true)
 		s.board.Visible(false)
+		s.bottomBar.Visible(false)
 	})
 	s.topBar.SetShowStopwatch()
 	s.topBar.SetTitleCoverArea(0.85)
@@ -31,12 +33,28 @@ func NewSceneSudoku() *SceneSudoku {
 				s.dialogSelect.Visible(false)
 				s.board.Setup(size, diff)
 				s.board.Visible(true)
+				s.bottomBar.Setup(size)
+				s.bottomBar.Visible(true)
 			}
 		}
 	})
 	s.Add(s.dialogSelect)
-	s.board = NewBoard()
+	s.dialogSelect.Visible(true)
+	s.board = NewBoard(func(btn *eui.Button) {
+		for i := range s.board.layout.GetContainer() {
+			icon := s.board.layout.GetContainer()[i].(*CellIcon)
+			if icon.btn == btn {
+				cell := s.board.field.GetCells()[i]
+				fmt.Println("pressed", cell.Value(), cell)
+			}
+		}
+
+	})
 	s.Add(s.board)
+	s.bottomBar = NewBottomBar(func(btn *eui.Button) {
+		fmt.Println("pressed", btn.GetText())
+	})
+	s.Add(s.bottomBar)
 	s.Resize()
 	return s
 }
@@ -47,5 +65,6 @@ func (s *SceneSudoku) Resize() {
 	hT := int(float64(rect.GetLowestSize()) * 0.1)
 	s.topBar.Resize([]int{0, 0, w, hT})
 	s.dialogSelect.Resize([]int{hT / 2, hT + hT/2, w - hT, h - hT*2})
-	s.board.Resize([]int{0, hT, w, h - hT})
+	s.board.Resize([]int{0, hT, w, h - hT*3})
+	s.bottomBar.Resize([]int{0, h - hT*2, w, hT * 2})
 }

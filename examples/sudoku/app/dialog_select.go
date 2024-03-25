@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/sudoku/game"
 )
@@ -14,6 +15,7 @@ type DialogSelect struct {
 	cSize    *eui.ComboBox
 	btnsDiff []*DiffButton
 	size     *eui.SubjectBase
+	show     bool
 }
 
 func NewDialogSelect(f func(b *eui.Button)) *DialogSelect {
@@ -22,7 +24,7 @@ func NewDialogSelect(f func(b *eui.Button)) *DialogSelect {
 	d.Add(d.title)
 	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.Visible(false) })
 	d.Add(d.btnClose)
-	data := []interface{}{2, 3, 4}
+	data := []interface{}{2, 3}
 	idx := 0
 	d.size = eui.NewSubject()
 	d.size.SetValue(data[idx])
@@ -41,40 +43,22 @@ func NewDialogSelect(f func(b *eui.Button)) *DialogSelect {
 	return d
 }
 
-func (d *DialogSelect) Visible(value bool) {
-	for _, v := range d.GetContainer() {
-		switch vT := v.(type) {
-		case *eui.Text:
-			vT.Visible(value)
-			if value {
-				vT.Enable()
-			} else {
-				vT.Disable()
-			}
-		case *eui.Button:
-			vT.Visible(value)
-			if value {
-				vT.Enable()
-			} else {
-				vT.Disable()
-			}
-		case *eui.ComboBox:
-			vT.Visible(value)
-			if value {
-				vT.Enable()
-			} else {
-				vT.Disable()
-			}
-		case *DiffButton:
-			vT.Visible(value)
-			if value {
-				vT.Enable()
-			} else {
-				vT.Disable()
-			}
-		}
+func (d *DialogSelect) Update(dt int) {
+	if !d.IsVisible() {
+		return
 	}
+	d.DrawableBase.Update(dt)
 }
+
+func (d *DialogSelect) Draw(surface *ebiten.Image) {
+	if !d.IsVisible() {
+		return
+	}
+	d.DrawableBase.Draw(surface)
+}
+
+func (d *DialogSelect) IsVisible() bool    { return d.show }
+func (d *DialogSelect) Visible(value bool) { d.show = value }
 
 func (d *DialogSelect) Resize(rect []int) {
 	d.Rect(eui.NewRect(rect))

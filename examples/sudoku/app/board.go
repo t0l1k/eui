@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/sudoku/game"
@@ -16,10 +14,13 @@ type Board struct {
 	field  *game.Field
 	layout *eui.GridLayoutRightDown
 	grid   *eui.GridView
+	fn     func(*eui.Button)
+	show   bool
 }
 
-func NewBoard() *Board {
+func NewBoard(fn func(b *eui.Button)) *Board {
 	b := &Board{}
+	b.fn = fn
 	b.layout = eui.NewGridLayoutRightDown(2, 2)
 	b.grid = eui.NewGridView(2, 2)
 	b.grid.Visible(false)
@@ -41,7 +42,7 @@ func (b *Board) Setup(dim int, diff game.Difficult) {
 	for y := 0; y < size; y++ {
 		for x := 0; x < size; x++ {
 			idx := y*size + x
-			btn := NewCellIcon(b.field.GetCells()[idx], b.buttonsLogic, eui.Silver, eui.Black)
+			btn := NewCellIcon(b.field.GetCells()[idx], b.fn, eui.Silver, eui.Black)
 			b.field.GetCells()[idx].Attach(btn)
 			b.layout.Add(btn)
 		}
@@ -50,37 +51,10 @@ func (b *Board) Setup(dim int, diff game.Difficult) {
 	b.layout.SetDim(float64(size), float64(size))
 }
 
-func (b *Board) Visible(value bool) {
-	for _, v := range b.GetContainer() {
-		switch vT := v.(type) {
-		case *eui.GridView:
-			vT.Visible(value)
-		}
-	}
-	for _, v := range b.layout.GetContainer() {
-		switch vT := v.(type) {
-		case *CellIcon:
-			vT.Visible(value)
-			if value {
-				vT.Enable()
-			} else {
-				vT.Disable()
-			}
-		}
-	}
-}
-
-func (b *Board) buttonsLogic(btn *eui.Button) {
-	for i := range b.layout.GetContainer() {
-		icon := b.layout.GetContainer()[i].(*CellIcon)
-		if icon.btn == btn {
-			cell := b.field.GetCells()[i]
-			fmt.Println("pressed", cell.Value(), cell)
-		}
-	}
-}
-
 func (b *Board) Update(dt int) {
+	if !b.IsVisible() {
+		return
+	}
 	for _, v := range b.layout.GetContainer() {
 		v.Update(dt)
 	}
@@ -90,9 +64,9 @@ func (b *Board) Update(dt int) {
 }
 
 func (b *Board) Draw(surface *ebiten.Image) {
-	// if !b.IsVisible() {
-	// 	return
-	// }
+	if !b.IsVisible() {
+		return
+	}
 	for _, v := range b.layout.GetContainer() {
 		v.Draw(surface)
 	}
@@ -100,6 +74,9 @@ func (b *Board) Draw(surface *ebiten.Image) {
 		v.Draw(surface)
 	}
 }
+
+func (b *Board) IsVisible() bool    { return b.show }
+func (b *Board) Visible(value bool) { b.show = value }
 
 func (b *Board) Resize(rect []int) {
 	b.layout.Resize(rect)
