@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/t0l1k/eui"
 )
@@ -41,18 +42,30 @@ func NewSceneSudoku() *SceneSudoku {
 	s.Add(s.dialogSelect)
 	s.dialogSelect.Visible(true)
 	s.board = NewBoard(func(btn *eui.Button) {
-		for i := range s.board.layout.GetContainer() {
-			icon := s.board.layout.GetContainer()[i].(*CellIcon)
+		for i := range s.board.layoutCells.GetContainer() {
+			icon := s.board.layoutCells.GetContainer()[i].(*CellIcon)
 			if icon.btn == btn {
-				cell := s.board.field.GetCells()[i]
-				fmt.Println("pressed", cell.Value(), cell)
+				x, y := s.board.field.Pos(i)
+				if s.bottomBar.IsActDel() {
+					s.board.field.ResetCell(x, y)
+				} else if s.bottomBar.IsActNotes() {
+				} else if s.bottomBar.IsActUndo() {
+				} else {
+					s.board.field.Add(x, y, s.board.GetHighlightValue())
+					s.board.Highlight(strconv.Itoa(s.board.GetHighlightValue()))
+				}
 			}
 		}
 
 	})
 	s.Add(s.board)
 	s.bottomBar = NewBottomBar(func(btn *eui.Button) {
-		fmt.Println("pressed", btn.GetText())
+		if s.bottomBar.SetAct(btn) {
+			s.board.Highlight(btn.GetText())
+		} else {
+			s.board.Highlight("0")
+		}
+		fmt.Println("pressed", btn.GetText(), btn.GetBg())
 	})
 	s.Add(s.bottomBar)
 	s.Resize()
@@ -65,6 +78,7 @@ func (s *SceneSudoku) Resize() {
 	hT := int(float64(rect.GetLowestSize()) * 0.1)
 	s.topBar.Resize([]int{0, 0, w, hT})
 	s.dialogSelect.Resize([]int{hT / 2, hT + hT/2, w - hT, h - hT*2})
-	s.board.Resize([]int{0, hT, w, h - hT*3})
-	s.bottomBar.Resize([]int{0, h - hT*2, w, hT * 2})
+	h1 := h - hT*2
+	s.board.Resize([]int{0, hT, w, h1})
+	s.bottomBar.Resize([]int{(w - (h1)) / 2, h - hT, h1, hT})
 }

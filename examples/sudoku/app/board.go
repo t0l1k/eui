@@ -1,6 +1,8 @@
 package app
 
 import (
+	"strconv"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/sudoku/game"
@@ -9,19 +11,20 @@ import (
 
 type Board struct {
 	eui.DrawableBase
-	dim    int
-	diff   game.Difficult
-	field  *game.Field
-	layout *eui.GridLayoutRightDown
-	grid   *eui.GridView
-	fn     func(*eui.Button)
-	show   bool
+	dim         int
+	diff        game.Difficult
+	field       *game.Field
+	layoutCells *eui.GridLayoutRightDown
+	grid        *eui.GridView
+	fn          func(*eui.Button)
+	show        bool
+	highlight   int
 }
 
 func NewBoard(fn func(b *eui.Button)) *Board {
 	b := &Board{}
 	b.fn = fn
-	b.layout = eui.NewGridLayoutRightDown(2, 2)
+	b.layoutCells = eui.NewGridLayoutRightDown(2, 2)
 	b.grid = eui.NewGridView(2, 2)
 	b.grid.Visible(false)
 	b.grid.DrawRect = true
@@ -38,24 +41,37 @@ func (b *Board) Setup(dim int, diff game.Difficult) {
 	gen := dynamo.NewGenSudokuField(dim, diff)
 	b.field = game.NewField(b.dim)
 	b.field.Load(gen.GetField())
-	b.layout.ResetContainerBase()
+	b.layoutCells.ResetContainerBase()
 	for y := 0; y < size; y++ {
 		for x := 0; x < size; x++ {
 			idx := y*size + x
 			btn := NewCellIcon(b.field.GetCells()[idx], b.fn, eui.Silver, eui.Black)
 			b.field.GetCells()[idx].Attach(btn)
-			b.layout.Add(btn)
+			b.layoutCells.Add(btn)
 		}
 	}
 	b.grid.Set(float64(dim), float64(dim))
-	b.layout.SetDim(float64(size), float64(size))
+	b.layoutCells.SetDim(float64(size), float64(size))
+}
+
+func (b *Board) GetHighlightValue() int { return b.highlight }
+
+func (b *Board) Highlight(value string) {
+	n, err := strconv.ParseInt(value, 10, 64)
+	if err != nil {
+		panic(err)
+	}
+	b.highlight = int(n)
+	for _, v := range b.layoutCells.GetContainer() {
+		v.(*CellIcon).Highlight(b.highlight)
+	}
 }
 
 func (b *Board) Update(dt int) {
 	if !b.IsVisible() {
 		return
 	}
-	for _, v := range b.layout.GetContainer() {
+	for _, v := range b.layoutCells.GetContainer() {
 		v.Update(dt)
 	}
 	for _, v := range b.GetContainer() {
@@ -67,7 +83,7 @@ func (b *Board) Draw(surface *ebiten.Image) {
 	if !b.IsVisible() {
 		return
 	}
-	for _, v := range b.layout.GetContainer() {
+	for _, v := range b.layoutCells.GetContainer() {
 		v.Draw(surface)
 	}
 	for _, v := range b.GetContainer() {
@@ -76,12 +92,13 @@ func (b *Board) Draw(surface *ebiten.Image) {
 }
 
 func (b *Board) IsVisible() bool    { return b.show }
-func (b *Board) Visible(value bool) { b.show = value }
+func (b *Board) Visible(value bool) { b.show = value; b.grid.Visible(value) }
 
 func (b *Board) Resize(rect []int) {
-	b.layout.Resize(rect)
+	b.Rect(eui.NewRect(rect))
+	b.layoutCells.Resize(rect)
 	b.grid.Resize(rect)
-	margin := float64(b.layout.GetRect().GetLowestSize()) * 0.005
-	b.layout.SetCellMargin(margin)
+	margin := float64(b.layoutCells.GetRect().GetLowestSize()) * 0.005
+	b.layoutCells.SetCellMargin(margin)
 	b.grid.SetStrokewidth(margin * 2)
 }

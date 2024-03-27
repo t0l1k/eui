@@ -32,6 +32,12 @@ func (c *Cell) Add(value int) {
 	c.notes.RemoveNote(value)
 }
 
+func (c *Cell) RemoveNote(value int) {
+	v := c.Value().(int)
+	c.SetValue(v)
+	c.notes.RemoveNote(value)
+}
+
 func (c *Cell) GetDim() int                     { return c.notes.dim }
 func (c *Cell) GetValue() int                   { return c.Value().(int) }
 func (c *Cell) GetNotes() ([]int, []int, []int) { return c.notes.GetNoteValues() }

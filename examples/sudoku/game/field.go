@@ -46,11 +46,11 @@ func (f *Field) Add(x, y, n int) {
 	f.cells[idx].Add(n)
 	fmt.Println("Сделан ход:", n, idx, x, y, f.cells[idx].notes)
 	for x0 := 0; x0 < f.size; x0++ {
-		f.cells[f.Idx(x0, y)].notes.RemoveNote(n)
+		f.cells[f.Idx(x0, y)].RemoveNote(n)
 		fmt.Println("Сделан ход gorz:", n, idx, x, y, x0, f.cells[f.Idx(x0, y)].notes)
 	}
 	for y0 := 0; y0 < f.size; y0++ {
-		f.cells[f.Idx(x, y0)].notes.RemoveNote(n)
+		f.cells[f.Idx(x, y0)].RemoveNote(n)
 		fmt.Println("Сделан ход vert:", n, idx, x, y, y0, f.cells[f.Idx(x, y0)].notes)
 	}
 
@@ -61,10 +61,39 @@ func (f *Field) Add(x, y, n int) {
 		if rX0 != rX || rY0 != rY {
 			continue
 		}
-		v.notes.RemoveNote(n)
+		v.RemoveNote(n)
 		fmt.Println("Сделан ход rect:", n, idx, x, y, x1, y1, f.cells[f.Idx(x1, y1)].notes)
 	}
 	fmt.Println("Результат хода:", n, idx, x, y, f.cells[idx].notes, f.String())
+}
+
+func (f *Field) ResetCell(x, y int) {
+	idx := f.Idx(x, y)
+	f.cells[idx].Reset()
+	fmt.Println("Обнулить ход:", idx, x, y, f.cells[f.Idx(x, y)].notes)
+	for x0 := 0; x0 < f.size; x0++ {
+		n0 := f.cells[f.Idx(x0, y)].Value().(int)
+		f.cells[f.Idx(x, y)].RemoveNote(n0)
+		fmt.Println("Обнулить ход gorz:", idx, x0, y, n0, f.cells[f.Idx(x0, y)].notes)
+	}
+	for y0 := 0; y0 < f.size; y0++ {
+		n0 := f.cells[f.Idx(x, y0)].Value().(int)
+		f.cells[f.Idx(x, y)].RemoveNote(n0)
+		fmt.Println("Обнулить ход vert:", idx, x, y0, n0, f.cells[f.Idx(x, y0)].notes)
+	}
+	rX0, rY0 := f.getRectIdx(x, y)
+	for i := range f.cells {
+		x0, y0 := f.Pos(i)
+		rX, rY := f.getRectIdx(x0, y0)
+		if rX0 != rX || rY0 != rY {
+			continue
+		}
+		n0 := f.cells[f.Idx(x0, y0)].Value().(int)
+		f.cells[f.Idx(x, y)].RemoveNote(n0)
+		fmt.Println("Обнулить ход rect:", idx, x, y, n0, f.cells[f.Idx(x, y)].notes)
+	}
+	cell := f.cells[f.Idx(x, y)]
+	fmt.Println("Обнуление хода:", idx, x, y, cell.Value().(int), cell.notes, f.String())
 }
 
 func (f Field) getRectIdx(x int, y int) (rX int, rY int) {
