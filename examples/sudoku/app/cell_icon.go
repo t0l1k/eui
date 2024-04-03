@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"image/color"
 	"strconv"
 
@@ -56,7 +55,7 @@ func (c *CellIcon) Layout() {
 			lbl.Bg(eui.Silver)
 		}
 		lbl.Fg(c.GetFg())
-		fmt.Println("Иконка с цифрой", c.cell.GetValue())
+		// log.Println("Иконка с цифрой", c.cell.GetValue())
 	} else {
 		size := c.cell.GetDim()
 		arr1, _, _ := c.cell.GetNotes()
@@ -78,7 +77,7 @@ func (c *CellIcon) Layout() {
 				}
 			}
 			c.layout.SetDim(float64(size), float64(size))
-			fmt.Println("Иконка с заметкой", arr1)
+			// log.Println("Иконка с заметкой", arr1)
 		} else {
 			lbl := eui.NewText("")
 			c.layout.Add(lbl)
@@ -86,18 +85,14 @@ func (c *CellIcon) Layout() {
 			defer lbl.Close()
 			lbl.Bg(eui.Red)
 			lbl.Fg(c.GetFg())
-			fmt.Println("Иконка без заметок", c.cell.GetValue())
+			// log.Println("Иконка без заметок", c.cell.GetValue())
 		}
 	}
 	c.Dirty = false
 }
 
 func (c *CellIcon) UpdateData(value interface{}) {
-	switch v := value.(type) {
-	case int:
-		c.Dirty = true
-		fmt.Println("cell icon get", v)
-	}
+	c.Dirty = true
 }
 
 func (d *CellIcon) Update(dt int) {

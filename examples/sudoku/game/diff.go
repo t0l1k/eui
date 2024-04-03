@@ -1,7 +1,7 @@
 package game
 
 import (
-	"fmt"
+	"log"
 	"math/rand"
 )
 
@@ -29,7 +29,7 @@ func (d Difficult) Percent(dim int) (moves int) {
 	}
 	n := rand.Intn(percentMax-percentMin) + percentMin
 	moves = n * (size * size) / 100
-	fmt.Printf("Сложность %v size:%v min:%v max:%v n:%v moves:%v\n", d, size, percentMin, percentMax, n, moves)
+	log.Printf("Сложность %v size:%v min:%v max:%v n:%v moves:%v\n", d, size, percentMin, percentMax, n, moves)
 	return moves
 }
 func (d Difficult) String() (res string) {

@@ -6,12 +6,11 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/sudoku/game"
-	"github.com/t0l1k/eui/examples/sudoku/game/dynamo"
+	"github.com/t0l1k/eui/examples/sudoku/game/recur"
 )
 
 type Board struct {
 	eui.DrawableBase
-	dim         int
 	diff        game.Difficult
 	field       *game.Field
 	layoutCells *eui.GridLayoutRightDown
@@ -35,12 +34,10 @@ func NewBoard(fn func(b *eui.Button)) *Board {
 }
 
 func (b *Board) Setup(dim int, diff game.Difficult) {
-	b.dim = dim
-	size := b.dim * b.dim
+	var size = dim * dim
 	b.diff = diff
-	gen := dynamo.NewGenSudokuField(dim, diff)
-	b.field = game.NewField(b.dim)
-	b.field.Load(gen.GetField())
+	b.field = game.NewField(dim)
+	b.field.Load(recur.LoadSudokuField(dim, diff))
 	b.layoutCells.ResetContainerBase()
 	for y := 0; y < size; y++ {
 		for x := 0; x < size; x++ {

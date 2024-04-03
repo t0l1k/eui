@@ -24,7 +24,7 @@ func NewDialogSelect(f func(b *eui.Button)) *DialogSelect {
 	d.Add(d.title)
 	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.Visible(false) })
 	d.Add(d.btnClose)
-	data := []interface{}{2, 3}
+	data := []interface{}{2, 3, 4}
 	idx := 0
 	d.size = eui.NewSubject()
 	d.size.SetValue(data[idx])

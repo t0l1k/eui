@@ -44,3 +44,15 @@ func GetIdxValueFromIntSlice(arr []int, value int) int {
 	}
 	return -1
 }
+
+func IntSlicesIsEqual(a, b []int) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if b[i] != v {
+			return false
+		}
+	}
+	return true
+}

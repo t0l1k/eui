@@ -41,9 +41,6 @@ func (n Note) IsExcess(value int) bool {
 }
 
 func (n *Note) AddNote(value int) {
-	if value == 0 {
-		panic("Note found 0")
-	}
 	found := eui.IntSliceContains(n.values, value)
 	if found {
 		n.excess = append(n.excess, value)
@@ -53,9 +50,6 @@ func (n *Note) AddNote(value int) {
 }
 
 func (n *Note) RemoveNote(value int) {
-	if value == 0 {
-		panic("Note found 0")
-	}
 	n.values = eui.RemoveFromIntSliceValue(n.values, value)
 	n.excess = eui.RemoveFromIntSliceValue(n.excess, value)
 }

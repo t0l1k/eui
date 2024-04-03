@@ -2,8 +2,6 @@ package game
 
 import (
 	"fmt"
-
-	"github.com/t0l1k/eui"
 )
 
 type Field struct {
@@ -16,7 +14,7 @@ func NewField(dim int) *Field {
 	f := &Field{dim: dim, size: dim * dim}
 	for y := 0; y < f.size; y++ {
 		for x := 0; x < f.size; x++ {
-			f.cells = append(f.cells, NewCell(f.dim, eui.NewPointInt(x, y)))
+			f.cells = append(f.cells, NewCell(f.dim))
 		}
 	}
 	return f
@@ -24,6 +22,7 @@ func NewField(dim int) *Field {
 
 func (f *Field) Load(field []int) {
 	f.generated = field
+	fmt.Println(field)
 	f.Reset()
 	for i := range f.cells {
 		x, y := f.Pos(i)
@@ -47,11 +46,11 @@ func (f *Field) Add(x, y, n int) {
 	fmt.Println("Сделан ход:", n, idx, x, y, f.cells[idx].notes)
 	for x0 := 0; x0 < f.size; x0++ {
 		f.cells[f.Idx(x0, y)].RemoveNote(n)
-		fmt.Println("Сделан ход gorz:", n, idx, x, y, x0, f.cells[f.Idx(x0, y)].notes)
+		// fmt.Println("Сделан ход gorz:", n, idx, x, y, x0, f.cells[f.Idx(x0, y)].notes)
 	}
 	for y0 := 0; y0 < f.size; y0++ {
 		f.cells[f.Idx(x, y0)].RemoveNote(n)
-		fmt.Println("Сделан ход vert:", n, idx, x, y, y0, f.cells[f.Idx(x, y0)].notes)
+		// fmt.Println("Сделан ход vert:", n, idx, x, y, y0, f.cells[f.Idx(x, y0)].notes)
 	}
 
 	rX0, rY0 := f.getRectIdx(x, y)
@@ -62,7 +61,7 @@ func (f *Field) Add(x, y, n int) {
 			continue
 		}
 		v.RemoveNote(n)
-		fmt.Println("Сделан ход rect:", n, idx, x, y, x1, y1, f.cells[f.Idx(x1, y1)].notes)
+		// fmt.Println("Сделан ход rect:", n, idx, x, y, x1, y1, f.cells[f.Idx(x1, y1)].notes)
 	}
 	fmt.Println("Результат хода:", n, idx, x, y, f.cells[idx].notes, f.String())
 }
@@ -74,12 +73,12 @@ func (f *Field) ResetCell(x, y int) {
 	for x0 := 0; x0 < f.size; x0++ {
 		n0 := f.cells[f.Idx(x0, y)].Value().(int)
 		f.cells[f.Idx(x, y)].RemoveNote(n0)
-		fmt.Println("Обнулить ход gorz:", idx, x0, y, n0, f.cells[f.Idx(x0, y)].notes)
+		// fmt.Println("Обнулить ход gorz:", idx, x0, y, n0, f.cells[f.Idx(x0, y)].notes)
 	}
 	for y0 := 0; y0 < f.size; y0++ {
 		n0 := f.cells[f.Idx(x, y0)].Value().(int)
 		f.cells[f.Idx(x, y)].RemoveNote(n0)
-		fmt.Println("Обнулить ход vert:", idx, x, y0, n0, f.cells[f.Idx(x, y0)].notes)
+		// fmt.Println("Обнулить ход vert:", idx, x, y0, n0, f.cells[f.Idx(x, y0)].notes)
 	}
 	rX0, rY0 := f.getRectIdx(x, y)
 	for i := range f.cells {
@@ -90,7 +89,7 @@ func (f *Field) ResetCell(x, y int) {
 		}
 		n0 := f.cells[f.Idx(x0, y0)].Value().(int)
 		f.cells[f.Idx(x, y)].RemoveNote(n0)
-		fmt.Println("Обнулить ход rect:", idx, x, y, n0, f.cells[f.Idx(x, y)].notes)
+		// fmt.Println("Обнулить ход rect:", idx, x, y, n0, f.cells[f.Idx(x, y)].notes)
 	}
 	cell := f.cells[f.Idx(x, y)]
 	fmt.Println("Обнуление хода:", idx, x, y, cell.Value().(int), cell.notes, f.String())
@@ -116,7 +115,7 @@ func (f Field) String() (result string) {
 	result = fmt.Sprintf("sudoku %vX%v\n", f.size, f.size)
 	for y := 0; y < f.size; y++ {
 		for x := 0; x < f.size; x++ {
-			result += f.cells[y*f.size+x].StringValueShort()
+			result += f.cells[y*f.size+x].String()
 		}
 		result += "\n"
 	}

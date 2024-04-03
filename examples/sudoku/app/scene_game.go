@@ -1,7 +1,6 @@
 package app
 
 import (
-	"fmt"
 	"strconv"
 
 	"github.com/t0l1k/eui"
@@ -28,8 +27,7 @@ func NewSceneSudoku() *SceneSudoku {
 	s.dialogSelect = NewDialogSelect(func(b *eui.Button) {
 		for _, v := range s.dialogSelect.btnsDiff {
 			if v.btn.IsPressed() {
-				size, score, diff := v.GetData()
-				fmt.Println("pressed selected:", v.title.GetText(), size, score, diff)
+				size, _, diff := v.GetData()
 				s.topBar.SetTitle("Sudoku " + diff.String())
 				s.dialogSelect.Visible(false)
 				s.board.Setup(size, diff)
@@ -65,7 +63,6 @@ func NewSceneSudoku() *SceneSudoku {
 		} else {
 			s.board.Highlight("0")
 		}
-		fmt.Println("pressed", btn.GetText(), btn.GetBg())
 	})
 	s.Add(s.bottomBar)
 	s.Resize()
