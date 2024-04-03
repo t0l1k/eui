@@ -36,6 +36,18 @@ func (f *Field) Reset() {
 	}
 }
 
+func (f *Field) ValuesCount() (counts map[int]int) {
+	counts = make(map[int]int)
+	for i := 1; i <= f.size; i++ {
+		for _, cell := range f.cells {
+			if cell.Value().(int) == i {
+				counts[i]++
+			}
+		}
+	}
+	return counts
+}
+
 func (f Field) Idx(x, y int) int       { return y*f.size + x }
 func (f Field) Pos(idx int) (int, int) { return idx % f.size, idx / f.size } //x,y
 func (f *Field) GetCells() []*Cell     { return f.cells }

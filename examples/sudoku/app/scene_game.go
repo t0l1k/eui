@@ -34,6 +34,7 @@ func NewSceneSudoku() *SceneSudoku {
 				s.board.Visible(true)
 				s.bottomBar.Setup(size)
 				s.bottomBar.Visible(true)
+				s.bottomBar.UpdateNrs(s.board.field.ValuesCount())
 			}
 		}
 	})
@@ -51,6 +52,7 @@ func NewSceneSudoku() *SceneSudoku {
 				} else {
 					s.board.field.Add(x, y, s.board.GetHighlightValue())
 					s.board.Highlight(strconv.Itoa(s.board.GetHighlightValue()))
+					s.bottomBar.UpdateNrs(s.board.field.ValuesCount())
 				}
 			}
 		}

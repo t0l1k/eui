@@ -38,13 +38,15 @@ func (b *BottomBar) Setup(dim int) {
 		b.layoutActs.Add(btn)
 		b.actBtns = append(b.actBtns, btn)
 	}
-	size := dim * dim
+	size := b.dim * b.dim
 	for i := 0; i < size; i++ {
-		btn := eui.NewButton(strconv.Itoa(i+1), b.fn)
+		btn := NewBtn(b.fn)
+		btn.SetValue(strconv.Itoa(i + 1))
+		btn.SetCount(strconv.Itoa(0))
 		b.layoutNums.Add(btn)
 		b.actBtns = append(b.actBtns, btn)
 	}
-	b.Resize(b.GetRect().GetArr())
+	b.Resize(b.GetRect().GetArr()) // обязательно после обнуления контейнеров
 }
 
 func (b *BottomBar) IsVisible() bool    { return b.show }
@@ -59,9 +61,15 @@ func (b *BottomBar) SetAct(btn *eui.Button) bool {
 	b.actNotes = false
 	b.actNumber = false
 	for _, v := range b.actBtns {
-		if v.(*eui.Button).GetBg() == eui.Yellow {
-			v.(*eui.Button).Bg(eui.Silver)
-			break
+		switch vv := v.(type) {
+		case *eui.Button:
+			if vv.GetBg() == eui.Yellow {
+				vv.Bg(eui.Silver)
+			}
+		case *BottomBarNr:
+			if vv.GetBg() == eui.Yellow {
+				vv.Bg(eui.Silver)
+			}
 		}
 	}
 	switch btn.GetText() {
@@ -78,14 +86,26 @@ func (b *BottomBar) SetAct(btn *eui.Button) bool {
 		btn.Bg(eui.Yellow)
 		return false
 	default:
-		for _, v := range b.actBtns {
-			if v.(*eui.Button).GetText() == btn.GetText() {
-				btn.Bg(eui.Yellow)
+		for _, v := range b.layoutNums.GetContainer() {
+			if v.(*BottomBarNr).GetText() == btn.GetText() {
+				v.(*BottomBarNr).Bg(eui.Yellow)
 			}
 		}
 		b.actNumber = true
 	}
 	return true
+}
+
+func (b *BottomBar) UpdateNrs(counts map[int]int) {
+	size := b.dim * b.dim
+	for k, v := range counts {
+		for _, btn := range b.layoutNums.GetContainer() {
+			if btn.(*BottomBarNr).GetValue() == strconv.Itoa(k) {
+				nr := strconv.Itoa(size - v)
+				btn.(*BottomBarNr).SetCount(nr)
+			}
+		}
+	}
 }
 
 func (b *BottomBar) Update(dt int) {
