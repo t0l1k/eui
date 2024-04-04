@@ -103,6 +103,9 @@ func (b *BottomBar) UpdateNrs(counts map[int]int) {
 			if btn.(*BottomBarNr).GetValue() == strconv.Itoa(k) {
 				nr := strconv.Itoa(size - v)
 				btn.(*BottomBarNr).SetCount(nr)
+				if size-v == 0 {
+					btn.(*BottomBarNr).countLbl.Bg(eui.Silver)
+				}
 			}
 		}
 	}

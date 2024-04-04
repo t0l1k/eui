@@ -27,6 +27,9 @@ func (f *Field) Load(field []int) {
 	for i := range f.cells {
 		x, y := f.Pos(i)
 		f.Add(x, y, field[i])
+		if field[i] > 0 {
+			f.cells[i].MarkReadOnly()
+		}
 	}
 }
 
@@ -54,7 +57,9 @@ func (f *Field) GetCells() []*Cell     { return f.cells }
 
 func (f *Field) Add(x, y, n int) {
 	idx := f.Idx(x, y)
-	f.cells[idx].Add(n)
+	if !f.cells[idx].Add(n) {
+		return
+	}
 	fmt.Println("Сделан ход:", n, idx, x, y, f.cells[idx].notes)
 	for x0 := 0; x0 < f.size; x0++ {
 		f.cells[f.Idx(x0, y)].RemoveNote(n)

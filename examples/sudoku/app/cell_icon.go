@@ -27,7 +27,11 @@ func NewCellIcon(cell *game.Cell, f func(b *eui.Button), bg, fg color.RGBA) *Cel
 	c.btn = eui.NewButton("-99", f)
 	c.Add(c.btn)
 	c.Bg(bg)
-	c.Fg(fg)
+	if c.cell.IsReadOnly() {
+		c.Fg(eui.Blue)
+	} else {
+		c.Fg(fg)
+	}
 	c.setup()
 	c.Visible(true)
 	return c

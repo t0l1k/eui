@@ -8,7 +8,8 @@ import (
 
 type Cell struct {
 	eui.SubjectBase
-	notes *Note
+	notes    *Note
+	readOnly bool
 }
 
 func NewCell(dim int) *Cell {
@@ -19,13 +20,23 @@ func NewCell(dim int) *Cell {
 }
 
 func (c *Cell) Reset() {
+	c.readOnly = false
 	c.SetValue(0)
 	c.notes.Reset()
 }
 
-func (c *Cell) Add(value int) {
+func (c *Cell) Add(value int) bool {
+	if c.readOnly {
+		return false
+	}
 	c.SetValue(value)
 	c.notes.RemoveNote(value)
+	return true
+}
+
+func (c *Cell) IsReadOnly() bool { return c.readOnly }
+func (c *Cell) MarkReadOnly() {
+	c.readOnly = true
 }
 
 func (c *Cell) RemoveNote(value int) {
