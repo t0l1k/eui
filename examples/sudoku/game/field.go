@@ -28,7 +28,7 @@ func (f *Field) Load(field []int) {
 		x, y := f.Pos(i)
 		f.Add(x, y, field[i])
 		if field[i] > 0 {
-			f.cells[i].MarkReadOnly()
+			f.cells[i].SetReadOnly()
 		}
 	}
 }
@@ -42,6 +42,7 @@ func (f *Field) Reset() {
 func (f *Field) ValuesCount() (counts map[int]int) {
 	counts = make(map[int]int)
 	for i := 1; i <= f.size; i++ {
+		counts[i] = 0
 		for _, cell := range f.cells {
 			if cell.Value().(int) == i {
 				counts[i]++
@@ -62,11 +63,11 @@ func (f *Field) Add(x, y, n int) {
 	}
 	fmt.Println("Сделан ход:", n, idx, x, y, f.cells[idx].notes)
 	for x0 := 0; x0 < f.size; x0++ {
-		f.cells[f.Idx(x0, y)].RemoveNote(n)
+		f.cells[f.Idx(x0, y)].UpdateNote(n)
 		// fmt.Println("Сделан ход gorz:", n, idx, x, y, x0, f.cells[f.Idx(x0, y)].notes)
 	}
 	for y0 := 0; y0 < f.size; y0++ {
-		f.cells[f.Idx(x, y0)].RemoveNote(n)
+		f.cells[f.Idx(x, y0)].UpdateNote(n)
 		// fmt.Println("Сделан ход vert:", n, idx, x, y, y0, f.cells[f.Idx(x, y0)].notes)
 	}
 
@@ -77,7 +78,7 @@ func (f *Field) Add(x, y, n int) {
 		if rX0 != rX || rY0 != rY {
 			continue
 		}
-		v.RemoveNote(n)
+		v.UpdateNote(n)
 		// fmt.Println("Сделан ход rect:", n, idx, x, y, x1, y1, f.cells[f.Idx(x1, y1)].notes)
 	}
 	fmt.Println("Результат хода:", n, idx, x, y, f.cells[idx].notes, f.String())
@@ -85,16 +86,19 @@ func (f *Field) Add(x, y, n int) {
 
 func (f *Field) ResetCell(x, y int) {
 	idx := f.Idx(x, y)
+	if f.cells[idx].IsReadOnly() {
+		return
+	}
 	f.cells[idx].Reset()
 	fmt.Println("Обнулить ход:", idx, x, y, f.cells[f.Idx(x, y)].notes)
 	for x0 := 0; x0 < f.size; x0++ {
 		n0 := f.cells[f.Idx(x0, y)].Value().(int)
-		f.cells[f.Idx(x, y)].RemoveNote(n0)
+		f.cells[f.Idx(x, y)].UpdateNote(n0)
 		// fmt.Println("Обнулить ход gorz:", idx, x0, y, n0, f.cells[f.Idx(x0, y)].notes)
 	}
 	for y0 := 0; y0 < f.size; y0++ {
 		n0 := f.cells[f.Idx(x, y0)].Value().(int)
-		f.cells[f.Idx(x, y)].RemoveNote(n0)
+		f.cells[f.Idx(x, y)].UpdateNote(n0)
 		// fmt.Println("Обнулить ход vert:", idx, x, y0, n0, f.cells[f.Idx(x, y0)].notes)
 	}
 	rX0, rY0 := f.getRectIdx(x, y)
@@ -105,7 +109,7 @@ func (f *Field) ResetCell(x, y int) {
 			continue
 		}
 		n0 := f.cells[f.Idx(x0, y0)].Value().(int)
-		f.cells[f.Idx(x, y)].RemoveNote(n0)
+		f.cells[f.Idx(x, y)].UpdateNote(n0)
 		// fmt.Println("Обнулить ход rect:", idx, x, y, n0, f.cells[f.Idx(x, y)].notes)
 	}
 	cell := f.cells[f.Idx(x, y)]

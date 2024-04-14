@@ -7,7 +7,13 @@ import (
 	"github.com/t0l1k/eui"
 )
 
-var actsStr = []string{"Отменить", "Удалить", "Заметка"}
+const (
+	aUndo = "Отменить"
+	aDel  = "Удалить"
+	aNote = "Заметка"
+)
+
+var actsStr = []string{aUndo, aDel, aNote}
 
 type BottomBar struct {
 	eui.DrawableBase
@@ -41,29 +47,61 @@ func (b *BottomBar) Setup(dim int) {
 	size := b.dim * b.dim
 	for i := 0; i < size; i++ {
 		btn := NewBtn(b.fn)
-		btn.SetValue(strconv.Itoa(i + 1))
-		btn.SetCount(strconv.Itoa(0))
+		btn.SetValue(i + 1)
+		btn.SetCount(0)
 		b.layoutNums.Add(btn)
 		b.actBtns = append(b.actBtns, btn)
 	}
 	b.Resize(b.GetRect().GetArr()) // обязательно после обнуления контейнеров
+	b.setBtnClrs()
 }
 
-func (b *BottomBar) IsVisible() bool    { return b.show }
-func (b *BottomBar) Visible(value bool) { b.show = value }
-func (b *BottomBar) IsActUndo() bool    { return b.actUndo }
-func (b *BottomBar) IsActDel() bool     { return b.actDel }
-func (b *BottomBar) IsActNotes() bool   { return b.actNotes }
+func (b *BottomBar) IsVisible() bool      { return b.show }
+func (b *BottomBar) Visible(value bool)   { b.show = value }
+func (b *BottomBar) IsActUndo() bool      { return b.actUndo }
+func (b *BottomBar) IsActDel() bool       { return b.actDel }
+func (b *BottomBar) IsActNotes() bool     { return b.actNotes }
+func (b *BottomBar) ShowNotes(value bool) { b.actNotes = value }
 
-func (b *BottomBar) SetAct(btn *eui.Button) bool {
+func (b *BottomBar) SetAct(btn *eui.Button) (result bool) {
+	b.setBtnClrs()
+	switch btn.GetText() {
+	case aUndo:
+		b.actUndo = true
+		btn.Bg(eui.Yellow)
+		result = false
+	case aDel:
+		b.actDel = true
+		btn.Bg(eui.Yellow)
+		result = false
+	case aNote:
+		b.actNotes = !b.actNotes
+		if b.actNotes {
+			btn.Bg(eui.Yellow)
+		}
+		result = false
+	default:
+		for _, v := range b.layoutNums.GetContainer() {
+			if v.(*BottomBarNr).GetText() == btn.GetText() {
+				v.(*BottomBarNr).Bg(eui.Yellow)
+			}
+		}
+		b.actNumber = true
+		result = true
+	}
+	return result
+}
+
+func (b *BottomBar) setBtnClrs() {
 	b.actUndo = false
 	b.actDel = false
-	b.actNotes = false
 	b.actNumber = false
 	for _, v := range b.actBtns {
 		switch vv := v.(type) {
 		case *eui.Button:
-			if vv.GetBg() == eui.Yellow {
+			if vv.GetText() == aNote && b.actNotes {
+				vv.Bg(eui.Yellow)
+			} else if vv.GetBg() == eui.Yellow {
 				vv.Bg(eui.Silver)
 			}
 		case *BottomBarNr:
@@ -72,28 +110,6 @@ func (b *BottomBar) SetAct(btn *eui.Button) bool {
 			}
 		}
 	}
-	switch btn.GetText() {
-	case actsStr[0]:
-		b.actUndo = true
-		btn.Bg(eui.Yellow)
-		return false
-	case actsStr[1]:
-		b.actDel = true
-		btn.Bg(eui.Yellow)
-		return false
-	case actsStr[2]:
-		b.actNotes = true
-		btn.Bg(eui.Yellow)
-		return false
-	default:
-		for _, v := range b.layoutNums.GetContainer() {
-			if v.(*BottomBarNr).GetText() == btn.GetText() {
-				v.(*BottomBarNr).Bg(eui.Yellow)
-			}
-		}
-		b.actNumber = true
-	}
-	return true
 }
 
 func (b *BottomBar) UpdateNrs(counts map[int]int) {
@@ -101,11 +117,7 @@ func (b *BottomBar) UpdateNrs(counts map[int]int) {
 	for k, v := range counts {
 		for _, btn := range b.layoutNums.GetContainer() {
 			if btn.(*BottomBarNr).GetValue() == strconv.Itoa(k) {
-				nr := strconv.Itoa(size - v)
-				btn.(*BottomBarNr).SetCount(nr)
-				if size-v == 0 {
-					btn.(*BottomBarNr).countLbl.Bg(eui.Silver)
-				}
+				btn.(*BottomBarNr).SetCount(size - v)
 			}
 		}
 	}

@@ -11,13 +11,13 @@ import (
 
 type Board struct {
 	eui.DrawableBase
-	diff        game.Difficult
-	field       *game.Field
-	layoutCells *eui.GridLayoutRightDown
-	grid        *eui.GridView
-	fn          func(*eui.Button)
-	show        bool
-	highlight   int
+	diff            game.Difficult
+	field           *game.Field
+	layoutCells     *eui.GridLayoutRightDown
+	grid            *eui.GridView
+	fn              func(*eui.Button)
+	show, showNotes bool
+	highlight       int
 }
 
 func NewBoard(fn func(b *eui.Button)) *Board {
@@ -49,10 +49,18 @@ func (b *Board) Setup(dim int, diff game.Difficult) {
 	}
 	b.grid.Set(float64(dim), float64(dim))
 	b.layoutCells.SetDim(float64(size), float64(size))
+	b.ShowNotes(true)
+}
+
+func (b *Board) IsShowNotes() bool { return b.showNotes }
+func (b *Board) ShowNotes(value bool) {
+	b.showNotes = value
+	for _, v := range b.layoutCells.GetContainer() {
+		v.(*CellIcon).ShowNotes(b.showNotes)
+	}
 }
 
 func (b *Board) GetHighlightValue() int { return b.highlight }
-
 func (b *Board) Highlight(value string) {
 	n, err := strconv.ParseInt(value, 10, 64)
 	if err != nil {

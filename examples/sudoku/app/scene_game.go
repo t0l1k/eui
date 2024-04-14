@@ -1,6 +1,7 @@
 package app
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/t0l1k/eui"
@@ -35,6 +36,7 @@ func NewSceneSudoku() *SceneSudoku {
 				s.bottomBar.Setup(size)
 				s.bottomBar.Visible(true)
 				s.bottomBar.UpdateNrs(s.board.field.ValuesCount())
+				s.bottomBar.ShowNotes(s.board.IsShowNotes())
 			}
 		}
 	})
@@ -47,8 +49,7 @@ func NewSceneSudoku() *SceneSudoku {
 				x, y := s.board.field.Pos(i)
 				if s.bottomBar.IsActDel() {
 					s.board.field.ResetCell(x, y)
-				} else if s.bottomBar.IsActNotes() {
-				} else if s.bottomBar.IsActUndo() {
+					log.Println("Set Act Del", x, y)
 				} else {
 					s.board.field.Add(x, y, s.board.GetHighlightValue())
 					s.board.Highlight(strconv.Itoa(s.board.GetHighlightValue()))
@@ -56,7 +57,6 @@ func NewSceneSudoku() *SceneSudoku {
 				}
 			}
 		}
-
 	})
 	s.Add(s.board)
 	s.bottomBar = NewBottomBar(func(btn *eui.Button) {
@@ -64,6 +64,13 @@ func NewSceneSudoku() *SceneSudoku {
 			s.board.Highlight(btn.GetText())
 		} else {
 			s.board.Highlight("0")
+			if s.bottomBar.IsActNotes() {
+				s.board.ShowNotes(true)
+				log.Println("Set Act Notes", s.board.IsShowNotes())
+			} else {
+				s.board.ShowNotes(false)
+				log.Println("Set Act Notes", s.board.IsShowNotes())
+			}
 		}
 	})
 	s.Add(s.bottomBar)

@@ -8,8 +8,8 @@ import (
 
 type Cell struct {
 	eui.SubjectBase
-	notes    *Note
-	readOnly bool
+	notes           *Note
+	readOnly, wrong bool
 }
 
 func NewCell(dim int) *Cell {
@@ -21,6 +21,7 @@ func NewCell(dim int) *Cell {
 
 func (c *Cell) Reset() {
 	c.readOnly = false
+	c.wrong = false
 	c.SetValue(0)
 	c.notes.Reset()
 }
@@ -29,35 +30,30 @@ func (c *Cell) Add(value int) bool {
 	if c.readOnly {
 		return false
 	}
+	if !c.notes.UpdateNote(value) {
+		return false
+	}
 	c.SetValue(value)
-	c.notes.RemoveNote(value)
 	return true
 }
 
-func (c *Cell) IsReadOnly() bool { return c.readOnly }
-func (c *Cell) MarkReadOnly() {
-	c.readOnly = true
-}
-
-func (c *Cell) RemoveNote(value int) {
+func (c *Cell) UpdateNote(value int) {
 	v := c.Value().(int)
 	c.SetValue(v)
-	c.notes.RemoveNote(value)
+	c.notes.UpdateNote(value)
 }
 
-func (c *Cell) GetDim() int                     { return c.notes.dim }
-func (c *Cell) GetValue() int                   { return c.Value().(int) }
-func (c *Cell) GetNotes() ([]int, []int, []int) { return c.notes.GetNoteValues() }
-
-func (c *Cell) AddNote(value int) {
-	c.notes.AddNote(value)
-}
+func (c *Cell) IsReadOnly() bool { return c.readOnly }
+func (c *Cell) SetReadOnly()     { c.readOnly = true }
+func (c *Cell) GetDim() int      { return c.notes.dim }
+func (c *Cell) GetValue() int    { return c.Value().(int) }
+func (c *Cell) GetNotes() []int  { return c.notes.GetNoteValues() }
 
 func (c Cell) String() (result string) {
 	if c.Value().(int) > 0 {
-		result = fmt.Sprintf("[%5v]", c.Value())
+		result = fmt.Sprintf("[%3v]", c.Value())
 	} else {
-		result = fmt.Sprintf("[%5v]", c.notes.String())
+		result = fmt.Sprintf("[%3v]", c.notes.String())
 	}
 	return result
 }

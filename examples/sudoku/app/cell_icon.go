@@ -11,12 +11,12 @@ import (
 
 type CellIcon struct {
 	eui.DrawableBase
-	cell      *game.Cell
-	btn       *eui.Button
-	layout    *eui.GridLayoutRightDown
-	show      bool
-	f         func(b *eui.Button)
-	highlight int
+	cell            *game.Cell
+	btn             *eui.Button
+	layout          *eui.GridLayoutRightDown
+	show, showNotes bool
+	f               func(b *eui.Button)
+	highlight       int
 }
 
 func NewCellIcon(cell *game.Cell, f func(b *eui.Button), bg, fg color.RGBA) *CellIcon {
@@ -24,7 +24,7 @@ func NewCellIcon(cell *game.Cell, f func(b *eui.Button), bg, fg color.RGBA) *Cel
 	c.cell = cell
 	c.layout = eui.NewGridLayoutRightDown(float64(cell.GetDim()), float64(cell.GetDim()))
 	c.f = f
-	c.btn = eui.NewButton("-99", f)
+	c.btn = eui.NewButton("0", f)
 	c.Add(c.btn)
 	c.Bg(bg)
 	if c.cell.IsReadOnly() {
@@ -39,6 +39,11 @@ func NewCellIcon(cell *game.Cell, f func(b *eui.Button), bg, fg color.RGBA) *Cel
 
 func (d *CellIcon) setup() {}
 
+func (c *CellIcon) ShowNotes(value bool) {
+	c.showNotes = value
+	c.Dirty = true
+}
+
 func (c *CellIcon) Highlight(value int) {
 	c.highlight = value
 	c.Dirty = true
@@ -48,12 +53,13 @@ func (c *CellIcon) Layout() {
 	c.SpriteBase.Layout()
 	c.Image().Fill(c.GetBg())
 	c.layout.ResetContainerBase()
-	if c.cell.GetValue() > 0 {
-		lbl := eui.NewText(strconv.Itoa(c.cell.GetValue()))
+	value := c.cell.GetValue()
+	if value > 0 {
+		lbl := eui.NewText(strconv.Itoa(value))
 		c.layout.Add(lbl)
 		c.layout.SetDim(1, 1)
 		defer lbl.Close()
-		if c.cell.GetValue() == c.highlight {
+		if value == c.highlight {
 			lbl.Bg(eui.Yellow)
 		} else {
 			lbl.Bg(eui.Silver)
@@ -62,17 +68,17 @@ func (c *CellIcon) Layout() {
 		// log.Println("Иконка с цифрой", c.cell.GetValue())
 	} else {
 		size := c.cell.GetDim()
-		arr1, _, _ := c.cell.GetNotes()
-		if len(arr1) > 0 {
+		notes := c.cell.GetNotes()
+		if c.showNotes && len(notes) > 0 {
 			for i := 0; i < size*size; i++ {
 				lbl := eui.NewText("")
 				lbl.Bg(eui.Silver)
 				lbl.Fg(c.GetFg())
 				c.layout.Add(lbl)
-				found := eui.IntSliceContains(arr1, i+1)
+				found := eui.IntSliceContains(notes, i+1)
 				if found {
-					idx := eui.GetIdxValueFromIntSlice(arr1, i+1)
-					lbl.SetText(strconv.Itoa(arr1[idx]))
+					idx := eui.GetIdxValueFromIntSlice(notes, i+1)
+					lbl.SetText(strconv.Itoa(notes[idx]))
 					if i+1 == c.highlight {
 						lbl.Bg(eui.Yellow)
 					}
@@ -87,7 +93,11 @@ func (c *CellIcon) Layout() {
 			c.layout.Add(lbl)
 			c.layout.SetDim(1, 1)
 			defer lbl.Close()
-			lbl.Bg(eui.Red)
+			if len(notes) == 0 {
+				lbl.Bg(eui.Orange)
+			} else {
+				lbl.Bg(eui.Silver)
+			}
 			lbl.Fg(c.GetFg())
 			// log.Println("Иконка без заметок", c.cell.GetValue())
 		}

@@ -137,12 +137,12 @@ func (d SudokuField) Move(x, y int) {
 	note := d.nextNote(x, y)
 	cell.Add(note)
 	d.updateNotesAfterMove(x, y, note)
-	fmt.Printf("Move:%v [%v,%v]%v %v\n", d.Idx(x, y), x, y, note, d.checkNotesLen())
+	fmt.Printf("Move:%v [%v,%v]%v\n", d.Idx(x, y), x, y, note)
 	d.checkDual(y)
 }
 
 func (d SudokuField) checkDual(y0 int) {
-	if d.Dim() <= 2 {
+	if d.Dim() < 3 {
 		return
 	}
 	for x0 := 0; x0 < d.Size(); x0++ {
@@ -174,8 +174,7 @@ func (d SudokuField) Shuffle(idx int) {
 	d.Shuffle(idx - 1)
 }
 
-// Если на поле есть заметка с одним числом её открыть сразу после хода
-func (d SudokuField) move(idx int) {
+func (d SudokuField) openSingleNote(idx int) {
 	if idx == 0 {
 		return
 	}
@@ -187,24 +186,10 @@ func (d SudokuField) move(idx int) {
 			cell.Add(note)
 			d.updateNotesAfterMove(x, y, note)
 			fmt.Printf("%v:Recur move:[%v,%v]%v\n%v\n", idx, x, y, note, d)
-			d.move(d.Size() * d.Size())
+			d.openSingleNote(d.Size() * d.Size())
 		}
 	}
-	d.move(idx - 1)
-}
-
-func (d SudokuField) checkNotesLen() map[int]int {
-	lens := make(map[int]int)
-	for y := 0; y < d.Size(); y++ {
-		for x := 0; x < d.Size(); x++ {
-			cell := d[d.Idx(x, y)]
-			if !(cell.value > 0) {
-				l := len(cell.GetNotes())
-				lens[l]++
-			}
-		}
-	}
-	return lens
+	d.openSingleNote(idx - 1)
 }
 
 func (d SudokuField) updateNotesAfterMove(x0, y0, value int) {
@@ -231,7 +216,7 @@ func (d SudokuField) updateNotesAfterMove(x0, y0, value int) {
 			d.IsValidNotesLen(x, y, value, cell)
 		}
 	}
-	d.move(d.Size() * d.Size())
+	d.openSingleNote(d.Size() * d.Size())
 }
 
 func (f SudokuField) IsValidNotesLen(x, y, value int, cell *Cell) {
