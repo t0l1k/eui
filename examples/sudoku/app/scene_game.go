@@ -2,7 +2,6 @@ package app
 
 import (
 	"log"
-	"strconv"
 
 	"github.com/t0l1k/eui"
 )
@@ -51,8 +50,7 @@ func NewSceneSudoku() *SceneSudoku {
 					s.board.field.ResetCell(x, y)
 					log.Println("Set Act Del", x, y)
 				} else {
-					s.board.field.Add(x, y, s.board.GetHighlightValue())
-					s.board.Highlight(strconv.Itoa(s.board.GetHighlightValue()))
+					s.board.Move(x, y)
 					s.bottomBar.UpdateNrs(s.board.field.ValuesCount())
 				}
 			}
@@ -70,6 +68,9 @@ func NewSceneSudoku() *SceneSudoku {
 			} else {
 				s.board.ShowNotes(false)
 				log.Println("Set Act Notes", s.board.IsShowNotes())
+			}
+			if s.bottomBar.IsActUndo() {
+				s.board.Undo()
 			}
 		}
 	})

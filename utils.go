@@ -56,3 +56,9 @@ func IntSlicesIsEqual(a, b []int) bool {
 	}
 	return true
 }
+
+func PopIntSlice(a []int) []int {
+	a[len(a)-1] = -1
+	a = a[:len(a)-1]
+	return a
+}

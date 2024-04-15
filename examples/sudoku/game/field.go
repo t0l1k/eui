@@ -2,12 +2,16 @@ package game
 
 import (
 	"fmt"
+	"log"
+
+	"github.com/t0l1k/eui"
 )
 
 type Field struct {
 	dim, size int
 	cells     []*Cell
 	generated []int
+	history   []int
 }
 
 func NewField(dim int) *Field {
@@ -81,6 +85,7 @@ func (f *Field) Add(x, y, n int) {
 		v.UpdateNote(n)
 		// fmt.Println("Сделан ход rect:", n, idx, x, y, x1, y1, f.cells[f.Idx(x1, y1)].notes)
 	}
+	f.history = append(f.history, idx)
 	fmt.Println("Результат хода:", n, idx, x, y, f.cells[idx].notes, f.String())
 }
 
@@ -114,6 +119,13 @@ func (f *Field) ResetCell(x, y int) {
 	}
 	cell := f.cells[f.Idx(x, y)]
 	fmt.Println("Обнуление хода:", idx, x, y, cell.Value().(int), cell.notes, f.String())
+}
+
+func (f *Field) Undo() {
+	x, y := f.Pos(f.history[len(f.history)-1])
+	f.ResetCell(x, y)
+	f.history = eui.PopIntSlice(f.history)
+	log.Println("undo", f.history)
 }
 
 func (f Field) getRectIdx(x int, y int) (rX int, rY int) {

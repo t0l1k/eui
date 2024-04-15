@@ -60,6 +60,15 @@ func (b *Board) ShowNotes(value bool) {
 	}
 }
 
+func (b *Board) Undo() {
+	b.field.Undo()
+}
+
+func (b *Board) Move(x, y int) {
+	b.field.Add(x, y, b.GetHighlightValue())
+	b.Highlight(strconv.Itoa(b.GetHighlightValue()))
+}
+
 func (b *Board) GetHighlightValue() int { return b.highlight }
 func (b *Board) Highlight(value string) {
 	n, err := strconv.ParseInt(value, 10, 64)
