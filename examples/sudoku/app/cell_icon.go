@@ -22,7 +22,7 @@ type CellIcon struct {
 func NewCellIcon(cell *game.Cell, f func(b *eui.Button), bg, fg color.RGBA) *CellIcon {
 	c := &CellIcon{}
 	c.cell = cell
-	c.layout = eui.NewGridLayoutRightDown(float64(cell.GetDim()), float64(cell.GetDim()))
+	c.layout = eui.NewGridLayoutRightDown(float64(cell.Dim()), float64(cell.Dim()))
 	c.f = f
 	c.btn = eui.NewButton("0", f)
 	c.Add(c.btn)
@@ -39,15 +39,9 @@ func NewCellIcon(cell *game.Cell, f func(b *eui.Button), bg, fg color.RGBA) *Cel
 
 func (d *CellIcon) setup() {}
 
-func (c *CellIcon) ShowNotes(value bool) {
-	c.showNotes = value
-	c.Dirty = true
-}
-
-func (c *CellIcon) Highlight(value int) {
-	c.highlight = value
-	c.Dirty = true
-}
+func (c *CellIcon) ShowNotes(value bool)         { c.showNotes = value; c.Dirty = true }
+func (c *CellIcon) Highlight(value int)          { c.highlight = value; c.Dirty = true }
+func (c *CellIcon) UpdateData(value interface{}) { c.Dirty = true }
 
 func (c *CellIcon) Layout() {
 	c.SpriteBase.Layout()
@@ -67,7 +61,7 @@ func (c *CellIcon) Layout() {
 		lbl.Fg(c.GetFg())
 		// log.Println("Иконка с цифрой", c.cell.GetValue())
 	} else {
-		size := c.cell.GetDim()
+		size := c.cell.Dim()
 		notes := c.cell.GetNotes()
 		if c.showNotes && len(notes) > 0 {
 			for i := 0; i < size*size; i++ {
@@ -103,10 +97,6 @@ func (c *CellIcon) Layout() {
 		}
 	}
 	c.Dirty = false
-}
-
-func (c *CellIcon) UpdateData(value interface{}) {
-	c.Dirty = true
 }
 
 func (d *CellIcon) Update(dt int) {

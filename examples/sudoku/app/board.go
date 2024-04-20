@@ -62,6 +62,7 @@ func (b *Board) ShowNotes(value bool) {
 
 func (b *Board) Undo() {
 	b.field.Undo()
+	b.field.ReseAllCells(b.field.Size() * b.field.Size())
 }
 
 func (b *Board) Move(x, y int) {
