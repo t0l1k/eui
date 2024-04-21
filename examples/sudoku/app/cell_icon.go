@@ -58,7 +58,11 @@ func (c *CellIcon) Layout() {
 		} else {
 			lbl.Bg(eui.Silver)
 		}
-		lbl.Fg(c.GetFg())
+		if c.cell.IsReadOnly() {
+			lbl.Fg(eui.Blue)
+		} else {
+			lbl.Fg(c.GetFg())
+		}
 		// log.Println("Иконка с цифрой", c.cell.GetValue())
 	} else {
 		size := c.cell.Dim()
