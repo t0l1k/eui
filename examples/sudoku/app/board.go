@@ -11,7 +11,7 @@ import (
 type Board struct {
 	eui.DrawableBase
 	diff            game.Difficult
-	field           *game.Field
+	game            *game.Game
 	layoutCells     *eui.GridLayoutRightDown
 	grid            *eui.GridView
 	fn              func(*eui.Button)
@@ -35,14 +35,14 @@ func NewBoard(fn func(b *eui.Button)) *Board {
 func (b *Board) Setup(dim int, diff game.Difficult) {
 	var size = dim * dim
 	b.diff = diff
-	b.field = game.NewField(dim)
-	go b.field.Load(game.LoadNewSudokuField(dim, diff))
+	b.game = game.NewGame(dim)
+	b.game.Load(diff)
 	b.layoutCells.ResetContainerBase()
 	for y := 0; y < size; y++ {
 		for x := 0; x < size; x++ {
 			idx := y*size + x
-			btn := NewCellIcon(b.field.GetCells()[idx], b.fn, eui.Silver, eui.Black)
-			b.field.GetCells()[idx].Attach(btn)
+			btn := NewCellIcon(b.game.GetCells()[idx], b.fn, eui.Silver, eui.Black)
+			b.game.GetCells()[idx].Attach(btn)
 			b.layoutCells.Add(btn)
 		}
 	}
@@ -60,12 +60,12 @@ func (b *Board) ShowNotes(value bool) {
 }
 
 func (b *Board) Undo() {
-	b.field.Undo()
-	b.field.ReseAllCells(b.field.Size() * b.field.Size())
+	b.game.Undo()
+	b.game.ReseAllCells(b.game.Size() * b.game.Size())
 }
 
 func (b *Board) Move(x, y int) {
-	b.field.Add(x, y, b.GetHighlightValue())
+	b.game.Add(x, y, b.GetHighlightValue())
 	b.Highlight(strconv.Itoa(b.GetHighlightValue()))
 }
 

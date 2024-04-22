@@ -34,7 +34,7 @@ func NewSceneSudoku() *SceneSudoku {
 				s.board.Visible(true)
 				s.bottomBar.Setup(size)
 				s.bottomBar.Visible(true)
-				s.bottomBar.UpdateNrs(s.board.field.ValuesCount())
+				s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
 				s.bottomBar.ShowNotes(s.board.IsShowNotes())
 			}
 		}
@@ -45,13 +45,13 @@ func NewSceneSudoku() *SceneSudoku {
 		for i := range s.board.layoutCells.GetContainer() {
 			icon := s.board.layoutCells.GetContainer()[i].(*CellIcon)
 			if icon.btn == btn {
-				x, y := s.board.field.Pos(i)
+				x, y := s.board.game.GetField().Pos(i)
 				if s.bottomBar.IsActDel() {
-					s.board.field.ResetCell(x, y)
+					s.board.game.ResetCell(x, y)
 					log.Println("Set Act Del", x, y)
 				} else {
 					s.board.Move(x, y)
-					s.bottomBar.UpdateNrs(s.board.field.ValuesCount())
+					s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
 				}
 			}
 		}
