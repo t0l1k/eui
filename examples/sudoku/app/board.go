@@ -33,21 +33,20 @@ func NewBoard(fn func(b *eui.Button)) *Board {
 }
 
 func (b *Board) Setup(dim int, diff game.Difficult) {
-	var size = dim * dim
+	dimMode := game.NewDim(dim, dim)
 	b.diff = diff
-	b.game = game.NewGame(dim)
+	b.game = game.NewGame(dimMode)
 	b.game.Load(diff)
 	b.layoutCells.ResetContainerBase()
-	for y := 0; y < size; y++ {
-		for x := 0; x < size; x++ {
-			idx := y*size + x
-			btn := NewCellIcon(b.game.GetCells()[idx], b.fn, eui.Silver, eui.Black)
-			b.game.GetCells()[idx].Attach(btn)
+	for y := 0; y < dimMode.Size(); y++ {
+		for x := 0; x < dimMode.Size(); x++ {
+			btn := NewCellIcon(dimMode, b.game.Cell(x, y), b.fn, eui.Silver, eui.Black)
+			b.game.Cell(x, y).Attach(btn)
 			b.layoutCells.Add(btn)
 		}
 	}
 	b.grid.Set(float64(dim), float64(dim))
-	b.layoutCells.SetDim(float64(size), float64(size))
+	b.layoutCells.SetDim(float64(dimMode.Size()), float64(dimMode.Size()))
 	b.ShowNotes(true)
 }
 
@@ -61,11 +60,11 @@ func (b *Board) ShowNotes(value bool) {
 
 func (b *Board) Undo() {
 	b.game.Undo()
-	b.game.ReseAllCells(b.game.Size() * b.game.Size())
+	b.game.UpdateAllFieldNotes()
 }
 
 func (b *Board) Move(x, y int) {
-	b.game.Add(x, y, b.GetHighlightValue())
+	b.game.MakeMove(x, y, b.GetHighlightValue())
 	b.Highlight(strconv.Itoa(b.GetHighlightValue()))
 }
 

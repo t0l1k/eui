@@ -1,107 +1,173 @@
 package game
 
 import (
+	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 
 	"github.com/t0l1k/eui"
 )
 
+const (
+	err00 = "найдена пустая клетка"
+	err01 = "вариант 01 появления пустой клетки"
+	err02 = "вариант 02 появления пустой клетки"
+	err03 = "вариант 03 исчерпали заметки"
+)
+
 type Game struct {
-	dim, size int
-	diff      Difficult
-	field     *Field
-	history   []int
+	dim     *Dim
+	diff    Difficult
+	field   *field
+	path    map[int][]int
+	history []int
+	inGame  bool
 }
 
-func NewGame(dim int) *Game {
-	g := &Game{dim: dim, size: dim * dim}
-	g.field = newField(dim)
+func NewGame(dim *Dim) *Game {
+	g := &Game{dim: dim, field: newField(dim.Size())}
 	return g
 }
 
-func (g *Game) generate() {
-	g.field.Shuffle(g.field.Size() * g.field.Size())
-	g.field.prepareFor(g.diff)
-}
+func (g Game) Dim() *Dim              { return g.dim }
+func (g Game) Size() int              { return g.dim.Size() }
+func (g Game) Cell(x, y int) *Cell    { return g.field.cell(g.Idx(x, y)) }
+func (g Game) Idx(x, y int) int       { return y*g.Size() + x }
+func (g Game) Pos(idx int) (int, int) { return idx % g.Size(), idx / g.Size() }
 
 func (g *Game) Load(diff Difficult) {
 	g.diff = diff
-	g.field.Reset()
-	g.generate()
+	g.shuffle()
+	g.field.prepareFor(diff, g.dim.Size())
+	g.UpdateAllFieldNotes()
+	g.inGame = true
 }
 
-func (g *Game) ValuesCount() (counts map[int]int) {
-	counts = make(map[int]int)
-	for i := 1; i <= g.size; i++ {
-		counts[i] = 0
-		for _, cell := range g.GetCells() {
-			if cell.Value().(int) == i {
-				counts[i]++
+func (g *Game) shuffle() {
+	g.field.reset(g.Size())
+	idx := 0
+	count := 0
+	g.path = make(map[int][]int)
+	for g.field.isFoundEmptyCells() {
+		if err := g.guess(idx); err == nil {
+			idx++
+			if idx >= g.Size()*g.Size() {
+				idx = 0
+			}
+			fmt.Printf("%v,%v сделан ход на поле\n%v", count, idx, g.String())
+		} else {
+			switch err.Error() {
+			case err03:
+				for k := range g.path {
+					if k >= idx {
+						delete(g.path, idx)
+					}
+				}
+				idx--
+			}
+			x0, y0 := g.Pos(idx)
+			for y := y0; y < g.Size(); y++ {
+				for x := x0; x < g.Size(); x++ {
+					g.field.cell(g.Idx(x, y)).reset(g.Size())
+				}
+			}
+			g.UpdateAllFieldNotes()
+			fmt.Printf("%v,%v на поле есть пустые заметки\n%v\n%v\n", count, idx, g.String(), err)
+		}
+		count++
+	}
+}
+
+func (g *Game) guess(idx int) error {
+	if g.Cell(g.Pos(idx)).GetValue() > 0 {
+		return nil
+	}
+	cell := g.field.cell(idx)
+	notes := cell.GetNotes()
+	for _, v := range cell.GetNotes() {
+		if eui.IntSliceContains(g.path[idx], v) {
+			notes = eui.RemoveFromIntSliceValue(notes, v)
+			fmt.Printf("Удаляем метку:%v из заметок:[%v] рузультат пути:[%v]", v, notes, g.path)
+		}
+	}
+	if len(notes) == 0 {
+		return errors.New(err03)
+	}
+	note := g.getRndNote(notes)
+	x, y := g.Pos(idx)
+	g.MakeMove(x, y, note)
+	fmt.Printf("%v ход %v ячейка[%v] успешен на поле\n%v\n", idx, note, cell, g.String())
+	if err := g.isFoundEmptyNotes(idx); err != nil {
+		fmt.Printf("%v ход %v ячейка[%v]есть пустая клетка на поле\n%v\n%v\n", idx, note, cell, g.String(), err)
+		return err
+	}
+	return nil
+}
+
+func (*Game) getRndNote(notes []int) int {
+	note := notes[rand.Intn(len(notes))]
+	return note
+}
+
+func (g *Game) isFoundEmptyNotes(idx int) error {
+	notes := make(map[int]bool)
+	for i := 1; i <= g.Size(); i++ {
+		notes[i] = false
+	}
+	if g.field.isFoundEmptyNote() {
+		fmt.Println(notes)
+		return errors.New(err00)
+	}
+	var allNotes [][]int
+	_, y0 := g.Pos(idx)
+	for x := 0; x < g.Size(); x++ {
+		value := g.Cell(x, y0).GetValue()
+		if value > 0 {
+			notes[value] = true
+		} else {
+			cell := g.Cell(x, y0)
+			allNotes = append(allNotes, cell.GetNotes())
+			for _, v := range cell.GetNotes() {
+				notes[v] = true
 			}
 		}
 	}
-	return counts
-}
-
-func (g Game) Dim() int           { return g.dim }
-func (g Game) Size() int          { return g.size }
-func (g *Game) GetCells() []*Cell { return *g.field }
-func (g *Game) GetField() *Field  { return g.field }
-
-func (g *Game) Add(x, y, n int) {
-	idx := g.field.Idx(x, y)
-	if !g.GetCells()[idx].Add(n) {
-		return
+	for _, v := range notes {
+		if !v {
+			fmt.Println(notes, allNotes)
+			return errors.New(err01)
+		}
 	}
-	fmt.Println("Сделан ход:", n, idx, x, y, g.field.GetField()[idx].notes)
-	for x0 := 0; x0 < g.size; x0++ {
-		g.field.GetField()[g.field.Idx(x0, y)].UpdateNote(n)
-	}
-	for y0 := 0; y0 < g.size; y0++ {
-		g.field.GetField()[g.field.Idx(x, y0)].UpdateNote(n)
-	}
-
-	rX0, rY0 := g.getRectIdx(x, y)
-	for i, v := range g.field.GetField() {
-		x1, y1 := g.field.Pos(i)
-		rX, rY := g.getRectIdx(x1, y1)
-		if rX0 != rX || rY0 != rY {
+	for i, v1 := range allNotes {
+		if len(v1) > 1 {
 			continue
 		}
-		v.UpdateNote(n)
+		for j, v2 := range allNotes {
+			if len(v2) > 1 || i == j {
+				continue
+			}
+			if eui.IntSlicesIsEqual(v1, v2) {
+				fmt.Println(notes, allNotes)
+				return errors.New(err02)
+			}
+		}
 	}
+	return nil
+}
+
+func (g *Game) MakeMove(x, y, note int) {
+	idx := g.Idx(x, y)
+	if !g.inGame {
+		g.path[idx] = append(g.path[idx], note)
+	}
+	cell := g.field.cell(idx)
+	if !cell.add(note) {
+		return
+	}
+	g.UpdateAllFieldNotes()
 	g.history = append(g.history, idx)
-	fmt.Println("Результат хода:", n, idx, x, y, g.GetCells()[idx].notes, g.String())
-}
-
-func (g *Game) ResetCell(x, y int) {
-	idx := g.GetField().Idx(x, y)
-	if g.GetCells()[idx].IsReadOnly() {
-		return
-	}
-	g.GetCells()[idx].Reset()
-	fmt.Println("Обнулить ход:", idx, x, y, g.GetCells()[g.GetField().Idx(x, y)].notes)
-	for x0 := 0; x0 < g.size; x0++ {
-		value := g.GetCells()[g.GetField().Idx(x0, y)].Value().(int)
-		g.GetCells()[g.GetField().Idx(x, y)].UpdateNote(value)
-	}
-	for y0 := 0; y0 < g.size; y0++ {
-		value := g.GetCells()[g.GetField().Idx(x, y0)].Value().(int)
-		g.GetCells()[g.GetField().Idx(x, y)].UpdateNote(value)
-	}
-	rX0, rY0 := g.getRectIdx(x, y)
-	for i := range g.GetCells() {
-		x0, y0 := g.GetField().Pos(i)
-		rX, rY := g.getRectIdx(x0, y0)
-		if rX0 != rX || rY0 != rY {
-			continue
-		}
-		value := g.GetCells()[g.GetField().Idx(x0, y0)].Value().(int)
-		g.GetCells()[g.GetField().Idx(x, y)].UpdateNote(value)
-	}
-	cell := g.GetCells()[g.GetField().Idx(x, y)]
-	fmt.Println("Обнуление хода:", idx, x, y, cell.Value().(int), cell.notes, g.String())
+	fmt.Printf("Ход %v метка:%v путь %v\n", idx, note, g.path)
 }
 
 func (g *Game) Undo() {
@@ -111,45 +177,91 @@ func (g *Game) Undo() {
 	x, y := g.LastMovePos()
 	g.ResetCell(x, y)
 	g.history = eui.PopIntSlice(g.history)
-	log.Println("undo", x, y, g.history)
+	log.Println("Undo move", x, y, g.Cell(x, y))
 }
 
-func (g Game) ReseAllCells(idx int) {
-	if idx == 0 {
-		return
-	}
-	x, y := g.GetField().Pos(idx - 1)
-	if g.GetCells()[g.GetField().Idx(x, y)].GetValue() == 0 {
+func (g *Game) LastMovePos() (int, int) { return g.Pos(g.history[len(g.history)-1]) }
+
+func (g *Game) UpdateAllFieldNotes() {
+	for i := range *g.field {
+		x, y := g.Pos(i)
+		cell := g.Cell(x, y)
+		if cell.GetValue() > 0 {
+			continue
+		}
 		g.ResetCell(x, y)
 	}
-	g.ReseAllCells(idx - 1)
 }
 
-func (g *Game) LastMovePos() (int, int) { return g.GetField().Pos(g.history[len(g.history)-1]) }
+func (g *Game) ResetCell(x0, y0 int) {
+	cell := g.Cell(x0, y0)
+	if cell.IsReadOnly() {
+		return
+	}
+	cell.reset(g.Size())
+	for y := 0; y < g.Size(); y++ {
+		value := g.Cell(x0, y).GetValue()
+		if value > 0 {
+			g.Cell(x0, y0).setNote(value)
+		}
+	}
+	for x := 0; x < g.Size(); x++ {
+		value := g.Cell(x, y0).GetValue()
+		if value > 0 {
+			g.Cell(x0, y0).setNote(value)
+		}
+	}
+	rX0, rY0 := g.getRectIdx(x0, y0)
+	for i := range *g.field {
+		x1, y1 := g.Pos(i)
+		rX, rY := g.getRectIdx(x1, y1)
+		if rX0 != rX || rY0 != rY {
+			continue
+		}
+		value := g.Cell(x1, y1).GetValue()
+		if value > 0 {
+			g.Cell(x0, y0).setNote(value)
+		}
+	}
+}
+
+func (g *Game) ValuesCount() (counts map[int]int) {
+	counts = make(map[int]int)
+	for i := 1; i <= g.Size(); i++ {
+		counts[i] = 0
+		for _, cell := range *g.field {
+			if cell.GetValue() == i {
+				counts[i]++
+			}
+		}
+	}
+	return counts
+}
 
 func (g Game) getRectIdx(x int, y int) (rX int, rY int) {
-	szX := g.size
-	szY := g.size
-	rX = g.dim
-	rY = g.dim
+	szX := g.Size()
+	szY := g.Size()
+	rX = g.dim.W
+	rY = g.dim.H
 	for szX > x {
-		szX -= g.dim
+		szX -= g.dim.W
 		rX--
 	}
 	for szY > y {
-		szY -= g.dim
+		szY -= g.dim.H
 		rY--
 	}
 	return rX, rY
 }
 
-func (g Game) String() (result string) {
-	result = fmt.Sprintf("sudoku %vX%v\n", g.size, g.size)
-	for y := 0; y < g.size; y++ {
-		for x := 0; x < g.size; x++ {
-			result += g.GetCells()[g.GetField().Idx(x, y)].String()
+func (g Game) String() string {
+	res := "Sudoku: "
+	res += g.dim.String() + "\n"
+	for y := 0; y < g.Size(); y++ {
+		for x := 0; x < g.Size(); x++ {
+			res += fmt.Sprintf("[ %2v ]", g.Cell(x, y).String())
 		}
-		result += "\n"
+		res += "\n"
 	}
-	return result
+	return res
 }

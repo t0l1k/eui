@@ -2,68 +2,58 @@ package game
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/t0l1k/eui"
 )
 
 type Cell struct {
 	eui.SubjectBase
-	dim      int
-	readOnly bool
 	notes    map[int]bool
+	readOnly bool
 }
 
-func NewCell(dim int) *Cell {
-	c := &Cell{dim: dim}
-	c.Reset()
-	return c
-}
+func newCell() *Cell { return &Cell{} }
 
-func (c *Cell) Reset() {
-	c.readOnly = false
+func (c *Cell) reset(size int) {
 	c.SetValue(0)
 	c.notes = make(map[int]bool)
-	for i := 1; i <= c.Size(); i++ {
+	for i := 1; i <= size; i++ {
 		c.notes[i] = true
 	}
+	c.readOnly = false
 }
 
-func (c *Cell) Add(value int) bool {
-	if c.readOnly || !c.notes[value] {
+func (c Cell) GetValue() int { return c.Value().(int) }
+func (c *Cell) add(value int) bool {
+	if c.IsReadOnly() {
 		return false
 	}
 	c.SetValue(value)
-	c.UpdateNote(value)
+	c.setNote(value)
 	return true
 }
-
-func (c *Cell) Dim() int                  { return c.dim }
-func (c *Cell) Size() int                 { return c.dim * c.dim }
-func (c *Cell) IsReadOnly() bool          { return c.readOnly }
-func (c *Cell) SetReadOnly()              { c.readOnly = true }
-func (c *Cell) GetValue() int             { return c.Value().(int) }
-func (c Cell) IsFoundNote(value int) bool { return c.notes[value] }
-func (c *Cell) UpdateNote(value int)      { c.notes[value] = false }
-
-func (c *Cell) GetNotes() (notes []int) {
-	for k, v := range c.notes {
+func (c Cell) IsReadOnly() bool   { return c.readOnly }
+func (c *Cell) setReadOnly()      { c.readOnly = true }
+func (c *Cell) setNote(value int) { c.notes[value] = false }
+func (c Cell) GetNotes() (res []int) {
+	for i, v := range c.notes {
 		if v {
-			notes = append(notes, k)
+			res = append(res, i)
 		}
 	}
-	return notes
+	return res
 }
 
-func (c Cell) String() (result string) {
-	result = "["
-	if c.Value().(int) > 0 {
-		result = fmt.Sprintf("%3v", c.Value())
+func (c Cell) String() (res string) {
+	if c.GetValue() > 0 {
+		res = strconv.Itoa(c.GetValue())
 	} else {
 		for k, v := range c.notes {
 			if v {
-				result += fmt.Sprintf("(%v)", k)
+				res += fmt.Sprintf("(%v)", k)
 			}
 		}
 	}
-	return result + "]"
+	return res
 }

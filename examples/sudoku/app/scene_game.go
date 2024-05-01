@@ -45,7 +45,7 @@ func NewSceneSudoku() *SceneSudoku {
 		for i := range s.board.layoutCells.GetContainer() {
 			icon := s.board.layoutCells.GetContainer()[i].(*CellIcon)
 			if icon.btn == btn {
-				x, y := s.board.game.GetField().Pos(i)
+				x, y := s.board.game.Pos(i)
 				if s.bottomBar.IsActDel() {
 					s.board.game.ResetCell(x, y)
 					log.Println("Set Act Del", x, y)
@@ -71,6 +71,7 @@ func NewSceneSudoku() *SceneSudoku {
 			}
 			if s.bottomBar.IsActUndo() {
 				s.board.Undo()
+				log.Println("Set Act Undo")
 			}
 		}
 	})

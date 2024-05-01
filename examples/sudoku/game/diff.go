@@ -14,11 +14,10 @@ const (
 )
 
 func (d Difficult) Size() int { return int(Hard) }
-func (d Difficult) Percent(dim int) (moves int) {
+func (d Difficult) Percent(size int) (moves int) {
 	var (
-		percentMin, percentMax, size int
+		percentMin, percentMax int
 	)
-	size = dim * dim
 	switch d {
 	case Easy:
 		percentMin, percentMax = 20, 35
@@ -32,6 +31,7 @@ func (d Difficult) Percent(dim int) (moves int) {
 	log.Printf("Сложность %v size:%v min:%v max:%v n:%v moves:%v\n", d, size, percentMin, percentMax, n, moves)
 	return moves
 }
+
 func (d Difficult) String() (res string) {
 	switch d {
 	case Easy:
