@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,13 +11,15 @@ import (
 
 type Board struct {
 	eui.DrawableBase
-	diff            game.Difficult
-	game            *game.Game
-	layoutCells     *eui.GridLayoutRightDown
-	grid            *eui.GridView
-	fn              func(*eui.Button)
-	show, showNotes bool
-	highlight       int
+	diff                   game.Difficult
+	dim                    *game.Dim
+	game                   *game.Game
+	layoutCells            *eui.GridLayoutRightDown
+	grid                   *eui.GridView
+	fn                     func(*eui.Button)
+	show, showNotes, isWin bool
+	highlight              int
+	sw                     *eui.Stopwatch
 }
 
 func NewBoard(fn func(b *eui.Button)) *Board {
@@ -29,25 +32,29 @@ func NewBoard(fn func(b *eui.Button)) *Board {
 	b.grid.Fg(eui.Red)
 	b.grid.Bg(eui.Black)
 	b.Add(b.grid)
+	b.sw = eui.NewStopwatch()
 	return b
 }
 
-func (b *Board) Setup(dim int, diff game.Difficult) {
-	dimMode := game.NewDim(dim, dim)
+func (b *Board) Setup(dim *game.Dim, diff game.Difficult) {
+	b.dim = dim
 	b.diff = diff
-	b.game = game.NewGame(dimMode)
+	b.game = game.NewGame(b.dim)
 	b.game.Load(diff)
 	b.layoutCells.ResetContainerBase()
-	for y := 0; y < dimMode.Size(); y++ {
-		for x := 0; x < dimMode.Size(); x++ {
-			btn := NewCellIcon(dimMode, b.game.Cell(x, y), b.fn, eui.Silver, eui.Black)
+	for y := 0; y < b.dim.Size(); y++ {
+		for x := 0; x < b.dim.Size(); x++ {
+			btn := NewCellIcon(b.dim, b.game.Cell(x, y), b.fn, eui.Silver, eui.Black)
 			b.game.Cell(x, y).Attach(btn)
 			b.layoutCells.Add(btn)
 		}
 	}
-	b.grid.Set(float64(dim), float64(dim))
-	b.layoutCells.SetDim(float64(dimMode.Size()), float64(dimMode.Size()))
+	b.grid.Set(float64(b.dim.H), float64(b.dim.W))
+	b.layoutCells.SetDim(float64(b.dim.Size()), float64(b.dim.Size()))
 	b.ShowNotes(true)
+	b.isWin = false
+	b.sw.Reset()
+	b.sw.Start()
 }
 
 func (b *Board) IsShowNotes() bool { return b.showNotes }
@@ -63,8 +70,14 @@ func (b *Board) Undo() {
 	b.game.UpdateAllFieldNotes()
 }
 
+func (b *Board) MoveCount() int { return b.game.MovesCount() }
+
 func (b *Board) Move(x, y int) {
-	b.game.MakeMove(x, y, b.GetHighlightValue())
+	if !b.game.MakeMove(x, y, b.GetHighlightValue()) {
+		b.isWin = true
+		b.sw.Stop()
+		fmt.Println("Sudoku field collected game completed", b.sw, b.sw.Duration().String())
+	}
 	b.Highlight(strconv.Itoa(b.GetHighlightValue()))
 }
 
@@ -109,8 +122,10 @@ func (b *Board) Visible(value bool) { b.show = value; b.grid.Visible(value) }
 
 func (b *Board) Resize(rect []int) {
 	b.Rect(eui.NewRect(rect))
-	b.layoutCells.Resize(rect)
-	b.grid.Resize(rect)
+	x, y := b.GetRect().Pos()
+	w, h := b.GetRect().Size()
+	b.layoutCells.Resize([]int{x, y, w, h})
+	b.grid.Resize([]int{x, y, w, h})
 	margin := float64(b.layoutCells.GetRect().GetLowestSize()) * 0.005
 	b.layoutCells.SetCellMargin(margin)
 	b.grid.SetStrokewidth(margin * 2)

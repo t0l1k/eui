@@ -156,18 +156,22 @@ func (g *Game) isFoundEmptyNotes(idx int) error {
 	return nil
 }
 
-func (g *Game) MakeMove(x, y, note int) {
+func (g *Game) MakeMove(x, y, note int) bool {
 	idx := g.Idx(x, y)
 	if !g.inGame {
 		g.path[idx] = append(g.path[idx], note)
+		fmt.Printf("Ход %v метка:%v путь %v\n", idx, note, g.path)
+	} else {
+		g.history = append(g.history, idx)
 	}
 	cell := g.field.cell(idx)
 	if !cell.add(note) {
-		return
+		fmt.Println("move on read-only cell")
+		return true
 	}
-	g.UpdateAllFieldNotes()
-	g.history = append(g.history, idx)
-	fmt.Printf("Ход %v метка:%v путь %v\n", idx, note, g.path)
+	count := g.UpdateAllFieldNotes()
+	fmt.Printf("Ход %v метка:%v обновленно меток:%v в истории ходов:%v\n", idx, note, count, len(g.history))
+	return count > 0
 }
 
 func (g *Game) Undo() {
@@ -177,12 +181,13 @@ func (g *Game) Undo() {
 	x, y := g.LastMovePos()
 	g.ResetCell(x, y)
 	g.history = eui.PopIntSlice(g.history)
-	log.Println("Undo move", x, y, g.Cell(x, y))
+	log.Printf("Undo move[%v,%v]%v в истории ходов:%v\n", x, y, g.Cell(x, y), len(g.history))
 }
 
 func (g *Game) LastMovePos() (int, int) { return g.Pos(g.history[len(g.history)-1]) }
+func (g *Game) MovesCount() int         { return len(g.history) }
 
-func (g *Game) UpdateAllFieldNotes() {
+func (g *Game) UpdateAllFieldNotes() (count int) {
 	for i := range *g.field {
 		x, y := g.Pos(i)
 		cell := g.Cell(x, y)
@@ -190,7 +195,9 @@ func (g *Game) UpdateAllFieldNotes() {
 			continue
 		}
 		g.ResetCell(x, y)
+		count++
 	}
+	return count
 }
 
 func (g *Game) ResetCell(x0, y0 int) {

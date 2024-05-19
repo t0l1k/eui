@@ -66,17 +66,17 @@ func (s *Stopwatch) String() string {
 		str      string
 	)
 	duration = s.Duration()
-	mSec := int(duration.Milliseconds()) % 100
+	mSec := int(duration.Milliseconds()) % 1000
 	sec := int(duration.Seconds())
 	seconds := sec % 60
 	minutes := sec / 60
 	hour := minutes / 60
 	if hour > 0 {
-		str = fmt.Sprintf("%v:%02v:%02v", hour, minutes, seconds)
+		str = fmt.Sprintf("%vh%02vm%02vs", hour, minutes, seconds)
 	} else if minutes > 0 {
-		str = fmt.Sprintf("%v:%02v.%02v", minutes, seconds, mSec)
+		str = fmt.Sprintf("%vm%02v.%02vs", minutes, seconds, mSec)
 	} else {
-		str = fmt.Sprintf("%v.%02v", seconds, mSec)
+		str = fmt.Sprintf("%v.%02vs", seconds, mSec)
 	}
 	return str
 }

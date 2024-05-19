@@ -1,43 +1,51 @@
 package app
 
 import (
+	"time"
+
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/sudoku/game"
 )
 
 type DiffButton struct {
 	eui.DrawableBase
-	title, bestScore *eui.Text
-	btn              *eui.Button
-	size             int
-	diff             game.Difficult
-	score            string
-	f                func(b *eui.Button)
+	title, lblScore *eui.Text
+	btn             *eui.Button
+	dim             *game.Dim
+	diff            game.Difficult
+	score           *game.Score
+	f               func(b *eui.Button)
 }
 
-func NewDiffButton(size int, diff game.Difficult, score string, f func(b *eui.Button)) *DiffButton {
+func NewDiffButton(dim *game.Dim, diff game.Difficult, score *game.Score, f func(b *eui.Button)) *DiffButton {
 	d := &DiffButton{}
-	d.size = size
+	d.dim = dim
 	d.score = score
 	d.diff = diff
 	d.f = f
 	d.title = eui.NewText(diff.String())
 	d.Add(d.title)
-	d.bestScore = eui.NewText(score)
-	d.Add(d.bestScore)
+	d.lblScore = eui.NewText(score.String())
+	d.Add(d.lblScore)
 	d.btn = eui.NewButton("Запустить", f)
 	d.Add(d.btn)
 	return d
 }
 
-func (d *DiffButton) GetData() (int, string, game.Difficult) {
-	return d.size, d.score, d.diff
+func (d *DiffButton) GetData() (*game.Dim, string, game.Difficult) {
+	return d.dim, d.score.String(), d.diff
+}
+
+func (d *DiffButton) SetScore(value time.Duration) {
+	d.score.Last(value)
+	d.lblScore.SetText(d.score.String())
 }
 
 func (d *DiffButton) UpdateData(value interface{}) {
 	switch v := value.(type) {
 	case int:
-		d.size = v
+		d.dim.W = v
+		d.dim.H = v
 	}
 }
 
@@ -62,7 +70,7 @@ func (d *DiffButton) Resize(rect []int) {
 	d.title.Resize([]int{x, y, int(wTop), int(hTop)})
 	y += int(h1)
 	w2 := w0 / 3
-	d.bestScore.Resize([]int{x, y, w2, int(h1)})
+	d.lblScore.Resize([]int{x, y, w2, int(h1)})
 	d.btn.Resize([]int{x + w2, y, w2 * 2, int(h1)})
 	d.ImageReset()
 }

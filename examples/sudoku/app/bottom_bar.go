@@ -2,13 +2,15 @@ package app
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/examples/sudoku/game"
 )
 
 const (
-	aUndo = "Отменить"
+	aUndo = "Отменить ход"
 	aDel  = "Удалить"
 	aNote = "Заметка"
 )
@@ -19,7 +21,7 @@ type BottomBar struct {
 	eui.DrawableBase
 	layoutActs, layoutNums               *eui.BoxLayout
 	actBtns                              []eui.Drawabler
-	dim                                  int
+	dim                                  *game.Dim
 	show                                 bool
 	fn                                   func(*eui.Button)
 	actUndo, actDel, actNotes, actNumber bool
@@ -35,7 +37,7 @@ func NewBottomBar(fn func(*eui.Button)) *BottomBar {
 	return b
 }
 
-func (b *BottomBar) Setup(dim int) {
+func (b *BottomBar) Setup(dim *game.Dim) {
 	b.dim = dim
 	b.layoutActs.ResetContainerBase()
 	b.layoutNums.ResetContainerBase()
@@ -44,8 +46,7 @@ func (b *BottomBar) Setup(dim int) {
 		b.layoutActs.Add(btn)
 		b.actBtns = append(b.actBtns, btn)
 	}
-	size := b.dim * b.dim
-	for i := 0; i < size; i++ {
+	for i := 0; i < b.dim.Size(); i++ {
 		btn := NewBtn(b.fn)
 		btn.SetValue(i + 1)
 		btn.SetCount(0)
@@ -65,7 +66,11 @@ func (b *BottomBar) ShowNotes(value bool) { b.actNotes = value }
 
 func (b *BottomBar) SetAct(btn *eui.Button) (result bool) {
 	b.setBtnClrs()
-	switch btn.GetText() {
+	btnStr := (btn.GetText())
+	if strings.HasPrefix(btnStr, aUndo) {
+		btnStr = aUndo
+	}
+	switch btnStr {
 	case aUndo:
 		b.actUndo = true
 		btn.Bg(eui.Yellow)
@@ -113,12 +118,20 @@ func (b *BottomBar) setBtnClrs() {
 }
 
 func (b *BottomBar) UpdateNrs(counts map[int]int) {
-	size := b.dim * b.dim
+	size := b.dim.Size()
 	for k, v := range counts {
 		for _, btn := range b.layoutNums.GetContainer() {
 			if btn.(*BottomBarNr).GetValue() == strconv.Itoa(k) {
 				btn.(*BottomBarNr).SetCount(size - v)
 			}
+		}
+	}
+}
+
+func (b *BottomBar) UpdateUndoBtn(count int) {
+	for _, btn := range b.layoutActs.GetContainer() {
+		if strings.HasPrefix(btn.(*eui.Button).GetText(), aUndo) {
+			btn.(*eui.Button).SetText(aUndo + ":" + strconv.Itoa(count))
 		}
 	}
 }

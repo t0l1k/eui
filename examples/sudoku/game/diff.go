@@ -11,9 +11,11 @@ const (
 	Easy Difficult = iota
 	Normal
 	Hard
+	Extreme
 )
 
-func (d Difficult) Size() int { return int(Hard) }
+func (d Difficult) Eq(other Difficult) bool { return d == other }
+func (d Difficult) Size() int               { return int(Extreme) }
 func (d Difficult) Percent(size int) (moves int) {
 	var (
 		percentMin, percentMax int
@@ -24,7 +26,9 @@ func (d Difficult) Percent(size int) (moves int) {
 	case Normal:
 		percentMin, percentMax = 35, 50
 	case Hard:
-		percentMin, percentMax = 50, 75
+		percentMin, percentMax = 50, 65
+	case Extreme:
+		percentMin, percentMax = 65, 80
 	}
 	n := rand.Intn(percentMax-percentMin) + percentMin
 	moves = n * (size * size) / 100
@@ -40,6 +44,8 @@ func (d Difficult) String() (res string) {
 		res = "Нормально"
 	case Hard:
 		res = "Сложно"
+	case Extreme:
+		res = "Экстремально"
 	}
 	return res
 }

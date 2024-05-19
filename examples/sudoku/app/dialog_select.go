@@ -22,10 +22,10 @@ func NewDialogSelect(f func(b *eui.Button)) *DialogSelect {
 	d := &DialogSelect{}
 	d.title = eui.NewText("Выбрать размер поля и сложность")
 	d.Add(d.title)
-	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.Visible(false) })
+	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.Visible(false); eui.GetUi().Pop() })
 	d.Add(d.btnClose)
 	data := func() (result []interface{}) {
-		for i := 2; i <= 4; i++ {
+		for i := 2; i <= 5; i++ {
 			result = append(result, i)
 		}
 		return result
@@ -39,8 +39,9 @@ func NewDialogSelect(f func(b *eui.Button)) *DialogSelect {
 		d.cSize.SetText(str)
 	})
 	d.Add(d.cSize)
-	for i := 0; i < 3; i++ {
-		btn := NewDiffButton(d.size.Value().(int), game.Difficult(i), "3:00", f)
+	for i := 0; i < 4; i++ {
+		sz := d.size.Value().(int)
+		btn := NewDiffButton(game.NewDim(sz, sz), game.Difficult(i), game.NewScore(0), f)
 		d.size.Attach(btn)
 		d.btnsDiff = append(d.btnsDiff, btn)
 		d.Add(btn)
@@ -68,7 +69,7 @@ func (d *DialogSelect) Visible(value bool) { d.show = value }
 func (d *DialogSelect) Resize(rect []int) {
 	d.Rect(eui.NewRect(rect))
 	w0, h0 := d.GetRect().Size()
-	h1 := float64(h0) / 5
+	h1 := float64(h0) / 6
 	hTop := h1 * 0.8
 	wTop := float64(w0) * 0.8
 	x, y := d.GetRect().Pos()

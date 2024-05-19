@@ -27,12 +27,12 @@ func NewSceneSudoku() *SceneSudoku {
 	s.dialogSelect = NewDialogSelect(func(b *eui.Button) {
 		for _, v := range s.dialogSelect.btnsDiff {
 			if v.btn.IsPressed() {
-				size, _, diff := v.GetData()
+				dim, _, diff := v.GetData()
 				s.topBar.SetTitle("Sudoku " + diff.String())
 				s.dialogSelect.Visible(false)
-				s.board.Setup(size, diff)
+				s.board.Setup(dim, diff)
 				s.board.Visible(true)
-				s.bottomBar.Setup(size)
+				s.bottomBar.Setup(dim)
 				s.bottomBar.Visible(true)
 				s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
 				s.bottomBar.ShowNotes(s.board.IsShowNotes())
@@ -50,8 +50,21 @@ func NewSceneSudoku() *SceneSudoku {
 					s.board.game.ResetCell(x, y)
 					log.Println("Set Act Del", x, y)
 				} else {
-					s.board.Move(x, y)
-					s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
+					if !s.board.isWin {
+						s.board.Move(x, y)
+						s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
+						s.bottomBar.UpdateUndoBtn(s.board.MoveCount())
+					}
+					if s.board.isWin {
+						for _, v := range s.dialogSelect.btnsDiff {
+							if v.diff.Eq(s.board.diff) && v.dim.Eq(s.board.dim) {
+								v.SetScore(s.board.sw.Duration())
+							}
+						}
+						s.board.Visible(false)
+						s.bottomBar.Visible(false)
+						s.dialogSelect.Visible(true)
+					}
 				}
 			}
 		}
@@ -71,6 +84,8 @@ func NewSceneSudoku() *SceneSudoku {
 			}
 			if s.bottomBar.IsActUndo() {
 				s.board.Undo()
+				s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
+				s.bottomBar.UpdateUndoBtn(s.board.MoveCount())
 				log.Println("Set Act Undo")
 			}
 		}
@@ -87,6 +102,6 @@ func (s *SceneSudoku) Resize() {
 	s.topBar.Resize([]int{0, 0, w, hT})
 	s.dialogSelect.Resize([]int{hT / 2, hT + hT/2, w - hT, h - hT*2})
 	h1 := h - hT*2
-	s.board.Resize([]int{0, hT, w, h1})
+	s.board.Resize([]int{(w - (h1)) / 2, hT, h1, h1})
 	s.bottomBar.Resize([]int{(w - (h1)) / 2, h - hT, h1, hT})
 }
