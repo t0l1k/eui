@@ -2,7 +2,6 @@ package eui
 
 import (
 	"fmt"
-	"log"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -41,22 +40,18 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func
 		if c.index < len(c.data)-1 {
 			c.index++
 			c.valueVar.SetValue(c.GetValueString())
-			log.Println("combo: +", c.index, c.Value())
 		}
 		if c.onChange != nil {
 			c.onChange(c)
-			log.Println("combo: exec +")
 		}
 	})
 	c.btnMinus = NewButton("-", func(b *Button) {
 		if c.index > 0 {
 			c.index--
 			c.valueVar.SetValue(c.GetValueString())
-			log.Println("combo: -", c.index, c.Value())
 		}
 		if c.onChange != nil {
 			c.onChange(c)
-			log.Println("combo: exec -")
 		}
 	})
 	c.lblText = NewText(text)
@@ -80,6 +75,8 @@ func (c *ComboBox) GetValueString() (result string) {
 		result = fmt.Sprintf("%v", c.Value().(float64))
 	case string:
 		result = fmt.Sprintf("%v", c.Value().(string))
+	default:
+		result = strconv.Itoa(c.index)
 	}
 	return result
 }

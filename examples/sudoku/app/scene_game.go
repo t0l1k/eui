@@ -4,6 +4,7 @@ import (
 	"log"
 
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/examples/sudoku/game"
 )
 
 type SceneSudoku struct {
@@ -15,6 +16,7 @@ type SceneSudoku struct {
 }
 
 func NewSceneSudoku() *SceneSudoku {
+	gamesData := game.NewGamesData()
 	s := &SceneSudoku{}
 	s.topBar = eui.NewTopBar("Sudoku", func(b *eui.Button) {
 		s.dialogSelect.Visible(true)
@@ -24,10 +26,10 @@ func NewSceneSudoku() *SceneSudoku {
 	s.topBar.SetShowStopwatch()
 	s.topBar.SetTitleCoverArea(0.85)
 	s.Add(s.topBar)
-	s.dialogSelect = NewDialogSelect(func(b *eui.Button) {
+	s.dialogSelect = NewDialogSelect(gamesData, func(b *eui.Button) {
 		for _, v := range s.dialogSelect.btnsDiff {
 			if v.btn.IsPressed() {
-				dim, _, diff := v.GetData()
+				dim, diff := v.GetData()
 				s.topBar.SetTitle("Sudoku " + diff.String())
 				s.dialogSelect.Visible(false)
 				s.board.Setup(dim, diff)
@@ -56,9 +58,11 @@ func NewSceneSudoku() *SceneSudoku {
 						s.bottomBar.UpdateUndoBtn(s.board.MoveCount())
 					}
 					if s.board.isWin {
+						gamesData.AddGameResult(s.board.dim, s.board.diff, s.board.sw.Duration())
 						for _, v := range s.dialogSelect.btnsDiff {
 							if v.diff.Eq(s.board.diff) && v.dim.Eq(s.board.dim) {
-								v.SetScore(s.board.sw.Duration())
+								value := gamesData.GetLastBest(s.board.dim, s.board.diff)
+								v.SetScore(value)
 							}
 						}
 						s.board.Visible(false)

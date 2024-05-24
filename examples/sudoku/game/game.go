@@ -17,7 +17,7 @@ const (
 )
 
 type Game struct {
-	dim     *Dim
+	dim     Dim
 	diff    Difficult
 	field   *field
 	path    map[int][]int
@@ -25,12 +25,12 @@ type Game struct {
 	inGame  bool
 }
 
-func NewGame(dim *Dim) *Game {
+func NewGame(dim Dim) *Game {
 	g := &Game{dim: dim, field: newField(dim.Size())}
 	return g
 }
 
-func (g Game) Dim() *Dim              { return g.dim }
+func (g Game) Dim() Dim               { return g.dim }
 func (g Game) Size() int              { return g.dim.Size() }
 func (g Game) Cell(x, y int) *Cell    { return g.field.cell(g.Idx(x, y)) }
 func (g Game) Idx(x, y int) int       { return y*g.Size() + x }

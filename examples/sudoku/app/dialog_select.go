@@ -10,43 +10,62 @@ import (
 
 type DialogSelect struct {
 	eui.DrawableBase
-	title    *eui.Text
-	btnClose *eui.Button
-	cSize    *eui.ComboBox
-	btnsDiff []*DiffButton
-	size     *eui.SubjectBase
-	show     bool
+	title     *eui.Text
+	btnClose  *eui.Button
+	cSize     *eui.ComboBox
+	btnsDiff  []*DiffButton
+	modes     *eui.SubjectBase
+	show      bool
+	gamesData *game.GamesData
 }
 
-func NewDialogSelect(f func(b *eui.Button)) *DialogSelect {
+func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSelect {
 	d := &DialogSelect{}
+	d.gamesData = gamesData
 	d.title = eui.NewText("Выбрать размер поля и сложность")
 	d.Add(d.title)
 	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.Visible(false); eui.GetUi().Pop() })
 	d.Add(d.btnClose)
-	data := func() (result []interface{}) {
-		for i := 2; i <= 5; i++ {
-			result = append(result, i)
-		}
-		return result
-	}()
+	var data []interface{}
+	for dim := range *gamesData {
+		data = append(data, dim)
+	}
 	idx := 0
-	d.size = eui.NewSubject()
-	d.size.SetValue(data[idx])
-	d.cSize = eui.NewComboBox("Размер поля", data, idx, func(cb *eui.ComboBox) {
-		d.size.SetValue(cb.Value())
-		str := fmt.Sprintf("Выбран размер поля %vx%v", d.size, d.size)
+	d.modes = eui.NewSubject()
+	d.modes.Attach(d)
+	d.modes.SetValue(data[idx])
+	d.cSize = eui.NewComboBox(fmt.Sprintf("Размер поля %v", data[idx].(game.Dim)), data, idx, func(cb *eui.ComboBox) {
+		d.modes.SetValue(cb.Value())
+		str := fmt.Sprintf("Размер поля %v", d.modes)
 		d.cSize.SetText(str)
 	})
 	d.Add(d.cSize)
 	for i := 0; i < 4; i++ {
-		sz := d.size.Value().(int)
-		btn := NewDiffButton(game.NewDim(sz, sz), game.Difficult(i), game.NewScore(0), f)
-		d.size.Attach(btn)
+		dim := d.modes.Value().(game.Dim)
+		btn := NewDiffButton(dim, game.NewDiff(game.Difficult(i)), f)
+		d.modes.Attach(btn)
 		d.btnsDiff = append(d.btnsDiff, btn)
 		d.Add(btn)
 	}
 	return d
+}
+
+func (d *DialogSelect) UpdateData(value interface{}) {
+	switch v := value.(type) {
+	case game.Dim:
+		for dim, diffs := range *d.gamesData {
+			for diff := range diffs {
+				if v.Eq(dim) {
+					for _, v := range d.btnsDiff {
+						if v.diff.Eq(diff) {
+							res := d.gamesData.GetLastBest(dim, diff)
+							v.SetScore(res)
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 func (d *DialogSelect) Update(dt int) {

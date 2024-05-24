@@ -21,7 +21,7 @@ type BottomBar struct {
 	eui.DrawableBase
 	layoutActs, layoutNums               *eui.BoxLayout
 	actBtns                              []eui.Drawabler
-	dim                                  *game.Dim
+	dim                                  game.Dim
 	show                                 bool
 	fn                                   func(*eui.Button)
 	actUndo, actDel, actNotes, actNumber bool
@@ -37,7 +37,7 @@ func NewBottomBar(fn func(*eui.Button)) *BottomBar {
 	return b
 }
 
-func (b *BottomBar) Setup(dim *game.Dim) {
+func (b *BottomBar) Setup(dim game.Dim) {
 	b.dim = dim
 	b.layoutActs.ResetContainerBase()
 	b.layoutNums.ResetContainerBase()

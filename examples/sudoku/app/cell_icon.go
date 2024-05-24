@@ -12,7 +12,7 @@ import (
 type CellIcon struct {
 	eui.DrawableBase
 	cell            *game.Cell
-	dim             *game.Dim
+	dim             game.Dim
 	btn             *eui.Button
 	layout          *eui.GridLayoutRightDown
 	show, showNotes bool
@@ -20,7 +20,7 @@ type CellIcon struct {
 	highlight       int
 }
 
-func NewCellIcon(dim *game.Dim, cell *game.Cell, f func(b *eui.Button), bg, fg color.RGBA) *CellIcon {
+func NewCellIcon(dim game.Dim, cell *game.Cell, f func(b *eui.Button), bg, fg color.RGBA) *CellIcon {
 	c := &CellIcon{}
 	c.cell = cell
 	c.dim = dim

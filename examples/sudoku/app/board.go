@@ -12,7 +12,7 @@ import (
 type Board struct {
 	eui.DrawableBase
 	diff                   game.Difficult
-	dim                    *game.Dim
+	dim                    game.Dim
 	game                   *game.Game
 	layoutCells            *eui.GridLayoutRightDown
 	grid                   *eui.GridView
@@ -36,7 +36,7 @@ func NewBoard(fn func(b *eui.Button)) *Board {
 	return b
 }
 
-func (b *Board) Setup(dim *game.Dim, diff game.Difficult) {
+func (b *Board) Setup(dim game.Dim, diff game.Difficult) {
 	b.dim = dim
 	b.diff = diff
 	b.game = game.NewGame(b.dim)
@@ -76,7 +76,7 @@ func (b *Board) Move(x, y int) {
 	if !b.game.MakeMove(x, y, b.GetHighlightValue()) {
 		b.isWin = true
 		b.sw.Stop()
-		fmt.Println("Sudoku field collected game completed", b.sw, b.sw.Duration().String())
+		fmt.Println("Sudoku field collected game completed", b.sw, b.dim, b.diff)
 	}
 	b.Highlight(strconv.Itoa(b.GetHighlightValue()))
 }

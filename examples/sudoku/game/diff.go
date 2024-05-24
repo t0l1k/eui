@@ -14,6 +14,8 @@ const (
 	Extreme
 )
 
+func NewDiff(diff Difficult) Difficult { return diff }
+
 func (d Difficult) Eq(other Difficult) bool { return d == other }
 func (d Difficult) Size() int               { return int(Extreme) }
 func (d Difficult) Percent(size int) (moves int) {
