@@ -74,9 +74,9 @@ func (b *Board) MoveCount() int { return b.game.MovesCount() }
 
 func (b *Board) Move(x, y int) {
 	if !b.game.MakeMove(x, y, b.GetHighlightValue()) {
-		b.isWin = true
+		b.isWin = b.game.IsWin()
 		b.sw.Stop()
-		fmt.Println("Sudoku field collected game completed", b.sw, b.dim, b.diff)
+		fmt.Println("Sudoku field collected game completed", b.sw, b.dim, b.diff, b.isWin)
 	}
 	b.Highlight(strconv.Itoa(b.GetHighlightValue()))
 }

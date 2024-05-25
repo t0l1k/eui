@@ -187,6 +187,76 @@ func (g *Game) Undo() {
 func (g *Game) LastMovePos() (int, int) { return g.Pos(g.history[len(g.history)-1]) }
 func (g *Game) MovesCount() int         { return len(g.history) }
 
+func (g *Game) IsWin() bool {
+	var chechHor, chechVert, checkRects bool
+	var arr []int
+	for x0 := 0; x0 < g.Size(); x0++ {
+		arr = g.fillArr()
+		for y := 0; y < g.Size(); y++ {
+			value := g.Cell(x0, y).GetValue()
+			if value == 0 {
+				return false
+			} else {
+				arr = eui.RemoveFromIntSliceValue(arr, value)
+			}
+		}
+		if len(arr) == 0 {
+			chechHor = true
+		} else {
+			return false
+		}
+	}
+
+	for y0 := 0; y0 < g.Size(); y0++ {
+		arr = g.fillArr()
+		for x := 0; x < g.Size(); x++ {
+			value := g.Cell(x, y0).GetValue()
+			if value == 0 {
+				return false
+			} else {
+				arr = eui.RemoveFromIntSliceValue(arr, value)
+			}
+		}
+		if len(arr) == 0 {
+			chechVert = true
+		} else {
+			return false
+		}
+	}
+
+	for rY0 := 0; rY0 < g.dim.H; rY0++ {
+		for rX0 := 0; rX0 < g.dim.W; rX0++ {
+			arr = g.fillArr()
+			for i, v := range *g.field {
+				x, y := g.Pos(i)
+				rX, rY := g.getRectIdx(x, y)
+				if rX0 != rX || rY0 != rY {
+					continue
+				}
+				value := v.GetValue()
+				if value == 0 {
+					return false
+				} else {
+					arr = eui.RemoveFromIntSliceValue(arr, value)
+				}
+			}
+			if len(arr) == 0 {
+				checkRects = true
+			} else {
+				return false
+			}
+		}
+	}
+	return chechHor && chechVert && checkRects
+}
+
+func (g *Game) fillArr() (arr []int) {
+	for i := 1; i <= g.Size(); i++ {
+		arr = append(arr, i)
+	}
+	return arr
+}
+
 func (g *Game) UpdateAllFieldNotes() (count int) {
 	for i := range *g.field {
 		x, y := g.Pos(i)
