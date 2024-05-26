@@ -10,7 +10,9 @@ func NewGamesData() *GamesData {
 	gDim := make(GamesData)
 	dims := func() (result []Dim) {
 		for i := 2; i <= 3; i++ {
-			result = append(result, NewDim(i, i))
+			for j := 1; j <= 5; j++ {
+				result = append(result, NewDim(i, j))
+			}
 		}
 		return result
 	}()

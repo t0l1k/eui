@@ -30,7 +30,7 @@ func NewSceneSudoku() *SceneSudoku {
 		for _, v := range s.dialogSelect.btnsDiff {
 			if v.btn.IsPressed() {
 				dim, diff := v.GetData()
-				s.topBar.SetTitle("Sudoku " + diff.String())
+				s.topBar.SetTitle("Sudoku " + dim.String() + diff.String())
 				s.dialogSelect.Visible(false)
 				s.board.Setup(dim, diff)
 				s.board.Visible(true)

@@ -47,10 +47,17 @@ func (g *GridView) SetStrokewidth(w float64) { g.strokeWidth = w; g.Dirty = true
 func (g *GridView) Layout() {
 	g.SpriteBase.Layout()
 	g.Image().Fill(g.bg)
-	cellSize := func() (size float64) {
+	cellSizeW := func() (size float64) {
 		r := g.r
+		for r*size < float64(g.rect.W) {
+			size += 0.01
+		}
+		return size
+	}()
+
+	cellSizeH := func() (size float64) {
 		c := g.c
-		for r*size < float64(g.rect.W) && c*size < float64(g.rect.H) {
+		for c*size < float64(g.rect.H) {
 			size += 0.01
 		}
 		return size
@@ -58,13 +65,13 @@ func (g *GridView) Layout() {
 
 	r := g.GetRect()
 	w0, h0 := r.Size()
-	marginX := (float64(w0) - cellSize*g.r) / 2
-	marginY := (float64(h0) - cellSize*g.c) / 2
+	marginX := (float64(w0) - cellSizeW*g.r) / 2
+	marginY := (float64(h0) - cellSizeH*g.c) / 2
 	x0, y0 := marginX, marginY
 
 	if g.DrawRect {
 		x, y := x0, y0
-		w, h := cellSize*g.r, cellSize*g.c
+		w, h := cellSizeW*g.r, cellSizeH*g.c
 		if y < 0 {
 			y = 0
 		}
@@ -74,24 +81,28 @@ func (g *GridView) Layout() {
 		vector.StrokeRect(g.Image(), float32(x), float32(y), float32(w), float32(h), float32(g.strokeWidth), g.fg, true)
 	}
 
-	for y := y0 + cellSize; y < y0+cellSize*g.c; y += cellSize {
-		vector.StrokeLine(
-			g.Image(),
-			float32(x0),
-			float32(y),
-			float32(x0)+float32(cellSize)*float32(g.r),
-			float32(y),
-			float32(g.strokeWidth), g.fg, true)
+	if g.c > 1 {
+		for x := x0 + cellSizeW; x < x0+cellSizeW*g.r; x += cellSizeW {
+			vector.StrokeLine(
+				g.Image(),
+				float32(x),
+				float32(y0),
+				float32(x),
+				float32(y0)+float32(cellSizeH)*float32(g.c),
+				float32(g.strokeWidth), g.fg, true)
+		}
 	}
 
-	for x := x0 + cellSize; x < x0+cellSize*g.r; x += cellSize {
-		vector.StrokeLine(
-			g.Image(),
-			float32(x),
-			float32(y0),
-			float32(x),
-			float32(y0)+float32(cellSize)*float32(g.c),
-			float32(g.strokeWidth), g.fg, true)
+	if g.r > 1 {
+		for y := y0 + cellSizeH; y < y0+cellSizeH*g.c; y += cellSizeH {
+			vector.StrokeLine(
+				g.Image(),
+				float32(x0),
+				float32(y),
+				float32(x0)+float32(cellSizeW)*float32(g.r),
+				float32(y),
+				float32(g.strokeWidth), g.fg, true)
+		}
 	}
 	g.Dirty = true
 }

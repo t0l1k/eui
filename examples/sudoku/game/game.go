@@ -188,7 +188,7 @@ func (g *Game) LastMovePos() (int, int) { return g.Pos(g.history[len(g.history)-
 func (g *Game) MovesCount() int         { return len(g.history) }
 
 func (g *Game) IsWin() bool {
-	var chechHor, chechVert, checkRects bool
+	var checkHor, checkVert, checkRects bool
 	var arr []int
 	for x0 := 0; x0 < g.Size(); x0++ {
 		arr = g.fillArr()
@@ -201,7 +201,7 @@ func (g *Game) IsWin() bool {
 			}
 		}
 		if len(arr) == 0 {
-			chechHor = true
+			checkHor = true
 		} else {
 			return false
 		}
@@ -218,14 +218,14 @@ func (g *Game) IsWin() bool {
 			}
 		}
 		if len(arr) == 0 {
-			chechVert = true
+			checkVert = true
 		} else {
 			return false
 		}
 	}
 
-	for rY0 := 0; rY0 < g.dim.H; rY0++ {
-		for rX0 := 0; rX0 < g.dim.W; rX0++ {
+	for rY0 := 0; rY0 < g.dim.W; rY0++ {
+		for rX0 := 0; rX0 < g.dim.H; rX0++ {
 			arr = g.fillArr()
 			for i, v := range *g.field {
 				x, y := g.Pos(i)
@@ -247,7 +247,7 @@ func (g *Game) IsWin() bool {
 			}
 		}
 	}
-	return chechHor && chechVert && checkRects
+	return checkHor && checkVert && checkRects
 }
 
 func (g *Game) fillArr() (arr []int) {
@@ -320,6 +320,10 @@ func (g Game) getRectIdx(x int, y int) (rX int, rY int) {
 	szY := g.Size()
 	rX = g.dim.W
 	rY = g.dim.H
+	if g.dim.W != g.dim.H {
+		rX = g.dim.H
+		rY = g.dim.W
+	}
 	for szX > x {
 		szX -= g.dim.W
 		rX--
