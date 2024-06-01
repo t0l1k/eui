@@ -27,7 +27,7 @@ func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSe
 	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.Visible(false); eui.GetUi().Pop() })
 	d.Add(d.btnClose)
 	var data []interface{}
-	for dim := range *gamesData {
+	for _, dim := range gamesData.SortedDims() {
 		data = append(data, dim)
 	}
 	idx := 0

@@ -1,6 +1,7 @@
 package game
 
 import (
+	"sort"
 	"time"
 )
 
@@ -10,7 +11,7 @@ func NewGamesData() *GamesData {
 	gDim := make(GamesData)
 	dims := func() (result []Dim) {
 		for i := 2; i <= 3; i++ {
-			for j := 1; j <= 5; j++ {
+			for j := 2; j <= 5; j++ {
 				result = append(result, NewDim(i, j))
 			}
 		}
@@ -49,6 +50,14 @@ func (g GamesData) GetLastBest(dim Dim, diff Difficult) (result string) {
 		value = g[dim][diff][len(g[dim][diff])-1].String()
 	}
 	result += "Best:" + best.Round(time.Millisecond).String() + " Last:" + value
+	return result
+}
+
+func (g GamesData) SortedDims() (result []Dim) {
+	for dims := range g {
+		result = append(result, dims)
+	}
+	sort.Sort(DimsBySize(result))
 	return result
 }
 
