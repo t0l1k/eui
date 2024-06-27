@@ -61,6 +61,37 @@ func (g GamesData) SortedDims() (result []Dim) {
 	return result
 }
 
+func (g GamesData) GamesPlayed() (results []string) {
+	var arr []GameData
+	for _, diffs := range g {
+		for _, games := range diffs {
+			if len(games) == 0 {
+				continue
+			}
+			arr = append(arr, games...)
+		}
+	}
+	sort.Sort(GameByTime(arr))
+	for _, game := range arr {
+	beg:
+		for dim, diffs := range g {
+			for diff, games := range diffs {
+				for _, gm := range games {
+					if game.Eq(gm) {
+						result := ""
+						result += dim.String()
+						result += diff.String()
+						result += game.String()
+						results = append(results, result)
+						break beg
+					}
+				}
+			}
+		}
+	}
+	return results
+}
+
 func (g GamesData) String() (result string) {
 	for dim, diffs := range g {
 		for diff, games := range diffs {

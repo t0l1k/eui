@@ -18,7 +18,7 @@ type SceneSudoku struct {
 func NewSceneSudoku() *SceneSudoku {
 	gamesData := game.NewGamesData()
 	s := &SceneSudoku{}
-	s.topBar = eui.NewTopBar("Sudoku", func(b *eui.Button) {
+	s.topBar = eui.NewTopBar(title, func(b *eui.Button) {
 		s.dialogSelect.Visible(true)
 		s.board.Visible(false)
 		s.bottomBar.Visible(false)
@@ -59,6 +59,9 @@ func NewSceneSudoku() *SceneSudoku {
 					}
 					if s.board.isWin {
 						gamesData.AddGameResult(s.board.dim, s.board.diff, s.board.sw.Duration())
+						margin := s.dialogSelect.margin
+						s.dialogSelect.history.Reset()
+						s.dialogSelect.history.SetupListViewText(gamesData.GamesPlayed(), margin, 1, eui.Aqua, eui.Black)
 						for _, v := range s.dialogSelect.btnsDiff {
 							if v.diff.Eq(s.board.diff) && v.dim.Eq(s.board.dim) {
 								value := gamesData.GetLastBest(s.board.dim, s.board.diff)
@@ -68,6 +71,7 @@ func NewSceneSudoku() *SceneSudoku {
 						s.board.Visible(false)
 						s.bottomBar.Visible(false)
 						s.dialogSelect.Visible(true)
+						s.topBar.SetTitle(title)
 					}
 				}
 			}

@@ -10,13 +10,16 @@ import (
 
 type DialogSelect struct {
 	eui.DrawableBase
-	title     *eui.Text
-	btnClose  *eui.Button
-	cSize     *eui.ComboBox
-	btnsDiff  []*DiffButton
-	modes     *eui.SubjectBase
-	show      bool
-	gamesData *game.GamesData
+	title      *eui.Text
+	btnClose   *eui.Button
+	lblHistory *eui.Text
+	history    *eui.ListView
+	cSize      *eui.ComboBox
+	btnsDiff   []*DiffButton
+	modes      *eui.SubjectBase
+	show       bool
+	gamesData  *game.GamesData
+	margin     int
 }
 
 func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSelect {
@@ -47,6 +50,10 @@ func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSe
 		d.btnsDiff = append(d.btnsDiff, btn)
 		d.Add(btn)
 	}
+	d.lblHistory = eui.NewText("История игр")
+	d.Add(d.lblHistory)
+	d.history = eui.NewListView()
+	d.Add(d.history)
 	return d
 }
 
@@ -89,16 +96,24 @@ func (d *DialogSelect) Resize(rect []int) {
 	d.Rect(eui.NewRect(rect))
 	w0, h0 := d.GetRect().Size()
 	h1 := float64(h0) / 6
+	d.margin = int(h1 / 2)
 	hTop := h1 * 0.8
-	wTop := float64(w0) * 0.8
-	x, y := d.GetRect().Pos()
-	d.title.Resize([]int{x, y, int(wTop), int(hTop)})
-	d.btnClose.Resize([]int{x + w0 - int(hTop), y, int(hTop), int(hTop)})
+	wTop := float64(w0) * 0.7
+	x0, y0 := d.GetRect().Pos()
+	d.title.Resize([]int{x0, y0, w0 - int(hTop), int(hTop)})
+	x := x0 + (w0 - int(hTop))
+	y := y0
+	d.btnClose.Resize([]int{x, y, int(hTop), int(hTop)})
+	x = x0
 	y += int(h1)
-	d.cSize.Resize([]int{x, y, w0, int(h1)})
+	d.cSize.Resize([]int{x, y, int(wTop), int(h1)})
+	x = x0 + w0 - (w0 - int(wTop))
+	d.lblHistory.Resize([]int{x, y, w0 - int(wTop), int(hTop)})
 	y += int(h1)
+	d.history.Resize([]int{x, y, (w0 - int(wTop)), h0 - int(h1*2)})
+	x = x0
 	for _, v := range d.btnsDiff {
-		v.Resize([]int{x, y, w0, int(h1)})
+		v.Resize([]int{x, y, int(wTop), int(h1)})
 		y += int(h1)
 	}
 	d.ImageReset()

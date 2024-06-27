@@ -84,18 +84,21 @@ func (s *Stopwatch) String() string {
 // Возвращаю строку в формате часов включая секунды, минуты или часы
 func (s *Stopwatch) StringShort() string {
 	var (
-		duration time.Duration
-		str      string
+		duration                 time.Duration
+		sec, minutes, hour, days int
+		str                      string
 	)
 	duration = s.Duration()
-	sec := int(duration.Seconds())
-	seconds := sec % 60
-	minutes := sec / 60
-	hour := minutes / 60
-	if hour > 0 {
-		str = fmt.Sprintf("%v:%02v:%02v", hour, minutes, seconds)
+	sec = int(duration.Seconds()) % 60
+	minutes = int(duration.Minutes()) % 60
+	hour = int(duration.Hours()) % 24
+	days = int(duration.Hours()) / 24
+	if days > 0 {
+		str = fmt.Sprintf("%vd %v:%02v:%02v", days, hour, minutes, sec)
+	} else if hour > 0 {
+		str = fmt.Sprintf("%v:%02v:%02v", hour, minutes, sec)
 	} else {
-		str = fmt.Sprintf("%v:%02v", minutes, seconds)
+		str = fmt.Sprintf("%v:%02v", minutes, sec)
 	}
 	return str
 }
