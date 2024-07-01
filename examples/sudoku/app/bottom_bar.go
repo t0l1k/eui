@@ -6,7 +6,6 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/examples/sudoku/game"
 )
 
 const (
@@ -19,34 +18,43 @@ var actsStr = []string{aUndo, aDel, aNote}
 
 type BottomBar struct {
 	eui.DrawableBase
-	layoutActs, layoutNums               *eui.BoxLayout
+	layoutActs                           *eui.BoxLayout
+	layoutNums                           *eui.GridLayoutRightDown
 	actBtns                              []eui.Drawabler
-	dim                                  game.Dim
 	show                                 bool
 	fn                                   func(*eui.Button)
 	actUndo, actDel, actNotes, actNumber bool
+	varSw                                *eui.SubjectBase
+	board                                *Board
 }
 
 func NewBottomBar(fn func(*eui.Button)) *BottomBar {
 	b := &BottomBar{}
 	b.fn = fn
-	b.layoutActs = eui.NewHLayout()
-	b.layoutNums = eui.NewHLayout()
-	b.Bg(eui.Red)
-	b.Fg(eui.Silver)
+	b.layoutActs = eui.NewVLayout()
+	b.layoutNums = eui.NewGridLayoutRightDown(2, 2)
 	return b
 }
 
-func (b *BottomBar) Setup(dim game.Dim) {
-	b.dim = dim
+func (b *BottomBar) Setup(board *Board) {
+	b.board = board
 	b.layoutActs.ResetContainerBase()
 	b.layoutNums.ResetContainerBase()
+	b.layoutNums.SetDim(float64(board.dim.W), float64(board.dim.H))
+	b.layoutActs.Add(eui.NewText(title))
+	b.layoutActs.Add(eui.NewText(board.dim.String()))
+	b.layoutActs.Add(eui.NewText(b.board.diff.String() + "(" + strconv.Itoa(board.game.Percent) + "%)"))
+	swStr := eui.NewText("")
+	b.varSw = eui.NewSubject()
+	b.varSw.Attach(swStr)
+	b.varSw.SetValue(b.board.sw.StringShort())
+	b.layoutActs.Add(swStr)
 	for _, v := range actsStr {
 		btn := eui.NewButton(v, b.fn)
 		b.layoutActs.Add(btn)
 		b.actBtns = append(b.actBtns, btn)
 	}
-	for i := 0; i < b.dim.Size(); i++ {
+	for i := 0; i < b.board.dim.Size(); i++ {
 		btn := NewBtn(b.fn)
 		btn.SetValue(i + 1)
 		btn.SetCount(0)
@@ -118,7 +126,7 @@ func (b *BottomBar) setBtnClrs() {
 }
 
 func (b *BottomBar) UpdateNrs(counts map[int]int) {
-	size := b.dim.Size()
+	size := b.board.dim.Size()
 	for k, v := range counts {
 		for _, btn := range b.layoutNums.GetContainer() {
 			if btn.(*BottomBarNr).GetValue() == strconv.Itoa(k) {
@@ -130,8 +138,11 @@ func (b *BottomBar) UpdateNrs(counts map[int]int) {
 
 func (b *BottomBar) UpdateUndoBtn(count int) {
 	for _, btn := range b.layoutActs.GetContainer() {
-		if strings.HasPrefix(btn.(*eui.Button).GetText(), aUndo) {
-			btn.(*eui.Button).SetText(aUndo + ":" + strconv.Itoa(count))
+		switch btn := btn.(type) {
+		case *eui.Button:
+			if strings.HasPrefix(btn.GetText(), aUndo) {
+				btn.SetText(aUndo + ":" + strconv.Itoa(count))
+			}
 		}
 	}
 }
@@ -146,6 +157,7 @@ func (b *BottomBar) Update(dt int) {
 	for _, v := range b.layoutNums.GetContainer() {
 		v.Update(dt)
 	}
+	b.varSw.SetValue(b.board.sw.StringShort())
 }
 
 func (b *BottomBar) Draw(surface *ebiten.Image) {
@@ -165,9 +177,9 @@ func (b *BottomBar) Resize(rect []int) {
 	b.SpriteBase.Resize(rect)
 	w0, h0 := b.GetRect().Size()
 	x, y := b.GetRect().Pos()
-	h1 := h0 / 3
+	h1 := h0 / 2
 	b.layoutActs.Resize([]int{x, y, w0, h1})
 	y += h1
-	b.layoutNums.Resize([]int{x, y, w0, h1 * 2})
+	b.layoutNums.Resize([]int{x, y, w0, h1})
 	b.ImageReset()
 }

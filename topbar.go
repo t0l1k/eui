@@ -7,14 +7,14 @@ type TopBar struct {
 	lblTitle, tmLbl            *Text
 	tmVar                      *SubjectBase
 	Stopwatch                  *Stopwatch
-	showStopwatch              bool
+	useSW, showSW, showTitle   bool
 	coverTitle, coverStopwatch float64
 }
 
 // Умею показать вверху строку с меткой текста с кнопкой выход из сцены(если nil) или переопределенной функцией(для вызова диалога, например) в параметре и секундомером нахождения на сцене
 func NewTopBar(title string, f func(b *Button)) *TopBar {
 	t := &TopBar{coverTitle: 0.25, coverStopwatch: 0.1}
-	t.showStopwatch = false
+	t.useSW = false
 	t.btnFunc = f
 	btnText := "Menu"
 	if f == nil {
@@ -31,6 +31,7 @@ func NewTopBar(title string, f func(b *Button)) *TopBar {
 	t.lblTitle = NewText(title)
 	t.Add(t.lblTitle)
 	t.setTheme()
+	t.showTitle = true
 	return t
 }
 
@@ -77,18 +78,36 @@ func (t *TopBar) initStopwatch() {
 	t.Stopwatch.Start()
 }
 
-func (t *TopBar) SetShowStopwatch() {
-	t.showStopwatch = !t.showStopwatch
-	if t.showStopwatch {
+func (t *TopBar) SetShowStoppwatch(value bool) {
+	t.showSW = value
+	if t.showSW {
+		t.tmLbl.Visible(true)
+	} else {
+		t.tmLbl.Visible(false)
+	}
+}
+
+func (t *TopBar) SetUseStopwatch() {
+	t.useSW = !t.useSW
+	if t.useSW {
 		t.initStopwatch()
 	} else {
 		t.Stopwatch.Stop()
 	}
 }
 
+func (t *TopBar) SetShowTitle(value bool) {
+	t.showTitle = value
+	if t.showTitle {
+		t.lblTitle.Visible(true)
+	} else {
+		t.lblTitle.Visible(false)
+	}
+}
+
 func (t *TopBar) Update(dt int) {
 	t.DrawableBase.Update(dt)
-	if !t.showStopwatch {
+	if !t.useSW {
 		return
 	}
 	t.tmVar.SetValue(t.Stopwatch.StringShort())
@@ -102,7 +121,7 @@ func (t *TopBar) Resize(rect []int) {
 	x += h
 	w = int(float64(t.rect.W) * t.coverTitle)
 	t.lblTitle.Resize([]int{x, y, w, h})
-	if t.showStopwatch {
+	if t.useSW {
 		w = int(float64(t.rect.W) * t.coverStopwatch)
 		x = t.GetRect().W - w
 		t.tmLbl.Resize([]int{x, y, w, h})

@@ -19,6 +19,7 @@ const (
 type Game struct {
 	dim     Dim
 	diff    Difficult
+	Percent int
 	field   *field
 	path    map[int][]int
 	history []int
@@ -39,7 +40,7 @@ func (g Game) Pos(idx int) (int, int) { return idx % g.Size(), idx / g.Size() }
 func (g *Game) Load(diff Difficult) {
 	g.diff = diff
 	g.shuffle()
-	g.field.prepareFor(diff, g.dim.Size())
+	g.Percent = g.field.prepareFor(diff, g.dim.Size())
 	g.UpdateAllFieldNotes()
 	g.inGame = true
 }

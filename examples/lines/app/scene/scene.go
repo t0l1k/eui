@@ -19,7 +19,7 @@ func NewSceneGame() *SceneGame {
 		s.dialog.Visible(true)
 		s.board.Visible(false)
 	})
-	s.topBar.SetShowStopwatch()
+	s.topBar.SetUseStopwatch()
 	s.topBar.SetTitleCoverArea(0.5)
 	s.Add(s.topBar)
 	s.dialog = NewDialog("Запустить игру", func(dlg *eui.Button) {

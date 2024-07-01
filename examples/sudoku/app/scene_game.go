@@ -22,8 +22,11 @@ func NewSceneSudoku() *SceneSudoku {
 		s.dialogSelect.Visible(true)
 		s.board.Visible(false)
 		s.bottomBar.Visible(false)
+		s.topBar.SetTitle(title)
+		s.topBar.SetShowTitle(true)
+		s.topBar.SetShowStoppwatch(true)
 	})
-	s.topBar.SetShowStopwatch()
+	s.topBar.SetUseStopwatch()
 	s.topBar.SetTitleCoverArea(0.85)
 	s.Add(s.topBar)
 	s.dialogSelect = NewDialogSelect(gamesData, func(b *eui.Button) {
@@ -33,11 +36,13 @@ func NewSceneSudoku() *SceneSudoku {
 				s.topBar.SetTitle("Sudoku " + dim.String() + diff.String())
 				s.dialogSelect.Visible(false)
 				s.board.Setup(dim, diff)
+				s.topBar.SetShowTitle(false)
 				s.board.Visible(true)
-				s.bottomBar.Setup(dim)
+				s.bottomBar.Setup(s.board)
 				s.bottomBar.Visible(true)
 				s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
 				s.bottomBar.ShowNotes(s.board.IsShowNotes())
+				s.topBar.SetShowStoppwatch(false)
 			}
 		}
 	})
@@ -72,6 +77,8 @@ func NewSceneSudoku() *SceneSudoku {
 						s.bottomBar.Visible(false)
 						s.dialogSelect.Visible(true)
 						s.topBar.SetTitle(title)
+						s.topBar.SetShowTitle(true)
+						s.topBar.SetShowStoppwatch(true)
 					}
 				}
 			}
@@ -104,12 +111,12 @@ func NewSceneSudoku() *SceneSudoku {
 }
 
 func (s *SceneSudoku) Resize() {
-	w, h := eui.GetUi().Size()
-	rect := eui.NewRect([]int{0, 0, w, h})
+	w0, h0 := eui.GetUi().Size()
+	rect := eui.NewRect([]int{0, 0, w0, h0})
 	hT := int(float64(rect.GetLowestSize()) * 0.1)
-	s.topBar.Resize([]int{0, 0, w, hT})
-	s.dialogSelect.Resize([]int{hT / 2, hT + hT/2, w - hT, h - hT*2})
-	h1 := h - hT*2
-	s.board.Resize([]int{(w - (h1)) / 2, hT, h1, h1})
-	s.bottomBar.Resize([]int{(w - (h1)) / 2, h - hT, h1, hT})
+	s.topBar.Resize([]int{0, 0, w0, hT})
+	s.dialogSelect.Resize([]int{hT / 2, hT + hT/2, w0 - hT, h0 - hT*2})
+	w1 := (w0 - hT) / 3
+	s.board.Resize([]int{hT, 0, w1 * 2, h0})
+	s.bottomBar.Resize([]int{hT + w1*2, 0, w1, h0})
 }

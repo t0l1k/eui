@@ -43,8 +43,8 @@ func (f field) isFoundEmptyNote() bool {
 	return false
 }
 
-func (f field) prepareFor(diff Difficult, size int) {
-	moves := diff.Percent(size)
+func (f field) prepareFor(diff Difficult, size int) (percent int) {
+	moves, percent := diff.Percent(size)
 	fmt.Printf("Для сложности %v ходов %v\n", diff, moves)
 	for moves > 0 {
 		x, y := rand.Intn(size), rand.Intn(size)
@@ -61,4 +61,5 @@ func (f field) prepareFor(diff Difficult, size int) {
 			v.setReadOnly()
 		}
 	}
+	return percent
 }

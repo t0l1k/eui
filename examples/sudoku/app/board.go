@@ -124,10 +124,10 @@ func (b *Board) Visible(value bool) { b.show = value; b.grid.Visible(value) }
 func (b *Board) Resize(rect []int) {
 	b.Rect(eui.NewRect(rect))
 	margin := float64(b.GetRect().GetLowestSize()) * 0.005
-	x, y := b.GetRect().Pos()
-	w, h := b.GetRect().Size()
+	x, y, w, h := b.GetRect().GetRect()
 	b.layoutCells.Resize([]int{x + int(margin/2), y + int(margin/2), w, h})
-	b.grid.Resize([]int{x, y, w, h})
 	b.layoutCells.SetCellMargin(margin)
+	x1, y1, w1, h1 := b.layoutCells.ItemsRect.GetRect()
+	b.grid.Resize([]int{x1 - int(margin/2), y1 - int(margin/2), w1, h1})
 	b.grid.SetStrokewidth(margin * 2)
 }

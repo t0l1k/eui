@@ -34,6 +34,9 @@ func (gr *GridView) Fg(clr color.Color) {
 	gr.Dirty = true
 }
 
+func (g *GridView) GetRow() float64 { return g.r }
+func (g *GridView) GetCol() float64 { return g.c }
+
 func (g *GridView) Set(r, c float64) {
 	g.r = r
 	g.c = c

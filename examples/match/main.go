@@ -513,7 +513,7 @@ func NewSceneGame() *SceneGame {
 		s.board.dialog.SetTitle("Выбор игры")
 		s.board.dialog.Visible(true)
 	})
-	s.topBar.SetShowStopwatch()
+	s.topBar.SetUseStopwatch()
 	s.topBar.SetTitleCoverArea(0.5)
 	s.Add(s.topBar)
 	s.board = NewBoard()
