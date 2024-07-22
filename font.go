@@ -28,7 +28,7 @@ func GetFonts() (f *Fonts) {
 type Fonts map[int]font.Face
 
 func (f Fonts) add(size int) {
-	tt, err := opentype.Parse(res.RobotoRegular_ttf)
+	tt, err := opentype.Parse(res.DejaVuSans_ttf)
 	if err != nil {
 		log.Fatal(err)
 	}
