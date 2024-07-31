@@ -20,6 +20,7 @@ type ListView struct {
 func NewListView() *ListView {
 	l := &ListView{rows: 1, itemSize: 30}
 	l.SetupView()
+	l.Visible(true)
 	return l
 }
 

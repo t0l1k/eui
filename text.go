@@ -76,7 +76,7 @@ func (t *Text) Layout() {
 }
 
 func (t *Text) Draw(surface *ebiten.Image) {
-	if !t.IsVisible() || t.IsDisabled() {
+	if !t.IsVisible() {
 		return
 	}
 	if t.Dirty {

@@ -28,7 +28,6 @@ func NewHand(bg, fg color.Color) *Hand {
 	col := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
 	h.Bg(col)
 	h.Fg(fg)
-	h.Visible(true)
 	return h
 }
 

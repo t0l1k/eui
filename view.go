@@ -11,6 +11,7 @@ type View struct {
 func NewView() *View {
 	v := &View{}
 	v.SetupView()
+	v.Visible(true)
 	return v
 }
 
@@ -18,7 +19,6 @@ func (v *View) SetupView() {
 	theme := GetUi().theme
 	v.Bg(theme.Get(ViewBg))
 	v.SetState(ViewStateNormal)
-	v.Visible(true)
 	GetUi().inputMouse.Attach(v)
 	GetUi().inputTouch.Attach(v)
 }
@@ -53,7 +53,7 @@ func (v *View) SetState(state InputState) {
 }
 
 func (v *View) UpdateInput(value interface{}) {
-	if !v.visible || v.disabled {
+	if v.disabled {
 		return
 	}
 	switch vl := value.(type) {

@@ -3,6 +3,9 @@ package eui
 import "github.com/hajimehoshi/ebiten/v2"
 
 type Drawabler interface {
+	Visible(bool)
+	Enable()
+	Disable()
 	Layouter
 	Spriter
 	Close()

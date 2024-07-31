@@ -30,6 +30,7 @@ func NewButton(text string, f func(*Button)) *Button {
 	b.Bg(bg)
 	b.Fg(fg)
 	b.SetupButton(text, f)
+	b.Visible(true)
 	return b
 }
 

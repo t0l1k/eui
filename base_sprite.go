@@ -37,9 +37,13 @@ func (s *SpriteBase) Layout() {
 	s.Dirty = false
 }
 
-func (s *SpriteBase) Update(dt int) {}
+func (s *SpriteBase) Update(dt int) {
+	if s.IsDisabled() {
+		return
+	}
+}
 func (s *SpriteBase) Draw(surface *ebiten.Image) {
-	if !s.IsVisible() || s.IsDisabled() {
+	if !s.IsVisible() {
 		return
 	}
 	if s.Dirty {
