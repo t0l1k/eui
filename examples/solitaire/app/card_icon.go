@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/solitaire/game"
 )
 
@@ -22,14 +23,14 @@ func NewCardIcon(cell *game.Cell, f func(b *eui.Button)) *CardIcon {
 	str := ""
 	var col color.Color
 	if c.cell.GetCard() == nil {
-		col = eui.Blue
+		col = colors.Blue
 		str = ""
 	} else {
 		col = c.cell.GetCard().Color()
 		str = c.cell.GetCard().StringShort()
 	}
 	c.btn = eui.NewButton(str, f)
-	c.btn.Bg(eui.White)
+	c.btn.Bg(colors.White)
 	c.btn.Fg(col)
 	c.Add(c.btn)
 	c.Visible(true)
@@ -41,7 +42,7 @@ func (c *CardIcon) UpdateData(value interface{}) {
 	case *game.Card:
 		if v == nil {
 			c.btn.SetText(" ")
-			c.btn.Fg(eui.Blue)
+			c.btn.Fg(colors.Blue)
 		} else {
 			c.btn.SetText(v.StringShort())
 			c.btn.Fg(c.cell.GetCard().Color())

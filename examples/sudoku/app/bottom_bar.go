@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/colors"
 )
 
 const (
@@ -81,22 +82,22 @@ func (b *BottomBar) SetAct(btn *eui.Button) (result bool) {
 	switch btnStr {
 	case aUndo:
 		b.actUndo = true
-		btn.Bg(eui.Yellow)
+		btn.Bg(colors.Yellow)
 		result = false
 	case aDel:
 		b.actDel = true
-		btn.Bg(eui.Yellow)
+		btn.Bg(colors.Yellow)
 		result = false
 	case aNote:
 		b.actNotes = !b.actNotes
 		if b.actNotes {
-			btn.Bg(eui.Yellow)
+			btn.Bg(colors.Yellow)
 		}
 		result = false
 	default:
 		for _, v := range b.layoutNums.GetContainer() {
 			if v.(*BottomBarNr).GetText() == btn.GetText() {
-				v.(*BottomBarNr).Bg(eui.Yellow)
+				v.(*BottomBarNr).Bg(colors.Yellow)
 			}
 		}
 		b.actNumber = true
@@ -113,13 +114,13 @@ func (b *BottomBar) setBtnClrs() {
 		switch vv := v.(type) {
 		case *eui.Button:
 			if vv.GetText() == aNote && b.actNotes {
-				vv.Bg(eui.Yellow)
-			} else if vv.GetBg() == eui.Yellow {
-				vv.Bg(eui.Silver)
+				vv.Bg(colors.Yellow)
+			} else if vv.GetBg() == colors.Yellow {
+				vv.Bg(colors.Silver)
 			}
 		case *BottomBarNr:
-			if vv.GetBg() == eui.Yellow {
-				vv.Bg(eui.Silver)
+			if vv.GetBg() == colors.Yellow {
+				vv.Bg(colors.Silver)
 			}
 		}
 	}

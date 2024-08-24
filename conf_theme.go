@@ -1,6 +1,10 @@
 package eui
 
-import "image/color"
+import (
+	"image/color"
+
+	"github.com/t0l1k/eui/colors"
+)
 
 type ThemeValue int
 
@@ -37,65 +41,40 @@ const (
 	TopBarStopwatchFg
 )
 
-var (
-	Black  = color.RGBA{0, 0, 0, 255}
-	Gray   = color.RGBA{128, 128, 128, 255}
-	Silver = color.RGBA{192, 192, 192, 255}
-	White  = color.RGBA{255, 255, 255, 255}
-
-	Orange  = color.RGBA{255, 165, 0, 255}
-	Fuchsia = color.RGBA{255, 0, 255, 255}
-	Purple  = color.RGBA{128, 0, 128, 255}
-	Red     = color.RGBA{255, 0, 0, 255}
-	Maroon  = color.RGBA{128, 0, 0, 255}
-
-	Yellow      = color.RGBA{255, 255, 0, 255}
-	GreenYellow = color.RGBA{173, 255, 47, 255}
-	YellowGreen = color.RGBA{154, 205, 50, 255}
-	Olive       = color.RGBA{128, 128, 0, 255}
-	Lime        = color.RGBA{0, 255, 0, 255}
-	Green       = color.RGBA{0, 128, 0, 255}
-
-	Aqua = color.RGBA{0, 255, 255, 255}
-	Teal = color.RGBA{0, 128, 128, 255}
-	Blue = color.RGBA{0, 0, 255, 255}
-	Navy = color.RGBA{0, 0, 128, 255}
-)
-
 type Theme map[ThemeValue]color.Color
 
 func DefaultTheme() *Theme {
 	t := NewTheme()
-	t.Set(ButtonFg, Black)
-	t.Set(ButtonBg, Silver)
-	t.Set(ButtonHover, Yellow)
-	t.Set(ButtonFocus, Red)
-	t.Set(ButtonNormal, Green)
-	t.Set(ButtonActive, White)
-	t.Set(ButtonSelected, Maroon)
-	t.Set(ButtonDisabled, Gray)
-	t.Set(TextBg, Green)
-	t.Set(TextFg, White)
-	t.Set(CheckboxBg, Teal)
-	t.Set(CheckboxFg, Black)
-	t.Set(ComboBoxBg, Navy)
-	t.Set(ComboBoxFg, White)
-	t.Set(InputBoxBg, GreenYellow)
-	t.Set(InputBoxFg, Fuchsia)
-	t.Set(ListViewBg, Silver)
-	t.Set(ListViewFg, Orange)
-	t.Set(ListViewItemBg, Blue)
-	t.Set(ListViewItemFg, Yellow)
-	t.Set(SceneBg, Navy)
-	t.Set(SceneFg, Yellow)
-	t.Set(ViewBg, Navy)
-	t.Set(TopBarBg, Gray)
-	t.Set(TopBarQuitBg, Silver)
-	t.Set(TopBarQuitFg, Black)
-	t.Set(TopBarTitleBg, YellowGreen)
-	t.Set(TopBarTitleFg, Black)
-	t.Set(TopBarStopwatchBg, YellowGreen)
-	t.Set(TopBarStopwatchFg, Black)
+	t.Set(ButtonFg, colors.Black)
+	t.Set(ButtonBg, colors.Silver)
+	t.Set(ButtonHover, colors.Yellow)
+	t.Set(ButtonFocus, colors.Red)
+	t.Set(ButtonNormal, colors.Green)
+	t.Set(ButtonActive, colors.White)
+	t.Set(ButtonSelected, colors.Maroon)
+	t.Set(ButtonDisabled, colors.Gray)
+	t.Set(TextBg, colors.Green)
+	t.Set(TextFg, colors.White)
+	t.Set(CheckboxBg, colors.Teal)
+	t.Set(CheckboxFg, colors.Black)
+	t.Set(ComboBoxBg, colors.Navy)
+	t.Set(ComboBoxFg, colors.White)
+	t.Set(InputBoxBg, colors.GreenYellow)
+	t.Set(InputBoxFg, colors.Fuchsia)
+	t.Set(ListViewBg, colors.Silver)
+	t.Set(ListViewFg, colors.Orange)
+	t.Set(ListViewItemBg, colors.Blue)
+	t.Set(ListViewItemFg, colors.Yellow)
+	t.Set(SceneBg, colors.Navy)
+	t.Set(SceneFg, colors.Yellow)
+	t.Set(ViewBg, colors.Navy)
+	t.Set(TopBarBg, colors.Gray)
+	t.Set(TopBarQuitBg, colors.Silver)
+	t.Set(TopBarQuitFg, colors.Black)
+	t.Set(TopBarTitleBg, colors.YellowGreen)
+	t.Set(TopBarTitleFg, colors.Black)
+	t.Set(TopBarStopwatchBg, colors.YellowGreen)
+	t.Set(TopBarStopwatchFg, colors.Black)
 	return &t
 }
 

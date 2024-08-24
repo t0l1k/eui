@@ -8,6 +8,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/colors"
 )
 
 const (
@@ -262,8 +263,8 @@ func NewCellIcon(field *Field, f func(b *eui.Button)) *CellIcon {
 
 func (c *CellIcon) Setup(f func(b *eui.Button)) {
 	c.btn.SetupButton(CellClosed, f)
-	c.btn.Bg(eui.Teal)
-	c.btn.Fg(eui.Yellow)
+	c.btn.Bg(colors.Teal)
+	c.btn.Fg(colors.Yellow)
 }
 
 func (b *CellIcon) Visible(value bool) {
@@ -289,8 +290,8 @@ func (c *CellIcon) UpdateData(value interface{}) {
 		case CellStateMatch:
 			cell := c.field.GetCell(v.Value().(*CellData).pos.X, v.Value().(*CellData).pos.Y)
 			c.btn.SetText(cell.String())
-			c.btn.Bg(eui.GreenYellow)
-			c.btn.Fg(eui.Blue)
+			c.btn.Bg(colors.GreenYellow)
+			c.btn.Fg(colors.Blue)
 			c.btn.Disable()
 		}
 	}
@@ -341,8 +342,8 @@ func (b *Board) Reset() {
 	b.stopwatch.Reset()
 	for _, v := range b.layout.GetContainer() {
 		v.Visible(true)
-		v.(*CellIcon).btn.Bg(eui.Teal)
-		v.(*CellIcon).btn.Fg(eui.Yellow)
+		v.(*CellIcon).btn.Bg(colors.Teal)
+		v.(*CellIcon).btn.Fg(colors.Yellow)
 	}
 	b.bottomLbl.Visible(true)
 }
@@ -606,7 +607,7 @@ func NewGameMatch() *eui.Ui {
 	k := 60
 	w, h := 9*k, 6*k
 	u.SetSize(w, h)
-	u.GetTheme().Set(eui.ViewBg, eui.Black)
+	u.GetTheme().Set(eui.ViewBg, colors.Black)
 	return u
 }
 

@@ -3,7 +3,7 @@ package game
 import (
 	"image/color"
 
-	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/colors"
 )
 
 type BallColor int
@@ -49,24 +49,24 @@ func (b BallColor) String() string {
 func (b BallColor) Color() color.RGBA {
 	switch b {
 	case BallBrown:
-		return eui.Maroon
+		return colors.Maroon
 	case BallYellow:
-		return eui.Yellow
+		return colors.Yellow
 	case BallGreen:
-		return eui.Green
+		return colors.Green
 	case BallRed:
-		return eui.Red
+		return colors.Red
 	case BallAqua:
-		return eui.Aqua
+		return colors.Aqua
 	case BallBlue:
-		return eui.Blue
+		return colors.Blue
 	case BallMagenta:
-		return eui.Fuchsia
+		return colors.Fuchsia
 	case BallPurple:
-		return eui.Purple
+		return colors.Purple
 	case BallOrange:
-		return eui.Orange
+		return colors.Orange
 	default:
-		return eui.Silver
+		return colors.Silver
 	}
 }

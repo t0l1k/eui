@@ -9,6 +9,7 @@ type Timer struct {
 	run      bool
 }
 
+// Длительность в миллисекундах
 func NewTimer(duration int) *Timer { return &Timer{duration: duration} }
 
 func (t *Timer) SetDuration(value int) { t.duration = value }

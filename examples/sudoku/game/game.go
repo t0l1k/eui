@@ -6,7 +6,7 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/utils"
 )
 
 const (
@@ -87,8 +87,8 @@ func (g *Game) guess(idx int) error {
 	cell := g.field.cell(idx)
 	notes := cell.GetNotes()
 	for _, v := range cell.GetNotes() {
-		if eui.IntSliceContains(g.path[idx], v) {
-			notes = eui.RemoveFromIntSliceValue(notes, v)
+		if utils.IntSliceContains(g.path[idx], v) {
+			notes = utils.RemoveFromIntSliceValue(notes, v)
 			fmt.Printf("Удаляем метку:%v из заметок:[%v] рузультат пути:[%v]", v, notes, g.path)
 		}
 	}
@@ -148,7 +148,7 @@ func (g *Game) isFoundEmptyNotes(idx int) error {
 			if len(v2) > 1 || i == j {
 				continue
 			}
-			if eui.IntSlicesIsEqual(v1, v2) {
+			if utils.IntSlicesIsEqual(v1, v2) {
 				fmt.Println(notes, allNotes)
 				return errors.New(err02)
 			}
@@ -181,7 +181,7 @@ func (g *Game) Undo() {
 	}
 	x, y := g.LastMovePos()
 	g.ResetCell(x, y)
-	g.history = eui.PopIntSlice(g.history)
+	g.history = utils.PopIntSlice(g.history)
 	log.Printf("Undo move[%v,%v]%v в истории ходов:%v\n", x, y, g.Cell(x, y), len(g.history))
 }
 
@@ -198,7 +198,7 @@ func (g *Game) IsWin() bool {
 			if value == 0 {
 				return false
 			} else {
-				arr = eui.RemoveFromIntSliceValue(arr, value)
+				arr = utils.RemoveFromIntSliceValue(arr, value)
 			}
 		}
 		if len(arr) == 0 {
@@ -215,7 +215,7 @@ func (g *Game) IsWin() bool {
 			if value == 0 {
 				return false
 			} else {
-				arr = eui.RemoveFromIntSliceValue(arr, value)
+				arr = utils.RemoveFromIntSliceValue(arr, value)
 			}
 		}
 		if len(arr) == 0 {
@@ -238,7 +238,7 @@ func (g *Game) IsWin() bool {
 				if value == 0 {
 					return false
 				} else {
-					arr = eui.RemoveFromIntSliceValue(arr, value)
+					arr = utils.RemoveFromIntSliceValue(arr, value)
 				}
 			}
 			if len(arr) == 0 {

@@ -6,7 +6,9 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/sudoku/game"
+	"github.com/t0l1k/eui/utils"
 )
 
 type CellIcon struct {
@@ -30,7 +32,7 @@ func NewCellIcon(dim game.Dim, cell *game.Cell, f func(b *eui.Button), bg, fg co
 	c.Add(c.btn)
 	c.Bg(bg)
 	if c.cell.IsReadOnly() {
-		c.Fg(eui.Blue)
+		c.Fg(colors.Blue)
 	} else {
 		c.Fg(fg)
 	}
@@ -53,12 +55,12 @@ func (c *CellIcon) Layout() {
 		c.layout.SetDim(1, 1)
 		defer lbl.Close()
 		if value == c.highlight {
-			lbl.Bg(eui.Yellow)
+			lbl.Bg(colors.Yellow)
 		} else {
-			lbl.Bg(eui.Silver)
+			lbl.Bg(colors.Silver)
 		}
 		if c.cell.IsReadOnly() {
-			lbl.Fg(eui.Blue)
+			lbl.Fg(colors.Blue)
 		} else {
 			lbl.Fg(c.GetFg())
 		}
@@ -68,15 +70,15 @@ func (c *CellIcon) Layout() {
 		if c.showNotes && len(notes) > 0 {
 			for i := 0; i < c.dim.Size(); i++ {
 				lbl := eui.NewText("")
-				lbl.Bg(eui.Silver)
+				lbl.Bg(colors.Silver)
 				lbl.Fg(c.GetFg())
 				c.layout.Add(lbl)
-				found := eui.IntSliceContains(notes, i+1)
+				found := utils.IntSliceContains(notes, i+1)
 				if found {
-					idx := eui.GetIdxValueFromIntSlice(notes, i+1)
+					idx := utils.GetIdxValueFromIntSlice(notes, i+1)
 					lbl.SetText(strconv.Itoa(notes[idx]))
 					if i+1 == c.highlight {
-						lbl.Bg(eui.Yellow)
+						lbl.Bg(colors.Yellow)
 					}
 				} else {
 					lbl.SetText("")
@@ -90,9 +92,9 @@ func (c *CellIcon) Layout() {
 			c.layout.SetDim(1, 1)
 			defer lbl.Close()
 			if len(notes) == 0 {
-				lbl.Bg(eui.Orange)
+				lbl.Bg(colors.Orange)
 			} else {
-				lbl.Bg(eui.Silver)
+				lbl.Bg(colors.Silver)
 			}
 			lbl.Fg(c.GetFg())
 			// log.Println("Иконка без заметок", c.cell.GetValue())

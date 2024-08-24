@@ -12,6 +12,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/colors"
 )
 
 // Стрелка часов с рисованием прозрачного фона и самой стрелки, можно напрямую рисовать через draw, только стрелку, но так элегантнее, все через макет и уже в контейнере обновить и перерисовать
@@ -310,16 +311,16 @@ const (
 
 func setAppTheme() {
 	theme := eui.GetUi().GetTheme()
-	theme.Set(AppBg, eui.Silver)
-	theme.Set(AppFg, eui.Black)
-	theme.Set(ApplblBg, eui.GreenYellow)
-	theme.Set(ApplblFg, eui.Black)
-	theme.Set(AppfaceBg, eui.Navy)
-	theme.Set(AppfaceFg, eui.GreenYellow)
-	theme.Set(AppMsSecondHandFg, eui.Black)
-	theme.Set(AppSecondHandFg, eui.Red)
-	theme.Set(AppMinuteHandFg, eui.Blue)
-	theme.Set(AppHourHandFg, eui.Navy)
+	theme.Set(AppBg, colors.Silver)
+	theme.Set(AppFg, colors.Black)
+	theme.Set(ApplblBg, colors.GreenYellow)
+	theme.Set(ApplblFg, colors.Black)
+	theme.Set(AppfaceBg, colors.Navy)
+	theme.Set(AppfaceFg, colors.GreenYellow)
+	theme.Set(AppMsSecondHandFg, colors.Black)
+	theme.Set(AppSecondHandFg, colors.Red)
+	theme.Set(AppMinuteHandFg, colors.Blue)
+	theme.Set(AppHourHandFg, colors.Navy)
 }
 
 func main() {

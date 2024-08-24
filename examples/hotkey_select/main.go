@@ -6,6 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/colors"
 )
 
 const (
@@ -27,7 +28,7 @@ func NewInputKey(title string) *InputKey {
 	i.btn = eui.NewButton("(?)", func(b *eui.Button) {
 		if b.IsPressed() {
 			i.active = true
-			i.btn.Bg(eui.Yellow)
+			i.btn.Bg(colors.Yellow)
 		}
 	})
 	i.Add(i.btn)
@@ -49,7 +50,7 @@ func (i *InputKey) Update(dt int) {
 	i.DrawableBase.Update(dt)
 	if i.btn.GetState() == eui.ViewStateNormal {
 		i.active = false
-		i.btn.Bg(eui.Silver)
+		i.btn.Bg(colors.Silver)
 	}
 }
 

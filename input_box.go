@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/t0l1k/eui/colors"
 )
 
 // Умею получить от клавиатуры нажатый символ(пока только английский), backspace удаляет последний введенный символ, enter запускает прикрепленный метод. Умею мигать курсором. Только при фокусе от клавиатуры доступен ввод, активированый нажатием левой кнопки мыши(меняется виджет обрамление былым). Есть проверка только на цифры, выбрать при создании экземпляра метод с настроенной проверкой на цифры.
@@ -124,7 +125,7 @@ func (inp *InputBox) parseInput(key ebiten.Key) {
 		inp._text += "."
 	default:
 		if inp.onlyDigits {
-			inp.btn.Bg(Red)
+			inp.btn.Bg(colors.Red)
 		}
 		inp._text += ebiten.KeyName(key)
 	}

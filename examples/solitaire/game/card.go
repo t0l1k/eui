@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/colors"
 )
 
 type Card struct {
@@ -46,9 +46,9 @@ func (s *Card) EqSuit(other *Card) bool {
 func (s Card) Color() (col color.Color) {
 	switch s.suit {
 	case Hearts, Diamonds:
-		col = eui.Red
+		col = colors.Red
 	case Clubs, Spades:
-		col = eui.Black
+		col = colors.Black
 	}
 	return col
 }
