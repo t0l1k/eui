@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/utils"
 )
 
 type Cell struct {
@@ -36,10 +37,10 @@ func (c *Cell) add(value int) bool {
 func (c Cell) IsReadOnly() bool   { return c.readOnly }
 func (c *Cell) setReadOnly()      { c.readOnly = true }
 func (c *Cell) setNote(value int) { c.notes[value] = false }
-func (c Cell) GetNotes() (res []int) {
+func (c Cell) GetNotes() (res utils.IntList) {
 	for i, v := range c.notes {
 		if v {
-			res = append(res, i)
+			res = res.Add(i)
 		}
 	}
 	return res

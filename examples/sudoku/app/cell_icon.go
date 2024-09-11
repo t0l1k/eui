@@ -8,7 +8,6 @@ import (
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/sudoku/game"
-	"github.com/t0l1k/eui/utils"
 )
 
 type CellIcon struct {
@@ -73,9 +72,9 @@ func (c *CellIcon) Layout() {
 				lbl.Bg(colors.Silver)
 				lbl.Fg(c.GetFg())
 				c.layout.Add(lbl)
-				found := utils.IntSliceContains(notes, i+1)
+				found := notes.IsContain(i + 1)
 				if found {
-					idx := utils.GetIdxValueFromIntSlice(notes, i+1)
+					idx, _ := notes.Index(i + 1)
 					lbl.SetText(strconv.Itoa(notes[idx]))
 					if i+1 == c.highlight {
 						lbl.Bg(colors.Yellow)

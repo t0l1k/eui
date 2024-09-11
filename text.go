@@ -90,6 +90,5 @@ func (t *Text) Draw(surface *ebiten.Image) {
 
 func (t *Text) Resize(rect []int) {
 	t.Rect(NewRect(rect))
-	t.SpriteBase.Rect(NewRect(rect))
 	t.ImageReset()
 }

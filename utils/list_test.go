@@ -47,7 +47,7 @@ func TestList(t *testing.T) {
 	t.Run("List Remove", func(t *testing.T) {
 		l := NewIntList().Add(1).Add(2).Add(3)
 		fmt.Println("add 1 2 3", l)
-		l, _ = l.Remove(3)
+		l, _ = l.RemoveValue(3)
 		fmt.Println("remove 3 from  (1 2)", l)
 		got := l.IsContain(3)
 		want := false
@@ -66,4 +66,41 @@ func TestList(t *testing.T) {
 			t.Errorf("got %v want %v from %v", got, want, l)
 		}
 	})
+
+	t.Run("List is empty and check size", func(t *testing.T) {
+		l := NewIntList().Add(1).Add(2).Add(3)
+		fmt.Println("add 1 2 3", l)
+		l = l.Pop()
+		fmt.Println("pop from  (1 2)", l)
+		got := l.IsEmpty()
+		want := false
+		if got != want {
+			t.Errorf("got %v want %v from %v", got, want, l)
+		}
+
+		gotSz := l.Size()
+		wantSz := 2
+		fmt.Println("List Size)", l, gotSz)
+		if gotSz != wantSz {
+			t.Errorf("got %v want %v from %v", got, want, l)
+		}
+
+		l = l.Pop()
+		l = l.Pop()
+		l = l.Pop()
+		got = l.IsEmpty()
+		want = true
+		fmt.Println("pop 3 times)", l, got)
+		if got != want {
+			t.Errorf("got %v want %v from %v", got, want, l)
+		}
+
+		gotSz = l.Size()
+		wantSz = 0
+		fmt.Println("List Size)", l, gotSz)
+		if gotSz != wantSz {
+			t.Errorf("got %v want %v from %v", got, want, l)
+		}
+	})
+
 }

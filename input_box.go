@@ -13,8 +13,7 @@ type InputBox struct {
 	_text         string
 	btn           *Button
 	size          int
-	prompt        string
-	isPrompt      bool
+	cursor        *Cursor
 	timerFlashing *Timer
 	keyboardState InputKeyboardState
 	onReturn      func(*InputBox)
@@ -25,7 +24,6 @@ func NewInputBox(text string, size int, onReturn func(*InputBox)) *InputBox {
 	i := &InputBox{
 		timerFlashing: NewTimer(500),
 		size:          size,
-		prompt:        "|",
 		onReturn:      onReturn,
 		onlyDigits:    false,
 	}
@@ -37,7 +35,6 @@ func NewDigitInputBox(text string, size int, onReturn func(*InputBox)) *InputBox
 	i := &InputBox{
 		timerFlashing: NewTimer(500),
 		size:          size,
-		prompt:        "|",
 		onReturn:      onReturn,
 		onlyDigits:    true,
 	}
@@ -55,6 +52,7 @@ func (inp *InputBox) setupBox(text string) {
 	inp.fg = theme.Get(InputBoxFg)
 	inp.btn.Fg(inp.fg)
 	inp.btn.Bg(inp.bg)
+	inp.cursor = NewCursor(inp.bg, inp.fg)
 	GetUi().inputKeyboard.Attach(inp)
 }
 
@@ -64,12 +62,11 @@ func (inp *InputBox) setPrompt() string {
 		str += " "
 	}
 	str += inp._text
-	if inp.isPrompt {
-		str += inp.prompt
+	if !inp.cursor.IsVisible() {
+		inp.cursor.Visible(true)
 	} else {
-		str += " "
+		inp.cursor.Visible(false)
 	}
-	inp.isPrompt = !inp.isPrompt
 	return str
 }
 
@@ -134,6 +131,7 @@ func (inp *InputBox) parseInput(key ebiten.Key) {
 
 func (inp *InputBox) Update(dt int) {
 	inp.btn.Update(dt)
+	inp.cursor.Update(dt)
 	inp.updatePrompt(dt)
 	if inp.state == ViewStateFocus {
 		inp.SetState(ViewStateActive)
@@ -165,17 +163,13 @@ func (inp *InputBox) Update(dt int) {
 func (inp *InputBox) updatePrompt(dt int) {
 	inp.timerFlashing.Update(dt)
 	if inp.state == ViewStateActive || inp.state == ViewStateFocus {
-		if !inp.timerFlashing.IsOn() {
-			inp.timerFlashing.On()
-			inp.btn.SetText(inp.setPrompt())
-		}
-		if inp.timerFlashing.IsDone() {
+		if !inp.timerFlashing.IsOn() || inp.timerFlashing.IsDone() {
 			inp.timerFlashing.On()
 			inp.btn.SetText(inp.setPrompt())
 		}
 	} else {
 		inp.timerFlashing.Off()
-		inp.isPrompt = false
+		inp.cursor.Visible(false)
 	}
 }
 
@@ -199,11 +193,20 @@ func (inp *InputBox) SetDigit(value string) {
 	inp.Dirty = true
 }
 
-func (inp *InputBox) Draw(surface *ebiten.Image) { inp.btn.Draw(surface) }
+func (inp *InputBox) Draw(surface *ebiten.Image) {
+	inp.btn.Draw(surface)
+	inp.cursor.Draw(surface)
+}
 
 func (inp *InputBox) Resize(rect []int) {
 	inp.View.Resize(rect)
-	inp.btn.Resize(rect)
+	sz := inp.size
+	w := inp.GetRect().W / sz
+	w1 := int(float64(w) * 0.2)
+	h := inp.GetRect().H
+	x, y := inp.GetRect().Pos()
+	inp.btn.Resize([]int{x, y, w * (inp.size), h})
+	inp.cursor.Resize([]int{x + w*(inp.size) - w1, y, w1, h})
 }
 
 func (inp *InputBox) Close() { GetUi().inputKeyboard.Detach(inp) }

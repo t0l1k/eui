@@ -60,12 +60,12 @@ func TestPosition(t *testing.T) {
 			arr = arr.Add(i)
 		}
 		fmt.Println("arr:", arr)
-		arr, err := arr.Remove(1)
+		arr, err := arr.RemoveValue(1)
 		if err != nil {
 			panic(err)
 		}
 		fmt.Println("arr1:", arr)
-		arr, err = arr.Remove(2)
+		arr, err = arr.RemoveValue(2)
 		if err != nil {
 			panic(err)
 		}

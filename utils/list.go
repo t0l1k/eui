@@ -11,7 +11,7 @@ func NewIntList() IntList { return make(IntList, 0) }
 
 func (l IntList) Add(value int) IntList { return append(l, value) }
 
-func (l IntList) Remove(value int) (IntList, error) {
+func (l IntList) RemoveValue(value int) (IntList, error) {
 	if !l.IsContain(value) {
 		return nil, fmt.Errorf("элемент %v отстутствует", value)
 	}
@@ -24,6 +24,9 @@ func (l IntList) Remove(value int) (IntList, error) {
 	l = l[:len(l)-1]
 	return l, nil
 }
+
+func (l IntList) IsEmpty() bool { return len(l) == 0 }
+func (l IntList) Size() int     { return len(l) }
 
 func (l IntList) IsContain(value int) bool {
 	for _, v := range l {
@@ -56,6 +59,9 @@ func (l IntList) Index(value int) (int, error) {
 }
 
 func (l IntList) Pop() IntList {
+	if l.IsEmpty() {
+		return l
+	}
 	l[len(l)-1] = -1
 	l = l[:len(l)-1]
 	return l

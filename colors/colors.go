@@ -1,6 +1,8 @@
 package colors
 
-import "image/color"
+import (
+	"image/color"
+)
 
 var (
 	Black  = color.RGBA{0, 0, 0, 255}
@@ -26,3 +28,13 @@ var (
 	Blue = color.RGBA{0, 0, 255, 255}
 	Navy = color.RGBA{0, 0, 128, 255}
 )
+
+func SetInvisible(value color.Color) color.Color {
+	r, g, b, _ := value.RGBA()
+	rr := float64(r)
+	gg := float64(g)
+	bb := float64(b)
+	aa := 0
+	clr := color.RGBA{uint8(rr), uint8(gg), uint8(bb), uint8(aa)}
+	return clr
+}
