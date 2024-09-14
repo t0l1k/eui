@@ -21,15 +21,18 @@ func NewSceneMain() *SceneMain {
 	s.topBar.SetTitleCoverArea(0.9)
 	s.Add(s.topBar)
 	s.board = NewBoardSol15(func(btn *eui.Button) {
-		fmt.Println("pressed:", btn.GetText())
 		for k, cells := range *s.board.game {
-			for _, cell := range cells {
+			for i, cell := range cells {
 				card := cell.GetCard()
 				if card == nil {
 					continue
 				}
 				if card.StringShort() == btn.GetText() {
-					s.board.MakeMove(k)
+					count := 3 - i
+					for count >= 0 {
+						s.board.MakeMove(k)
+						count--
+					}
 					s.bottomBar.updateMoveCount()
 				}
 			}
