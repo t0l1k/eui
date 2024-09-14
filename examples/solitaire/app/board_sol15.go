@@ -63,8 +63,10 @@ func (b *BoardSol15) Setup(full bool) {
 
 func (b *BoardSol15) MakeMove(move int) {
 	if b.game.MakeMove(move) {
-		if b.game.IsSolved() || b.game.AvailableMoves() == 0 {
+		if b.game.IsSolved() {
 			b.sw.Stop()
+			sb := eui.NewSnackBar("Пасьянс собран за " + b.sw.String() + ". Победа!!!").Show(5000)
+			b.Add(sb)
 		}
 		b.moveIdx++
 		b.backupGame()
@@ -86,6 +88,7 @@ func (b *BoardSol15) Update(dt int) {
 	for _, v := range b.layout.GetContainer() {
 		v.Update(dt)
 	}
+	b.DrawableBase.Update(dt)
 }
 
 func (b *BoardSol15) Draw(surface *ebiten.Image) {
@@ -95,6 +98,7 @@ func (b *BoardSol15) Draw(surface *ebiten.Image) {
 	for _, v := range b.layout.GetContainer() {
 		v.Draw(surface)
 	}
+	b.DrawableBase.Draw(surface)
 }
 
 func (b *BoardSol15) Resize(rect []int) {

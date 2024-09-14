@@ -46,10 +46,14 @@ func NewSceneMain() *SceneMain {
 		case actNew:
 			s.board.Setup(true)
 			s.bottomBar.updateMoveCount()
+			sb := eui.NewSnackBar("Новый рассклад!").Show(2000)
+			s.Add(sb)
 		case actReset:
 			s.board.sw.Stop()
 			s.board.Setup(false)
 			s.bottomBar.updateMoveCount()
+			sb := eui.NewSnackBar("Повторить собирать рассклад!").Show(1000)
+			s.Add(sb)
 		case actBackwardMove:
 			if s.board.moveIdx > 0 {
 				s.board.moveIdx--

@@ -26,7 +26,7 @@ func (d *DeckCards52) Reset() {
 func (d *DeckCards52) Len() int { return len(d.deck) }
 
 func (d *DeckCards52) Shuffle() *DeckCards52 {
-	for i := 0; i < 100; i++ {
+	for i := 0; i < 1000; i++ {
 		nr := rand.Intn(52)
 		tmp := d.deck[nr]
 		d.deck[nr] = d.deck[0]

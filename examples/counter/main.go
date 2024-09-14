@@ -37,6 +37,9 @@ func NewSceneCounter() *SceneCounter {
 	sc.lay1 = eui.NewVLayout() // Контейнер по вертикали
 	sc.lay2 = eui.NewHLayout() // Контейнер по горизонтали
 
+	sb := eui.NewSnackBar("Test!!!").Show(3000)
+	sc.Add(sb)
+
 	counter := eui.NewSubject()                 // Подписчикам передать оповещение при изменении переменной
 	lblCounter := eui.NewText(counter.String()) // Текстовая метка
 	counter.Attach(lblCounter)                  // Подписка на уведомления от этой переменной
@@ -67,6 +70,7 @@ func (s *SceneCounter) Update(dt int) {
 	for _, v := range s.lay2.GetContainer() {
 		v.Update(dt)
 	}
+	s.SceneBase.Update(dt)
 }
 
 func (s *SceneCounter) Draw(surface *ebiten.Image) {
@@ -76,9 +80,11 @@ func (s *SceneCounter) Draw(surface *ebiten.Image) {
 	for _, v := range s.lay2.GetContainer() {
 		v.Draw(surface)
 	}
+	s.SceneBase.Draw(surface)
 }
 
 func (s *SceneCounter) Resize() {
+	s.SceneBase.Resize()
 	w0, h0 := eui.GetUi().Size() // Получить размеры окна, и для сцены это всё окно в расспоряжении
 	s.lay1.Resize([]int{0, 0, w0, h0 / 2})
 	s.lay2.Resize([]int{0, h0 / 2, w0, h0 / 2})

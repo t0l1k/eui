@@ -18,9 +18,10 @@ func (t *Timer) IsOn() bool            { return t.run }
 func (t *Timer) IsOff() bool           { return !t.run }
 func (t *Timer) IsDone() bool          { return !(t.timer > 0) }
 
-func (t *Timer) On() {
+func (t *Timer) On() *Timer {
 	t.Reset()
 	t.run = true
+	return t
 }
 func (t *Timer) Off() { t.run = false }
 
