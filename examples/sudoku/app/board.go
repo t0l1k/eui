@@ -55,7 +55,13 @@ func (b *Board) Setup(dim game.Dim, diff game.Difficult) {
 	b.ShowNotes(true)
 	b.isWin = false
 	b.sw.Reset()
-	b.sw.Start()
+	if !(b.diff.String() == game.Manual.String()) {
+		b.sw.Start()
+	}
+}
+
+func (b *Board) GetDiffStr() string {
+	return b.diff.String() + "(" + strconv.Itoa(b.game.GetPercent()) + "%)"
 }
 
 func (b *Board) IsShowNotes() bool { return b.showNotes }

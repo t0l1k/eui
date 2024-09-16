@@ -43,7 +43,7 @@ func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSe
 		d.cSize.SetText(str)
 	})
 	d.Add(d.cSize)
-	for i := 0; i < 4; i++ {
+	for i := 0; i < 5; i++ {
 		dim := d.modes.Value().(game.Dim)
 		btn := NewDiffButton(dim, game.NewDiff(game.Difficult(i)), f)
 		d.modes.Attach(btn)
@@ -95,7 +95,7 @@ func (d *DialogSelect) Visible(value bool) { d.show = value }
 func (d *DialogSelect) Resize(rect []int) {
 	d.Rect(eui.NewRect(rect))
 	w0, h0 := d.GetRect().Size()
-	h1 := float64(h0) / 6
+	h1 := float64(h0) / 7
 	d.margin = int(h1 / 2)
 	hTop := h1 * 0.8
 	wTop := float64(w0) * 0.7

@@ -56,10 +56,32 @@ func (f field) prepareFor(diff Difficult, size int) (percent int) {
 			fmt.Printf("Ход:%v xy[%v,%v]%v\n", moves, x, y, cell)
 		}
 	}
+	f.MarkReadOnly()
+	return percent
+}
+
+func (f field) MarkReadOnly() {
 	for _, v := range f {
 		if v.GetValue() > 0 {
 			v.setReadOnly()
 		}
 	}
-	return percent
+}
+
+func (f field) GetMovesCount() (moves int) {
+	for _, v := range f {
+		if v.GetValue() > 0 {
+			moves++
+		}
+	}
+	return moves
+}
+
+func (f field) valueCount(value int) (count int) {
+	for _, cell := range f {
+		if cell.GetValue() == value {
+			count++
+		}
+	}
+	return count
 }

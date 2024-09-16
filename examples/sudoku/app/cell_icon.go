@@ -116,6 +116,10 @@ func (c *CellIcon) Draw(surface *ebiten.Image) {
 	if c.Dirty {
 		c.Layout()
 	}
+	op := &ebiten.DrawImageOptions{}
+	x, y := c.GetRect().Pos()
+	op.GeoM.Translate(float64(x), float64(y))
+	surface.DrawImage(c.Image(), op)
 	for _, v := range c.layout.GetContainer() {
 		v.Draw(surface)
 	}

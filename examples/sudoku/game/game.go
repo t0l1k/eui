@@ -38,10 +38,28 @@ func (g Game) Idx(x, y int) int       { return y*g.Size() + x }
 func (g Game) Pos(idx int) (int, int) { return idx % g.Size(), idx / g.Size() }
 
 func (g *Game) Load(diff Difficult) {
-	g.diff = diff
-	g.shuffle()
-	g.Percent = g.field.prepareFor(diff, g.dim.Size())
-	g.UpdateAllFieldNotes()
+	switch diff {
+	case Easy, Normal, Hard, Extreme:
+		g.diff = diff
+		g.shuffle()
+		g.Percent = g.field.prepareFor(g.diff, g.dim.Size())
+		g.UpdateAllFieldNotes()
+		g.inGame = true
+	case Manual:
+		g.field.reset(g.Size())
+		g.path = make(map[int]utils.IntList)
+	}
+}
+
+func (g *Game) GetPercent() int {
+	moves := g.field.GetMovesCount()
+	sz := g.dim.Size()
+	g.Percent = moves * 100 / (sz * sz)
+	return g.Percent
+}
+
+func (g *Game) MarkReadOnly() {
+	g.field.MarkReadOnly()
 	g.inGame = true
 }
 
@@ -306,12 +324,7 @@ func (g *Game) ResetCell(x0, y0 int) {
 func (g *Game) ValuesCount() (counts map[int]int) {
 	counts = make(map[int]int)
 	for i := 1; i <= g.Size(); i++ {
-		counts[i] = 0
-		for _, cell := range *g.field {
-			if cell.GetValue() == i {
-				counts[i]++
-			}
-		}
+		counts[i] = g.field.valueCount(i)
 	}
 	return counts
 }

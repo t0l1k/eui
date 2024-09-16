@@ -12,6 +12,7 @@ const (
 	Normal
 	Hard
 	Extreme
+	Manual
 )
 
 func NewDiff(diff Difficult) Difficult { return diff }
@@ -31,6 +32,8 @@ func (d Difficult) Percent(size int) (moves, percent int) {
 		percentMin, percentMax = 50, 65
 	case Extreme:
 		percentMin, percentMax = 65, 80
+	case Manual:
+		return 0, 0
 	}
 	percent = rand.Intn(percentMax-percentMin) + percentMin
 	moves = percent * (size * size) / 100
@@ -48,6 +51,8 @@ func (d Difficult) String() (res string) {
 		res = "Сложно"
 	case Extreme:
 		res = "Экстремально"
+	case Manual:
+		res = "От руки"
 	}
 	return res
 }

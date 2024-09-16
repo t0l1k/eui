@@ -7,26 +7,28 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/colors"
+	"github.com/t0l1k/eui/examples/sudoku/game"
 )
 
 const (
-	aUndo = "Отменить ход"
-	aDel  = "Удалить"
-	aNote = "Заметка"
+	aAccept = "Применить игру"
+	aUndo   = "Отменить ход"
+	aDel    = "Удалить"
+	aNote   = "Заметка"
 )
 
 var actsStr = []string{aUndo, aDel, aNote}
 
 type BottomBar struct {
 	eui.DrawableBase
-	layoutActs                           *eui.BoxLayout
-	layoutNums                           *eui.GridLayoutRightDown
-	actBtns                              []eui.Drawabler
-	show                                 bool
-	fn                                   func(*eui.Button)
-	actUndo, actDel, actNotes, actNumber bool
-	varSw                                *eui.SubjectBase
-	board                                *Board
+	layoutActs                                      *eui.BoxLayout
+	layoutNums                                      *eui.GridLayoutRightDown
+	actBtns                                         []eui.Drawabler
+	show                                            bool
+	fn                                              func(*eui.Button)
+	actAccept, actUndo, actDel, actNotes, actNumber bool
+	varSw, varDiff                                  *eui.SubjectBase
+	board                                           *Board
 }
 
 func NewBottomBar(fn func(*eui.Button)) *BottomBar {
@@ -44,12 +46,22 @@ func (b *BottomBar) Setup(board *Board) {
 	b.layoutNums.SetDim(float64(board.dim.W), float64(board.dim.H))
 	b.layoutActs.Add(eui.NewText(title))
 	b.layoutActs.Add(eui.NewText(board.dim.String()))
-	b.layoutActs.Add(eui.NewText(b.board.diff.String() + "(" + strconv.Itoa(board.game.Percent) + "%)"))
+	diffText := eui.NewText("")
+	b.layoutActs.Add(diffText)
+	b.varDiff = eui.NewSubject()
+	b.varDiff.Attach(diffText)
+	b.varDiff.SetValue(b.board.GetDiffStr())
 	swStr := eui.NewText("")
 	b.varSw = eui.NewSubject()
 	b.varSw.Attach(swStr)
 	b.varSw.SetValue(b.board.sw.StringShort())
 	b.layoutActs.Add(swStr)
+	b.actBtns = nil
+	if b.board.diff.String() == game.Manual.String() {
+		btn := eui.NewButton(aAccept, b.fn)
+		b.layoutActs.Add(btn)
+		b.actBtns = append(b.actBtns, btn)
+	}
 	for _, v := range actsStr {
 		btn := eui.NewButton(v, b.fn)
 		b.layoutActs.Add(btn)
@@ -68,6 +80,7 @@ func (b *BottomBar) Setup(board *Board) {
 
 func (b *BottomBar) IsVisible() bool      { return b.show }
 func (b *BottomBar) Visible(value bool)   { b.show = value }
+func (b *BottomBar) IsActAccept() bool    { return b.actAccept }
 func (b *BottomBar) IsActUndo() bool      { return b.actUndo }
 func (b *BottomBar) IsActDel() bool       { return b.actDel }
 func (b *BottomBar) IsActNotes() bool     { return b.actNotes }
@@ -80,6 +93,10 @@ func (b *BottomBar) SetAct(btn *eui.Button) (result bool) {
 		btnStr = aUndo
 	}
 	switch btnStr {
+	case aAccept:
+		b.actAccept = true
+		btn.Bg(colors.Yellow)
+		result = false
 	case aUndo:
 		b.actUndo = true
 		btn.Bg(colors.Yellow)
@@ -107,6 +124,7 @@ func (b *BottomBar) SetAct(btn *eui.Button) (result bool) {
 }
 
 func (b *BottomBar) setBtnClrs() {
+	b.actAccept = false
 	b.actUndo = false
 	b.actDel = false
 	b.actNumber = false
@@ -127,6 +145,7 @@ func (b *BottomBar) setBtnClrs() {
 }
 
 func (b *BottomBar) UpdateNrs(counts map[int]int) {
+	b.varDiff.SetValue(b.board.GetDiffStr())
 	size := b.board.dim.Size()
 	for k, v := range counts {
 		for _, btn := range b.layoutNums.GetContainer() {

@@ -56,12 +56,13 @@ func NewSceneSudoku() *SceneSudoku {
 				x, y := s.board.game.Pos(i)
 				if s.bottomBar.IsActDel() {
 					s.board.game.ResetCell(x, y)
+					s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
 					log.Println("Set Act Del", x, y)
 				} else {
 					if !s.board.isWin {
 						s.board.Move(x, y)
-						s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
 						s.bottomBar.UpdateUndoBtn(s.board.MoveCount())
+						s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
 					}
 					if s.board.isWin {
 						gamesData.AddGameResult(s.board.dim, s.board.diff, s.board.sw.Duration())
@@ -103,6 +104,11 @@ func NewSceneSudoku() *SceneSudoku {
 				s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
 				s.bottomBar.UpdateUndoBtn(s.board.MoveCount())
 				log.Println("Set Act Undo")
+			}
+			if s.bottomBar.IsActAccept() {
+				s.board.game.MarkReadOnly()
+				s.board.sw.Start()
+				log.Println("Set Act Accept in hand game", s.board.GetDiffStr(), s.bottomBar.varDiff.Value())
 			}
 		}
 	})
