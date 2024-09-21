@@ -1,36 +1,38 @@
-package game
+package sols
 
 import (
 	"fmt"
 	"sort"
 	"strconv"
+
+	"github.com/t0l1k/eui/examples/games/solitaire/sols/deck"
 )
 
 // Прввила пасьянса, есть поле в 15 рядов по 4 карты в ряде(2 ряда пустые на старте), каждый ряд содержит 4 карты одного достоинства, когда собран(все тузы, короли и т.д. в одном ряду). Перенос на пустой ряд любой карты, или в ряд где менее 4 карт, можно положить только того же достоинства карту.
 type Lauout15 map[int][]*Cell
 
-func NewLayout15(deck *DeckCards52) *Lauout15 {
+func NewLayout15(deck *deck.DeckCards52) *Lauout15 {
 	l := make(Lauout15)
 	l.Reset(deck)
 	return &l
 }
 
-func (l Lauout15) Reset(deck *DeckCards52) {
+func (l Lauout15) Reset(deck52 *deck.DeckCards52) {
 	idx := 0
 	for i := 0; i < 15; i++ {
 		l[i] = nil
 		for p := 0; p < 4; p++ {
-			if idx >= deck.Len() {
+			if idx >= deck52.Len() {
 				l.AddCard(i, nil)
 				continue
 			}
-			l.AddCard(i, deck.deck[idx])
+			l.AddCard(i, deck52.Deck52()[idx])
 			idx++
 		}
 	}
 }
 
-func (l Lauout15) GetDeck() (deck []*Card) {
+func (l Lauout15) GetDeck() (deck []*deck.Card) {
 	for i := 0; i < 15; i++ {
 		for _, cell := range l.Row(i) {
 			deck = append(deck, cell.GetCard())
@@ -39,7 +41,7 @@ func (l Lauout15) GetDeck() (deck []*Card) {
 	return deck
 }
 
-func (l Lauout15) SetDeck(deck []*Card) {
+func (l Lauout15) SetDeck(deck []*deck.Card) {
 	idx := 0
 	for i := 0; i < 15; i++ {
 		for p := 0; p < 4; p++ {
@@ -50,7 +52,7 @@ func (l Lauout15) SetDeck(deck []*Card) {
 	}
 }
 
-func (l Lauout15) AddCard(row int, card *Card) {
+func (l Lauout15) AddCard(row int, card *deck.Card) {
 	cell := NewCell()
 	cell.SetCard(card)
 	l[row] = append(l[row], cell)
@@ -85,7 +87,7 @@ func (l Lauout15) Row(row int) []*Cell {
 	return l[row]
 }
 
-func (l Lauout15) RowLastCard(row int) *Card {
+func (l Lauout15) RowLastCard(row int) *deck.Card {
 	isEmpty, idx := l.IsRowEmpty(row)
 	if !isEmpty {
 		return l[row][idx].GetCard()
@@ -93,7 +95,7 @@ func (l Lauout15) RowLastCard(row int) *Card {
 	return nil
 }
 
-func (l Lauout15) InWhichRow(card0 *Card) int {
+func (l Lauout15) InWhichRow(card0 *deck.Card) int {
 	for i, cells := range l {
 		for _, cell := range cells {
 			if cell.GetCard().Eq(card0) {

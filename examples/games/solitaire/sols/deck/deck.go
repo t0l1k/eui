@@ -1,4 +1,4 @@
-package game
+package deck
 
 import (
 	"math/rand"
@@ -22,6 +22,8 @@ func (d *DeckCards52) Reset() {
 		}
 	}
 }
+
+func (d *DeckCards52) Deck52() []*Card { return d.deck }
 
 func (d *DeckCards52) Len() int { return len(d.deck) }
 

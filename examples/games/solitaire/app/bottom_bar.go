@@ -8,15 +8,15 @@ import (
 )
 
 const (
-	// actNextSol       = "Новый пасьянс"
-	actNew   = "Новая игра"
-	actReset = "Играть сначала"
+	actNextSol = " Следующий пасьянс"
+	actNew     = "Новая игра"
+	actReset   = "Играть сначала"
 	// actAvailibleMove = "Доступные ходы"
 	actBackwardMove = "<"
 	actForwardMove  = ">"
 )
 
-var actStrs = []string{actNew, actReset, actBackwardMove, actForwardMove}
+var actStrs = []string{actNextSol, actNew, actReset, actBackwardMove, actForwardMove}
 
 type BottomBar struct {
 	eui.DrawableBase

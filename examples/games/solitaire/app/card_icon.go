@@ -5,18 +5,19 @@ import (
 
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/colors"
-	"github.com/t0l1k/eui/examples/games/solitaire/game"
+	"github.com/t0l1k/eui/examples/games/solitaire/sols"
+	"github.com/t0l1k/eui/examples/games/solitaire/sols/deck"
 )
 
 type CardIcon struct {
 	eui.DrawableBase
-	cell *game.Cell
+	cell *sols.Cell
 	btn  *eui.Button
 	show bool
 	f    func(b *eui.Button)
 }
 
-func NewCardIcon(cell *game.Cell, f func(b *eui.Button)) *CardIcon {
+func NewCardIcon(cell *sols.Cell, f func(b *eui.Button)) *CardIcon {
 	c := &CardIcon{}
 	c.cell = cell
 	c.f = f
@@ -39,7 +40,7 @@ func NewCardIcon(cell *game.Cell, f func(b *eui.Button)) *CardIcon {
 
 func (c *CardIcon) UpdateData(value interface{}) {
 	switch v := value.(type) {
-	case *game.Card:
+	case *deck.Card:
 		if v == nil {
 			c.btn.SetText(" ")
 			c.btn.Fg(colors.Blue)

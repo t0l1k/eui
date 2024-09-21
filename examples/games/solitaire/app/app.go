@@ -12,3 +12,9 @@ func NewGame() *eui.Ui {
 	u.SetSize(w, h)
 	return u
 }
+
+type Sols interface {
+	eui.Drawabler
+	Setup(bool)
+	MakeMove(int)
+}

@@ -5,34 +5,35 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/examples/games/solitaire/game"
+	"github.com/t0l1k/eui/examples/games/solitaire/sols"
+	"github.com/t0l1k/eui/examples/games/solitaire/sols/deck"
 )
 
 type BoardSol15 struct {
 	eui.DrawableBase
-	game           *game.Lauout15
+	game           *sols.Lauout15
 	layout         *eui.GridLayoutRightDown
 	fn             func(*eui.Button)
-	deck           *game.DeckCards52
+	deck           *deck.DeckCards52
 	sw             *eui.Stopwatch
-	historyOfMoves [][]*game.Card
+	historyOfMoves [][]*deck.Card
 	moveIdx        int
 }
 
 func NewBoardSol15(fn func(*eui.Button)) *BoardSol15 {
 	b := &BoardSol15{}
 	b.fn = fn
-	b.deck = game.NewDeckCards52().Shuffle()
-	b.game = game.NewLayout15(b.deck)
+	b.deck = deck.NewDeckCards52().Shuffle()
+	b.game = sols.NewLayout15(b.deck)
 	b.layout = eui.NewGridLayoutRightDown(14, 8)
 	b.sw = eui.NewStopwatch()
 	b.Visible(true)
 	return b
 }
 
-func (b *BoardSol15) Setup(full bool) {
-	if full {
-		b.deck = game.NewDeckCards52().Shuffle()
+func (b *BoardSol15) Setup(newDeck bool) {
+	if newDeck {
+		b.deck = deck.NewDeckCards52().Shuffle()
 		b.sw.Reset()
 	}
 	b.game.Reset(b.deck)

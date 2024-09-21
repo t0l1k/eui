@@ -28,7 +28,7 @@ func NewSceneMain() *SceneMain {
 					continue
 				}
 				if card.StringShort() == btn.GetText() {
-					count := 3 - i
+					count := 3 - i // supermove
 					for count >= 0 {
 						s.board.MakeMove(k)
 						count--
@@ -41,8 +41,9 @@ func NewSceneMain() *SceneMain {
 	s.board.Setup(true)
 	s.Add(s.board)
 	s.bottomBar = NewBottomBar(func(btn *eui.Button) {
-		fmt.Println("pressed:", btn.GetText())
 		switch btn.GetText() {
+		case actNextSol:
+			fmt.Println("pressed:", btn.GetText())
 		case actNew:
 			s.board.Setup(true)
 			s.bottomBar.updateMoveCount()
