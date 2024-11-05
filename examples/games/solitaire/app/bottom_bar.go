@@ -1,8 +1,6 @@
 package app
 
 import (
-	"strconv"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 )
@@ -22,7 +20,7 @@ type BottomBar struct {
 	eui.DrawableBase
 	layout          *eui.BoxLayout
 	fn              func(*eui.Button)
-	board           *BoardSol15
+	board           Sols
 	varSw, varMoves *eui.SubjectBase
 }
 
@@ -36,7 +34,7 @@ func NewBottomBar(fn func(*eui.Button)) *BottomBar {
 	return b
 }
 
-func (b *BottomBar) Setup(board *BoardSol15) {
+func (b *BottomBar) Setup(board Sols) {
 	b.board = board
 	b.layout.ResetContainerBase()
 	for _, str := range actStrs {
@@ -50,9 +48,10 @@ func (b *BottomBar) Setup(board *BoardSol15) {
 	b.layout.Add(swText)
 }
 
-func (s *BottomBar) updateMoveCount() {
-	str := "Ход:" + strconv.Itoa(len(s.board.historyOfMoves)) + " доступно:" + strconv.Itoa(s.board.game.AvailableMoves()) + " ходов"
+func (s *BottomBar) UpdateMoveCount() bool {
+	moves, str := s.board.AvailableMoves()
 	s.varMoves.SetValue(str)
+	return moves == 0
 }
 
 func (b *BottomBar) Update(dt int) {
@@ -62,7 +61,7 @@ func (b *BottomBar) Update(dt int) {
 	for _, v := range b.layout.GetContainer() {
 		v.Update(dt)
 	}
-	b.varSw.SetValue(b.board.sw.StringShort())
+	b.varSw.SetValue(b.board.Stopwatch().StringShort())
 }
 
 func (b *BottomBar) Draw(surface *ebiten.Image) {

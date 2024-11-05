@@ -2,16 +2,18 @@ package app
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/solitaire/sols"
 	"github.com/t0l1k/eui/examples/games/solitaire/sols/deck"
+	"github.com/t0l1k/eui/examples/games/solitaire/sols/sol15"
 )
 
 type BoardSol15 struct {
 	eui.DrawableBase
-	game           *sols.Lauout15
+	game           *sol15.Lauout15
 	layout         *eui.GridLayoutRightDown
 	fn             func(*eui.Button)
 	deck           *deck.DeckCards52
@@ -24,10 +26,9 @@ func NewBoardSol15(fn func(*eui.Button)) *BoardSol15 {
 	b := &BoardSol15{}
 	b.fn = fn
 	b.deck = deck.NewDeckCards52().Shuffle()
-	b.game = sols.NewLayout15(b.deck)
+	b.game = sol15.NewLayout15(b.deck)
 	b.layout = eui.NewGridLayoutRightDown(14, 8)
 	b.sw = eui.NewStopwatch()
-	b.Visible(true)
 	return b
 }
 
@@ -40,18 +41,18 @@ func (b *BoardSol15) Setup(newDeck bool) {
 	b.layout.ResetContainerBase()
 	for i := 0; i < 15; i++ {
 		for p := 0; p < 4; p++ {
-			cell := b.game.Row(i)[p]
+			cell := b.game.Column(sols.Column(i))[p]
 			cardIcon := NewCardIcon(cell, b.fn)
 			cell.Attach(cardIcon)
 			b.layout.Add(cardIcon)
 		}
-		if (i+1)%3 == 0 && (i > 0) {
+		if (i+1)%3 == 0 && (i > 0 && i < 14) {
 			for i := 0; i < 14; i++ {
-				lbl := eui.NewText("*")
+				lbl := eui.NewText(" ")
 				b.layout.Add(lbl)
 			}
-		} else {
-			lbl := eui.NewText("*")
+		} else if i < 14 {
+			lbl := eui.NewText(" ")
 			b.layout.Add(lbl)
 		}
 	}
@@ -62,7 +63,7 @@ func (b *BoardSol15) Setup(newDeck bool) {
 	b.Resize(b.GetRect().GetArr()) // обязательно после обнуления контейнеров
 }
 
-func (b *BoardSol15) MakeMove(move int) {
+func (b *BoardSol15) MakeMove(move sols.Column) {
 	if b.game.MakeMove(move) {
 		if b.game.IsSolved() {
 			b.sw.Stop()
@@ -74,11 +75,23 @@ func (b *BoardSol15) MakeMove(move int) {
 	}
 }
 
+func (b *BoardSol15) Game() sols.CardGame { return b.game }
+
+func (b *BoardSol15) AvailableMoves() (int, string) {
+	moves := b.game.AvailableMoves()
+	str := "Ход:" + strconv.Itoa(len(b.historyOfMoves)) + " доступно:" + strconv.Itoa(moves) + " ходов"
+	return moves, str
+}
+
+func (b *BoardSol15) Stopwatch() *eui.Stopwatch  { return b.sw }
+func (b *BoardSol15) GetHistory() [][]*deck.Card { return b.historyOfMoves }
+func (b *BoardSol15) GetMoveNr() int             { return b.moveIdx }
+func (b *BoardSol15) SetMoveNr(value int)        { b.moveIdx = value }
+
 func (b *BoardSol15) backupGame() {
 	deck := b.game.GetDeck()
 	b.historyOfMoves = b.historyOfMoves[:b.moveIdx]
 	b.historyOfMoves = append(b.historyOfMoves, deck)
-	// b.moveIdx = len(b.historyOfMoves) - 1
 	fmt.Println("deck:", deck, b.moveIdx, len(b.historyOfMoves))
 }
 

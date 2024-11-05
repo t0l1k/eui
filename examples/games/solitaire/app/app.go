@@ -1,6 +1,10 @@
 package app
 
-import "github.com/t0l1k/eui"
+import (
+	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/examples/games/solitaire/sols"
+	"github.com/t0l1k/eui/examples/games/solitaire/sols/deck"
+)
 
 var title = "Собери пасьянс"
 
@@ -16,5 +20,11 @@ func NewGame() *eui.Ui {
 type Sols interface {
 	eui.Drawabler
 	Setup(bool)
-	MakeMove(int)
+	Game() sols.CardGame
+	MakeMove(sols.Column)
+	AvailableMoves() (int, string)
+	Stopwatch() *eui.Stopwatch
+	GetHistory() [][]*deck.Card
+	GetMoveNr() int
+	SetMoveNr(int)
 }

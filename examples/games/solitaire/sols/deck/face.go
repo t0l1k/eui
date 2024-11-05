@@ -3,7 +3,7 @@ package deck
 type Face int
 
 const (
-	Ace Face = iota
+	Ace Face = iota + 1
 	Two
 	Three
 	Four
@@ -21,6 +21,10 @@ const (
 func GetAllCardFace() []Face {
 	return []Face{Ace, Two, Three, Four, Five, Six, Seven, Eight, Nine, Ten, Jack, Queen, King}
 }
+
+func (f Face) IsEq(other Face) bool      { return int(f) == int(other) }
+func (f Face) IsOneLess(other Face) bool { return int(f) == int(other)-1 }
+func (f Face) IsOneHigh(other Face) bool { return int(f) == int(other)+1 }
 
 func (f Face) String() string {
 	s := ""

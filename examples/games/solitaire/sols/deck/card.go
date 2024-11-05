@@ -17,30 +17,36 @@ func NewCard(suit Suit, face Face) *Card {
 	return c
 }
 
+func (s *Card) GetCard() (value *Card) { return s }
+
 func (s *Card) SetCard(value *Card) {
 	s.face = value.face
 	s.suit = value.suit
 }
 
 func (s *Card) Eq(other *Card) bool {
-	if other == nil || s == nil {
-		return false
-	}
-	return s.face == other.face && s.suit == other.suit
+	return (s == nil && other == nil) || s.face.IsEq(other.face) && s.suit.IsEq(other.suit)
+	// return !(other == nil || s == nil) && s.face == other.face && s.suit == other.suit
 }
 
-func (s *Card) EqFace(other *Card) bool {
-	if other == nil || s == nil {
-		return false
-	}
-	return s.face == other.face
+func (s *Card) IsEqFace(other *Card) bool {
+	return !(other == nil || s == nil) && s.face == other.face
 }
 
 func (s *Card) EqSuit(other *Card) bool {
-	if other == nil || s == nil {
-		return false
-	}
-	return s.suit == other.suit
+	return !(other == nil || s == nil) && s.suit.IsEq(other.suit)
+}
+
+func (s *Card) EqColor(other *Card) bool {
+	return !(s == nil || other == nil) && s.suit.EqColor(other.suit)
+}
+
+func (s *Card) IsOneLess(other *Card) bool {
+	return !(s == nil || other == nil) && s.face.IsOneLess(other.face)
+}
+
+func (s *Card) IsOneHigh(other *Card) bool {
+	return !(s == nil || other == nil) && s.face.IsOneHigh(other.face)
 }
 
 func (s Card) Color() (col color.Color) {
@@ -57,6 +63,9 @@ func (c Card) StringShort() string {
 	return fmt.Sprintf("%2v", c.face.String()) + c.suit.String()
 }
 
-func (c Card) String() string {
+func (c *Card) String() string {
+	if c == nil {
+		return "[...]"
+	}
 	return fmt.Sprintf("[%2v%v]", c.face.String(), c.suit.String())
 }

@@ -9,7 +9,10 @@ import (
 type SceneMain struct {
 	eui.SceneBase
 	topBar    *eui.TopBar
-	board     *BoardSol15
+	boards    []Sols
+	boardIdx  int
+	current   Sols
+	fn        func(*eui.Button)
 	bottomBar *BottomBar
 }
 
@@ -20,59 +23,87 @@ func NewSceneMain() *SceneMain {
 	s.topBar.SetShowStoppwatch(true)
 	s.topBar.SetTitleCoverArea(0.9)
 	s.Add(s.topBar)
-	s.board = NewBoardSol15(func(btn *eui.Button) {
-		for k, cells := range *s.board.game {
-			for i, cell := range cells {
-				card := cell.GetCard()
-				if card == nil {
-					continue
-				}
-				if card.StringShort() == btn.GetText() {
-					count := 3 - i // supermove
-					for count >= 0 {
-						s.board.MakeMove(k)
-						count--
-					}
-					s.bottomBar.updateMoveCount()
-				}
-			}
-		}
-	})
-	s.board.Setup(true)
-	s.Add(s.board)
+	s.fn = s.gameLogic
+	var board Sols
+
+	board = NewBoardSol15(s.fn)
+	s.Add(board)
+	board.Setup(true)
+	s.boards = append(s.boards, board)
+
+	board = nil
+
+	board = NewBoardFreecell(s.fn)
+	s.Add(board)
+	board.Setup(true)
+	s.boards = append(s.boards, board)
+
+	s.current = s.boards[s.boardIdx]
+	s.current.Visible(true)
 	s.bottomBar = NewBottomBar(func(btn *eui.Button) {
 		switch btn.GetText() {
 		case actNextSol:
-			fmt.Println("pressed:", btn.GetText())
+			s.current.Visible(false)
+			s.current = nil
+			s.boardIdx++
+			if s.boardIdx >= len(s.boards) {
+				s.boardIdx = 0
+			}
+			s.current = s.boards[s.boardIdx]
+			s.current.Setup(true)
+			s.current.Visible(true)
+			s.Add(s.current)
+			s.Resize()
+			fmt.Println("pressed:", btn.GetText(), s.boardIdx)
 		case actNew:
-			s.board.Setup(true)
-			s.bottomBar.updateMoveCount()
+			s.current.Setup(true)
+			s.bottomBar.UpdateMoveCount()
 			sb := eui.NewSnackBar("Новый рассклад!").Show(2000)
 			s.Add(sb)
 		case actReset:
-			s.board.sw.Stop()
-			s.board.Setup(false)
-			s.bottomBar.updateMoveCount()
+			s.current.Stopwatch().Stop()
+			s.current.Setup(false)
+			s.bottomBar.UpdateMoveCount()
 			sb := eui.NewSnackBar("Повторить собирать рассклад!").Show(1000)
 			s.Add(sb)
 		case actBackwardMove:
-			if s.board.moveIdx > 0 {
-				s.board.moveIdx--
+			if s.current.GetMoveNr() > 0 {
+				s.current.SetMoveNr(s.current.GetMoveNr() - 1)
+				s.bottomBar.UpdateMoveCount()
 			}
-			s.board.game.SetDeck(s.board.historyOfMoves[s.board.moveIdx])
-			fmt.Println("idx:", s.board.moveIdx)
+			s.current.Game().SetDeck(s.current.GetHistory()[s.current.GetMoveNr()])
 		case actForwardMove:
-			if s.board.moveIdx < len(s.board.historyOfMoves)-1 {
-				s.board.moveIdx++
+			if s.current.GetMoveNr() < len(s.current.GetHistory())-1 {
+				s.current.SetMoveNr(s.current.GetMoveNr() + 1)
+				s.bottomBar.UpdateMoveCount()
 			}
-			s.board.game.SetDeck(s.board.historyOfMoves[s.board.moveIdx])
-			fmt.Println("idx:", s.board.moveIdx)
+			s.current.Game().SetDeck(s.current.GetHistory()[s.current.GetMoveNr()])
 		}
 	})
-	s.bottomBar.Setup(s.board)
+	s.bottomBar.Setup(s.current)
 	s.Add(s.bottomBar)
 	s.Resize()
 	return s
+}
+
+func (s *SceneMain) gameLogic(btn *eui.Button) {
+	for _, card := range s.current.Game().GetDeck() {
+		if card == nil {
+			continue
+		}
+		if card.StringShort() == btn.GetText() {
+			column, idx := s.current.Game().Index(card)
+			fmt.Println("sc mv:", column, idx, btn.GetText())
+			for idx >= 0 {
+				s.current.MakeMove(column)
+				idx--
+			}
+			if s.bottomBar.UpdateMoveCount() {
+				sb := eui.NewSnackBar("Нет ходов").Show(1000)
+				s.Add(sb)
+			}
+		}
+	}
 }
 
 func (s *SceneMain) Resize() {
@@ -80,6 +111,6 @@ func (s *SceneMain) Resize() {
 	rect := eui.NewRect([]int{0, 0, w0, h0})
 	Htop := int(float64(rect.GetLowestSize()) * 0.05)
 	s.topBar.Resize([]int{0, 0, w0, Htop})
-	s.board.Resize([]int{0, Htop, w0, h0 - Htop*4})
+	s.current.Resize([]int{0, Htop, w0, h0 - Htop*4})
 	s.bottomBar.Resize([]int{0, h0 - Htop, w0, Htop})
 }

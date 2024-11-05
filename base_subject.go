@@ -9,10 +9,7 @@ type SubjectBase struct {
 
 func NewSubject() *SubjectBase { return &SubjectBase{} }
 
-func (s *SubjectBase) Attach(o Observerer) {
-	s.listener = append(s.listener, o)
-}
-
+func (s *SubjectBase) Attach(o Observerer) { s.listener = append(s.listener, o) }
 func (s *SubjectBase) Detach(o Observerer) {
 	for i, observer := range s.listener {
 		if observer == o {
@@ -28,15 +25,7 @@ func (s *SubjectBase) Notify() {
 	}
 }
 
-func (s *SubjectBase) Value() interface{} {
-	return s.value
-}
-
-func (s *SubjectBase) SetValue(value interface{}) {
-	s.value = value
-	s.Notify()
-}
-
-func (s *SubjectBase) String() string {
-	return fmt.Sprintf("%v", s.value)
-}
+func (s *SubjectBase) Reset()                     { s.SetValue(nil) }
+func (s *SubjectBase) Value() interface{}         { return s.value }
+func (s *SubjectBase) SetValue(value interface{}) { s.value = value; s.Notify() }
+func (s *SubjectBase) String() string             { return fmt.Sprintf("%v", s.value) }

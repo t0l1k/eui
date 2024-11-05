@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"image/color"
 
 	"github.com/t0l1k/eui"
@@ -23,7 +24,7 @@ func NewCardIcon(cell *sols.Cell, f func(b *eui.Button)) *CardIcon {
 	c.f = f
 	str := ""
 	var col color.Color
-	if c.cell.GetCard() == nil {
+	if c.cell.IsEmpty() {
 		col = colors.Blue
 		str = ""
 	} else {
@@ -48,6 +49,8 @@ func (c *CardIcon) UpdateData(value interface{}) {
 			c.btn.SetText(v.StringShort())
 			c.btn.Fg(c.cell.GetCard().Color())
 		}
+	default:
+		fmt.Println("||||||||||ci:", value, v)
 	}
 	c.Dirty = true
 }
