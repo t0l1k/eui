@@ -2,6 +2,7 @@ package eui
 
 import "fmt"
 
+// Умею принять значение и передать подписчикам при обновлении значения
 type SubjectBase struct {
 	value    interface{}
 	listener []Observerer
@@ -28,4 +29,6 @@ func (s *SubjectBase) Notify() {
 func (s *SubjectBase) Reset()                     { s.SetValue(nil) }
 func (s *SubjectBase) Value() interface{}         { return s.value }
 func (s *SubjectBase) SetValue(value interface{}) { s.value = value; s.Notify() }
-func (s *SubjectBase) String() string             { return fmt.Sprintf("%v", s.value) }
+func (s *SubjectBase) String() string {
+	return fmt.Sprintf("listeners: %v value:%v", len(s.listener), s.value)
+}

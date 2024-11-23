@@ -32,7 +32,7 @@ func (s *KeyboardInput) Detach(o Inputer) {
 
 func (s *KeyboardInput) SetValue(keys []ebiten.Key) {
 	s.value.keys = nil
-	s.value.keys = append(s.value.keys, keys[len(keys)-1])
+	s.value.keys = append(s.value.keys, keys...)
 	s.Notify()
 }
 

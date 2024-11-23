@@ -7,23 +7,21 @@ import (
 	"github.com/t0l1k/eui"
 )
 
-func init() {
-	counter = 0
+type Count struct{ eui.SubjectBase }
+
+func NewCount() *Count {
+	c := &Count{}
+	c.SetValue(0)
+	return c
 }
 
-var counter int
-
-func Value() int {
-	return counter
+func (c *Count) Inc() {
+	c.SetValue(c.Value().(int) + 1)
 }
 
-func Inc() {
-	counter++
-}
-
-func Dec() {
-	if counter > 0 {
-		counter--
+func (c *Count) Dec() {
+	if c.Value().(int) > 0 {
+		c.SetValue(c.Value().(int) - 1)
 	}
 }
 
@@ -37,23 +35,21 @@ func NewSceneCounter() *SceneCounter {
 	sc.lay1 = eui.NewVLayout() // Контейнер по вертикали
 	sc.lay2 = eui.NewHLayout() // Контейнер по горизонтали
 
-	sb := eui.NewSnackBar("Test!!!").Show(3000)
+	sb := eui.NewSnackBar("Test Counter!!!").Show(3000)
 	sc.Add(sb)
 
-	counter := eui.NewSubject()                 // Подписчикам передать оповещение при изменении переменной
-	lblCounter := eui.NewText(counter.String()) // Текстовая метка
-	counter.Attach(lblCounter)                  // Подписка на уведомления от этой переменной
-	counter.SetValue(Value())
-	sc.lay1.Add(lblCounter) // Добавить в контейнер метку
+	count := NewCount()                     // Подписчикам передать оповещение при изменении переменной
+	lblCount := eui.NewText(count.String()) // Текстовая метка
+	count.Attach(lblCount)                  // Подписка на уведомления от этой переменной
+	count.SetValue(count.Value())
+	sc.lay1.Add(lblCount) // Добавить в контейнер метку
 
 	btnInc := eui.NewButton("+", func(b *eui.Button) {
-		Inc()
-		counter.SetValue(Value())
+		count.Inc()
 	}) // Кнопка увеличить на единицу и передать подписчикам об этом
 
 	btnDec := eui.NewButton("-", func(b *eui.Button) {
-		Dec()
-		counter.SetValue(Value())
+		count.Dec()
 	}) // Кнопка уменьшить на единицу и передать подписчикам об этом
 
 	sc.lay2.Add(btnInc) // Добавить в контейнер кнопку увеличить

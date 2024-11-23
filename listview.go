@@ -84,11 +84,8 @@ func (l *ListView) SetListViewTextWithBgFgColors(list []string, bg, fg []color.C
 	l.resizeChilds()
 }
 
-func (l *ListView) Add(d Drawabler) {
+func (l *ListView) AddBgFg(d Drawabler, bg, fg color.Color) {
 	l.ContainerBase.Add(d)
-	theme := GetUi().theme
-	bg := theme.Get(ListViewItemBg)
-	fg := theme.Get(ListViewItemFg)
 	switch value := d.(type) {
 	case *Text:
 		value.Bg(bg)
@@ -104,6 +101,13 @@ func (l *ListView) Add(d Drawabler) {
 		l.list = append(l.list, value.GetText())
 	}
 	l.resizeChilds()
+}
+
+func (l *ListView) Add(d Drawabler) {
+	theme := GetUi().theme
+	bg := theme.Get(ListViewItemBg)
+	fg := theme.Get(ListViewItemFg)
+	l.AddBgFg(d, bg, fg)
 }
 
 func (l *ListView) Itemsize(itemSize int) {
