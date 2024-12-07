@@ -1,6 +1,7 @@
 package eui
 
 import (
+	"image/color"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -49,6 +50,9 @@ func (t *Text) UpdateData(value interface{}) {
 		t.SetText(v)
 	case int:
 		t.SetText(strconv.Itoa(v))
+	case []color.Color:
+		t.Bg(v[0])
+		t.Fg(v[1])
 	}
 }
 
