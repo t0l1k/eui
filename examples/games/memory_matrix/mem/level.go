@@ -1,6 +1,10 @@
 package mem
 
+import "strconv"
+
 type Level int
+
+func (l Level) String() string { return strconv.Itoa(int(l)) }
 
 func GetDimForLevel(level Level) Dim {
 	w0, h0 := 2, 2

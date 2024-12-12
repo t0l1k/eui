@@ -21,7 +21,7 @@ func NewGame(level Level) *Game {
 	g.field = newField().Shuffle(int(level), g.dim)
 	g.stage = NewGameStage()
 	g.moveCount = 0
-	g.gameData = NewGameData()
+	g.gameData = NewGameData(int(level))
 	return g
 }
 
@@ -41,7 +41,7 @@ func (g *Game) NextLevel() {
 	g.moveCount = 0
 	g.dim = GetDimForLevel(g.level)
 	g.field = newField().Shuffle(int(g.level), g.dim)
-	g.gameData = NewGameData()
+	g.gameData = NewGameData(int(g.level))
 }
 
 func (g *Game) Move(idx int) bool {
@@ -92,6 +92,7 @@ func (g *Game) Cell(idx int) *Cell       { return g.field.cell(idx) }
 func (g *Game) IsCellEmpty(idx int) bool { return g.field.cell(idx).IsEmpty() }
 
 func (g *Game) GameData() GameData     { return *g.gameData }
+func (g *Game) Level() Level           { return g.level }
 func (g *Game) Dim() Dim               { return g.dim }
 func (g *Game) Idx(x, y int) int       { return g.dim.Idx(x, y) }
 func (g *Game) Pos(idx int) (int, int) { return g.dim.Pos(idx) }

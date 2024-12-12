@@ -23,24 +23,29 @@ func NewSceneMain() *SceneMain {
 	s.lblStatus = eui.NewText("")
 	s.Add(s.lblStatus)
 	s.board = NewBoardMem(func(btn *eui.Button) {
+		if btn.IsPressed() {
+			switch s.board.Game().Stage() {
+			case mem.Preparation:
+				s.board.game.Move(0)
+				s.board.showTimer.On()
+				s.board.SetupShow()
+			case mem.Restart:
+				s.board.game.NextLevel()
+				s.board.SetupPreparation()
+			}
+		}
 		for i, v := range s.board.layout.GetContainer() {
-			if v.(*eui.Button) == btn {
-				switch s.board.Game().Stage() {
-				case mem.Preparation:
-					s.board.game.Move(i)
-					s.board.showTimer.On()
-					s.board.SetupShow()
-				case mem.Show:
-				case mem.Recollection:
-					if s.board.game.Move(i) {
-						v.(*eui.Button).Bg(colors.Aqua)
-					} else {
-						v.(*eui.Button).Bg(colors.Orange)
+			switch vv := v.(type) {
+			case *eui.Button:
+				if vv == btn {
+					switch s.board.Game().Stage() {
+					case mem.Recollection:
+						if s.board.game.Move(i) {
+							v.(*eui.Button).Bg(colors.Aqua)
+						} else {
+							v.(*eui.Button).Bg(colors.Orange)
+						}
 					}
-				case mem.Conclusion:
-				case mem.Restart:
-					s.board.game.NextLevel()
-					s.board.SetupPreparation()
 				}
 			}
 		}

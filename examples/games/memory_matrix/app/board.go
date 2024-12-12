@@ -39,7 +39,7 @@ func (d *BoardMem) Game() *mem.Game { return d.game }
 func (d *BoardMem) SetupPreparation() {
 	d.layout.ResetContainerBase()
 	d.layout.SetDim(1, 1)
-	btn := eui.NewButton("Click to Start", d.fn)
+	btn := eui.NewButton("Click to Start "+d.game.Level().String()+" "+d.game.Dim().String(), d.fn)
 	d.layout.Add(btn)
 	d.layout.Resize(d.GetRect().GetArr())
 	str := d.gamesData.String()
@@ -97,7 +97,7 @@ func (d *BoardMem) SetupConclusion() {
 	} else if d.Game().GameOver {
 		str = "Game Over"
 	}
-	btn := eui.NewButton(str, d.fn)
+	btn := d.setupScoreBtn()
 	d.layout.Add(btn)
 	d.layout.Resize(d.GetRect().GetArr())
 	str = d.gamesData.String()
@@ -106,6 +106,24 @@ func (d *BoardMem) SetupConclusion() {
 	sb := eui.NewSnackBar(d.Game().String()).Show(3000)
 	d.Add(sb)
 	log.Println("Setup Conclusion done", d.game.String())
+}
+
+func (d *BoardMem) setupScoreBtn() *eui.ButtonIcon {
+	level := d.gamesData.Max()
+	count := d.gamesData.Size()
+	var xArr, yArr, levels []int
+	for i := 0; i < count; i++ {
+		xArr = append(xArr, i+1)
+	}
+	for i := 0; i < level; i++ {
+		yArr = append(yArr, i+1)
+	}
+	levels = d.gamesData.Levels()
+	plot := eui.NewPlot(xArr, yArr, levels, "Memory Matrix", "Game", "Level")
+	plot.Resize(d.GetRect().GetArr())
+	plot.Layout()
+	btn := eui.NewButtonIcon([]*ebiten.Image{plot.Image(), plot.Image()}, d.fn)
+	return btn
 }
 
 func (d *BoardMem) Update(dt int) {
