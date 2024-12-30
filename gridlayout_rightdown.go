@@ -41,6 +41,7 @@ func (c *GridLayoutRightDown) GetColumnSize() (size float64) {
 	}
 	return size
 }
+func (d *GridLayoutRightDown) FitToDim(value bool)     { d.fitToDim = value; d.resize() }
 func (d *GridLayoutRightDown) SetDim(r, c float64)     { d.row = r; d.column = c; d.resize() }
 func (d *GridLayoutRightDown) SetRows(r float64)       { d.row = r; d.resize() }
 func (d *GridLayoutRightDown) SetColumns(c float64)    { d.column = c; d.resize() }

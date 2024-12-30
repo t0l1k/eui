@@ -18,11 +18,19 @@ func (s *SpriteBase) Bg(value color.Color) { s.bg = value; s.Dirty = true }
 func (s *SpriteBase) GetFg() color.Color   { return s.fg }
 func (s *SpriteBase) Fg(value color.Color) { s.fg = value; s.Dirty = true }
 
-func (s *SpriteBase) IsVisible() bool    { return s.visible }
-func (s *SpriteBase) Visible(value bool) { s.visible = value; s.Dirty = true }
-func (s *SpriteBase) IsDisabled() bool   { return s.disabled }
-func (s *SpriteBase) Enable()            { s.disabled = false }
-func (s *SpriteBase) Disable()           { s.disabled = true }
+func (s *SpriteBase) IsVisible() bool { return s.visible }
+func (s *SpriteBase) Visible(value bool) {
+	s.visible = value
+	if value {
+		s.Enable()
+	} else {
+		s.Disable()
+	}
+	s.Dirty = true
+}
+func (s *SpriteBase) IsDisabled() bool { return s.disabled }
+func (s *SpriteBase) Enable()          { s.disabled = false }
+func (s *SpriteBase) Disable()         { s.disabled = true }
 
 func (s *SpriteBase) Image() *ebiten.Image         { return s.image }
 func (s *SpriteBase) SetImage(image *ebiten.Image) { s.image = image }

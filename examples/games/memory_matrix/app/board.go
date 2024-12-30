@@ -39,6 +39,7 @@ func (d *BoardMem) Game() *mem.Game { return d.game }
 func (d *BoardMem) SetupPreparation() {
 	d.layout.ResetContainerBase()
 	d.layout.SetDim(1, 1)
+	d.layout.FitToDim(false)
 	btn := eui.NewButton("Click to Start "+d.game.Level().String()+" "+d.game.Dim().String(), d.fn)
 	d.layout.Add(btn)
 	d.layout.Resize(d.GetRect().GetArr())
@@ -92,6 +93,7 @@ func (d *BoardMem) SetupConclusion() {
 	var str string
 	d.layout.ResetContainerBase()
 	d.layout.SetDim(1, 1)
+	d.layout.FitToDim(true)
 	if d.Game().Win {
 		str = "Winner"
 	} else if d.Game().GameOver {

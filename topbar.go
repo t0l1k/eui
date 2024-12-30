@@ -2,18 +2,20 @@ package eui
 
 type TopBar struct {
 	DrawableBase
-	btnMenu                    *Button
-	btnFunc                    func(b *Button)
-	lblTitle, tmLbl            *Text
-	tmVar                      *SubjectBase
-	Stopwatch                  *Stopwatch
-	useSW, showSW, showTitle   bool
-	coverTitle, coverStopwatch float64
+	btnMenu                        *Button
+	btnFunc                        func(b *Button)
+	lblTitle, tmLbl                *Text
+	tmVar                          *SubjectBase
+	Stopwatch                      *Stopwatch
+	useSW, showSW, showTitle, show bool
+	coverTitle, coverStopwatch     float64
 }
 
 // Умею показать вверху строку с меткой текста с кнопкой выход из сцены(если nil) или переопределенной функцией(для вызова диалога, например) в параметре и секундомером нахождения на сцене
 func NewTopBar(title string, f func(b *Button)) *TopBar {
 	t := &TopBar{coverTitle: 0.25, coverStopwatch: 0.1}
+	t.show = true
+	t.showTitle = true
 	t.useSW = false
 	t.btnFunc = f
 	btnText := "Menu"
@@ -31,7 +33,6 @@ func NewTopBar(title string, f func(b *Button)) *TopBar {
 	t.lblTitle = NewText(title)
 	t.Add(t.lblTitle)
 	t.setTheme()
-	t.showTitle = true
 	return t
 }
 
@@ -103,6 +104,23 @@ func (t *TopBar) SetShowTitle(value bool) {
 	} else {
 		t.lblTitle.Visible(false)
 	}
+}
+
+func (t *TopBar) IsVisible() bool { return t.show }
+func (t *TopBar) Visible(value bool) {
+	t.show = value
+	if t.showTitle {
+		t.lblTitle.Visible(value)
+	}
+	if t.showSW {
+		t.tmLbl.Visible(value)
+	}
+	if !value {
+		t.btnMenu.Disable()
+	} else {
+		t.btnMenu.Enable()
+	}
+	t.btnMenu.Visible(value)
 }
 
 func (t *TopBar) Update(dt int) {
