@@ -94,18 +94,20 @@ func (d *BoardMem) SetupConclusion() {
 	d.layout.ResetContainerBase()
 	d.layout.SetDim(1, 1)
 	d.layout.FitToDim(true)
+	sb := eui.NewSnackBar("")
 	if d.Game().Win {
 		str = "Winner"
+		sb.Bg(colors.Blue)
 	} else if d.Game().GameOver {
 		str = "Game Over"
+		sb.Bg(colors.Red)
 	}
+	sb.SetText(str + " " + d.Game().String()).Show(3000)
 	btn := d.setupScoreBtn()
 	d.layout.Add(btn)
 	d.layout.Resize(d.GetRect().GetArr())
-	str = d.gamesData.String()
-	d.varMsg.SetValue(str)
+	d.varMsg.SetValue(d.gamesData.String())
 	d.varColor.SetValue([]color.Color{colors.Fuchsia, colors.Black})
-	sb := eui.NewSnackBar(d.Game().String()).Show(3000)
 	d.Add(sb)
 	log.Println("Setup Conclusion done", d.game.String())
 }

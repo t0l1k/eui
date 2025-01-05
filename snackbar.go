@@ -1,6 +1,7 @@
 package eui
 
 import (
+	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -20,6 +21,21 @@ func NewSnackBar(message string) *SnackBar {
 	s.msg.Fg(colors.Yellow)
 	s.Add(s.msg)
 	s.Resize([]int{})
+	return s
+}
+
+func (s *SnackBar) Bg(value color.Color) *SnackBar {
+	s.msg.Bg(value)
+	return s
+}
+
+func (s *SnackBar) Fg(value color.Color) *SnackBar {
+	s.msg.Fg(value)
+	return s
+}
+
+func (s *SnackBar) SetText(value string) *SnackBar {
+	s.msg.SetText(value)
 	return s
 }
 

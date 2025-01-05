@@ -39,7 +39,7 @@ func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSe
 	d.modes.SetValue(data[idx])
 	d.cSize = eui.NewComboBox(fmt.Sprintf("Размер поля %v", data[idx].(game.Dim)), data, idx, func(cb *eui.ComboBox) {
 		d.modes.SetValue(cb.Value())
-		str := fmt.Sprintf("Размер поля %v", d.modes)
+		str := fmt.Sprintf("Размер поля %v", cb.Value())
 		d.cSize.SetText(str)
 	})
 	d.Add(d.cSize)
