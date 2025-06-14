@@ -8,15 +8,15 @@ import (
 )
 
 type Cell struct {
-	eui.SubjectBase
+	*eui.Signal
 	grid    Grid
 	active  bool
 	formula Formula
 }
 
 func NewCell(grid Grid) *Cell {
-	c := &Cell{}
-	c.SetValue("")
+	c := &Cell{Signal: eui.NewSignal()}
+	c.Emit("")
 	c.grid = grid
 	c.active = false
 	c.formula = nil
@@ -28,7 +28,7 @@ func (c *Cell) IsContainValue() bool     { return !(c.Value() == "") }
 func (c *Cell) GetFormula() Formula      { return c.formula }
 func (c *Cell) IsContainFormula() bool   { return c.formula != nil }
 func (c *Cell) SetFormula(value Formula) { c.formula = value }
-func (c *Cell) RemoveFormula()           { c.formula = nil; c.SetValue("") }
+func (c *Cell) RemoveFormula()           { c.formula = nil; c.Emit("") }
 
 func (c *Cell) GetNum() int {
 	if c.IsContainValue() {
@@ -46,11 +46,11 @@ func (c *Cell) IsActive() bool { return c.active }
 func (c *Cell) SetActive()     { c.active = true }
 func (c *Cell) SetInActive()   { c.active = false }
 
-func (c *Cell) UpdateData(value any) {
-	switch value.(type) {
-	case string:
-		c.formula.Calc()
-	}
-}
+// func (c *Cell) UpdateData(value any) {
+// 	switch value.(type) {
+// 	case string:
+// 		c.formula.Calc()
+// 	}
+// }
 
 func (c *Cell) String() string { return fmt.Sprintf("%v", c.Value()) }

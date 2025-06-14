@@ -27,7 +27,7 @@ type BottomBar struct {
 	show                                            bool
 	fn                                              func(*eui.Button)
 	actAccept, actUndo, actDel, actNotes, actNumber bool
-	varSw, varDiff                                  *eui.SubjectBase
+	varSw, varDiff                                  *eui.Signal
 	board                                           *Board
 }
 
@@ -48,13 +48,13 @@ func (b *BottomBar) Setup(board *Board) {
 	b.layoutActs.Add(eui.NewText(board.dim.String()))
 	diffText := eui.NewText("")
 	b.layoutActs.Add(diffText)
-	b.varDiff = eui.NewSubject()
-	b.varDiff.Attach(diffText)
-	b.varDiff.SetValue(b.board.GetDiffStr())
+	b.varDiff = eui.NewSignal()
+	b.varDiff.ConnectAndFire(func(data any) { diffText.SetText(data.(string)) }, b.board.GetDiffStr())
+	// b.varDiff.Emit(b.board.GetDiffStr())
 	swStr := eui.NewText("")
-	b.varSw = eui.NewSubject()
-	b.varSw.Attach(swStr)
-	b.varSw.SetValue(b.board.sw.StringShort())
+	b.varSw = eui.NewSignal()
+	b.varSw.Connect(func(data any) { swStr.SetText(data.(string)) })
+	b.varSw.Emit(b.board.sw.StringShort())
 	b.layoutActs.Add(swStr)
 	b.actBtns = nil
 	if b.board.diff.String() == game.Manual.String() {
@@ -145,7 +145,7 @@ func (b *BottomBar) setBtnClrs() {
 }
 
 func (b *BottomBar) UpdateNrs(counts map[int]int) {
-	b.varDiff.SetValue(b.board.GetDiffStr())
+	b.varDiff.Emit(b.board.GetDiffStr())
 	size := b.board.dim.Size()
 	for k, v := range counts {
 		for _, btn := range b.layoutNums.GetContainer() {
@@ -177,7 +177,7 @@ func (b *BottomBar) Update(dt int) {
 	for _, v := range b.layoutNums.GetContainer() {
 		v.Update(dt)
 	}
-	b.varSw.SetValue(b.board.sw.StringShort())
+	b.varSw.Emit(b.board.sw.StringShort())
 }
 
 func (b *BottomBar) Draw(surface *ebiten.Image) {

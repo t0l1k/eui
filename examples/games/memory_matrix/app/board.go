@@ -17,13 +17,39 @@ type BoardMem struct {
 	gamesData        *mem.GamesData
 	showTimer        *eui.Timer
 	fn               func(*eui.Button)
-	varMsg, varColor *eui.SubjectBase
+	varMsg, varColor *eui.Signal
 }
 
 func NewBoardMem(fn func(*eui.Button)) *BoardMem {
 	d := &BoardMem{}
-	d.varMsg = eui.NewSubject()
-	d.varColor = eui.NewSubject()
+	d.varMsg = eui.NewSignal()
+	d.varColor = eui.NewSignal(func(a, b any) bool {
+		// Если оба nil — считаем равными
+		if a == nil && b == nil {
+			return true
+		}
+		// Если только один nil — не равны
+		if a == nil || b == nil {
+			return false
+		}
+		// Приведение к []color.Color
+		aArr, okA := a.([]color.Color)
+		bArr, okB := b.([]color.Color)
+		if !okA || !okB {
+			return false
+		}
+		if len(aArr) != len(bArr) {
+			return false
+		}
+		for i := range aArr {
+			aR, aG, aB, aA := aArr[i].RGBA()
+			bR, bG, bB, bA := bArr[i].RGBA()
+			if aR != bR || aG != bG || aB != bB || aA != bA {
+				return false
+			}
+		}
+		return true
+	})
 	d.game = mem.NewGame(mem.Level(1))
 	d.gamesData = mem.NewGamesData()
 	d.Visible(true)
@@ -44,8 +70,8 @@ func (d *BoardMem) SetupPreparation() {
 	d.layout.Add(btn)
 	d.layout.Resize(d.GetRect().GetArr())
 	str := d.gamesData.String()
-	d.varMsg.SetValue(str)
-	d.varColor.SetValue([]color.Color{colors.YellowGreen, colors.Black})
+	d.varMsg.Emit(str)
+	d.varColor.Emit([]color.Color{colors.YellowGreen, colors.Black})
 	log.Println("Setup Preparation done", d.game.String())
 }
 
@@ -66,8 +92,8 @@ func (d *BoardMem) SetupShow() {
 	}
 	d.layout.Resize(d.GetRect().GetArr())
 	str := d.gamesData.String()
-	d.varMsg.SetValue(str)
-	d.varColor.SetValue([]color.Color{colors.Red, colors.Black})
+	d.varMsg.Emit(str)
+	d.varColor.Emit([]color.Color{colors.Red, colors.Black})
 	log.Println("Setup Show Done", d.game.String())
 }
 
@@ -84,8 +110,8 @@ func (d *BoardMem) SetupRecolection() {
 	}
 	d.layout.Resize(d.GetRect().GetArr())
 	str := d.gamesData.String()
-	d.varMsg.SetValue(str)
-	d.varColor.SetValue([]color.Color{colors.Blue, colors.Yellow})
+	d.varMsg.Emit(str)
+	d.varColor.Emit([]color.Color{colors.Blue, colors.Yellow})
 	log.Println("Setup Recolection Done", d.game.String())
 }
 
@@ -106,8 +132,8 @@ func (d *BoardMem) SetupConclusion() {
 	btn := d.setupScoreBtn()
 	d.layout.Add(btn)
 	d.layout.Resize(d.GetRect().GetArr())
-	d.varMsg.SetValue(d.gamesData.String())
-	d.varColor.SetValue([]color.Color{colors.Fuchsia, colors.Black})
+	d.varMsg.Emit(d.gamesData.String())
+	d.varColor.Emit([]color.Color{colors.Fuchsia, colors.Black})
 	d.Add(sb)
 	log.Println("Setup Conclusion done", d.game.String())
 }

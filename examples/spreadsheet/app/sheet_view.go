@@ -25,9 +25,9 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 	sv.input = eui.NewInputBox2(func(ib *eui.InputBox2) {
 		value := ib.GetText()
 		if ok, res := sv.sheet.IsFormula(sv.activeCell, value); ok {
-			sv.activeCell.SetValue(res)
+			sv.activeCell.Emit(res)
 		} else {
-			sv.activeCell.SetValue(value)
+			sv.activeCell.Emit(value)
 		}
 		sv.laySheet.ImageReset()
 	})
@@ -77,7 +77,9 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 				cell.SetActive()
 				sv.activeCell = cell
 			})
-			cell.Attach(btn)
+			cell.Connect(func(data any) {
+				btn.SetText(data.(string))
+			})
 			sv.sheet.InitCell(grid, cell)
 			sv.laySheet.AddBgFg(btn, colors.Gray, colors.Yellow)
 		}

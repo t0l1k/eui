@@ -3,25 +3,19 @@
 package main
 
 import (
+	"strconv"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 )
 
-type Count struct{ eui.SubjectBase }
+type Count struct{ *eui.Signal }
 
-func NewCount() *Count {
-	c := &Count{}
-	c.SetValue(0)
-	return c
-}
-
-func (c *Count) Inc() {
-	c.SetValue(c.Value().(int) + 1)
-}
-
+func NewCount() *Count { return &Count{Signal: eui.NewSignal()} }
+func (c *Count) Inc()  { c.Emit(c.Value().(int) + 1) }
 func (c *Count) Dec() {
 	if c.Value().(int) > 0 {
-		c.SetValue(c.Value().(int) - 1)
+		c.Emit(c.Value().(int) - 1)
 	}
 }
 
@@ -38,10 +32,11 @@ func NewSceneCounter() *SceneCounter {
 	sb := eui.NewSnackBar("Test Counter!!!").Show(3000)
 	sc.Add(sb)
 
-	count := NewCount()                     // Подписчикам передать оповещение при изменении переменной
-	lblCount := eui.NewText(count.String()) // Текстовая метка
-	count.Attach(lblCount)                  // Подписка на уведомления от этой переменной
-	count.SetValue(count.Value())
+	lblCount := eui.NewText("") // Текстовая метка
+	count := NewCount()         // Подписчикам передать оповещение при изменении переменной
+	count.ConnectAndFire(func(data any) {
+		lblCount.SetText(strconv.Itoa(count.Value().(int)))
+	}, 0) // Подписка на уведомления от этой переменной
 	sc.lay1.Add(lblCount) // Добавить в контейнер метку
 
 	btnInc := eui.NewButton("+", func(b *eui.Button) {

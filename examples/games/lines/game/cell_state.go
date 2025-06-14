@@ -43,10 +43,10 @@ func NewCellData(state CellStateType, color BallColor, pos eui.PointInt) *CellDa
 	return &CellData{State: state, Color: color, Pos: pos}
 }
 
-type CellState struct{ eui.SubjectBase }
+type CellState struct{ *eui.Signal }
 
 func NewCellState(state CellStateType, color BallColor, pos eui.PointInt) *CellState {
-	c := &CellState{}
-	c.SetValue(NewCellData(state, color, pos))
+	c := &CellState{Signal: eui.NewSignal()}
+	c.Emit(NewCellData(state, color, pos))
 	return c
 }

@@ -14,11 +14,11 @@ const (
 
 // Умею оповестить подписчиков о смене состояния игры
 type gameState struct {
-	eui.SubjectBase
+	*eui.Signal
 }
 
 func newGameState() *gameState {
-	s := &gameState{}
-	s.SetValue(GameStart)
+	s := &gameState{Signal: eui.NewSignal()}
+	s.Emit(GameStart)
 	return s
 }

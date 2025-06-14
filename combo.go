@@ -11,7 +11,7 @@ type ComboBox struct {
 	DrawableBase
 	btnPlus, btnMinus *Button
 	lblValue, lblText *Text
-	valueVar          *SubjectBase
+	valueVar          *Signal
 	data              []interface{}
 	index             int
 	onChange          func(c *ComboBox)
@@ -34,12 +34,14 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func
 	c.lblValue = NewText(c.GetValueString())
 	c.lblValue.Bg(c.bg)
 	c.lblValue.Fg(c.fg)
-	c.valueVar = NewSubject()
-	c.valueVar.Attach(c.lblValue)
+	c.valueVar = NewSignal()
+	c.valueVar.Connect(func(data any) {
+		c.lblValue.SetText(data.(string))
+	})
 	c.btnPlus = NewButton("+", func(b *Button) {
 		if c.index < len(c.data)-1 {
 			c.index++
-			c.valueVar.SetValue(c.GetValueString())
+			c.valueVar.Emit(c.GetValueString())
 		}
 		if c.onChange != nil {
 			c.onChange(c)
@@ -48,7 +50,7 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func
 	c.btnMinus = NewButton("-", func(b *Button) {
 		if c.index > 0 {
 			c.index--
-			c.valueVar.SetValue(c.GetValueString())
+			c.valueVar.Emit(c.GetValueString())
 		}
 		if c.onChange != nil {
 			c.onChange(c)

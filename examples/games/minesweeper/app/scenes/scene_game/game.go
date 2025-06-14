@@ -18,7 +18,24 @@ func newGame(r, c, m int) *Game {
 	g.layout = eui.NewGridLayoutRightDown(float64(r), float64(c))
 	g.layout.SetCellMargin(1)
 	g.field = game.NewMinedField(r, c, m)
-	g.field.State.Attach(g)
+	g.field.State.Connect(func(data any) {
+		v := data.(string)
+		switch v {
+		case game.GameStart, game.GamePlay:
+			for _, cell := range g.layout.GetContainer() {
+				if cell.(*game.CellIcon).Btn.IsDisabled() {
+					cell.(*game.CellIcon).Btn.Enable()
+				}
+			}
+		case game.GameWin, game.GameOver:
+			g.timer.Stop()
+			for _, cell := range g.layout.GetContainer() {
+				if !cell.(*game.CellIcon).Btn.IsDisabled() {
+					cell.(*game.CellIcon).Btn.Disable()
+				}
+			}
+		}
+	})
 	g.timer = eui.NewStopwatch()
 	g.New()
 	return g
@@ -92,7 +109,7 @@ func (g *Game) Update(dt int) {
 	switch g.field.State.Value() {
 	case game.GameStart, game.GamePlay:
 		if !ebiten.IsFocused() && g.field.State.Value() == game.GamePlay {
-			g.field.State.SetValue(game.GamePause)
+			g.field.State.Emit(game.GamePause)
 			g.timer.Stop()
 			for _, cell := range g.layout.GetContainer() {
 				cell.(*game.CellIcon).Visible(false)
@@ -100,7 +117,7 @@ func (g *Game) Update(dt int) {
 		}
 	case game.GamePause:
 		if ebiten.IsFocused() {
-			g.field.State.SetValue(game.GamePlay)
+			g.field.State.Emit(game.GamePlay)
 			g.timer.Start()
 			for _, cell := range g.layout.GetContainer() {
 				cell.(*game.CellIcon).Visible(true)
@@ -112,26 +129,26 @@ func (g *Game) Update(dt int) {
 	}
 }
 
-func (g *Game) UpdateData(value interface{}) {
-	switch v := value.(type) {
-	case string:
-		switch v {
-		case game.GameStart, game.GamePlay:
-			for _, cell := range g.layout.GetContainer() {
-				if cell.(*game.CellIcon).Btn.IsDisabled() {
-					cell.(*game.CellIcon).Btn.Enable()
-				}
-			}
-		case game.GameWin, game.GameOver:
-			g.timer.Stop()
-			for _, cell := range g.layout.GetContainer() {
-				if !cell.(*game.CellIcon).Btn.IsDisabled() {
-					cell.(*game.CellIcon).Btn.Disable()
-				}
-			}
-		}
-	}
-}
+// func (g *Game) UpdateData(value interface{}) {
+// 	switch v := value.(type) {
+// 	case string:
+// 		switch v {
+// 		case game.GameStart, game.GamePlay:
+// 			for _, cell := range g.layout.GetContainer() {
+// 				if cell.(*game.CellIcon).Btn.IsDisabled() {
+// 					cell.(*game.CellIcon).Btn.Enable()
+// 				}
+// 			}
+// 		case game.GameWin, game.GameOver:
+// 			g.timer.Stop()
+// 			for _, cell := range g.layout.GetContainer() {
+// 				if !cell.(*game.CellIcon).Btn.IsDisabled() {
+// 					cell.(*game.CellIcon).Btn.Disable()
+// 				}
+// 			}
+// 		}
+// 	}
+// }
 
 func (g *Game) Draw(surface *ebiten.Image) {
 	for _, cell := range g.layout.GetContainer() {

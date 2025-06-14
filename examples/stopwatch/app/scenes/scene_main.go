@@ -22,7 +22,7 @@ type SceneStopwatch struct {
 	frame0, frame1 *eui.BoxLayout
 	list           *eui.ListView
 	swMain, swRing *eui.Stopwatch
-	var0, var1     *eui.SubjectBase
+	var0, var1     *eui.Signal
 	sBtns          []string
 	state          watchState
 	count          int
@@ -34,8 +34,8 @@ func NewSceneStopwatch() *SceneStopwatch {
 	s.swMain = eui.NewStopwatch()
 	s.swRing = eui.NewStopwatch()
 
-	s.var0 = eui.NewSubject()
-	s.var1 = eui.NewSubject()
+	s.var0 = eui.NewSignal()
+	s.var1 = eui.NewSignal()
 
 	s.topBar = eui.NewTopBar("Секундомер", nil)
 
@@ -43,13 +43,11 @@ func NewSceneStopwatch() *SceneStopwatch {
 	lblTimeMain := eui.NewText("Нажми старт")
 	lblTimeMain.OnlyOneFontSize(true)
 	s.frame0.Add(lblTimeMain)
-	s.var0.Attach(lblTimeMain)
-
+	s.var0.Connect(func(data any) { lblTimeMain.SetText(data.(string)) })
 	lblTimeSecond := eui.NewText("0.0")
 	lblTimeSecond.OnlyOneFontSize(true)
 	s.frame0.Add(lblTimeSecond)
-	s.var1.Attach(lblTimeSecond)
-
+	s.var1.Connect(func(data any) { lblTimeSecond.SetText(data.(string)) })
 	s.list = eui.NewListView()
 
 	s.frame1 = eui.NewHLayout()
@@ -117,8 +115,8 @@ func (s *SceneStopwatch) stopwatchAppLogic(b *eui.Button) {
 }
 
 func (s *SceneStopwatch) Update(dt int) {
-	s.var0.SetValue(s.swMain.String())
-	s.var1.SetValue(s.swRing.String())
+	s.var0.Emit(s.swMain.String())
+	s.var1.Emit(s.swRing.String())
 
 	if s.dirty {
 		switch s.state {

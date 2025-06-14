@@ -26,7 +26,7 @@ func (c *Cell) Pos() eui.PointInt {
 
 func (c *Cell) Reset() {
 	c.color = BallNoColor
-	c.State.SetValue(NewCellData(CellEmpty, BallNoColor, c.pos))
+	c.State.Emit(NewCellData(CellEmpty, BallNoColor, c.pos))
 }
 
 func (c *Cell) Color() BallColor {
@@ -47,7 +47,7 @@ func (c *Cell) IsFilledNext() bool {
 
 func (c *Cell) SetFilledNext(color BallColor) {
 	c.color = color
-	c.State.SetValue(NewCellData(CellFilledNext, color, c.pos))
+	c.State.Emit(NewCellData(CellFilledNext, color, c.pos))
 }
 
 func (c *Cell) IsFilled() bool {
@@ -55,7 +55,7 @@ func (c *Cell) IsFilled() bool {
 }
 
 func (c *Cell) SetFilled() {
-	c.State.SetValue(NewCellData(CellFilled, c.color, c.pos))
+	c.State.Emit(NewCellData(CellFilled, c.color, c.pos))
 }
 
 func (c *Cell) IsMarkedForMove() bool {
@@ -63,7 +63,7 @@ func (c *Cell) IsMarkedForMove() bool {
 }
 
 func (c *Cell) SetMarkedForMove() {
-	c.State.SetValue(NewCellData(CellMarkedForMove, c.color, c.pos))
+	c.State.Emit(NewCellData(CellMarkedForMove, c.color, c.pos))
 }
 
 func (c *Cell) IsFilledAfterMove() bool {
@@ -72,7 +72,7 @@ func (c *Cell) IsFilledAfterMove() bool {
 
 func (c *Cell) SetFilledAfterMove(color BallColor) {
 	c.SetColor(color)
-	c.State.SetValue(NewCellData(CellFilledAfterMove, c.color, c.pos))
+	c.State.Emit(NewCellData(CellFilledAfterMove, c.color, c.pos))
 }
 
 func (c *Cell) IsMarkedForDelete() bool {
@@ -80,7 +80,7 @@ func (c *Cell) IsMarkedForDelete() bool {
 }
 
 func (c *Cell) SetMarkedForDelete() {
-	c.State.SetValue(NewCellData(CellMarkedForDelete, c.color, c.pos))
+	c.State.Emit(NewCellData(CellMarkedForDelete, c.color, c.pos))
 }
 
 func (c *Cell) IsEmpty() bool {

@@ -43,12 +43,12 @@ func NewCellData(state string, pos eui.PointInt) *CellData {
 }
 
 type CellState struct {
-	eui.SubjectBase
+	*eui.Signal
 }
 
 func NewCellState(state string, pos eui.PointInt) *CellState {
-	c := &CellState{}
-	c.SetValue(NewCellData(state, pos))
+	c := &CellState{Signal: eui.NewSignal()}
+	c.Emit(NewCellData(state, pos))
 	return c
 }
 
@@ -74,13 +74,13 @@ func (c *Cell) IsMatch() bool      { return c.match }
 
 func (c *Cell) SetMatch() {
 	c.match = true
-	c.state.SetValue(NewCellState(CellStateMatch, c.pos))
+	c.state.Emit(NewCellState(CellStateMatch, c.pos))
 }
 
 func (c *Cell) Reset() {
 	c.match = false
 	c.open = false
-	c.state.SetValue(NewCellState(CellStateClosed, c.pos))
+	c.state.Emit(NewCellState(CellStateClosed, c.pos))
 }
 
 func (c *Cell) Open() {
@@ -89,9 +89,9 @@ func (c *Cell) Open() {
 	}
 	c.open = !c.open
 	if c.open {
-		c.state.SetValue(NewCellState(CellStateOpen, c.pos))
+		c.state.Emit(NewCellState(CellStateOpen, c.pos))
 	} else {
-		c.state.SetValue(NewCellState(CellStateClosed, c.pos))
+		c.state.Emit(NewCellState(CellStateClosed, c.pos))
 	}
 }
 
@@ -104,14 +104,9 @@ func (c *Cell) String() (result string) {
 	return result
 }
 
-type FieldState struct {
-	eui.SubjectBase
-}
+type FieldState struct{ *eui.Signal }
 
-func NewFieldState() *FieldState {
-	c := &FieldState{}
-	return c
-}
+func NewFieldState() *FieldState { return &FieldState{Signal: eui.NewSignal()} }
 
 type Field struct {
 	State        *FieldState
@@ -144,7 +139,7 @@ func (f *Field) NewGame() {
 		}
 	}
 	f.shuffle()
-	f.State.SetValue(GameStart)
+	f.State.Emit(GameStart)
 	log.Println("Set Game start")
 }
 
@@ -154,7 +149,7 @@ func (f *Field) ResetGame() {
 	for _, v := range f.field {
 		v.Reset()
 	}
-	f.State.SetValue(GameStart)
+	f.State.Emit(GameStart)
 	log.Println("Set Game start")
 }
 
@@ -224,7 +219,7 @@ func (f *Field) IsWin() bool {
 			return false
 		}
 	}
-	f.State.SetValue(GameWin)
+	f.State.Emit(GameWin)
 	log.Println("Set game win!")
 	return true
 }
@@ -278,29 +273,10 @@ func (b *CellIcon) Visible(value bool) {
 	}
 }
 
-func (c *CellIcon) UpdateData(value interface{}) {
-	switch v := value.(type) {
-	case *CellState:
-		switch v.Value().(*CellData).state {
-		case CellStateClosed:
-			c.btn.SetText(CellClosed)
-		case CellStateOpen:
-			cell := c.field.GetCell(v.Value().(*CellData).pos.X, v.Value().(*CellData).pos.Y)
-			c.btn.SetText(cell.String())
-		case CellStateMatch:
-			cell := c.field.GetCell(v.Value().(*CellData).pos.X, v.Value().(*CellData).pos.Y)
-			c.btn.SetText(cell.String())
-			c.btn.Bg(colors.GreenYellow)
-			c.btn.Fg(colors.Blue)
-			c.btn.Disable()
-		}
-	}
-}
-
 type Board struct {
 	eui.DrawableBase
 	field     *Field
-	varArea   *eui.SubjectBase
+	varArea   *eui.Signal
 	layout    *eui.GridLayoutRightDown
 	stopwatch *eui.Stopwatch
 	bottomLbl *eui.Text
@@ -308,15 +284,35 @@ type Board struct {
 
 func NewBoard() *Board {
 	b := &Board{}
-	b.varArea = eui.NewSubject()
+	b.varArea = eui.NewSignal()
 	b.field = NewField()
-	b.field.State.Attach(b)
+	b.field.State.Connect(func(value any) {
+		v := value.(string)
+		switch v {
+		case GameStart:
+		case GamePlay:
+			if !b.stopwatch.IsRun() {
+				b.stopwatch.Start()
+			}
+		case GamePause:
+			b.stopwatch.Stop()
+			b.Visible(false)
+		case GameWin:
+			b.stopwatch.Stop()
+			b.Visible(false)
+			str := fmt.Sprintf("Время:[%v] Нажатий: %v Размер поля: %v", b.stopwatch, b.field.ClickCount, b.field.dim.String())
+			b.varArea.Emit(str)
+		}
+		log.Println("board got:", value)
+	})
 	r, c := b.field.Dim()
 	b.layout = eui.NewGridLayoutRightDown(float64(r), float64(c))
 	b.stopwatch = eui.NewStopwatch()
 	b.bottomLbl = eui.NewText("")
 	b.Add(b.bottomLbl)
-	b.varArea.Attach(b.bottomLbl)
+	b.varArea.Connect(func(data any) {
+		b.bottomLbl.SetText(data.(string))
+	})
 	b.NewGame()
 	return b
 }
@@ -329,7 +325,24 @@ func (b *Board) NewGame() {
 		btn := NewCellIcon(b.field, b.gameLogic)
 		x, y := b.field.pos(i)
 		cell := b.field.GetCell(x, y)
-		cell.state.Attach(btn)
+		cell.state.Connect(func(data any) {
+			v := data.(*CellState)
+			c := btn
+			switch v.Value().(*CellData).state {
+			case CellStateClosed:
+				c.btn.SetText(CellClosed)
+			case CellStateOpen:
+				cell := c.field.GetCell(v.Value().(*CellData).pos.X, v.Value().(*CellData).pos.Y)
+				c.btn.SetText(cell.String())
+			case CellStateMatch:
+				cell := c.field.GetCell(v.Value().(*CellData).pos.X, v.Value().(*CellData).pos.Y)
+				c.btn.SetText(cell.String())
+				c.btn.Bg(colors.GreenYellow)
+				c.btn.Fg(colors.Blue)
+				c.btn.Disable()
+			}
+
+		})
 		b.layout.Add(btn)
 	}
 	r, c := b.field.Dim()
@@ -360,7 +373,7 @@ func (b *Board) gameLogic(c *eui.Button) {
 			if c.IsMouseDownLeft() {
 				switch b.field.State.Value() {
 				case GameStart:
-					b.field.State.SetValue(GamePlay)
+					b.field.State.Emit(GamePlay)
 					log.Println("Set game play")
 					b.stopwatch.Start()
 					b.field.Open(x, y)
@@ -371,28 +384,6 @@ func (b *Board) gameLogic(c *eui.Button) {
 			}
 		}
 	}
-}
-
-func (b *Board) UpdateData(value interface{}) {
-	switch v := value.(type) {
-	case string:
-		switch v {
-		case GameStart:
-		case GamePlay:
-			if !b.stopwatch.IsRun() {
-				b.stopwatch.Start()
-			}
-		case GamePause:
-			b.stopwatch.Stop()
-			b.Visible(false)
-		case GameWin:
-			b.stopwatch.Stop()
-			b.Visible(false)
-			str := fmt.Sprintf("Время:[%v] Нажатий: %v Размер поля: %v", b.stopwatch, b.field.ClickCount, b.field.dim.String())
-			b.varArea.SetValue(str)
-		}
-	}
-	log.Println("board got:", value)
 }
 
 func (b *Board) Visible(value bool) {
@@ -422,7 +413,7 @@ func (b *Board) Update(dt int) {
 		v.Update(dt)
 	}
 	str := fmt.Sprintf("Время:[%v] Нажатий: %v Размер поля: %v", b.stopwatch, b.field.ClickCount, b.field.dim.String())
-	b.varArea.SetValue(str)
+	b.varArea.Emit(str)
 }
 
 func (b *Board) Draw(surface *ebiten.Image) {
@@ -490,26 +481,6 @@ func (d *Dialog) Visible(value bool) {
 	}
 }
 
-func (b *Dialog) UpdateData(value interface{}) {
-	switch v := value.(type) {
-	case string:
-		switch v {
-		case GamePlay:
-			if b.IsVisible() {
-				b.board.field.State.SetValue(GamePause)
-				log.Println("Set Game Pause")
-			}
-		case GamePause:
-			b.title.SetText("Пауза!")
-			b.Visible(true)
-		case GameWin:
-			b.Visible(true)
-			b.title.SetText("Победа!")
-		}
-	}
-	log.Println("dialog got:", value)
-}
-
 func (t *Dialog) SetTitle(title string) {
 	t.title.SetText(title)
 }
@@ -548,7 +519,7 @@ func NewSceneGame() *SceneGame {
 		s.dialog.Visible(true)
 		s.board.Visible(false)
 		if s.board.field.State.Value() == GamePlay {
-			s.board.field.State.SetValue(GamePause)
+			s.board.field.State.Emit(GamePause)
 		}
 		log.Println("Set Game to pause")
 	})
@@ -568,7 +539,7 @@ func NewSceneGame() *SceneGame {
 		}
 		if btn.GetText() == bCont {
 			if s.board.field.State.Value() == GamePause {
-				s.board.field.State.SetValue(GamePlay)
+				s.board.field.State.Emit(GamePlay)
 			}
 			s.board.Visible(true)
 			log.Println("Set Game continue play")
@@ -579,8 +550,29 @@ func NewSceneGame() *SceneGame {
 	s.Add(s.dialog)
 
 	s.board = NewBoard()
-	s.board.varArea.Attach(s.dialog.message)
-	s.board.field.State.Attach(s.dialog)
+	s.board.varArea.Connect(func(data any) {
+		s.dialog.message.SetText(data.(string))
+	})
+	s.board.field.State.Connect(func(value any) {
+		b := s.dialog
+		v := value.(string)
+		switch v {
+		case GamePlay:
+			if b.IsVisible() {
+				b.board.field.State.Emit(GamePause)
+				log.Println("Set Game Pause")
+			}
+		case GamePause:
+			b.title.SetText("Пауза!")
+			b.Visible(true)
+		case GameWin:
+			b.Visible(true)
+			b.title.SetText("Победа!")
+		}
+
+		log.Println("dialog got:", value)
+
+	})
 	s.Add(s.board)
 
 	s.Resize()

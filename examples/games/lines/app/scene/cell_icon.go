@@ -94,44 +94,6 @@ func (c *CellIcon) Update(dt int) {
 	}
 }
 
-func (c *CellIcon) UpdateData(value interface{}) {
-	switch v := value.(type) {
-	case *game.CellData:
-		switch v.State {
-		case game.CellEmpty:
-			c.anim = BallAnimNo
-			c.animStatus = BallHidden
-			c.fg = v.Color.Color()
-			c.updateIcon(BallHidden)
-		case game.CellFilledNext:
-			c.anim = BallAnimFilledNext
-			c.animStatus = BallHidden
-			c.fg = v.Color.Color()
-			c.updateIcon(BallSmall)
-		case game.CellFilled:
-			c.anim = BallAnimFilled
-			c.animStatus = BallMedium
-			c.fg = v.Color.Color()
-			c.updateIcon(BallNormal)
-		case game.CellMarkedForMove:
-			c.anim = BallAnimJump
-			c.animStatus = BallJumpCenter
-			c.fg = v.Color.Color()
-			c.updateIcon(BallNormal)
-		case game.CellFilledAfterMove:
-			c.anim = BallAnimFilledAfterMove
-			c.animStatus = BallJumpCenter
-			c.fg = v.Color.Color()
-			c.updateIcon(BallNormal)
-		case game.CellMarkedForDelete:
-			c.anim = BallAnimDelete
-			c.animStatus = BallBig
-			c.fg = v.Color.Color()
-			c.updateIcon(BallBig)
-		}
-	}
-}
-
 func (c *CellIcon) updateIcon(ballStatus BallStatusType) {
 	bg := game.BallNoColor.Color()
 	rect := c.GetRect().GetArr()

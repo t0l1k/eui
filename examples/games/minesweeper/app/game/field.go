@@ -27,7 +27,7 @@ func NewMinedField(r, c, m int) *MinedField {
 }
 
 func (mf *MinedField) New() {
-	mf.State.SetValue(GameStart)
+	mf.State.Emit(GameStart)
 	mf.resetMarkedMines()
 	if mf.field != nil {
 		mf.field = mf.field[:0]
@@ -42,12 +42,12 @@ func (mf *MinedField) New() {
 }
 
 func (mf *MinedField) Reset() {
-	mf.State.SetValue(GameStart)
+	mf.State.Emit(GameStart)
 	mf.resetMarkedMines()
 	for _, cell := range mf.field {
 		cell.reset()
 	}
-	mf.State.SetValue(GamePlay)
+	mf.State.Emit(GamePlay)
 	mf.Open(mf.firstMove.X, mf.firstMove.Y)
 }
 
@@ -108,7 +108,7 @@ func (mf *MinedField) Shuffle(fX, fY int) {
 			mf.field[idx].count = count
 		}
 	}
-	mf.State.SetValue(GamePlay)
+	mf.State.Emit(GamePlay)
 }
 
 func (mf *MinedField) Open(x, y int) {
@@ -138,7 +138,7 @@ func (mf *MinedField) Open(x, y int) {
 
 func (mf *MinedField) Winned() bool {
 	if mf.totalOpenCells+mf.totalMines == mf.row*mf.column {
-		mf.State.SetValue(GameWin)
+		mf.State.Emit(GameWin)
 		mf.resetMarkedMines()
 		for _, cell := range mf.field {
 			if cell.mined {
@@ -151,7 +151,7 @@ func (mf *MinedField) Winned() bool {
 }
 
 func (mf *MinedField) GameOver() {
-	mf.State.SetValue(GameOver)
+	mf.State.Emit(GameOver)
 	mf.resetMarkedMines()
 	for _, cell := range mf.field {
 		if cell.mined {
@@ -238,7 +238,7 @@ func (mf *MinedField) RestoreGame() {
 		cell.State.SetValue(newCellData(mf.saved[idx], cell.String(), cell.pos))
 	}
 	if mf.State.Value() == GameWin || mf.State.Value() == GameOver {
-		mf.State.SetValue(GamePlay)
+		mf.State.Emit(GamePlay)
 	}
 }
 

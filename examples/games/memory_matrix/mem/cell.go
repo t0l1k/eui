@@ -8,13 +8,13 @@ const (
 )
 
 type Cell struct {
-	eui.SubjectBase
+	*eui.Signal
 	readonly, marked bool
 }
 
 func NewCell() *Cell {
-	c := &Cell{}
-	c.SetValue(CellEmpty)
+	c := &Cell{Signal: eui.NewSignal()}
+	c.Emit(CellEmpty)
 	return c
 }
 
@@ -23,7 +23,7 @@ func (c *Cell) IsReadOnly() bool { return c.readonly }
 func (c *Cell) SetReadOnly()     { c.readonly = true }
 func (c *Cell) IsMarked() bool   { return c.marked }
 func (c *Cell) SetMarked()       { c.marked = true }
-func (c *Cell) Move()            { c.SetValue(CellFilled) }
+func (c *Cell) Move()            { c.Emit(CellFilled) }
 func (c *Cell) String() string {
 	if c.IsEmpty() {
 		return CellEmpty

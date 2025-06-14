@@ -3,6 +3,7 @@ package scene
 import (
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
@@ -16,7 +17,7 @@ type Board struct {
 	field                  *game.Field
 	showWay                bool
 	showWayDt              int
-	varScore, varScoreBest *eui.SubjectBase
+	varScore, varScoreBest *eui.Signal
 	bestScore              int
 }
 
@@ -28,12 +29,15 @@ func NewBoard(dim int) *Board {
 	b.Add(b.table)
 	r, c := b.field.Dim()
 	b.gameLayout = eui.NewGridLayoutRightDown(float64(r), float64(c))
-	b.varScore = eui.NewSubject()
-	b.varScore.Attach(b.table.leftLbl)
+	b.varScore = eui.NewSignal()
+	b.varScore.Connect(func(data any) {
+		b.table.leftLbl.SetText(strconv.Itoa(data.(int)))
+	})
 	b.bestScore = 10
-	b.varScoreBest = eui.NewSubject()
-	b.varScoreBest.Attach(b.table.rightLbl)
-	b.varScoreBest.SetValue(b.bestScore)
+	b.varScoreBest = eui.NewSignal()
+	b.varScoreBest.ConnectAndFire(func(data any) {
+		b.table.rightLbl.SetText(strconv.Itoa(data.(int)))
+	}, b.bestScore)
 	return b
 }
 
@@ -43,7 +47,43 @@ func (b *Board) NewGame(dim int) {
 	for _, cell := range b.field.GetField() {
 		cell.Reset()
 		btn := NewCellIcon(cell, b.gameLogic)
-		cell.State.Attach(btn)
+		cell.State.Connect(func(data any) {
+			v := data.(*game.CellData)
+			c := btn
+			switch v.State {
+			case game.CellEmpty:
+				c.anim = BallAnimNo
+				c.animStatus = BallHidden
+				c.fg = v.Color.Color()
+				c.updateIcon(BallHidden)
+			case game.CellFilledNext:
+				c.anim = BallAnimFilledNext
+				c.animStatus = BallHidden
+				c.fg = v.Color.Color()
+				c.updateIcon(BallSmall)
+			case game.CellFilled:
+				c.anim = BallAnimFilled
+				c.animStatus = BallMedium
+				c.fg = v.Color.Color()
+				c.updateIcon(BallNormal)
+			case game.CellMarkedForMove:
+				c.anim = BallAnimJump
+				c.animStatus = BallJumpCenter
+				c.fg = v.Color.Color()
+				c.updateIcon(BallNormal)
+			case game.CellFilledAfterMove:
+				c.anim = BallAnimFilledAfterMove
+				c.animStatus = BallJumpCenter
+				c.fg = v.Color.Color()
+				c.updateIcon(BallNormal)
+			case game.CellMarkedForDelete:
+				c.anim = BallAnimDelete
+				c.animStatus = BallBig
+				c.fg = v.Color.Color()
+				c.updateIcon(BallBig)
+			}
+
+		})
 		b.gameLayout.Add(btn)
 	}
 	r, c := b.field.Dim()
@@ -91,9 +131,9 @@ func (b *Board) setWayCells(col game.BallColor, way []int) {
 
 func (b *Board) Update(dt int) {
 	if b.field.GetScore() > b.varScoreBest.Value().(int) {
-		b.varScoreBest.SetValue(b.field.GetScore())
+		b.varScoreBest.Emit(b.field.GetScore())
 	}
-	b.varScore.SetValue(b.field.GetScore())
+	b.varScore.Emit(b.field.GetScore())
 	if b.showWay {
 		if b.showWayDt > 0 {
 			b.showWayDt -= dt

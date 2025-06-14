@@ -43,7 +43,7 @@ func (b *BoardSol15) Setup(newDeck bool) {
 		for p := 0; p < 4; p++ {
 			cell := b.game.Column(sols.Column(i))[p]
 			cardIcon := NewCardIcon(cell, b.fn)
-			cell.Attach(cardIcon)
+			cell.Connect(cardIcon.UpdateData)
 			b.layout.Add(cardIcon)
 		}
 		if (i+1)%3 == 0 && (i > 0 && i < 14) {

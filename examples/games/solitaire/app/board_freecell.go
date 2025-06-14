@@ -56,7 +56,7 @@ func (b *BoardFreecell) Setup(resetDeck bool) {
 		cell := b.game.Column(colName)[0]
 		if cell.IsEmpty() {
 			cardIcon := NewCardIcon(cell, b.fn)
-			cell.Attach(cardIcon)
+			cell.Connect(cardIcon.UpdateData)
 			b.layoutFC.Add(cardIcon)
 			idx++
 		}
@@ -64,7 +64,7 @@ func (b *BoardFreecell) Setup(resetDeck bool) {
 	for _, colName := range fc.ColHouses {
 		cell := b.game.Column(colName)[0]
 		cardIcon := NewCardIcon(cell, b.fn)
-		cell.Attach(cardIcon)
+		cell.Connect(cardIcon.UpdateData)
 		b.layoutHome.Add(cardIcon)
 		idx++
 	}
@@ -73,7 +73,7 @@ func (b *BoardFreecell) Setup(resetDeck bool) {
 		cells := b.game.Column(colName)
 		for _, cell := range cells {
 			cardIcon := NewCardIcon(cell, b.fn)
-			cell.Attach(cardIcon)
+			cell.Connect(cardIcon.UpdateData)
 			b.layoutCols[i].Add(cardIcon)
 			idx++
 		}

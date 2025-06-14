@@ -21,15 +21,15 @@ type BottomBar struct {
 	layout          *eui.BoxLayout
 	fn              func(*eui.Button)
 	board           Sols
-	varSw, varMoves *eui.SubjectBase
+	varSw, varMoves *eui.Signal
 }
 
 func NewBottomBar(fn func(*eui.Button)) *BottomBar {
 	b := &BottomBar{}
 	b.layout = eui.NewHLayout()
 	b.fn = fn
-	b.varSw = eui.NewSubject()
-	b.varMoves = eui.NewSubject()
+	b.varSw = eui.NewSignal()
+	b.varMoves = eui.NewSignal()
 	b.Visible(true)
 	return b
 }
@@ -41,16 +41,16 @@ func (b *BottomBar) Setup(board Sols) {
 		b.layout.Add(eui.NewButton(str, b.fn))
 	}
 	movesText := eui.NewText("Ходов:0")
-	b.varMoves.Attach(movesText)
+	b.varMoves.Connect(func(data any) { movesText.SetText(data.(string)) })
 	b.layout.Add(movesText)
 	swText := eui.NewText("")
-	b.varSw.Attach(swText)
+	b.varSw.Connect(func(data any) { swText.SetText(data.(string)) })
 	b.layout.Add(swText)
 }
 
 func (s *BottomBar) UpdateMoveCount() bool {
 	moves, str := s.board.AvailableMoves()
-	s.varMoves.SetValue(str)
+	s.varMoves.Emit(str)
 	return moves == 0
 }
 
@@ -61,7 +61,7 @@ func (b *BottomBar) Update(dt int) {
 	for _, v := range b.layout.GetContainer() {
 		v.Update(dt)
 	}
-	b.varSw.SetValue(b.board.Stopwatch().StringShort())
+	b.varSw.Emit(b.board.Stopwatch().StringShort())
 }
 
 func (b *BottomBar) Draw(surface *ebiten.Image) {

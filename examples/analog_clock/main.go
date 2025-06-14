@@ -228,7 +228,7 @@ type SceneAnalogClock struct {
 	topBar   *eui.TopBar
 	clock    *AnalogClock
 	lblTm    *eui.Text
-	tmVar    *eui.SubjectBase
+	tmVar    *eui.Signal
 	checkBox *eui.Checkbox
 }
 
@@ -240,8 +240,10 @@ func NewSceneAnalogClock() *SceneAnalogClock {
 	s.Add(s.clock)
 	s.lblTm = eui.NewText("")
 	s.Add(s.lblTm)
-	s.tmVar = eui.NewSubject()
-	s.tmVar.Attach(s.lblTm)
+	s.tmVar = eui.NewSignal()
+	s.tmVar.Connect(func(data any) {
+		s.lblTm.SetText(data.(string))
+	})
 	conf := eui.GetUi().GetSettings()
 	s.checkBox = eui.NewCheckbox("MSecond View?", func(c *eui.Checkbox) {
 		s.clock.MsHand.ToggleVisible()
@@ -269,7 +271,7 @@ func (s *SceneAnalogClock) setupTheme() {
 func (s *SceneAnalogClock) Update(dt int) {
 	dtFormat := "2006-01-02 15:04:05"
 	tm := time.Now().Format(dtFormat)
-	s.tmVar.SetValue(tm)
+	s.tmVar.Emit(tm)
 	s.SceneBase.Update(dt)
 }
 

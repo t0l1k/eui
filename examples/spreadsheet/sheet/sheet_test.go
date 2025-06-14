@@ -25,7 +25,7 @@ func TestInitAddUpdateCells(t *testing.T) {
 			t.Errorf("got %v want %v", got, want)
 		}
 
-		sheet.Cell(GridParse(indexs[3])).SetValue(got)
+		sheet.Cell(GridParse(indexs[3])).Emit(got)
 		got = sheet.Cell(GridParse(indexs[3])).Value().(string)
 		if got != want {
 			t.Errorf("got %v want %v", got, want)
@@ -33,7 +33,7 @@ func TestInitAddUpdateCells(t *testing.T) {
 	})
 
 	t.Run("Test New Value Updated And Update Formula", func(t *testing.T) {
-		sheet.Cell(GridParse(indexs[0])).SetValue("10")
+		sheet.Cell(GridParse(indexs[0])).Emit("10")
 		got := sheet.Cell(GridParse(indexs[3])).GetValue()
 		want := "15"
 		if got != want {

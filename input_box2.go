@@ -13,7 +13,7 @@ import (
 type InputBox2 struct {
 	DrawableBase
 	lbl                   *Text
-	textVar               *SubjectBase
+	textVar               *Signal
 	hasFocus, alwaysFocus bool
 	onReturn              func(*InputBox2)
 	onlyDigits            bool
@@ -24,10 +24,10 @@ type InputBox2 struct {
 func NewInputBox2(onReturn func(*InputBox2)) *InputBox2 {
 	i := &InputBox2{}
 	i.onReturn = onReturn
-	i.textVar = NewSubject()
+	i.textVar = NewSignal()
 	i.lbl = NewText("")
-	i.textVar.Attach(i.lbl)
-	i.textVar.SetValue("")
+	i.textVar.Connect(func(data any) { i.lbl.SetText(data.(string)) })
+	i.textVar.Emit("")
 	i.Add(i.lbl)
 	theme := GetUi().theme
 	i.bg = theme.Get(InputBoxBg)
@@ -45,8 +45,8 @@ func NewDigitInputBox2(txt string, ln int, onReturn func(*InputBox2)) *InputBox2
 }
 
 func (i *InputBox2) GetText() string      { return i.textVar.Value().(string) }
-func (i *InputBox2) Reset()               { i.textVar.Reset() }
-func (i *InputBox2) SetText(value string) { i.textVar.SetValue(value) }
+func (i *InputBox2) Reset()               { i.textVar.Emit("") }
+func (i *InputBox2) SetText(value string) { i.textVar.Emit(value) }
 
 func (i *InputBox2) IsFocused() bool  { return i.hasFocus }
 func (i *InputBox2) SetFocus()        { i.hasFocus = true }
@@ -86,13 +86,13 @@ func (i *InputBox2) Update(dt int) {
 	if len(runes) > 0 {
 		txt := i.textVar.Value().(string)
 		txt += string(runes)
-		i.textVar.SetValue(txt)
+		i.textVar.Emit(txt)
 	}
 	if i.checkRepeat(ebiten.KeyBackspace) {
 		if len(i.textVar.Value().(string)) > 0 {
 			txt := i.textVar.Value().(string)
 			txt = txt[:len(txt)-1]
-			i.textVar.SetValue(txt)
+			i.textVar.Emit(txt)
 		}
 	}
 	if i.onlyDigits {

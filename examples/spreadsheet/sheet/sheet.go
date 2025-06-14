@@ -15,9 +15,9 @@ func (s Sheet) AddValue(index Grid, value string) {
 	if !cell.IsContainValue() {
 		isFormula, newValue := s.IsFormula(cell, value)
 		if isFormula {
-			s[index].SetValue(newValue)
+			s[index].Emit(newValue)
 		} else {
-			s[index].SetValue(value)
+			s[index].Emit(value)
 		}
 	}
 }

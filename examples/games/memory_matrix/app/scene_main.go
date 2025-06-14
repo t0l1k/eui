@@ -1,6 +1,8 @@
 package app
 
 import (
+	"image/color"
+
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/games/memory_matrix/mem"
@@ -51,8 +53,12 @@ func NewSceneMain() *SceneMain {
 		}
 	})
 	s.Add(s.board)
-	s.board.varMsg.Attach(s.lblStatus)
-	s.board.varColor.Attach(s.lblStatus)
+	s.board.varMsg.Connect(func(data any) { s.lblStatus.SetText(data.(string)) })
+	s.board.varColor.Connect(func(data any) {
+		arr := data.([]color.Color)
+		s.lblStatus.Bg(arr[0])
+		s.lblStatus.Fg(arr[1])
+	})
 	s.lblStatus.SetText(s.board.Game().String())
 	s.Resize()
 	return s

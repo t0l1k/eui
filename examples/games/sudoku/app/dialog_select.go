@@ -16,7 +16,7 @@ type DialogSelect struct {
 	history    *eui.ListView
 	cSize      *eui.ComboBox
 	btnsDiff   []*DiffButton
-	modes      *eui.SubjectBase
+	modes      *eui.Signal
 	show       bool
 	gamesData  *game.GamesData
 	margin     int
@@ -34,11 +34,25 @@ func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSe
 		data = append(data, dim)
 	}
 	idx := 0
-	d.modes = eui.NewSubject()
-	d.modes.Attach(d)
-	d.modes.SetValue(data[idx])
+	d.modes = eui.NewSignal()
+	d.modes.Connect(func(data any) {
+		value := data.(game.Dim)
+		for dim, diffs := range *d.gamesData {
+			for diff := range diffs {
+				if value.Eq(dim) {
+					for _, v := range d.btnsDiff {
+						if v.diff.Eq(diff) {
+							res := d.gamesData.GetLastBest(dim, diff)
+							v.SetScore(res)
+						}
+					}
+				}
+			}
+		}
+	})
+	d.modes.Emit(data[idx])
 	d.cSize = eui.NewComboBox(fmt.Sprintf("Размер поля %v", data[idx].(game.Dim)), data, idx, func(cb *eui.ComboBox) {
-		d.modes.SetValue(cb.Value())
+		d.modes.Emit(cb.Value())
 		str := fmt.Sprintf("Размер поля %v", cb.Value())
 		d.cSize.SetText(str)
 	})
@@ -46,7 +60,9 @@ func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSe
 	for i := 0; i < 5; i++ {
 		dim := d.modes.Value().(game.Dim)
 		btn := NewDiffButton(dim, game.NewDiff(game.Difficult(i)), f)
-		d.modes.Attach(btn)
+		d.modes.Connect(func(data any) {
+			btn.dim = data.(game.Dim)
+		})
 		d.btnsDiff = append(d.btnsDiff, btn)
 		d.Add(btn)
 	}
