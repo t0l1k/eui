@@ -2,6 +2,7 @@ package eui
 
 import (
 	"strconv"
+	"unicode"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui/colors"
@@ -83,7 +84,7 @@ func (inp *InputBox) UpdateInput(value interface{}) {
 					inp.keyboardState = KeyEscape
 				} else {
 					inp.keyboardState = KeyPressed
-					inp.parseInput(v)
+					inp.parseInput(vl.GetRunes())
 				}
 			}
 			if len(vl.keys) == 0 {
@@ -93,39 +94,20 @@ func (inp *InputBox) UpdateInput(value interface{}) {
 	}
 }
 
-func (inp *InputBox) parseInput(key ebiten.Key) {
+func (inp *InputBox) parseInput(chars []rune) {
 	if len(inp._text) >= inp.size {
 		return
 	}
-	switch key {
-	case ebiten.Key0:
-		inp._text += "0"
-	case ebiten.Key1:
-		inp._text += "1"
-	case ebiten.Key2:
-		inp._text += "2"
-	case ebiten.Key3:
-		inp._text += "3"
-	case ebiten.Key4:
-		inp._text += "4"
-	case ebiten.Key5:
-		inp._text += "5"
-	case ebiten.Key6:
-		inp._text += "6"
-	case ebiten.Key7:
-		inp._text += "7"
-	case ebiten.Key8:
-		inp._text += "8"
-	case ebiten.Key9:
-		inp._text += "9"
-	case ebiten.KeyPeriod:
-		inp._text += "."
-	default:
-		if inp.onlyDigits {
+	for _, v := range chars {
+		if unicode.IsDigit(v) || v == '.' {
+			continue
+		} else if inp.onlyDigits {
 			inp.btn.Bg(colors.Red)
+			break
 		}
-		inp._text += ebiten.KeyName(key)
 	}
+	value := string(chars)
+	inp._text += value
 	inp.btn.SetText(inp.setPrompt())
 }
 

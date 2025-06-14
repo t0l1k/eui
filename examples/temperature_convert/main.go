@@ -21,10 +21,10 @@ type SceneTemp struct {
 }
 
 func NewSceneTemp() *SceneTemp {
-	var a, c *eui.InputBox2
+	var a, c *eui.InputBox
 	s := &SceneTemp{}
 	s.layout = eui.NewHLayout()
-	a = eui.NewDigitInputBox2("01234", 5, func(ib *eui.InputBox2) {
+	a = eui.NewDigitInputBox("01234", 5, func(ib *eui.InputBox) {
 		if digit, err := ib.GetDigit(); err == nil {
 			n := GetFahrenheitFromCelsius(digit)
 			c.SetText(fmt.Sprintf("%.2f", n))
@@ -34,7 +34,7 @@ func NewSceneTemp() *SceneTemp {
 	s.layout.Add(a)
 	b := eui.NewText("Celsius =")
 	s.layout.Add(b)
-	c = eui.NewDigitInputBox2("43210", 5, func(ib *eui.InputBox2) {
+	c = eui.NewDigitInputBox("43210", 5, func(ib *eui.InputBox) {
 		if digit, err := ib.GetDigit(); err == nil {
 			n := GetCelsiusFromFahrenheit(digit)
 			a.SetText(fmt.Sprintf("%.2f", n))

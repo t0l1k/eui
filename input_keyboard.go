@@ -5,9 +5,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
-type KeyboardData struct{ keys []ebiten.Key }
+type KeyboardData struct {
+	keys  []ebiten.Key
+	runes []rune
+}
 
 func (k *KeyboardData) GetKeys() []ebiten.Key { return k.keys }
+func (k *KeyboardData) GetRunes() []rune      { return k.runes }
 
 // Умею передать подписчикам события от клавиатуры, пока только цифры. При нажатой клавише, более 250 мс символ дублируется.
 type KeyboardInput struct {
@@ -20,7 +24,6 @@ type KeyboardInput struct {
 func NewKeyboardInput() *KeyboardInput { return &KeyboardInput{timer: NewTimer(250)} }
 
 func (s *KeyboardInput) Attach(o Inputer) { s.listener = append(s.listener, o) }
-
 func (s *KeyboardInput) Detach(o Inputer) {
 	for i, observer := range s.listener {
 		if observer == o {
@@ -30,9 +33,11 @@ func (s *KeyboardInput) Detach(o Inputer) {
 	}
 }
 
-func (s *KeyboardInput) SetValue(keys []ebiten.Key) {
+func (s *KeyboardInput) SetValue(keys []ebiten.Key, runes []rune) {
 	s.value.keys = nil
 	s.value.keys = append(s.value.keys, keys...)
+	s.value.runes = nil
+	s.value.runes = append(s.value.runes, runes...)
 	s.Notify()
 }
 
@@ -45,6 +50,7 @@ func (s *KeyboardInput) Notify() {
 // Передать новое или повторное нажатие после истечения паузы
 func (s *KeyboardInput) update(dt int) {
 	keys := inpututil.AppendPressedKeys(s.value.keys[:0])
+	runes := ebiten.AppendInputChars(s.value.runes[:0])
 	if len(keys) == 0 {
 		s.timer.Off()
 		return
@@ -52,11 +58,11 @@ func (s *KeyboardInput) update(dt int) {
 	s.timer.Update(dt)
 	if len(keys) > 0 {
 		if !s.timer.IsOn() {
-			s.SetValue(keys)
+			s.SetValue(keys, runes)
 			s.timer.On()
 		}
 		if s.timer.IsDone() {
-			s.SetValue(keys)
+			s.SetValue(keys, runes)
 			s.timer.Reset()
 		}
 	}
