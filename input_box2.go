@@ -13,7 +13,7 @@ import (
 type InputBox2 struct {
 	DrawableBase
 	lbl                   *Text
-	textVar               *Signal
+	textVar               *Signal[string]
 	hasFocus, alwaysFocus bool
 	onReturn              func(*InputBox2)
 	onlyDigits            bool
@@ -24,9 +24,9 @@ type InputBox2 struct {
 func NewInputBox2(onReturn func(*InputBox2)) *InputBox2 {
 	i := &InputBox2{}
 	i.onReturn = onReturn
-	i.textVar = NewSignal()
+	i.textVar = NewSignal[string]()
 	i.lbl = NewText("")
-	i.textVar.Connect(func(data any) { i.lbl.SetText(data.(string)) })
+	i.textVar.Connect(func(data string) { i.lbl.SetText(data) })
 	i.textVar.Emit("")
 	i.Add(i.lbl)
 	theme := GetUi().theme
@@ -44,7 +44,7 @@ func NewDigitInputBox2(txt string, ln int, onReturn func(*InputBox2)) *InputBox2
 	return i
 }
 
-func (i *InputBox2) GetText() string      { return i.textVar.Value().(string) }
+func (i *InputBox2) GetText() string      { return i.textVar.Value() }
 func (i *InputBox2) Reset()               { i.textVar.Emit("") }
 func (i *InputBox2) SetText(value string) { i.textVar.Emit(value) }
 
@@ -55,10 +55,10 @@ func (i *InputBox2) SetAlwaysFocus()  { i.alwaysFocus = true }
 func (i *InputBox2) BlurAlwaysFocus() { i.alwaysFocus = false }
 
 func (i *InputBox2) GetDigit() (float64, error) {
-	if len(i.textVar.Value().(string)) == 0 {
+	if len(i.textVar.Value()) == 0 {
 		return 0, nil
 	}
-	n, err := strconv.ParseFloat(i.textVar.Value().(string), 64)
+	n, err := strconv.ParseFloat(i.textVar.Value(), 64)
 	if err != nil {
 		return 0, err
 	}
@@ -84,20 +84,20 @@ func (i *InputBox2) Update(dt int) {
 	var runes []rune
 	runes = ebiten.AppendInputChars(runes[:0])
 	if len(runes) > 0 {
-		txt := i.textVar.Value().(string)
+		txt := i.textVar.Value()
 		txt += string(runes)
 		i.textVar.Emit(txt)
 	}
 	if i.checkRepeat(ebiten.KeyBackspace) {
-		if len(i.textVar.Value().(string)) > 0 {
-			txt := i.textVar.Value().(string)
+		if len(i.textVar.Value()) > 0 {
+			txt := i.textVar.Value()
 			txt = txt[:len(txt)-1]
 			i.textVar.Emit(txt)
 		}
 	}
 	if i.onlyDigits {
 		i.lbl.Bg(i.bg)
-		for _, v := range i.textVar.Value().(string) {
+		for _, v := range i.textVar.Value() {
 			if !unicode.IsDigit(v) && !(v == '.' || v == ',') {
 				i.lbl.Bg(colornames.Red)
 			}

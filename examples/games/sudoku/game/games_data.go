@@ -10,7 +10,7 @@ type GamesData map[Dim]map[Difficult][]GameData
 func NewGamesData() *GamesData {
 	gDim := make(GamesData)
 	dims := func() (result []Dim) {
-		for i := 2; i <= 3; i++ {
+		for i := 2; i <= 5; i++ {
 			for j := 2; j <= 5; j++ {
 				result = append(result, NewDim(i, j))
 			}

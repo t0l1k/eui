@@ -42,18 +42,8 @@ func NewCellData(state string, pos eui.PointInt) *CellData {
 	return &CellData{state: state, pos: pos}
 }
 
-type CellState struct {
-	*eui.Signal
-}
-
-func NewCellState(state string, pos eui.PointInt) *CellState {
-	c := &CellState{Signal: eui.NewSignal()}
-	c.Emit(NewCellData(state, pos))
-	return c
-}
-
 type Cell struct {
-	state       *CellState
+	state       *eui.Signal[*CellData]
 	pos         eui.PointInt
 	sym         int
 	open, match bool
@@ -63,7 +53,7 @@ func NewCell(x, y int) *Cell {
 	pos := eui.NewPointInt(x, y)
 	return &Cell{
 		pos:   pos,
-		state: NewCellState(CellStateClosed, pos)}
+		state: eui.NewSignal[*CellData]()}
 }
 
 func (c *Cell) Pos() (int, int)    { return c.pos.X, c.pos.Y }
@@ -74,13 +64,13 @@ func (c *Cell) IsMatch() bool      { return c.match }
 
 func (c *Cell) SetMatch() {
 	c.match = true
-	c.state.Emit(NewCellState(CellStateMatch, c.pos))
+	c.state.Emit(NewCellData(CellStateMatch, c.pos))
 }
 
 func (c *Cell) Reset() {
 	c.match = false
 	c.open = false
-	c.state.Emit(NewCellState(CellStateClosed, c.pos))
+	c.state.Emit(NewCellData(CellStateClosed, c.pos))
 }
 
 func (c *Cell) Open() {
@@ -89,9 +79,9 @@ func (c *Cell) Open() {
 	}
 	c.open = !c.open
 	if c.open {
-		c.state.Emit(NewCellState(CellStateOpen, c.pos))
+		c.state.Emit(NewCellData(CellStateOpen, c.pos))
 	} else {
-		c.state.Emit(NewCellState(CellStateClosed, c.pos))
+		c.state.Emit(NewCellData(CellStateClosed, c.pos))
 	}
 }
 
@@ -104,9 +94,9 @@ func (c *Cell) String() (result string) {
 	return result
 }
 
-type FieldState struct{ *eui.Signal }
+type FieldState struct{ *eui.Signal[string] }
 
-func NewFieldState() *FieldState { return &FieldState{Signal: eui.NewSignal()} }
+func NewFieldState() *FieldState { return &FieldState{Signal: eui.NewSignal[string]()} }
 
 type Field struct {
 	State        *FieldState
@@ -276,7 +266,7 @@ func (b *CellIcon) Visible(value bool) {
 type Board struct {
 	eui.DrawableBase
 	field     *Field
-	varArea   *eui.Signal
+	varArea   *eui.Signal[string]
 	layout    *eui.GridLayoutRightDown
 	stopwatch *eui.Stopwatch
 	bottomLbl *eui.Text
@@ -284,11 +274,10 @@ type Board struct {
 
 func NewBoard() *Board {
 	b := &Board{}
-	b.varArea = eui.NewSignal()
+	b.varArea = eui.NewSignal[string]()
 	b.field = NewField()
-	b.field.State.Connect(func(value any) {
-		v := value.(string)
-		switch v {
+	b.field.State.Connect(func(value string) {
+		switch value {
 		case GameStart:
 		case GamePlay:
 			if !b.stopwatch.IsRun() {
@@ -310,8 +299,8 @@ func NewBoard() *Board {
 	b.stopwatch = eui.NewStopwatch()
 	b.bottomLbl = eui.NewText("")
 	b.Add(b.bottomLbl)
-	b.varArea.Connect(func(data any) {
-		b.bottomLbl.SetText(data.(string))
+	b.varArea.Connect(func(data string) {
+		b.bottomLbl.SetText(data)
 	})
 	b.NewGame()
 	return b
@@ -325,17 +314,16 @@ func (b *Board) NewGame() {
 		btn := NewCellIcon(b.field, b.gameLogic)
 		x, y := b.field.pos(i)
 		cell := b.field.GetCell(x, y)
-		cell.state.Connect(func(data any) {
-			v := data.(*CellState)
+		cell.state.Connect(func(value *CellData) {
 			c := btn
-			switch v.Value().(*CellData).state {
+			switch value.state {
 			case CellStateClosed:
 				c.btn.SetText(CellClosed)
 			case CellStateOpen:
-				cell := c.field.GetCell(v.Value().(*CellData).pos.X, v.Value().(*CellData).pos.Y)
+				cell := c.field.GetCell(value.pos.X, value.pos.Y)
 				c.btn.SetText(cell.String())
 			case CellStateMatch:
-				cell := c.field.GetCell(v.Value().(*CellData).pos.X, v.Value().(*CellData).pos.Y)
+				cell := c.field.GetCell(value.pos.X, value.pos.Y)
 				c.btn.SetText(cell.String())
 				c.btn.Bg(colornames.Greenyellow)
 				c.btn.Fg(colornames.Blue)
@@ -550,13 +538,12 @@ func NewSceneGame() *SceneGame {
 	s.Add(s.dialog)
 
 	s.board = NewBoard()
-	s.board.varArea.Connect(func(data any) {
-		s.dialog.message.SetText(data.(string))
+	s.board.varArea.Connect(func(data string) {
+		s.dialog.message.SetText(data)
 	})
-	s.board.field.State.Connect(func(value any) {
+	s.board.field.State.Connect(func(value string) {
 		b := s.dialog
-		v := value.(string)
-		switch v {
+		switch value {
 		case GamePlay:
 			if b.IsVisible() {
 				b.board.field.State.Emit(GamePause)

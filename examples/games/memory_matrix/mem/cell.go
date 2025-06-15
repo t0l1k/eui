@@ -8,17 +8,17 @@ const (
 )
 
 type Cell struct {
-	*eui.Signal
+	*eui.Signal[string]
 	readonly, marked bool
 }
 
 func NewCell() *Cell {
-	c := &Cell{Signal: eui.NewSignal()}
+	c := &Cell{Signal: eui.NewSignal[string]()}
 	c.Emit(CellEmpty)
 	return c
 }
 
-func (c *Cell) IsEmpty() bool    { return c.Value().(string) == CellEmpty }
+func (c *Cell) IsEmpty() bool    { return c.Value() == CellEmpty }
 func (c *Cell) IsReadOnly() bool { return c.readonly }
 func (c *Cell) SetReadOnly()     { c.readonly = true }
 func (c *Cell) IsMarked() bool   { return c.marked }

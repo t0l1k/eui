@@ -29,66 +29,63 @@ func (c *CellIcon) Setup(field *MinedField, f func(b *eui.Button)) {
 	c.Btn.Fg(colornames.Red)
 }
 
-func (c *CellIcon) UpdateData(value interface{}) {
-	switch v := value.(type) {
-	case *cellData:
-		switch v.state {
-		case closed:
+func (c *CellIcon) UpdateData(value *cellData) {
+	switch value.state {
+	case closed:
+		c.Btn.SetText(cellClosed)
+		c.Btn.Bg(colornames.Gray)
+		c.Btn.Fg(colornames.Red)
+	case flagged:
+		c.Btn.SetText(cellFlagged)
+	case questioned:
+		c.Btn.SetText(cellQuestioned)
+	case firstMined:
+		c.Btn.SetText(cellFirstMined)
+	case saved:
+		c.Btn.Fg(colornames.Yellow)
+		c.Btn.SetText(cellSaved)
+	case blown:
+		c.Btn.SetText(cellBlown)
+	case wrongFlagged:
+		c.Btn.SetText(cellWrongFlagged)
+	case opened:
+		cell := c.field.GetCell(value.pos.X, value.pos.Y)
+		switch cell.count {
+		case 0:
 			c.Btn.SetText(cellClosed)
-			c.Btn.Bg(colornames.Gray)
-			c.Btn.Fg(colornames.Red)
-		case flagged:
-			c.Btn.SetText(cellFlagged)
-		case questioned:
-			c.Btn.SetText(cellQuestioned)
-		case firstMined:
-			c.Btn.SetText(cellFirstMined)
-		case saved:
-			c.Btn.Fg(colornames.Yellow)
-			c.Btn.SetText(cellSaved)
-		case blown:
-			c.Btn.SetText(cellBlown)
-		case wrongFlagged:
-			c.Btn.SetText(cellWrongFlagged)
-		case opened:
-			cell := c.field.GetCell(v.pos.X, v.pos.Y)
-			switch cell.count {
-			case 0:
-				c.Btn.SetText(cellClosed)
-				c.Btn.Bg(colornames.Silver)
-			case 1:
-				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colornames.Silver)
-				c.Btn.Fg(colornames.Blue)
-			case 2:
-				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colornames.Silver)
-				c.Btn.Fg(colornames.Orange)
-			case 3:
-				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colornames.Silver)
-				c.Btn.Fg(colornames.Green)
-			case 4:
-				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colornames.Silver)
-				c.Btn.Fg(colornames.Aqua)
-			case 5:
-				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colornames.Silver)
-				c.Btn.Fg(colornames.Navy)
-			case 6:
-				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colornames.Silver)
-				c.Btn.Fg(colornames.Fuchsia)
-			case 7:
-				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colornames.Silver)
-				c.Btn.Fg(colornames.Purple)
-			case 8:
-				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colornames.Silver)
-				c.Btn.Fg(colornames.Black)
-			}
+			c.Btn.Bg(colornames.Silver)
+		case 1:
+			c.Btn.SetText(strconv.Itoa(int(cell.count)))
+			c.Btn.Bg(colornames.Silver)
+			c.Btn.Fg(colornames.Blue)
+		case 2:
+			c.Btn.SetText(strconv.Itoa(int(cell.count)))
+			c.Btn.Bg(colornames.Silver)
+			c.Btn.Fg(colornames.Orange)
+		case 3:
+			c.Btn.SetText(strconv.Itoa(int(cell.count)))
+			c.Btn.Bg(colornames.Silver)
+			c.Btn.Fg(colornames.Green)
+		case 4:
+			c.Btn.SetText(strconv.Itoa(int(cell.count)))
+			c.Btn.Bg(colornames.Silver)
+			c.Btn.Fg(colornames.Aqua)
+		case 5:
+			c.Btn.SetText(strconv.Itoa(int(cell.count)))
+			c.Btn.Bg(colornames.Silver)
+			c.Btn.Fg(colornames.Navy)
+		case 6:
+			c.Btn.SetText(strconv.Itoa(int(cell.count)))
+			c.Btn.Bg(colornames.Silver)
+			c.Btn.Fg(colornames.Fuchsia)
+		case 7:
+			c.Btn.SetText(strconv.Itoa(int(cell.count)))
+			c.Btn.Bg(colornames.Silver)
+			c.Btn.Fg(colornames.Purple)
+		case 8:
+			c.Btn.SetText(strconv.Itoa(int(cell.count)))
+			c.Btn.Bg(colornames.Silver)
+			c.Btn.Fg(colornames.Black)
 		}
 	}
 }

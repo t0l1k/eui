@@ -5,15 +5,15 @@ import (
 	"github.com/t0l1k/eui/examples/games/solitaire/sols/deck"
 )
 
-type Cell struct{ *eui.Signal }
+type Cell struct{ *eui.Signal[*deck.Card] }
 
-func NewCell() *Cell                           { return &Cell{Signal: eui.NewSignal()} }
+func NewCell() *Cell                           { return &Cell{Signal: eui.NewSignal[*deck.Card]()} }
 func (c *Cell) Reset()                         { c.Emit(nil) }
 func (c *Cell) IsEmpty() bool                  { return c.GetCard() == nil }
 func (c *Cell) SetCard(value *deck.Card) *Cell { c.Emit(value); return c }
 func (c *Cell) GetCard() *deck.Card {
 	if card := c.Value(); card != nil {
-		return card.(*deck.Card)
+		return card
 	}
 	return nil
 }

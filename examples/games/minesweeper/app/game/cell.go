@@ -19,7 +19,7 @@ const (
 )
 
 type cell struct {
-	State *eui.Signal
+	State *eui.Signal[*cellData]
 	count byte
 	mined bool
 	pos   eui.PointInt
@@ -28,7 +28,7 @@ type cell struct {
 func newCell(pos eui.PointInt) *cell {
 	v := newCellData(closed, cellClosed, pos)
 	c := &cell{
-		State: eui.NewSignal(),
+		State: eui.NewSignal[*cellData](),
 		count: cellEmpty,
 		mined: false,
 		pos:   pos,
@@ -40,14 +40,14 @@ func newCell(pos eui.PointInt) *cell {
 func (c *cell) reset() { c.State.Emit(newCellData(closed, cellClosed, c.pos)) }
 
 func (c *cell) open() {
-	cd := c.State.Value().(*cellData)
+	cd := c.State.Value()
 	if cd.State() == closed || cd.State() == questioned {
 		c.State.Emit(newCellData(opened, c.String(), c.pos))
 	}
 }
 
 func (c *cell) mark() {
-	cd := c.State.Value().(*cellData)
+	cd := c.State.Value()
 	switch cd.State() {
 	case closed:
 		c.State.Emit(newCellData(flagged, cellFlagged, c.pos))
@@ -62,7 +62,7 @@ func (c *cell) Pos() (int, int) { return c.pos.X, c.pos.Y }
 
 func (c *cell) String() string {
 	var str string
-	cd := c.State.Value().(*cellData)
+	cd := c.State.Value()
 	switch cd.State() {
 	case closed:
 		str += "."

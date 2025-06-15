@@ -12,18 +12,19 @@ import (
 
 type BoardMem struct {
 	eui.DrawableBase
-	layout           *eui.GridLayoutRightDown
-	game             *mem.Game
-	gamesData        *mem.GamesData
-	showTimer        *eui.Timer
-	fn               func(*eui.Button)
-	varMsg, varColor *eui.Signal
+	layout    *eui.GridLayoutRightDown
+	game      *mem.Game
+	gamesData *mem.GamesData
+	showTimer *eui.Timer
+	fn        func(*eui.Button)
+	varMsg    *eui.Signal[string]
+	varColor  *eui.Signal[[]color.Color]
 }
 
 func NewBoardMem(fn func(*eui.Button)) *BoardMem {
 	d := &BoardMem{}
-	d.varMsg = eui.NewSignal()
-	d.varColor = eui.NewSignal(func(a, b any) bool {
+	d.varMsg = eui.NewSignal[string]()
+	d.varColor = eui.NewSignal[[]color.Color](func(a, b []color.Color) bool {
 		// Если оба nil — считаем равными
 		if a == nil && b == nil {
 			return true
@@ -33,11 +34,8 @@ func NewBoardMem(fn func(*eui.Button)) *BoardMem {
 			return false
 		}
 		// Приведение к []color.Color
-		aArr, okA := a.([]color.Color)
-		bArr, okB := b.([]color.Color)
-		if !okA || !okB {
-			return false
-		}
+		aArr := a
+		bArr := b
 		if len(aArr) != len(bArr) {
 			return false
 		}

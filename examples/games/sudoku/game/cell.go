@@ -9,12 +9,12 @@ import (
 )
 
 type Cell struct {
-	*eui.Signal
+	*eui.Signal[int]
 	notes    map[int]bool
 	readOnly bool
 }
 
-func newCell() *Cell { return &Cell{Signal: eui.NewSignal()} }
+func newCell() *Cell { return &Cell{Signal: eui.NewSignal[int]()} }
 
 func (c *Cell) reset(size int) {
 	c.Emit(0)
@@ -25,7 +25,7 @@ func (c *Cell) reset(size int) {
 	c.readOnly = false
 }
 
-func (c *Cell) GetValue() int { return c.Value().(int) }
+func (c *Cell) GetValue() int { return c.Value() }
 func (c *Cell) add(value int) bool {
 	if c.IsReadOnly() {
 		return false

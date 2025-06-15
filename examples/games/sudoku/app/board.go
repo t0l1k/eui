@@ -46,7 +46,7 @@ func (b *Board) Setup(dim game.Dim, diff game.Difficult) {
 	for y := 0; y < b.dim.Size(); y++ {
 		for x := 0; x < b.dim.Size(); x++ {
 			btn := NewCellIcon(b.dim, b.game.Cell(x, y), b.fn, colornames.Silver, colornames.Black)
-			b.game.Cell(x, y).Connect(func(data any) { btn.Dirty = true })
+			b.game.Cell(x, y).Connect(func(data int) { btn.Dirty = true })
 			b.layoutCells.Add(btn)
 		}
 	}

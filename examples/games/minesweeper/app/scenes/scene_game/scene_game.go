@@ -70,17 +70,14 @@ func (s *SceneGame) checkBtnStatus() {
 	}
 }
 
-func (s *SceneGame) UpdateData(value interface{}) {
-	switch v := value.(type) {
-	case string:
-		switch v {
-		case game.GameStart:
-			s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
-		case game.GameWin:
-			s.btnStatus.SetReleasedIcon(res.SmileSprites[3])
-		case game.GameOver:
-			s.btnStatus.SetReleasedIcon(res.SmileSprites[4])
-		}
+func (s *SceneGame) UpdateData(value string) {
+	switch value {
+	case game.GameStart:
+		s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
+	case game.GameWin:
+		s.btnStatus.SetReleasedIcon(res.SmileSprites[3])
+	case game.GameOver:
+		s.btnStatus.SetReleasedIcon(res.SmileSprites[4])
 	}
 }
 

@@ -42,7 +42,7 @@ func (c *Cell) EqualColors(color BallColor) bool {
 }
 
 func (c *Cell) IsFilledNext() bool {
-	return c.State.Value().(*CellData).State == CellFilledNext
+	return c.State.Value().State == CellFilledNext
 }
 
 func (c *Cell) SetFilledNext(color BallColor) {
@@ -51,7 +51,7 @@ func (c *Cell) SetFilledNext(color BallColor) {
 }
 
 func (c *Cell) IsFilled() bool {
-	return c.State.Value().(*CellData).State == CellFilled
+	return c.State.Value().State == CellFilled
 }
 
 func (c *Cell) SetFilled() {
@@ -59,7 +59,7 @@ func (c *Cell) SetFilled() {
 }
 
 func (c *Cell) IsMarkedForMove() bool {
-	return c.State.Value().(*CellData).State == CellMarkedForMove
+	return c.State.Value().State == CellMarkedForMove
 }
 
 func (c *Cell) SetMarkedForMove() {
@@ -67,7 +67,7 @@ func (c *Cell) SetMarkedForMove() {
 }
 
 func (c *Cell) IsFilledAfterMove() bool {
-	return c.State.Value().(*CellData).State == CellFilledAfterMove
+	return c.State.Value().State == CellFilledAfterMove
 }
 
 func (c *Cell) SetFilledAfterMove(color BallColor) {
@@ -76,7 +76,7 @@ func (c *Cell) SetFilledAfterMove(color BallColor) {
 }
 
 func (c *Cell) IsMarkedForDelete() bool {
-	return c.State.Value().(*CellData).State == CellMarkedForDelete
+	return c.State.Value().State == CellMarkedForDelete
 }
 
 func (c *Cell) SetMarkedForDelete() {

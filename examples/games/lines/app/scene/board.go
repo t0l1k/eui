@@ -17,7 +17,7 @@ type Board struct {
 	field                  *game.Field
 	showWay                bool
 	showWayDt              int
-	varScore, varScoreBest *eui.Signal
+	varScore, varScoreBest *eui.Signal[int]
 	bestScore              int
 }
 
@@ -29,14 +29,14 @@ func NewBoard(dim int) *Board {
 	b.Add(b.table)
 	r, c := b.field.Dim()
 	b.gameLayout = eui.NewGridLayoutRightDown(float64(r), float64(c))
-	b.varScore = eui.NewSignal()
-	b.varScore.Connect(func(data any) {
-		b.table.leftLbl.SetText(strconv.Itoa(data.(int)))
+	b.varScore = eui.NewSignal[int]()
+	b.varScore.Connect(func(data int) {
+		b.table.leftLbl.SetText(strconv.Itoa(data))
 	})
 	b.bestScore = 10
-	b.varScoreBest = eui.NewSignal()
-	b.varScoreBest.ConnectAndFire(func(data any) {
-		b.table.rightLbl.SetText(strconv.Itoa(data.(int)))
+	b.varScoreBest = eui.NewSignal[int]()
+	b.varScoreBest.ConnectAndFire(func(data int) {
+		b.table.rightLbl.SetText(strconv.Itoa(data))
 	}, b.bestScore)
 	return b
 }
@@ -47,8 +47,7 @@ func (b *Board) NewGame(dim int) {
 	for _, cell := range b.field.GetField() {
 		cell.Reset()
 		btn := NewCellIcon(cell, b.gameLogic)
-		cell.State.Connect(func(data any) {
-			v := data.(*game.CellData)
+		cell.State.Connect(func(v *game.CellData) {
 			c := btn
 			switch v.State {
 			case game.CellEmpty:
@@ -99,7 +98,7 @@ func (b *Board) gameLogic(btn *eui.Button) {
 	for i := range b.gameLayout.GetContainer() {
 		if b.gameLayout.GetContainer()[i].(*CellIcon).btn == btn {
 			cell := b.field.GetField()[i]
-			cellData := cell.State.Value().(*game.CellData)
+			cellData := cell.State.Value()
 			state := cellData.State
 			if btn.IsMouseDownLeft() && b.field.InGame {
 				if state == game.CellFilled || state == game.CellEmpty || state == game.CellFilledNext {
@@ -130,7 +129,7 @@ func (b *Board) setWayCells(col game.BallColor, way []int) {
 }
 
 func (b *Board) Update(dt int) {
-	if b.field.GetScore() > b.varScoreBest.Value().(int) {
+	if b.field.GetScore() > b.varScoreBest.Value() {
 		b.varScoreBest.Emit(b.field.GetScore())
 	}
 	b.varScore.Emit(b.field.GetScore())

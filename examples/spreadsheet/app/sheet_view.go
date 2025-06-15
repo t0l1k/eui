@@ -77,8 +77,8 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 				cell.SetActive()
 				sv.activeCell = cell
 			})
-			cell.Connect(func(data any) {
-				btn.SetText(data.(string))
+			cell.Connect(func(data string) {
+				btn.SetText(data)
 			})
 			sv.sheet.InitCell(grid, cell)
 			sv.laySheet.AddBgFg(btn, colornames.Gray, colornames.Yellow)

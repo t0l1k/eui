@@ -14,14 +14,14 @@ type Formula interface {
 }
 
 type FormulaAdd struct {
-	*eui.Signal
+	*eui.Signal[string]
 	sheet   *Sheet
 	srcCell *Cell
 	formula string
 }
 
 func NewFormulaAdd(sheet *Sheet, srcCell *Cell, formula string) *FormulaAdd {
-	f := &FormulaAdd{Signal: eui.NewSignal()}
+	f := &FormulaAdd{Signal: eui.NewSignal[string]()}
 	f.sheet = sheet
 	f.srcCell = srcCell
 	f.formula = formula
@@ -35,7 +35,7 @@ func (f *FormulaAdd) attach() {
 	for _, v := range f.parseFormula(f.formula) {
 		grid := GridParse(v)
 		cell := f.sheet.Cell(grid)
-		cell.Connect(func(data any) { f.sheet.Cell(f.srcCell.grid).formula.Calc() })
+		cell.Connect(func(data string) { f.sheet.Cell(f.srcCell.grid).formula.Calc() })
 	}
 }
 

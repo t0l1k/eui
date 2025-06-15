@@ -27,7 +27,7 @@ type BottomBar struct {
 	show                                            bool
 	fn                                              func(*eui.Button)
 	actAccept, actUndo, actDel, actNotes, actNumber bool
-	varSw, varDiff                                  *eui.Signal
+	varSw, varDiff                                  *eui.Signal[string]
 	board                                           *Board
 }
 
@@ -48,11 +48,11 @@ func (b *BottomBar) Setup(board *Board) {
 	b.layoutActs.Add(eui.NewText(board.dim.String()))
 	diffText := eui.NewText("")
 	b.layoutActs.Add(diffText)
-	b.varDiff = eui.NewSignal()
-	b.varDiff.ConnectAndFire(func(data any) { diffText.SetText(data.(string)) }, b.board.GetDiffStr())
+	b.varDiff = eui.NewSignal[string]()
+	b.varDiff.ConnectAndFire(func(data string) { diffText.SetText(data) }, b.board.GetDiffStr())
 	swStr := eui.NewText("")
-	b.varSw = eui.NewSignal()
-	b.varSw.Connect(func(data any) { swStr.SetText(data.(string)) })
+	b.varSw = eui.NewSignal[string]()
+	b.varSw.Connect(func(data string) { swStr.SetText(data) })
 	b.varSw.Emit(b.board.sw.StringShort())
 	b.layoutActs.Add(swStr)
 	b.actBtns = nil

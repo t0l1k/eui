@@ -53,9 +53,8 @@ func NewSceneMain() *SceneMain {
 		}
 	})
 	s.Add(s.board)
-	s.board.varMsg.Connect(func(data any) { s.lblStatus.SetText(data.(string)) })
-	s.board.varColor.Connect(func(data any) {
-		arr := data.([]color.Color)
+	s.board.varMsg.Connect(func(data string) { s.lblStatus.SetText(data) })
+	s.board.varColor.Connect(func(arr []color.Color) {
 		s.lblStatus.Bg(arr[0])
 		s.lblStatus.Fg(arr[1])
 	})

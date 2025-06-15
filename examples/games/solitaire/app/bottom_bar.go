@@ -21,15 +21,15 @@ type BottomBar struct {
 	layout          *eui.BoxLayout
 	fn              func(*eui.Button)
 	board           Sols
-	varSw, varMoves *eui.Signal
+	varSw, varMoves *eui.Signal[string]
 }
 
 func NewBottomBar(fn func(*eui.Button)) *BottomBar {
 	b := &BottomBar{}
 	b.layout = eui.NewHLayout()
 	b.fn = fn
-	b.varSw = eui.NewSignal()
-	b.varMoves = eui.NewSignal()
+	b.varSw = eui.NewSignal[string]()
+	b.varMoves = eui.NewSignal[string]()
 	b.Visible(true)
 	return b
 }
@@ -41,10 +41,10 @@ func (b *BottomBar) Setup(board Sols) {
 		b.layout.Add(eui.NewButton(str, b.fn))
 	}
 	movesText := eui.NewText("Ходов:0")
-	b.varMoves.Connect(func(data any) { movesText.SetText(data.(string)) })
+	b.varMoves.Connect(func(data string) { movesText.SetText(data) })
 	b.layout.Add(movesText)
 	swText := eui.NewText("")
-	b.varSw.Connect(func(data any) { swText.SetText(data.(string)) })
+	b.varSw.Connect(func(data string) { swText.SetText(data) })
 	b.layout.Add(swText)
 }
 

@@ -112,22 +112,19 @@ func (g *Game) Update(dt int) {
 	}
 }
 
-func (g *Game) UpdateData(value interface{}) {
-	switch v := value.(type) {
-	case string:
-		switch v {
-		case game.GameStart, game.GamePlay:
-			for _, cell := range g.layout.GetContainer() {
-				if cell.(*game.CellIcon).Btn.IsDisabled() {
-					cell.(*game.CellIcon).Btn.Enable()
-				}
+func (g *Game) UpdateData(value string) {
+	switch value {
+	case game.GameStart, game.GamePlay:
+		for _, cell := range g.layout.GetContainer() {
+			if cell.(*game.CellIcon).Btn.IsDisabled() {
+				cell.(*game.CellIcon).Btn.Enable()
 			}
-		case game.GameWin, game.GameOver:
-			g.timer.Stop()
-			for _, cell := range g.layout.GetContainer() {
-				if !cell.(*game.CellIcon).Btn.IsDisabled() {
-					cell.(*game.CellIcon).Btn.Disable()
-				}
+		}
+	case game.GameWin, game.GameOver:
+		g.timer.Stop()
+		for _, cell := range g.layout.GetContainer() {
+			if !cell.(*game.CellIcon).Btn.IsDisabled() {
+				cell.(*game.CellIcon).Btn.Disable()
 			}
 		}
 	}

@@ -9,13 +9,13 @@ import (
 	"github.com/t0l1k/eui"
 )
 
-type Count struct{ *eui.Signal }
+type Count struct{ *eui.Signal[int] }
 
-func NewCount() *Count { return &Count{Signal: eui.NewSignal()} }
-func (c *Count) Inc()  { c.Emit(c.Value().(int) + 1) }
+func NewCount() *Count { return &Count{Signal: eui.NewSignal[int]()} }
+func (c *Count) Inc()  { c.Emit(c.Value() + 1) }
 func (c *Count) Dec() {
-	if c.Value().(int) > 0 {
-		c.Emit(c.Value().(int) - 1)
+	if c.Value() > 0 {
+		c.Emit(c.Value() - 1)
 	}
 }
 
@@ -34,8 +34,8 @@ func NewSceneCounter() *SceneCounter {
 
 	lblCount := eui.NewText("") // Текстовая метка
 	count := NewCount()         // Подписчикам передать оповещение при изменении переменной
-	count.ConnectAndFire(func(data any) {
-		lblCount.SetText(strconv.Itoa(count.Value().(int)))
+	count.ConnectAndFire(func(data int) {
+		lblCount.SetText(strconv.Itoa(count.Value()))
 	}, 0) // Подписка на уведомления от этой переменной
 	sc.lay1.Add(lblCount) // Добавить в контейнер метку
 

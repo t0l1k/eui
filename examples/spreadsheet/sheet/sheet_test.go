@@ -26,7 +26,7 @@ func TestInitAddUpdateCells(t *testing.T) {
 		}
 
 		sheet.Cell(GridParse(indexs[3])).Emit(got)
-		got = sheet.Cell(GridParse(indexs[3])).Value().(string)
+		got = sheet.Cell(GridParse(indexs[3])).Value()
 		if got != want {
 			t.Errorf("got %v want %v", got, want)
 		}
