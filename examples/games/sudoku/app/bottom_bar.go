@@ -6,8 +6,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/games/sudoku/game"
+	"golang.org/x/image/colornames"
 )
 
 const (
@@ -50,7 +50,6 @@ func (b *BottomBar) Setup(board *Board) {
 	b.layoutActs.Add(diffText)
 	b.varDiff = eui.NewSignal()
 	b.varDiff.ConnectAndFire(func(data any) { diffText.SetText(data.(string)) }, b.board.GetDiffStr())
-	// b.varDiff.Emit(b.board.GetDiffStr())
 	swStr := eui.NewText("")
 	b.varSw = eui.NewSignal()
 	b.varSw.Connect(func(data any) { swStr.SetText(data.(string)) })
@@ -95,26 +94,26 @@ func (b *BottomBar) SetAct(btn *eui.Button) (result bool) {
 	switch btnStr {
 	case aAccept:
 		b.actAccept = true
-		btn.Bg(colors.Yellow)
+		btn.Bg(colornames.Yellow)
 		result = false
 	case aUndo:
 		b.actUndo = true
-		btn.Bg(colors.Yellow)
+		btn.Bg(colornames.Yellow)
 		result = false
 	case aDel:
 		b.actDel = true
-		btn.Bg(colors.Yellow)
+		btn.Bg(colornames.Yellow)
 		result = false
 	case aNote:
 		b.actNotes = !b.actNotes
 		if b.actNotes {
-			btn.Bg(colors.Yellow)
+			btn.Bg(colornames.Yellow)
 		}
 		result = false
 	default:
 		for _, v := range b.layoutNums.GetContainer() {
 			if v.(*BottomBarNr).GetText() == btn.GetText() {
-				v.(*BottomBarNr).Bg(colors.Yellow)
+				v.(*BottomBarNr).Bg(colornames.Yellow)
 			}
 		}
 		b.actNumber = true
@@ -132,13 +131,13 @@ func (b *BottomBar) setBtnClrs() {
 		switch vv := v.(type) {
 		case *eui.Button:
 			if vv.GetText() == aNote && b.actNotes {
-				vv.Bg(colors.Yellow)
-			} else if vv.GetBg() == colors.Yellow {
-				vv.Bg(colors.Silver)
+				vv.Bg(colornames.Yellow)
+			} else if vv.GetBg() == colornames.Yellow {
+				vv.Bg(colornames.Silver)
 			}
 		case *BottomBarNr:
-			if vv.GetBg() == colors.Yellow {
-				vv.Bg(colors.Silver)
+			if vv.GetBg() == colornames.Yellow {
+				vv.Bg(colornames.Silver)
 			}
 		}
 	}

@@ -49,7 +49,9 @@ func NewSceneCounter() *SceneCounter {
 
 	sc.lay2.Add(btnInc) // Добавить в контейнер кнопку увеличить
 	sc.lay2.Add(btnDec) // Добавить в контейнер кнопку уменьшить
-	sc.Resize()         // Метод обновить размеры сцены
+	// sc.Add(sc.lay1)
+	// sc.Add(sc.lay2)
+	sc.Resize() // Метод обновить размеры сцены
 	return sc
 }
 
@@ -94,5 +96,5 @@ func NewGame() *eui.Ui {
 func main() {
 	eui.Init(NewGame())
 	eui.Run(NewSceneCounter())
-	eui.Quit()
+	eui.Quit(func() {})
 }

@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 type BottomBarNr struct {
@@ -19,7 +19,7 @@ func NewBtn(fn func(btn *eui.Button)) *BottomBarNr {
 	b.valueBtn = eui.NewButton("", fn)
 	b.Add(b.valueBtn)
 	b.countLbl = eui.NewText("")
-	b.countLbl.Fg(colors.Black)
+	b.countLbl.Fg(colornames.Black)
 	b.Add(b.countLbl)
 	return b
 }
@@ -34,9 +34,9 @@ func (b *BottomBarNr) SetCount(value int) {
 	nr := strconv.Itoa(value)
 	b.countLbl.SetText(nr)
 	if value == 0 {
-		b.countLbl.Bg(colors.Silver)
+		b.countLbl.Bg(colornames.Silver)
 	} else {
-		b.countLbl.Bg(colors.Yellow)
+		b.countLbl.Bg(colornames.Yellow)
 	}
 }
 

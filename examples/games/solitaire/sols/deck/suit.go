@@ -3,7 +3,7 @@ package deck
 import (
 	"image/color"
 
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 type Suit int
@@ -24,9 +24,9 @@ func (s Suit) EqColor(other Suit) bool { return s.Color() == other.Color() }
 func (s Suit) Color() color.Color {
 	switch s {
 	case Clubs, Spades:
-		return colors.Black
+		return colornames.Black
 	case Diamonds, Hearts:
-		return colors.Red
+		return colornames.Red
 	}
 	return nil
 }

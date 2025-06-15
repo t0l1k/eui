@@ -33,10 +33,6 @@ type Sceneer interface {
 	Quit()
 }
 
-type Observerer interface {
-	UpdateData(interface{})
-}
-
 type Inputer interface {
 	UpdateInput(interface{})
 }

@@ -30,5 +30,5 @@ func NewGame() *eui.Ui {
 func main() {
 	eui.Init(NewGame())
 	eui.Run(NewSceneSpreadSheet())
-	eui.Quit()
+	eui.Quit(func() {})
 }

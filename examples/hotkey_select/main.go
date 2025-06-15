@@ -6,7 +6,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 const (
@@ -28,7 +28,7 @@ func NewInputKey(title string) *InputKey {
 	i.btn = eui.NewButton("(?)", func(b *eui.Button) {
 		if b.IsPressed() {
 			i.active = true
-			i.btn.Bg(colors.Yellow)
+			i.btn.Bg(colornames.Yellow)
 		}
 	})
 	i.Add(i.btn)
@@ -50,7 +50,7 @@ func (i *InputKey) Update(dt int) {
 	i.DrawableBase.Update(dt)
 	if i.btn.GetState() == eui.ViewStateNormal {
 		i.active = false
-		i.btn.Bg(colors.Silver)
+		i.btn.Bg(colornames.Silver)
 	}
 }
 
@@ -167,5 +167,5 @@ func NewGame() *eui.Ui {
 func main() {
 	eui.Init(NewGame())
 	eui.Run(NewSceneSelectHotkey())
-	eui.Quit()
+	eui.Quit(func() {})
 }

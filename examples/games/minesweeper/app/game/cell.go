@@ -19,37 +19,42 @@ const (
 )
 
 type cell struct {
-	State *cellState
+	State *eui.Signal
 	count byte
 	mined bool
 	pos   eui.PointInt
 }
 
 func newCell(pos eui.PointInt) *cell {
-	return &cell{
-		State: newCellState(closed, pos),
+	v := newCellData(closed, cellClosed, pos)
+	c := &cell{
+		State: eui.NewSignal(),
 		count: cellEmpty,
 		mined: false,
 		pos:   pos,
 	}
+	c.State.Emit(v)
+	return c
 }
 
-func (c *cell) reset() { c.State.SetValue(newCellData(closed, cellClosed, c.pos)) }
+func (c *cell) reset() { c.State.Emit(newCellData(closed, cellClosed, c.pos)) }
 
 func (c *cell) open() {
-	if c.State.Value() == closed || c.State.Value() == questioned {
-		c.State.SetValue(newCellData(opened, c.String(), c.pos))
+	cd := c.State.Value().(*cellData)
+	if cd.State() == closed || cd.State() == questioned {
+		c.State.Emit(newCellData(opened, c.String(), c.pos))
 	}
 }
 
 func (c *cell) mark() {
-	switch c.State.Value() {
+	cd := c.State.Value().(*cellData)
+	switch cd.State() {
 	case closed:
-		c.State.SetValue(newCellData(flagged, cellFlagged, c.pos))
+		c.State.Emit(newCellData(flagged, cellFlagged, c.pos))
 	case flagged:
-		c.State.SetValue(newCellData(questioned, cellQuestioned, c.pos))
+		c.State.Emit(newCellData(questioned, cellQuestioned, c.pos))
 	case questioned:
-		c.State.SetValue(newCellData(closed, cellClosed, c.pos))
+		c.State.Emit(newCellData(closed, cellClosed, c.pos))
 	}
 }
 
@@ -57,7 +62,8 @@ func (c *cell) Pos() (int, int) { return c.pos.X, c.pos.Y }
 
 func (c *cell) String() string {
 	var str string
-	switch c.State.Value() {
+	cd := c.State.Value().(*cellData)
+	switch cd.State() {
 	case closed:
 		str += "."
 	case flagged:

@@ -6,8 +6,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/games/sudoku/game"
+	"golang.org/x/image/colornames"
 )
 
 type Board struct {
@@ -30,8 +30,8 @@ func NewBoard(fn func(b *eui.Button)) *Board {
 	b.grid = eui.NewGridView(2, 2)
 	b.grid.Visible(false)
 	b.grid.DrawRect = true
-	b.grid.Fg(colors.Red)
-	b.grid.Bg(colors.Black)
+	b.grid.Fg(colornames.Red)
+	b.grid.Bg(colornames.Black)
 	b.Add(b.grid)
 	b.sw = eui.NewStopwatch()
 	return b
@@ -45,7 +45,7 @@ func (b *Board) Setup(dim game.Dim, diff game.Difficult) {
 	b.layoutCells.ResetContainerBase()
 	for y := 0; y < b.dim.Size(); y++ {
 		for x := 0; x < b.dim.Size(); x++ {
-			btn := NewCellIcon(b.dim, b.game.Cell(x, y), b.fn, colors.Silver, colors.Black)
+			btn := NewCellIcon(b.dim, b.game.Cell(x, y), b.fn, colornames.Silver, colornames.Black)
 			b.game.Cell(x, y).Connect(func(data any) { btn.Dirty = true })
 			b.layoutCells.Add(btn)
 		}

@@ -6,8 +6,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/games/sudoku/game"
+	"golang.org/x/image/colornames"
 )
 
 type CellIcon struct {
@@ -31,7 +31,7 @@ func NewCellIcon(dim game.Dim, cell *game.Cell, f func(b *eui.Button), bg, fg co
 	c.Add(c.btn)
 	c.Bg(bg)
 	if c.cell.IsReadOnly() {
-		c.Fg(colors.Blue)
+		c.Fg(colornames.Blue)
 	} else {
 		c.Fg(fg)
 	}
@@ -54,12 +54,12 @@ func (c *CellIcon) Layout() {
 		c.layout.SetDim(1, 1)
 		defer lbl.Close()
 		if value == c.highlight {
-			lbl.Bg(colors.Yellow)
+			lbl.Bg(colornames.Yellow)
 		} else {
-			lbl.Bg(colors.Silver)
+			lbl.Bg(colornames.Silver)
 		}
 		if c.cell.IsReadOnly() {
-			lbl.Fg(colors.Blue)
+			lbl.Fg(colornames.Blue)
 		} else {
 			lbl.Fg(c.GetFg())
 		}
@@ -69,7 +69,7 @@ func (c *CellIcon) Layout() {
 		if c.showNotes && len(notes) > 0 {
 			for i := 0; i < c.dim.Size(); i++ {
 				lbl := eui.NewText("")
-				lbl.Bg(colors.Silver)
+				lbl.Bg(colornames.Silver)
 				lbl.Fg(c.GetFg())
 				c.layout.Add(lbl)
 				found := notes.IsContain(i + 1)
@@ -77,7 +77,7 @@ func (c *CellIcon) Layout() {
 					idx, _ := notes.Index(i + 1)
 					lbl.SetText(strconv.Itoa(notes[idx]))
 					if i+1 == c.highlight {
-						lbl.Bg(colors.Yellow)
+						lbl.Bg(colornames.Yellow)
 					}
 				} else {
 					lbl.SetText("")
@@ -91,9 +91,9 @@ func (c *CellIcon) Layout() {
 			c.layout.SetDim(1, 1)
 			defer lbl.Close()
 			if len(notes) == 0 {
-				lbl.Bg(colors.Orange)
+				lbl.Bg(colornames.Orange)
 			} else {
-				lbl.Bg(colors.Silver)
+				lbl.Bg(colornames.Silver)
 			}
 			lbl.Fg(c.GetFg())
 			// log.Println("Иконка без заметок", c.cell.GetValue())

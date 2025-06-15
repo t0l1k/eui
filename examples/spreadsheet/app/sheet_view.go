@@ -3,8 +3,8 @@ package app
 import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/spreadsheet/sheet"
+	"golang.org/x/image/colornames"
 )
 
 type SpreadsheetView struct {
@@ -55,9 +55,9 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 				for _, v := range sv.laySheet.GetContainer() {
 					switch vv := v.(type) {
 					case *eui.Button:
-						if vv.GetBg() == colors.Aqua {
-							vv.Bg(colors.Gray)
-							vv.Fg(colors.Yellow)
+						if vv.GetBg() == colornames.Aqua {
+							vv.Bg(colornames.Gray)
+							vv.Fg(colornames.Yellow)
 							if sv.activeCell.IsActive() {
 								sv.activeCell.SetInActive()
 								sv.activeCell = nil
@@ -66,8 +66,8 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 						}
 					}
 				}
-				b.Bg(colors.Aqua)
-				b.Fg(colors.Black)
+				b.Bg(colornames.Aqua)
+				b.Fg(colornames.Black)
 				if cell.IsContainFormula() {
 					sv.input.SetText(cell.GetFormula().String())
 				} else {
@@ -81,7 +81,7 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 				btn.SetText(data.(string))
 			})
 			sv.sheet.InitCell(grid, cell)
-			sv.laySheet.AddBgFg(btn, colors.Gray, colors.Yellow)
+			sv.laySheet.AddBgFg(btn, colornames.Gray, colornames.Yellow)
 		}
 	}
 	return &sv

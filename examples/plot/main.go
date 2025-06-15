@@ -41,5 +41,5 @@ func NewGame() *eui.Ui {
 func main() {
 	eui.Init(NewGame())
 	eui.Run(NewSceneTestPlot())
-	eui.Quit()
+	eui.Quit(func() {})
 }

@@ -7,7 +7,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 type InputBox2 struct {
@@ -99,7 +99,7 @@ func (i *InputBox2) Update(dt int) {
 		i.lbl.Bg(i.bg)
 		for _, v := range i.textVar.Value().(string) {
 			if !unicode.IsDigit(v) && !(v == '.' || v == ',') {
-				i.lbl.Bg(colors.Red)
+				i.lbl.Bg(colornames.Red)
 			}
 		}
 	}

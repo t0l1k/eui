@@ -5,7 +5,7 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 type SnackBar struct {
@@ -17,8 +17,8 @@ type SnackBar struct {
 func NewSnackBar(message string) *SnackBar {
 	s := &SnackBar{}
 	s.msg = NewText(message)
-	s.msg.Bg(colors.Blue)
-	s.msg.Fg(colors.Yellow)
+	s.msg.Bg(colornames.Blue)
+	s.msg.Fg(colornames.Yellow)
 	s.Add(s.msg)
 	s.Resize([]int{})
 	return s

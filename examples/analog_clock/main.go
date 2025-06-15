@@ -12,7 +12,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 // Стрелка часов с рисованием прозрачного фона и самой стрелки, можно напрямую рисовать через draw, только стрелку, но так элегантнее, все через макет и уже в контейнере обновить и перерисовать
@@ -313,20 +313,20 @@ const (
 
 func setAppTheme() {
 	theme := eui.GetUi().GetTheme()
-	theme.Set(AppBg, colors.Silver)
-	theme.Set(AppFg, colors.Black)
-	theme.Set(ApplblBg, colors.GreenYellow)
-	theme.Set(ApplblFg, colors.Black)
-	theme.Set(AppfaceBg, colors.Navy)
-	theme.Set(AppfaceFg, colors.GreenYellow)
-	theme.Set(AppMsSecondHandFg, colors.Black)
-	theme.Set(AppSecondHandFg, colors.Red)
-	theme.Set(AppMinuteHandFg, colors.Blue)
-	theme.Set(AppHourHandFg, colors.Navy)
+	theme.Set(AppBg, colornames.Silver)
+	theme.Set(AppFg, colornames.Black)
+	theme.Set(ApplblBg, colornames.Greenyellow)
+	theme.Set(ApplblFg, colornames.Black)
+	theme.Set(AppfaceBg, colornames.Navy)
+	theme.Set(AppfaceFg, colornames.Greenyellow)
+	theme.Set(AppMsSecondHandFg, colornames.Black)
+	theme.Set(AppSecondHandFg, colornames.Red)
+	theme.Set(AppMinuteHandFg, colornames.Blue)
+	theme.Set(AppHourHandFg, colornames.Navy)
 }
 
 func main() {
 	eui.Init(NewGame())
 	eui.Run(NewSceneAnalogClock())
-	eui.Quit()
+	eui.Quit(func() {})
 }

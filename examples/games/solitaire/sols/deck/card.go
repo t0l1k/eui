@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"image/color"
 
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 type Card struct {
@@ -52,9 +52,9 @@ func (s *Card) IsOneHigh(other *Card) bool {
 func (s Card) Color() (col color.Color) {
 	switch s.suit {
 	case Hearts, Diamonds:
-		col = colors.Red
+		col = colornames.Red
 	case Clubs, Spades:
-		col = colors.Black
+		col = colornames.Black
 	}
 	return col
 }

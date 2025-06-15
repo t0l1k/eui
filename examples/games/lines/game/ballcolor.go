@@ -3,7 +3,7 @@ package game
 import (
 	"image/color"
 
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 type BallColor int
@@ -49,24 +49,24 @@ func (b BallColor) String() string {
 func (b BallColor) Color() color.RGBA {
 	switch b {
 	case BallBrown:
-		return colors.Maroon
+		return colornames.Maroon
 	case BallYellow:
-		return colors.Yellow
+		return colornames.Yellow
 	case BallGreen:
-		return colors.Green
+		return colornames.Green
 	case BallRed:
-		return colors.Red
+		return colornames.Red
 	case BallAqua:
-		return colors.Aqua
+		return colornames.Aqua
 	case BallBlue:
-		return colors.Blue
+		return colornames.Blue
 	case BallMagenta:
-		return colors.Fuchsia
+		return colornames.Fuchsia
 	case BallPurple:
-		return colors.Purple
+		return colornames.Purple
 	case BallOrange:
-		return colors.Orange
+		return colornames.Orange
 	default:
-		return colors.Silver
+		return colornames.Silver
 	}
 }

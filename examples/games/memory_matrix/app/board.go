@@ -6,8 +6,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/games/memory_matrix/mem"
+	"golang.org/x/image/colornames"
 )
 
 type BoardMem struct {
@@ -71,7 +71,7 @@ func (d *BoardMem) SetupPreparation() {
 	d.layout.Resize(d.GetRect().GetArr())
 	str := d.gamesData.String()
 	d.varMsg.Emit(str)
-	d.varColor.Emit([]color.Color{colors.YellowGreen, colors.Black})
+	d.varColor.Emit([]color.Color{colornames.Yellowgreen, colornames.Black})
 	log.Println("Setup Preparation done", d.game.String())
 }
 
@@ -85,7 +85,7 @@ func (d *BoardMem) SetupShow() {
 			btn := eui.NewButton(" ", d.fn)
 			btn.Disable()
 			if cell.IsReadOnly() {
-				btn.Bg(colors.Orange)
+				btn.Bg(colornames.Orange)
 			}
 			d.layout.Add(btn)
 		}
@@ -93,7 +93,7 @@ func (d *BoardMem) SetupShow() {
 	d.layout.Resize(d.GetRect().GetArr())
 	str := d.gamesData.String()
 	d.varMsg.Emit(str)
-	d.varColor.Emit([]color.Color{colors.Red, colors.Black})
+	d.varColor.Emit([]color.Color{colornames.Red, colornames.Black})
 	log.Println("Setup Show Done", d.game.String())
 }
 
@@ -111,7 +111,7 @@ func (d *BoardMem) SetupRecolection() {
 	d.layout.Resize(d.GetRect().GetArr())
 	str := d.gamesData.String()
 	d.varMsg.Emit(str)
-	d.varColor.Emit([]color.Color{colors.Blue, colors.Yellow})
+	d.varColor.Emit([]color.Color{colornames.Blue, colornames.Yellow})
 	log.Println("Setup Recolection Done", d.game.String())
 }
 
@@ -123,17 +123,17 @@ func (d *BoardMem) SetupConclusion() {
 	sb := eui.NewSnackBar("")
 	if d.Game().Win {
 		str = "Winner"
-		sb.Bg(colors.Blue)
+		sb.Bg(colornames.Blue)
 	} else if d.Game().GameOver {
 		str = "Game Over"
-		sb.Bg(colors.Red)
+		sb.Bg(colornames.Red)
 	}
 	sb.SetText(str + " " + d.Game().String()).Show(3000)
 	btn := d.setupScoreBtn()
 	d.layout.Add(btn)
 	d.layout.Resize(d.GetRect().GetArr())
 	d.varMsg.Emit(d.gamesData.String())
-	d.varColor.Emit([]color.Color{colors.Fuchsia, colors.Black})
+	d.varColor.Emit([]color.Color{colornames.Fuchsia, colornames.Black})
 	d.Add(sb)
 	log.Println("Setup Conclusion done", d.game.String())
 }

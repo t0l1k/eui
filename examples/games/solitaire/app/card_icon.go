@@ -5,9 +5,9 @@ import (
 	"image/color"
 
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/games/solitaire/sols"
 	"github.com/t0l1k/eui/examples/games/solitaire/sols/deck"
+	"golang.org/x/image/colornames"
 )
 
 type CardIcon struct {
@@ -25,14 +25,14 @@ func NewCardIcon(cell *sols.Cell, f func(b *eui.Button)) *CardIcon {
 	str := ""
 	var col color.Color
 	if c.cell.IsEmpty() {
-		col = colors.Blue
+		col = colornames.Blue
 		str = ""
 	} else {
 		col = c.cell.GetCard().Color()
 		str = c.cell.GetCard().StringShort()
 	}
 	c.btn = eui.NewButton(str, f)
-	c.btn.Bg(colors.White)
+	c.btn.Bg(colornames.White)
 	c.btn.Fg(col)
 	c.Add(c.btn)
 	c.Visible(true)
@@ -44,7 +44,7 @@ func (c *CardIcon) UpdateData(value interface{}) {
 	case *deck.Card:
 		if v == nil {
 			c.btn.SetText(" ")
-			c.btn.Fg(colors.Blue)
+			c.btn.Fg(colornames.Blue)
 		} else {
 			c.btn.SetText(v.StringShort())
 			c.btn.Fg(c.cell.GetCard().Color())

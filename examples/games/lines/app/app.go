@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 const (
@@ -20,6 +20,6 @@ func NewGameLines() *eui.Ui {
 	k := 60
 	w, h := 9*k, 6*k
 	u.SetSize(w, h)
-	u.GetTheme().Set(eui.ViewBg, colors.Black)
+	u.GetTheme().Set(eui.ViewBg, colornames.Black)
 	return u
 }

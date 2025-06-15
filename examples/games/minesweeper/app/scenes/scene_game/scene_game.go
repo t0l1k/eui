@@ -25,17 +25,7 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 	s.Add(s.topBar)
 	s.game = newGame(r, c, m)
 	s.Add(s.game)
-	s.game.field.State.Connect(func(value any) {
-		v := value.(string)
-		switch v {
-		case game.GameStart:
-			s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
-		case game.GameWin:
-			s.btnStatus.SetReleasedIcon(res.SmileSprites[3])
-		case game.GameOver:
-			s.btnStatus.SetReleasedIcon(res.SmileSprites[4])
-		}
-	})
+	s.game.field.State.Connect(s.UpdateData)
 	s.lblMines = eui.NewText("" + strconv.Itoa(s.game.field.GetTotalMines()))
 	s.Add(s.lblMines)
 	s.lblGameTimer = eui.NewText("00:00")
@@ -80,19 +70,19 @@ func (s *SceneGame) checkBtnStatus() {
 	}
 }
 
-// func (s *SceneGame) UpdateData(value interface{}) {
-// 	switch v := value.(type) {
-// 	case string:
-// 		switch v {
-// 		case game.GameStart:
-// 			s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
-// 		case game.GameWin:
-// 			s.btnStatus.SetReleasedIcon(res.SmileSprites[3])
-// 		case game.GameOver:
-// 			s.btnStatus.SetReleasedIcon(res.SmileSprites[4])
-// 		}
-// 	}
-// }
+func (s *SceneGame) UpdateData(value interface{}) {
+	switch v := value.(type) {
+	case string:
+		switch v {
+		case game.GameStart:
+			s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
+		case game.GameWin:
+			s.btnStatus.SetReleasedIcon(res.SmileSprites[3])
+		case game.GameOver:
+			s.btnStatus.SetReleasedIcon(res.SmileSprites[4])
+		}
+	}
+}
 
 func (s *SceneGame) Resize() {
 	w, h := eui.GetUi().Size()

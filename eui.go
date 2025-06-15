@@ -32,7 +32,11 @@ func Run(sc Sceneer) {
 }
 
 // Что-то перед выходом из приложения сделать
-func Quit() {}
+func Quit(fn func()) {
+	if fn != nil {
+		fn()
+	}
+}
 
 // Одиночка
 func GetUi() (u *Ui) {

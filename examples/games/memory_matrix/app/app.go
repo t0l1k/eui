@@ -2,7 +2,7 @@ package app
 
 import (
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 const (
@@ -15,6 +15,6 @@ func NewApp() *eui.Ui {
 	k := 80
 	w, h := 9*k, 6*k
 	u.SetSize(w, h)
-	u.GetTheme().Set(eui.ViewBg, colors.Navy)
+	u.GetTheme().Set(eui.ViewBg, colornames.Navy)
 	return u
 }

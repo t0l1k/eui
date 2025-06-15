@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/games/sudoku/game"
+	"golang.org/x/image/colornames"
 )
 
 type SceneSudoku struct {
@@ -68,7 +68,7 @@ func NewSceneSudoku() *SceneSudoku {
 						gamesData.AddGameResult(s.board.dim, s.board.diff, s.board.sw.Duration())
 						margin := s.dialogSelect.margin
 						s.dialogSelect.history.Reset()
-						s.dialogSelect.history.SetupListViewText(gamesData.GamesPlayed(), margin, 1, colors.Aqua, colors.Black)
+						s.dialogSelect.history.SetupListViewText(gamesData.GamesPlayed(), margin, 1, colornames.Aqua, colornames.Black)
 						for _, v := range s.dialogSelect.btnsDiff {
 							if v.diff.Eq(s.board.diff) && v.dim.Eq(s.board.dim) {
 								value := gamesData.GetLastBest(s.board.dim, s.board.diff)

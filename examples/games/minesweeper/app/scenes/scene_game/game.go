@@ -18,24 +18,7 @@ func newGame(r, c, m int) *Game {
 	g.layout = eui.NewGridLayoutRightDown(float64(r), float64(c))
 	g.layout.SetCellMargin(1)
 	g.field = game.NewMinedField(r, c, m)
-	g.field.State.Connect(func(data any) {
-		v := data.(string)
-		switch v {
-		case game.GameStart, game.GamePlay:
-			for _, cell := range g.layout.GetContainer() {
-				if cell.(*game.CellIcon).Btn.IsDisabled() {
-					cell.(*game.CellIcon).Btn.Enable()
-				}
-			}
-		case game.GameWin, game.GameOver:
-			g.timer.Stop()
-			for _, cell := range g.layout.GetContainer() {
-				if !cell.(*game.CellIcon).Btn.IsDisabled() {
-					cell.(*game.CellIcon).Btn.Disable()
-				}
-			}
-		}
-	})
+	g.field.State.Connect(g.UpdateData)
 	g.timer = eui.NewStopwatch()
 	g.New()
 	return g
@@ -57,7 +40,7 @@ func (g *Game) setupBoard() {
 		}
 		x, y := g.field.GetPos(i)
 		cell := g.field.GetCell(x, y)
-		cell.State.Attach(btn)
+		cell.State.Connect(btn.UpdateData)
 		g.layout.Add(btn)
 	}
 }
@@ -129,26 +112,26 @@ func (g *Game) Update(dt int) {
 	}
 }
 
-// func (g *Game) UpdateData(value interface{}) {
-// 	switch v := value.(type) {
-// 	case string:
-// 		switch v {
-// 		case game.GameStart, game.GamePlay:
-// 			for _, cell := range g.layout.GetContainer() {
-// 				if cell.(*game.CellIcon).Btn.IsDisabled() {
-// 					cell.(*game.CellIcon).Btn.Enable()
-// 				}
-// 			}
-// 		case game.GameWin, game.GameOver:
-// 			g.timer.Stop()
-// 			for _, cell := range g.layout.GetContainer() {
-// 				if !cell.(*game.CellIcon).Btn.IsDisabled() {
-// 					cell.(*game.CellIcon).Btn.Disable()
-// 				}
-// 			}
-// 		}
-// 	}
-// }
+func (g *Game) UpdateData(value interface{}) {
+	switch v := value.(type) {
+	case string:
+		switch v {
+		case game.GameStart, game.GamePlay:
+			for _, cell := range g.layout.GetContainer() {
+				if cell.(*game.CellIcon).Btn.IsDisabled() {
+					cell.(*game.CellIcon).Btn.Enable()
+				}
+			}
+		case game.GameWin, game.GameOver:
+			g.timer.Stop()
+			for _, cell := range g.layout.GetContainer() {
+				if !cell.(*game.CellIcon).Btn.IsDisabled() {
+					cell.(*game.CellIcon).Btn.Disable()
+				}
+			}
+		}
+	}
+}
 
 func (g *Game) Draw(surface *ebiten.Image) {
 	for _, cell := range g.layout.GetContainer() {

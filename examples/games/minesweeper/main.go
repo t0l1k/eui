@@ -9,5 +9,5 @@ import (
 func main() {
 	eui.Init(app.NewGame())
 	eui.Run(scene_main.NewSceneSelectGame())
-	eui.Quit()
+	eui.Quit(func() {})
 }

@@ -4,7 +4,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 type Cursor struct {
@@ -30,9 +30,9 @@ func (s *Cursor) Visible(value bool) {
 
 func (c *Cursor) Layout() {
 	c.SpriteBase.Layout()
-	c.Image().Fill(colors.SetInvisible(c.GetBg()))
+	c.Image().Fill(color.Transparent)
 	if c.show {
-		c.Image().Fill(colors.Red)
+		c.Image().Fill(colornames.Red)
 	}
 	c.Dirty = false
 }

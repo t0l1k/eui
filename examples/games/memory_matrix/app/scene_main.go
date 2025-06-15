@@ -4,8 +4,8 @@ import (
 	"image/color"
 
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
 	"github.com/t0l1k/eui/examples/games/memory_matrix/mem"
+	"golang.org/x/image/colornames"
 )
 
 type SceneMain struct {
@@ -43,9 +43,9 @@ func NewSceneMain() *SceneMain {
 					switch s.board.Game().Stage() {
 					case mem.Recollection:
 						if s.board.game.Move(i) {
-							v.(*eui.Button).Bg(colors.Aqua)
+							v.(*eui.Button).Bg(colornames.Aqua)
 						} else {
-							v.(*eui.Button).Bg(colors.Orange)
+							v.(*eui.Button).Bg(colornames.Orange)
 						}
 					}
 				}

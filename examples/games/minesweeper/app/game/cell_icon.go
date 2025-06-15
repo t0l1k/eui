@@ -5,7 +5,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 // Умею обновить клетку игры по подписке на состояние клетки поля
@@ -25,8 +25,8 @@ func NewCellIcon(field *MinedField, f func(b *eui.Button)) *CellIcon {
 func (c *CellIcon) Setup(field *MinedField, f func(b *eui.Button)) {
 	c.field = field
 	c.Btn.SetupButton(cellClosed, f)
-	c.Btn.Bg(colors.Gray)
-	c.Btn.Fg(colors.Red)
+	c.Btn.Bg(colornames.Gray)
+	c.Btn.Fg(colornames.Red)
 }
 
 func (c *CellIcon) UpdateData(value interface{}) {
@@ -35,8 +35,8 @@ func (c *CellIcon) UpdateData(value interface{}) {
 		switch v.state {
 		case closed:
 			c.Btn.SetText(cellClosed)
-			c.Btn.Bg(colors.Gray)
-			c.Btn.Fg(colors.Red)
+			c.Btn.Bg(colornames.Gray)
+			c.Btn.Fg(colornames.Red)
 		case flagged:
 			c.Btn.SetText(cellFlagged)
 		case questioned:
@@ -44,7 +44,7 @@ func (c *CellIcon) UpdateData(value interface{}) {
 		case firstMined:
 			c.Btn.SetText(cellFirstMined)
 		case saved:
-			c.Btn.Fg(colors.Yellow)
+			c.Btn.Fg(colornames.Yellow)
 			c.Btn.SetText(cellSaved)
 		case blown:
 			c.Btn.SetText(cellBlown)
@@ -55,39 +55,39 @@ func (c *CellIcon) UpdateData(value interface{}) {
 			switch cell.count {
 			case 0:
 				c.Btn.SetText(cellClosed)
-				c.Btn.Bg(colors.Silver)
+				c.Btn.Bg(colornames.Silver)
 			case 1:
 				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colors.Silver)
-				c.Btn.Fg(colors.Blue)
+				c.Btn.Bg(colornames.Silver)
+				c.Btn.Fg(colornames.Blue)
 			case 2:
 				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colors.Silver)
-				c.Btn.Fg(colors.Orange)
+				c.Btn.Bg(colornames.Silver)
+				c.Btn.Fg(colornames.Orange)
 			case 3:
 				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colors.Silver)
-				c.Btn.Fg(colors.Green)
+				c.Btn.Bg(colornames.Silver)
+				c.Btn.Fg(colornames.Green)
 			case 4:
 				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colors.Silver)
-				c.Btn.Fg(colors.Aqua)
+				c.Btn.Bg(colornames.Silver)
+				c.Btn.Fg(colornames.Aqua)
 			case 5:
 				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colors.Silver)
-				c.Btn.Fg(colors.Navy)
+				c.Btn.Bg(colornames.Silver)
+				c.Btn.Fg(colornames.Navy)
 			case 6:
 				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colors.Silver)
-				c.Btn.Fg(colors.Fuchsia)
+				c.Btn.Bg(colornames.Silver)
+				c.Btn.Fg(colornames.Fuchsia)
 			case 7:
 				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colors.Silver)
-				c.Btn.Fg(colors.Purple)
+				c.Btn.Bg(colornames.Silver)
+				c.Btn.Fg(colornames.Purple)
 			case 8:
 				c.Btn.SetText(strconv.Itoa(int(cell.count)))
-				c.Btn.Bg(colors.Silver)
-				c.Btn.Fg(colors.Black)
+				c.Btn.Bg(colornames.Silver)
+				c.Btn.Fg(colornames.Black)
 			}
 		}
 	}

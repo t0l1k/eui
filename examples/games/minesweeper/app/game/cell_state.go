@@ -24,44 +24,5 @@ type cellData struct {
 func newCellData(state, value string, pos eui.PointInt) *cellData {
 	return &cellData{pos: pos, state: state, value: value}
 }
-
+func (c *cellData) State() string   { return c.state }
 func (cd *cellData) String() string { return "cell[" + cd.value + "]at:" + cd.pos.String() + cd.state }
-
-// Умею оповестить подписчиков о смене состояния в ячейке
-type cellState struct {
-	listener []eui.Observerer
-	data     *cellData
-}
-
-func newCellState(state string, pos eui.PointInt) *cellState {
-	s := &cellState{}
-	s.SetValue(newCellData(state, cellClosed, pos))
-	return s
-}
-
-func (c cellState) Value() string { return c.data.state }
-
-func (s *cellState) SetValue(value *cellData) {
-	if s.data == value {
-		return
-	}
-	s.data = value
-	s.Notify()
-}
-
-func (s *cellState) Attach(o eui.Observerer) { s.listener = append(s.listener, o) }
-
-func (s *cellState) Detach(o eui.Observerer) {
-	for i, observer := range s.listener {
-		if observer == o {
-			s.listener = append(s.listener[:i], s.listener[i+1:]...)
-			break
-		}
-	}
-}
-
-func (s *cellState) Notify() {
-	for _, observer := range s.listener {
-		observer.UpdateData(s.data)
-	}
-}

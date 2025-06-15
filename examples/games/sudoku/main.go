@@ -8,5 +8,5 @@ import (
 func main() {
 	eui.Init(app.NewGameSudoku())
 	eui.Run(app.NewSceneSudoku())
-	eui.Quit()
+	eui.Quit(func() {})
 }

@@ -7,7 +7,7 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
-	"github.com/t0l1k/eui/colors"
+	"golang.org/x/image/colornames"
 )
 
 type Plot struct {
@@ -20,9 +20,9 @@ type Plot struct {
 func NewPlot(xArr, yArr, values []int, title, xTitle, yTitle string) *Plot {
 	p := &Plot{xArr: xArr, yArr: yArr, values: values, pTitle: title, xAxisTitle: xTitle, yAxisTitle: yTitle}
 	p.Visible(true)
-	p.bg = colors.Gray
-	p.fg = colors.YellowGreen
-	p.fgValues = colors.Blue
+	p.bg = colornames.Gray
+	p.fg = colornames.Yellowgreen
+	p.fgValues = colornames.Blue
 	return p
 }
 
