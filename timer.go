@@ -35,5 +35,5 @@ func (t *Timer) TimePassed() int { return t.duration - t.timer }
 func (t *Timer) TimeLeft() int   { return t.timer }
 
 func (t *Timer) String() string {
-	return strconv.Itoa(t.timer/1000 + 1)
+	return strconv.Itoa(t.timer)
 }

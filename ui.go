@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 // Умею иницализировать для Ebitenengine приложение, затем запускается сцена в которой отслеживаются через подписку от клавиатуры, мыши, касания экрана события и передаются структуре View, InputBox(клавиатуры, пока только цифры). Остальным виджетам это текстовая метка(Text) и изображение(Image) встаивается структура View, которая определяет события от мыши(InputState) и меняет состояние виджета это при наведении, в фокусе, покидание курсором виджета. Все происходит в сцене, где есть обновление и дельта от последнего обновления и рисование, затем уже сцена передает внутри себя виджетам события. После создания сцены по умолчанию создается раскладка по вертикали и при переопределении метода Resize уже в нем производится раскладка виджетов внутри сцены.
@@ -59,19 +58,22 @@ func (u *Ui) HandleEvent(ev Event) {
 			scene.Resize()
 		}
 		log.Println("Resize app done, new size:", r)
+	case EventKeyReleased:
+		kd := ev.Value.(KeyboardData)
+		if kd.IsReleased(ebiten.KeyF12) {
+			u.ToggleFullscreen()
+		}
+		if kd.IsReleased(ebiten.KeyEscape) {
+			err := u.Pop()
+			if err != nil {
+				os.Exit(0)
+			}
+		}
 	}
 }
 
 func (u *Ui) Update() error {
 	tick := u.getTick()
-	if inpututil.IsKeyJustReleased(ebiten.KeyEscape) || ebiten.IsWindowBeingClosed() {
-		err := u.Pop()
-		if err != nil {
-			os.Exit(0)
-		}
-	} else if inpututil.IsKeyJustReleased(ebiten.KeyF12) {
-		u.ToggleFullscreen()
-	}
 	u.inputMouse.update(tick)
 	u.inputTouch.update(tick)
 	u.inputKeyboard.update(tick)

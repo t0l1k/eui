@@ -43,15 +43,15 @@ func GetUi() (u *Ui) {
 	if uiInstance == nil {
 		tm := time.Now()
 		u = &Ui{
-			start:         time.Now(),
-			tick:          tm.Nanosecond() / 1e6,
-			scenes:        []Sceneer{},
-			inputMouse:    NewMouseInput(),
-			inputTouch:    NewTouchInput(),
-			inputKeyboard: NewKeyboardInput(),
-			theme:         DefaultTheme(),
-			settings:      DefaultSettings(),
+			start:      time.Now(),
+			tick:       tm.Nanosecond() / 1e6,
+			scenes:     []Sceneer{},
+			inputMouse: NewMouseInput(),
+			inputTouch: NewTouchInput(),
+			theme:      DefaultTheme(),
+			settings:   DefaultSettings(),
 		}
+		u.inputKeyboard = NewKeyboardInput(u.HandleEvent)
 		u.resizeListener = NewResizeListener(u.HandleEvent)
 		log.Printf("Ui init done")
 	} else {

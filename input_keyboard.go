@@ -1,69 +1,71 @@
 package eui
 
 import (
+	"log"
+	"slices"
+
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 )
 
 type KeyboardData struct {
-	keys  []ebiten.Key
-	runes []rune
+	keysP, keysR []ebiten.Key
+	runes        []rune
 }
 
-func (k *KeyboardData) GetKeys() []ebiten.Key { return k.keys }
-func (k *KeyboardData) GetRunes() []rune      { return k.runes }
+func NewKeyboardData(p, r []ebiten.Key, rn []rune) KeyboardData {
+	return KeyboardData{keysP: p, keysR: r, runes: rn}
+}
 
-// Умею передать подписчикам события от клавиатуры, пока только цифры. При нажатой клавише, более 250 мс символ дублируется.
+func (k *KeyboardData) GetKeysPressed() []ebiten.Key     { return k.keysP }
+func (k *KeyboardData) GetKeysReleased() []ebiten.Key    { return k.keysR }
+func (k *KeyboardData) GetRunes() []rune                 { return k.runes }
+func (k *KeyboardData) IsPressed(value ebiten.Key) bool  { return slices.Contains(k.keysP, value) }
+func (k *KeyboardData) IsReleased(value ebiten.Key) bool { return slices.Contains(k.keysR, value) }
+
+// Умею передать подписчикам события от клавиатуры. При нажатой клавише, более 250 мс символ дублируется.
 type KeyboardInput struct {
-	value    KeyboardData
-	timer    *Timer
-	listener []Inputer
+	*Signal[Event]
+	timer *Timer
 }
 
 // Пауза 250мс до следующего нажатия
-func NewKeyboardInput() *KeyboardInput { return &KeyboardInput{timer: NewTimer(250)} }
-
-func (s *KeyboardInput) Attach(o Inputer) { s.listener = append(s.listener, o) }
-func (s *KeyboardInput) Detach(o Inputer) {
-	for i, observer := range s.listener {
-		if observer == o {
-			s.listener = append(s.listener[:i], s.listener[i+1:]...)
-			break
-		}
+func NewKeyboardInput(fn SlotFunc[Event]) *KeyboardInput {
+	k := &KeyboardInput{
+		Signal: NewSignal[Event](),
+		timer:  NewTimer(250),
 	}
+	k.Connect(fn)
+	return k
 }
 
-func (s *KeyboardInput) SetValue(keys []ebiten.Key, runes []rune) {
-	s.value.keys = nil
-	s.value.keys = append(s.value.keys, keys...)
-	s.value.runes = nil
-	s.value.runes = append(s.value.runes, runes...)
-	s.Notify()
-}
+func (s *KeyboardInput) SetDelay(value int) { s.timer.SetDuration(value) }
 
-func (s *KeyboardInput) Notify() {
-	for _, observer := range s.listener {
-		observer.UpdateInput(s.value)
-	}
-}
-
-// Передать новое или повторное нажатие после истечения паузы
+// Передать новое или повторное нажатие клавиши после истечения паузы, для символов([]rune) повтор не работает
 func (s *KeyboardInput) update(dt int) {
-	keys := inpututil.AppendPressedKeys(s.value.keys[:0])
-	runes := ebiten.AppendInputChars(s.value.runes[:0])
-	if len(keys) == 0 {
+	keysP := inpututil.AppendPressedKeys(nil)
+	keysR := inpututil.AppendJustReleasedKeys(nil)
+	runes := ebiten.AppendInputChars(nil)
+	kd := NewKeyboardData(keysP, keysR, runes)
+	if len(keysP) == 0 && len(keysR) == 0 {
 		s.timer.Off()
 		return
 	}
 	s.timer.Update(dt)
-	if len(keys) > 0 {
+	if len(keysP) > 0 {
 		if !s.timer.IsOn() {
-			s.SetValue(keys, runes)
+			s.Emit(NewEvent(EventKeyPressed, kd))
 			s.timer.On()
+			log.Println("KeyboardInput:Emit:pressed", kd, s.timer.String())
 		}
 		if s.timer.IsDone() {
-			s.SetValue(keys, runes)
+			s.Emit(NewEvent(EventKeyPressed, kd))
 			s.timer.Reset()
+			log.Println("KeyboardInput:Timer:repeat", kd, s.timer.String())
 		}
+	}
+	if len(keysR) > 0 {
+		s.Emit(NewEvent(EventKeyReleased, kd))
+		log.Println("KeyboardInput:Emit:released", kd, s.timer.String())
 	}
 }

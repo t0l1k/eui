@@ -19,6 +19,7 @@ type InputKey struct {
 	btn    *eui.Button
 	active bool
 	Value  ebiten.Key
+	kId    int64
 }
 
 func NewInputKey(title string) *InputKey {
@@ -32,16 +33,16 @@ func NewInputKey(title string) *InputKey {
 		}
 	})
 	i.Add(i.btn)
-	eui.GetUi().GetInputKeyboard().Attach(i)
+	i.kId = eui.GetUi().GetInputKeyboard().Connect(i.UpdateInput)
 	return i
 }
 
-func (i *InputKey) UpdateInput(value interface{}) {
-	switch v := value.(type) {
-	case eui.KeyboardData:
-		if i.active {
-			i.btn.SetText(v.GetKeys()[0].String())
-			i.Value = v.GetKeys()[0]
+func (i *InputKey) UpdateInput(ev eui.Event) {
+	kd := ev.Value.(eui.KeyboardData)
+	if i.active {
+		if ev.Type == eui.EventKeyReleased {
+			i.btn.SetText(kd.GetKeysReleased()[0].String())
+			i.Value = kd.GetKeysReleased()[0]
 		}
 	}
 }
@@ -67,7 +68,7 @@ func (i *InputKey) String() string {
 	return fmt.Sprintf("%v: %v", i.lbl.GetText(), i.Value)
 }
 
-func (i *InputKey) Close() { eui.GetUi().GetInputKeyboard().Detach(i) }
+func (i *InputKey) Close() { eui.GetUi().GetInputKeyboard().Disconnect(i.kId) }
 
 type HotkeyDialog struct {
 	eui.DrawableBase

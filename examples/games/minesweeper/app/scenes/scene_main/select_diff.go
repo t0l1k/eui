@@ -17,6 +17,7 @@ type SelectDiff struct {
 	comboRow, comboCol, comboMines *eui.ComboBox
 	btnExec                        *eui.Button
 	percent, row, column           int
+	kId                            int64
 }
 
 func NewSelectDiff(title string) *SelectDiff {
@@ -57,18 +58,13 @@ func NewSelectDiff(title string) *SelectDiff {
 
 func (s *SelectDiff) Entered() {
 	s.Resize()
-	eui.GetUi().GetInputKeyboard().Attach(s)
+	s.kId = eui.GetUi().GetInputKeyboard().Connect(s.UpdateInput)
 }
 
-func (s *SelectDiff) UpdateInput(value interface{}) {
-	switch v := value.(type) {
-	case eui.KeyboardData:
-		for _, key := range v.GetKeys() {
-			if key == ebiten.KeySpace {
-				s.runGame()
-				log.Println("pressed <space>", len(v.GetKeys()), v.GetKeys())
-			}
-		}
+func (s *SelectDiff) UpdateInput(ev eui.Event) {
+	kd := ev.Value.(eui.KeyboardData)
+	if kd.IsReleased(ebiten.KeySpace) {
+		s.runGame()
 	}
 }
 
@@ -76,7 +72,7 @@ func (s *SelectDiff) runGame() {
 	mines := s.percent * (s.row * s.column) / 100
 	str := "Игра на " + strconv.Itoa(s.column) + " столбиков" + strconv.Itoa(s.row) + " рядов " + strconv.Itoa(mines) + " мин"
 	game := scene_game.NewSceneGame(str, s.row, s.column, mines)
-	eui.GetUi().GetInputKeyboard().Detach(s)
+	eui.GetUi().GetInputKeyboard().Disconnect(s.kId)
 	eui.GetUi().Push(game)
 	log.Println("run game", s.row, s.column, mines)
 }

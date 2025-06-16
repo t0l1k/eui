@@ -19,6 +19,7 @@ type InputBox struct {
 	keyboardState InputKeyboardState
 	onReturn      func(*InputBox)
 	onlyDigits    bool
+	keyListenerId int64
 }
 
 func NewInputBox(text string, size int, onReturn func(*InputBox)) *InputBox {
@@ -54,7 +55,7 @@ func (inp *InputBox) setupBox(text string) {
 	inp.btn.Fg(inp.fg)
 	inp.btn.Bg(inp.bg)
 	inp.cursor = NewCursor(inp.bg, inp.fg)
-	GetUi().inputKeyboard.Attach(inp)
+	inp.keyListenerId = GetUi().GetInputKeyboard().Connect(inp.UpdateInput)
 }
 
 func (inp *InputBox) setPrompt() string {
@@ -71,25 +72,30 @@ func (inp *InputBox) setPrompt() string {
 	return str
 }
 
-func (inp *InputBox) UpdateInput(value interface{}) {
-	switch vl := value.(type) {
-	case KeyboardData:
-		if inp.state == ViewStateActive {
-			for _, v := range vl.keys {
-				if v == ebiten.KeyBackspace {
-					inp.keyboardState = KeyBackspace
-				} else if v == ebiten.KeyEnter {
-					inp.keyboardState = KeyEnter
-				} else if v == ebiten.KeyEscape {
-					inp.keyboardState = KeyEscape
-				} else {
-					inp.keyboardState = KeyPressed
-					inp.parseInput(vl.GetRunes())
+func (inp *InputBox) UpdateInput(ev Event) {
+	if inp.state != ViewStateActive {
+		return
+	}
+	kd := ev.Value.(KeyboardData)
+	if len(kd.GetRunes()) > 0 {
+		inp.parseInput(kd.GetRunes())
+	}
+	if kd.IsReleased(ebiten.KeyBackspace) {
+		if len(inp._text) > 0 {
+			inp._text = inp._text[:len(inp._text)-1]
+			inp.btn.SetText(inp.setPrompt())
+			inp.keyboardState = KeyReleased
+			if inp.onlyDigits {
+				_, err := strconv.ParseFloat(inp._text, 64)
+				if err == nil || len(inp._text) == 0 {
+					inp.btn.Bg(inp.bg)
 				}
 			}
-			if len(vl.keys) == 0 {
-				inp.keyboardState = KeyReleased
-			}
+		}
+	}
+	if kd.IsReleased(ebiten.KeyEnter) {
+		if inp.onReturn != nil {
+			inp.onReturn(inp)
 		}
 	}
 }
@@ -191,4 +197,4 @@ func (inp *InputBox) Resize(rect []int) {
 	inp.cursor.Resize([]int{x + w*(inp.size) - w1, y, w1, h})
 }
 
-func (inp *InputBox) Close() { GetUi().inputKeyboard.Detach(inp) }
+func (inp *InputBox) Close() { GetUi().GetInputKeyboard().Disconnect(inp.keyListenerId) }
