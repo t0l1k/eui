@@ -3,6 +3,7 @@ package eui
 import "github.com/hajimehoshi/ebiten/v2"
 
 type Drawabler interface {
+	IsVisible() bool
 	Visible(bool)
 	Enable()
 	Disable()

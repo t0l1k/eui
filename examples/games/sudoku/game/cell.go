@@ -14,7 +14,7 @@ type Cell struct {
 	readOnly bool
 }
 
-func newCell() *Cell { return &Cell{Signal: eui.NewSignal[int]()} }
+func newCell() *Cell { return &Cell{Signal: eui.NewSignal(func(a, b int) bool { return a == b })} }
 
 func (c *Cell) reset(size int) {
 	c.Emit(0)

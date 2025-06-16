@@ -15,7 +15,7 @@ type Cell struct {
 }
 
 func NewCell(grid Grid) *Cell {
-	c := &Cell{Signal: eui.NewSignal[string]()}
+	c := &Cell{Signal: eui.NewSignal(func(a, b string) bool { return a == b })}
 	c.Emit("")
 	c.grid = grid
 	c.active = false

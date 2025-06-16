@@ -96,7 +96,9 @@ func (c *Cell) String() (result string) {
 
 type FieldState struct{ *eui.Signal[string] }
 
-func NewFieldState() *FieldState { return &FieldState{Signal: eui.NewSignal[string]()} }
+func NewFieldState() *FieldState {
+	return &FieldState{Signal: eui.NewSignal(func(a, b string) bool { return a == b })}
+}
 
 type Field struct {
 	State        *FieldState
@@ -274,7 +276,7 @@ type Board struct {
 
 func NewBoard() *Board {
 	b := &Board{}
-	b.varArea = eui.NewSignal[string]()
+	b.varArea = eui.NewSignal(func(a, b string) bool { return a == b })
 	b.field = NewField()
 	b.field.State.Connect(func(value string) {
 		switch value {

@@ -23,8 +23,8 @@ type BoardMem struct {
 
 func NewBoardMem(fn func(*eui.Button)) *BoardMem {
 	d := &BoardMem{}
-	d.varMsg = eui.NewSignal[string]()
-	d.varColor = eui.NewSignal[[]color.Color](func(a, b []color.Color) bool {
+	d.varMsg = eui.NewSignal(func(a, b string) bool { return a == b })
+	d.varColor = eui.NewSignal(func(a, b []color.Color) bool {
 		// Если оба nil — считаем равными
 		if a == nil && b == nil {
 			return true
@@ -132,7 +132,6 @@ func (d *BoardMem) SetupConclusion() {
 	d.layout.Resize(d.GetRect().GetArr())
 	d.varMsg.Emit(d.gamesData.String())
 	d.varColor.Emit([]color.Color{colornames.Fuchsia, colornames.Black})
-	d.Add(sb)
 	log.Println("Setup Conclusion done", d.game.String())
 }
 

@@ -11,17 +11,19 @@ import (
 
 // Умею иницализировать для Ebitenengine приложение, затем запускается сцена в которой отслеживаются через подписку от клавиатуры, мыши, касания экрана события и передаются структуре View, InputBox(клавиатуры, пока только цифры). Остальным виджетам это текстовая метка(Text) и изображение(Image) встаивается структура View, которая определяет события от мыши(InputState) и меняет состояние виджета это при наведении, в фокусе, покидание курсором виджета. Все происходит в сцене, где есть обновление и дельта от последнего обновления и рисование, затем уже сцена передает внутри себя виджетам события. После создания сцены по умолчанию создается раскладка по вертикали и при переопределении метода Resize уже в нем производится раскладка виджетов внутри сцены.
 type Ui struct {
-	title         string
-	scenes        []Sceneer
-	currentScene  Sceneer
-	theme         *Theme
-	settings      *Setting
-	tick          int
-	start         time.Time
-	size          PointInt
-	inputMouse    *MouseInput
-	inputTouch    *TouchInput
-	inputKeyboard *KeyboardInput
+	title          string
+	scenes         []Sceneer
+	currentScene   Sceneer
+	theme          *Theme
+	settings       *Setting
+	tick           int
+	start          time.Time
+	size           PointInt
+	inputMouse     *MouseInput
+	inputTouch     *TouchInput
+	inputKeyboard  *KeyboardInput
+	resizeListener *ResizeListener
+	modal          Drawabler
 }
 
 func (u *Ui) GetStartTime() time.Time          { return u.start }
@@ -40,14 +42,24 @@ func (u *Ui) GetSettings() *Setting            { return u.settings }
 // Отсюда можно следить за изменением размера окна, при изменении обновляются размеры текущей сцены
 func (u *Ui) Layout(w, h int) (int, int) {
 	if w != u.size.X || h != u.size.Y {
-		u.size.X, u.size.Y = w, h
+		u.resizeListener.Emit(NewEvent(EventResize, NewRect([]int{0, 0, w, h})))
+		log.Println("Emit:Resize:")
+	}
+	return w, h
+}
+
+func (u *Ui) HandleEvent(ev Event) {
+	log.Println("Ui:HandleEvent:", ev)
+	switch ev.Type {
+	case EventResize:
+		r := ev.Value.(Rect)
+		u.SetSize(r.W, r.H)
 		u.currentScene.Resize()
 		for _, scene := range u.scenes {
 			scene.Resize()
 		}
-		log.Println("Resize app done, new size:", w, h)
+		log.Println("Resize app done, new size:", r)
 	}
-	return w, h
 }
 
 func (u *Ui) Update() error {
@@ -57,19 +69,38 @@ func (u *Ui) Update() error {
 		if err != nil {
 			os.Exit(0)
 		}
-	} else if inpututil.IsKeyJustReleased(ebiten.KeyF11) {
+	} else if inpututil.IsKeyJustReleased(ebiten.KeyF12) {
 		u.ToggleFullscreen()
 	}
 	u.inputMouse.update(tick)
 	u.inputTouch.update(tick)
 	u.inputKeyboard.update(tick)
 	u.currentScene.Update(tick)
+	if u.modal != nil {
+		u.modal.Update(tick)
+	}
 	return nil
 }
 
 func (u *Ui) Draw(screen *ebiten.Image) {
 	screen.Fill(u.theme.Get(SceneBg))
 	u.currentScene.Draw(screen)
+	if u.modal != nil && u.modal.IsVisible() {
+		u.modal.Draw(screen)
+	}
+}
+
+func (u *Ui) ShowModal(d Drawabler) {
+	u.modal = d
+	u.modal.Visible(true)
+}
+
+func (u *Ui) HideModal() {
+	if u.modal != nil {
+		u.modal.Visible(false)
+		u.modal.Close()
+		u.modal = nil
+	}
 }
 
 func (a *Ui) ToggleFullscreen() {

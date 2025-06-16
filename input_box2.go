@@ -24,7 +24,7 @@ type InputBox2 struct {
 func NewInputBox2(onReturn func(*InputBox2)) *InputBox2 {
 	i := &InputBox2{}
 	i.onReturn = onReturn
-	i.textVar = NewSignal[string]()
+	i.textVar = NewSignal(func(a, b string) bool { return a == b })
 	i.lbl = NewText("")
 	i.textVar.Connect(func(data string) { i.lbl.SetText(data) })
 	i.textVar.Emit("")

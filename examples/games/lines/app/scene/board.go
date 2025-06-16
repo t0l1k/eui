@@ -29,12 +29,12 @@ func NewBoard(dim int) *Board {
 	b.Add(b.table)
 	r, c := b.field.Dim()
 	b.gameLayout = eui.NewGridLayoutRightDown(float64(r), float64(c))
-	b.varScore = eui.NewSignal[int]()
+	b.varScore = eui.NewSignal(func(a, b int) bool { return a == b })
 	b.varScore.Connect(func(data int) {
 		b.table.leftLbl.SetText(strconv.Itoa(data))
 	})
 	b.bestScore = 10
-	b.varScoreBest = eui.NewSignal[int]()
+	b.varScoreBest = eui.NewSignal(func(a, b int) bool { return a == b })
 	b.varScoreBest.ConnectAndFire(func(data int) {
 		b.table.rightLbl.SetText(strconv.Itoa(data))
 	}, b.bestScore)

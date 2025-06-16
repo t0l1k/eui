@@ -240,7 +240,7 @@ func NewSceneAnalogClock() *SceneAnalogClock {
 	s.Add(s.clock)
 	s.lblTm = eui.NewText("")
 	s.Add(s.lblTm)
-	s.tmVar = eui.NewSignal[string]()
+	s.tmVar = eui.NewSignal(func(a, b string) bool { return a == b })
 	s.tmVar.Connect(func(data string) {
 		s.lblTm.SetText(data)
 	})

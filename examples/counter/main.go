@@ -3,6 +3,7 @@
 package main
 
 import (
+	"log"
 	"strconv"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -11,7 +12,7 @@ import (
 
 type Count struct{ *eui.Signal[int] }
 
-func NewCount() *Count { return &Count{Signal: eui.NewSignal[int]()} }
+func NewCount() *Count { return &Count{Signal: eui.NewSignal(func(a, b int) bool { return a == b })} }
 func (c *Count) Inc()  { c.Emit(c.Value() + 1) }
 func (c *Count) Dec() {
 	if c.Value() > 0 {
@@ -29,8 +30,7 @@ func NewSceneCounter() *SceneCounter {
 	sc.lay1 = eui.NewVLayout() // Контейнер по вертикали
 	sc.lay2 = eui.NewHLayout() // Контейнер по горизонтали
 
-	sb := eui.NewSnackBar("Test Counter!!!").Show(3000)
-	sc.Add(sb)
+	eui.NewSnackBar("Test Counter!!!").Show(3000)
 
 	lblCount := eui.NewText("") // Текстовая метка
 	count := NewCount()         // Подписчикам передать оповещение при изменении переменной
@@ -49,9 +49,8 @@ func NewSceneCounter() *SceneCounter {
 
 	sc.lay2.Add(btnInc) // Добавить в контейнер кнопку увеличить
 	sc.lay2.Add(btnDec) // Добавить в контейнер кнопку уменьшить
-	// sc.Add(sc.lay1)
-	// sc.Add(sc.lay2)
-	sc.Resize() // Метод обновить размеры сцены
+	sc.Resize()         // Метод обновить размеры сцены
+	log.Println("zzz")
 	return sc
 }
 
@@ -77,7 +76,6 @@ func (s *SceneCounter) Draw(surface *ebiten.Image) {
 }
 
 func (s *SceneCounter) Resize() {
-	s.SceneBase.Resize()
 	w0, h0 := eui.GetUi().Size() // Получить размеры окна, и для сцены это всё окно в расспоряжении
 	s.lay1.Resize([]int{0, 0, w0, h0 / 2})
 	s.lay2.Resize([]int{0, h0 / 2, w0, h0 / 2})

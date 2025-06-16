@@ -21,7 +21,7 @@ type FormulaAdd struct {
 }
 
 func NewFormulaAdd(sheet *Sheet, srcCell *Cell, formula string) *FormulaAdd {
-	f := &FormulaAdd{Signal: eui.NewSignal[string]()}
+	f := &FormulaAdd{Signal: eui.NewSignal(func(a, b string) bool { return a == b })}
 	f.sheet = sheet
 	f.srcCell = srcCell
 	f.formula = formula

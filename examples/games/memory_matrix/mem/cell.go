@@ -13,7 +13,7 @@ type Cell struct {
 }
 
 func NewCell() *Cell {
-	c := &Cell{Signal: eui.NewSignal[string]()}
+	c := &Cell{Signal: eui.NewSignal(func(a, b string) bool { return a == b })}
 	c.Emit(CellEmpty)
 	return c
 }

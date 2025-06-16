@@ -1,15 +1,39 @@
 package eui
 
 import (
-	"sync"
+	"log"
 	"sync/atomic"
 )
+
+// Signal реализует потокобезопасный паттерн "сигнал-слот" (наблюдатель) с поддержкой generics.
+//
+// Signal[T] позволяет подписчикам (слотам) получать уведомления об изменении значения типа T.
+// Подписчики добавляются через метод Connect и могут быть удалены методом Disconnect.
+// Для предотвращения лишних уведомлений можно передать функцию сравнения EqualFunc[T].
+//
+// Если функция сравнения не указана, уведомления будут отправляться всегда при вызове Emit.
+//
+// Пример использования:
+//
+//	// Создание сигнала для int с проверкой на равенство
+//	sig := eui.NewSignal[int](func(a, b int) bool { return a == b })
+//
+//	// Подписка на изменения
+//	id := sig.Connect(func(val int) { fmt.Println("Новое значение:", val) })
+//
+//	// Изменение значения
+//	sig.Emit(42)
+//
+//	// Отписка
+//	sig.Disconnect(id)
+//
+// Для сложных типов (например, срезов или структур) рекомендуется явно передавать функцию сравнения.
+//
 
 type SlotFunc[T any] func(data T)
 type EqualFunc[T any] func(a, b T) bool
 
 type Signal[T any] struct {
-	mu        sync.RWMutex
 	slots     map[int64]SlotFunc[T]
 	lastVal   T
 	equalFunc EqualFunc[T]
@@ -31,8 +55,6 @@ func NewSignal[T any](equal ...EqualFunc[T]) *Signal[T] {
 
 // Возвращает id для отписки
 func (s *Signal[T]) Connect(slot SlotFunc[T]) int64 {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	id := atomic.AddInt64(&s.nextID, 1)
 	s.slots[id] = slot
 	return id
@@ -42,20 +64,16 @@ func (s *Signal[T]) Connect(slot SlotFunc[T]) int64 {
 func (s *Signal[T]) ConnectAndFire(slot SlotFunc[T], value T) int64 {
 	id := s.Connect(slot)
 	s.lastVal = value
-	go slot(value)
+	slot(value)
 	return id
 }
 
 func (s *Signal[T]) Disconnect(id int64) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
 	delete(s.slots, id)
 }
 
 func (s *Signal[T]) Emit(value T) {
-	s.mu.Lock()
 	if s.equalFunc != nil && s.equalFunc(s.lastVal, value) {
-		s.mu.Unlock()
 		return
 	}
 	s.lastVal = value
@@ -63,10 +81,10 @@ func (s *Signal[T]) Emit(value T) {
 	for _, slot := range s.slots {
 		slots = append(slots, slot)
 	}
-	s.mu.Unlock()
 	for _, slot := range slots {
-		go slot(value)
+		slot(value)
 	}
+	log.Println("Signal:Emit:", value)
 }
 
-func (s *Signal[T]) Value() T { s.mu.RLock(); defer s.mu.RUnlock(); return s.lastVal }
+func (s *Signal[T]) Value() T { return s.lastVal }

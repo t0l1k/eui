@@ -69,7 +69,7 @@ func (t *TopBar) setTheme() {
 
 func (t *TopBar) initStopwatch() {
 	t.Stopwatch = NewStopwatch()
-	t.tmVar = NewSignal[string]()
+	t.tmVar = NewSignal(func(a, b string) bool { return a == b })
 	t.tmLbl = NewText("0:00")
 	theme := GetUi().GetTheme()
 	t.tmLbl.bg = theme.Get(TopBarStopwatchBg)

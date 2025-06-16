@@ -34,8 +34,8 @@ func NewSceneStopwatch() *SceneStopwatch {
 	s.swMain = eui.NewStopwatch()
 	s.swRing = eui.NewStopwatch()
 
-	s.var0 = eui.NewSignal[string]()
-	s.var1 = eui.NewSignal[string]()
+	s.var0 = eui.NewSignal(func(a, b string) bool { return a == b })
+	s.var1 = eui.NewSignal(func(a, b string) bool { return a == b })
 
 	s.topBar = eui.NewTopBar("Секундомер", nil)
 

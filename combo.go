@@ -34,7 +34,7 @@ func (c *ComboBox) SetupCombo(text string, data []interface{}, index int, f func
 	c.lblValue = NewText(c.GetValueString())
 	c.lblValue.Bg(c.bg)
 	c.lblValue.Fg(c.fg)
-	c.valueVar = NewSignal[string]()
+	c.valueVar = NewSignal(func(a, b string) bool { return a == b })
 	c.valueVar.Connect(func(data string) {
 		c.lblValue.SetText(data)
 	})

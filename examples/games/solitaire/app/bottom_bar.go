@@ -28,8 +28,8 @@ func NewBottomBar(fn func(*eui.Button)) *BottomBar {
 	b := &BottomBar{}
 	b.layout = eui.NewHLayout()
 	b.fn = fn
-	b.varSw = eui.NewSignal[string]()
-	b.varMoves = eui.NewSignal[string]()
+	b.varSw = eui.NewSignal(func(a, b string) bool { return a == b })
+	b.varMoves = eui.NewSignal(func(a, b string) bool { return a == b })
 	b.Visible(true)
 	return b
 }

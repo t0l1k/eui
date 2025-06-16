@@ -22,7 +22,7 @@ func NewMinedField(r, c, m int) *MinedField {
 		row:        r,
 		column:     c,
 		totalMines: m,
-		State:      eui.NewSignal[string](),
+		State:      eui.NewSignal(func(a, b string) bool { return a == b }),
 	}
 	mf.State.Emit(GameStart)
 	mf.State.Connect(func(value string) {

@@ -52,7 +52,8 @@ func GetUi() (u *Ui) {
 			theme:         DefaultTheme(),
 			settings:      DefaultSettings(),
 		}
-		log.Printf("App init done")
+		u.resizeListener = NewResizeListener(u.HandleEvent)
+		log.Printf("Ui init done")
 	} else {
 		u = uiInstance
 	}

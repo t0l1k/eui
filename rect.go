@@ -160,6 +160,10 @@ func (r Rect) GetLowestSize() int {
 	return result
 }
 
+func (r Rect) Equal(other Rect) bool {
+	return r.X == other.X && r.Y == other.Y && r.W == other.W && r.H == other.H
+}
+
 func (r Rect) String() string {
 	return fmt.Sprintf("[%v, %v, %v, %v]", r.X, r.Y, r.W, r.H)
 }

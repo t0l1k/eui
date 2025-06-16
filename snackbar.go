@@ -42,6 +42,7 @@ func (s *SnackBar) SetText(value string) *SnackBar {
 func (s *SnackBar) Show(durration int) *SnackBar {
 	s.Visible(true)
 	s.timer = NewTimer(durration).On()
+	GetUi().ShowModal(s)
 	log.Println("Begin show snackbar", s)
 	return s
 }
@@ -53,9 +54,8 @@ func (s *SnackBar) Update(dt int) {
 	if !s.timer.IsDone() {
 		s.timer.Update(dt)
 	} else {
-		s.Visible(false)
 		log.Println("Show snackbar done", s.msg.GetText())
-		s.Close()
+		GetUi().HideModal()
 	}
 }
 
@@ -76,8 +76,7 @@ func (s *SnackBar) Resize(r []int) {
 
 func (s *SnackBar) Close() {
 	s.timer = nil
-	s.msg = nil
 	s.ImageReset()
 	s.ResetContainerBase()
-	s = nil
+	log.Println("SnackBar:Close:", s)
 }
