@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/t0l1k/eui"
 )
@@ -58,12 +59,12 @@ func NewSceneMain() *SceneMain {
 		case actNew:
 			s.current.Setup(true)
 			s.bottomBar.UpdateMoveCount()
-			eui.NewSnackBar("Новый рассклад!").Show(2000)
+			eui.NewSnackBar("Новый рассклад!").Show(2 * time.Second)
 		case actReset:
 			s.current.Stopwatch().Stop()
 			s.current.Setup(false)
 			s.bottomBar.UpdateMoveCount()
-			eui.NewSnackBar("Повторить собирать рассклад!").Show(1000)
+			eui.NewSnackBar("Повторить собирать рассклад!").Show(1 * time.Second)
 		case actBackwardMove:
 			if s.current.GetMoveNr() > 0 {
 				s.current.SetMoveNr(s.current.GetMoveNr() - 1)
@@ -97,7 +98,7 @@ func (s *SceneMain) gameLogic(btn *eui.Button) {
 				idx--
 			}
 			if s.bottomBar.UpdateMoveCount() {
-				eui.NewSnackBar("Нет ходов").Show(1000)
+				eui.NewSnackBar("Нет ходов").Show(1 * time.Second)
 			}
 		}
 	}

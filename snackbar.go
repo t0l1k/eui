@@ -3,6 +3,7 @@ package eui
 import (
 	"image/color"
 	"log"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"golang.org/x/image/colornames"
@@ -39,24 +40,15 @@ func (s *SnackBar) SetText(value string) *SnackBar {
 	return s
 }
 
-func (s *SnackBar) Show(durration int) *SnackBar {
+func (s *SnackBar) Show(durration time.Duration) *SnackBar {
 	s.Visible(true)
-	s.timer = NewTimer(durration).On()
+	s.timer = NewTimer(durration, func() {
+		log.Println("Show snackbar done", s.msg.GetText())
+		GetUi().HideModal()
+	}).On()
 	GetUi().ShowModal(s)
 	log.Println("Begin show snackbar", s)
 	return s
-}
-
-func (s *SnackBar) Update(dt int) {
-	if s.timer == nil {
-		return
-	}
-	if !s.timer.IsDone() {
-		s.timer.Update(dt)
-	} else {
-		log.Println("Show snackbar done", s.msg.GetText())
-		GetUi().HideModal()
-	}
 }
 
 func (s *SnackBar) Draw(surface *ebiten.Image) {

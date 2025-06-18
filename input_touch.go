@@ -20,7 +20,7 @@ type TouchInput struct {
 	listener []Inputer
 }
 
-func NewTouchInput() *TouchInput { return &TouchInput{} }
+func NewTouchInput(fn SlotFunc[Event]) *TouchInput { return &TouchInput{} }
 
 func (s *TouchInput) Attach(o Inputer) {
 	s.listener = append(s.listener, o)

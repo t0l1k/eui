@@ -1,7 +1,6 @@
 package eui
 
 import (
-	"log"
 	"sync/atomic"
 )
 
@@ -84,7 +83,7 @@ func (s *Signal[T]) Emit(value T) {
 	for _, slot := range slots {
 		slot(value)
 	}
-	log.Println("Signal:Emit:", value)
+	// log.Println("Signal:Emit:", value)
 }
 
 func (s *Signal[T]) Value() T { return s.lastVal }

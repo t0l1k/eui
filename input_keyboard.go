@@ -3,6 +3,7 @@ package eui
 import (
 	"log"
 	"slices"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -33,16 +34,16 @@ type KeyboardInput struct {
 func NewKeyboardInput(fn SlotFunc[Event]) *KeyboardInput {
 	k := &KeyboardInput{
 		Signal: NewSignal[Event](),
-		timer:  NewTimer(250),
+		timer:  NewTimer(250*time.Millisecond, nil),
 	}
 	k.Connect(fn)
 	return k
 }
 
-func (s *KeyboardInput) SetDelay(value int) { s.timer.SetDuration(value) }
+func (s *KeyboardInput) SetKeypressDelay(value time.Duration) { s.timer.SetDuration(value) }
 
 // Передать новое или повторное нажатие клавиши после истечения паузы, для символов([]rune) повтор не работает
-func (s *KeyboardInput) update(dt int) {
+func (s *KeyboardInput) update(int) {
 	keysP := inpututil.AppendPressedKeys(nil)
 	keysR := inpututil.AppendJustReleasedKeys(nil)
 	runes := ebiten.AppendInputChars(nil)
@@ -51,7 +52,6 @@ func (s *KeyboardInput) update(dt int) {
 		s.timer.Off()
 		return
 	}
-	s.timer.Update(dt)
 	if len(keysP) > 0 {
 		if !s.timer.IsOn() {
 			s.Emit(NewEvent(EventKeyPressed, kd))

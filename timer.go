@@ -1,39 +1,47 @@
 package eui
 
-import "strconv"
+import (
+	"time"
+)
 
-// Умею определеленную длительность времени в миллисекундах отсчитывать обратно. Умею отсчитывать регулярно обновляя таймер через метод update
 type Timer struct {
-	timer    int
-	duration int
-	run      bool
+	duration, left time.Duration
+	run            bool
+	onDone         func()
+	id             int64
 }
 
-// Длительность в миллисекундах
-func NewTimer(duration int) *Timer { return &Timer{duration: duration} }
-
-func (t *Timer) SetDuration(value int) { t.duration = value }
-func (t *Timer) Reset()                { t.timer = t.duration }
-func (t *Timer) IsOn() bool            { return t.run }
-func (t *Timer) IsOff() bool           { return !t.run }
-func (t *Timer) IsDone() bool          { return !(t.timer > 0) }
-
+func NewTimer(duration time.Duration, fn func()) *Timer {
+	t := &Timer{duration: duration, onDone: fn}
+	t.id = GetUi().tickListener.Connect(func(ev Event) {
+		if !t.run {
+			return
+		}
+		dt := ev.Value.(TickData)
+		t.left -= dt.Duration()
+		if t.left <= 0 {
+			t.run = false
+			t.left = t.duration
+			if t.onDone != nil {
+				t.onDone()
+			}
+		}
+	})
+	return t
+}
+func (t *Timer) SetOnDoneFunc(value func())      { t.onDone = value }
+func (t *Timer) SetDuration(value time.Duration) { t.duration = value }
+func (t *Timer) Reset()                          { t.left = t.duration }
+func (t *Timer) IsOn() bool                      { return t.run }
+func (t *Timer) IsOff() bool                     { return !t.run }
+func (t *Timer) IsDone() bool                    { return !(t.left > 0) }
 func (t *Timer) On() *Timer {
 	t.Reset()
 	t.run = true
 	return t
 }
-func (t *Timer) Off() { t.run = false }
-
-func (t *Timer) Update(dt int) {
-	if t.IsOn() {
-		t.timer -= dt
-	}
-}
-
-func (t *Timer) TimePassed() int { return t.duration - t.timer }
-func (t *Timer) TimeLeft() int   { return t.timer }
-
-func (t *Timer) String() string {
-	return strconv.Itoa(t.timer)
-}
+func (t *Timer) Off()                      { t.run = false }
+func (t *Timer) TimePassed() time.Duration { return t.duration - t.left }
+func (t *Timer) TimeLeft() time.Duration   { return t.left }
+func (t *Timer) String() string            { return t.left.String() }
+func (t *Timer) Close()                    { GetUi().tickListener.Disconnect(t.id) }

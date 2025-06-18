@@ -3,6 +3,7 @@ package app
 import (
 	"image/color"
 	"log"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
@@ -52,7 +53,10 @@ func NewBoardMem(fn func(*eui.Button)) *BoardMem {
 	d.gamesData = mem.NewGamesData()
 	d.Visible(true)
 	d.layout = eui.NewGridLayoutRightDown(1, 1)
-	d.showTimer = eui.NewTimer(1500)
+	d.showTimer = eui.NewTimer(1500*time.Millisecond, func() {
+		d.Game().SetNextStage()
+		d.SetupRecolection()
+	})
 	d.fn = fn
 	d.SetupPreparation()
 	return d
@@ -126,7 +130,7 @@ func (d *BoardMem) SetupConclusion() {
 		str = "Game Over"
 		sb.Bg(colornames.Red)
 	}
-	sb.SetText(str + " " + d.Game().String()).Show(3000)
+	sb.SetText(str + " " + d.Game().String()).Show(3 * time.Second)
 	btn := d.setupScoreBtn()
 	d.layout.Add(btn)
 	d.layout.Resize(d.GetRect().GetArr())
@@ -157,16 +161,8 @@ func (d *BoardMem) Update(dt int) {
 	if !d.IsVisible() {
 		return
 	}
-	if d.showTimer.IsOn() {
-		d.showTimer.Update(dt)
-	}
 	switch d.game.Stage() {
 	case mem.Show:
-		if d.showTimer.IsDone() && d.showTimer.IsOn() {
-			d.showTimer.Off()
-			d.Game().SetNextStage()
-			d.SetupRecolection()
-		}
 	case mem.Conclusion:
 		d.gamesData = d.gamesData.Add(d.game.GameData())
 		d.Game().SetNextStage()

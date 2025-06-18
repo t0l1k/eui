@@ -9,6 +9,7 @@ type EventType int
 
 const (
 	EventResize EventType = iota
+	EventTick
 	EventKeyPressed
 	EventKeyReleased
 )
@@ -16,6 +17,7 @@ const (
 func (e EventType) String() string {
 	return [...]string{
 		"Resize",
+		"Tick",
 		"KeyPressed",
 		"KeyReleased",
 	}[e]
@@ -28,7 +30,9 @@ type Event struct {
 
 func NewEvent(t EventType, v any) Event {
 	e := Event{Type: t, Value: v}
-	log.Println("New:", e.String())
+	if !(e.Type == EventTick) {
+		log.Println("New:", e.String())
+	}
 	return e
 }
 

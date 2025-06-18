@@ -22,6 +22,7 @@ type Ui struct {
 	inputTouch     *TouchInput
 	inputKeyboard  *KeyboardInput
 	resizeListener *ResizeListener
+	tickListener   *TickListener
 	modal          Drawabler
 }
 
@@ -48,8 +49,10 @@ func (u *Ui) Layout(w, h int) (int, int) {
 }
 
 func (u *Ui) HandleEvent(ev Event) {
-	log.Println("Ui:HandleEvent:", ev)
 	switch ev.Type {
+	case EventTick:
+		// tc := ev.Value.(TickData)
+		// log.Println("Ui:HandleEvent:Tick", tc.String())
 	case EventResize:
 		r := ev.Value.(Rect)
 		u.SetSize(r.W, r.H)
@@ -70,10 +73,14 @@ func (u *Ui) HandleEvent(ev Event) {
 			}
 		}
 	}
+	if !(ev.Type == EventTick) {
+		log.Println("Ui:HandleEvent:", ev)
+	}
 }
 
 func (u *Ui) Update() error {
 	tick := u.getTick()
+	u.tickListener.update(tick)
 	u.inputMouse.update(tick)
 	u.inputTouch.update(tick)
 	u.inputKeyboard.update(tick)

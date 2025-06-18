@@ -21,6 +21,11 @@ func Init(u *Ui) {
 	ebiten.SetWindowSize(u.size.X, u.size.Y)
 	log.Println("Set Window Size:", u.size.X, u.size.Y)
 	ebiten.SetFullscreen(u.settings.Get(UiFullscreen).(bool))
+	u.tickListener = NewTickListener(u.HandleEvent, 10*time.Millisecond)
+	u.inputKeyboard = NewKeyboardInput(u.HandleEvent)
+	u.inputMouse = NewMouseInput(u.HandleEvent)
+	u.inputTouch = NewTouchInput(u.HandleEvent)
+	u.resizeListener = NewResizeListener(u.HandleEvent)
 }
 
 // Переход в вечный цикл...
@@ -43,17 +48,13 @@ func GetUi() (u *Ui) {
 	if uiInstance == nil {
 		tm := time.Now()
 		u = &Ui{
-			start:      time.Now(),
-			tick:       tm.Nanosecond() / 1e6,
-			scenes:     []Sceneer{},
-			inputMouse: NewMouseInput(),
-			inputTouch: NewTouchInput(),
-			theme:      DefaultTheme(),
-			settings:   DefaultSettings(),
+			start:    time.Now(),
+			tick:     tm.Nanosecond() / 1e6,
+			scenes:   []Sceneer{},
+			theme:    DefaultTheme(),
+			settings: DefaultSettings(),
 		}
-		u.inputKeyboard = NewKeyboardInput(u.HandleEvent)
-		u.resizeListener = NewResizeListener(u.HandleEvent)
-		log.Printf("Ui init done")
+		log.Printf("Ui instance init done")
 	} else {
 		u = uiInstance
 	}

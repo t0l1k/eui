@@ -22,7 +22,7 @@ type MouseInput struct {
 	listener []Inputer
 }
 
-func NewMouseInput() *MouseInput { return &MouseInput{} }
+func NewMouseInput(fn SlotFunc[Event]) *MouseInput { return &MouseInput{} }
 
 func (s *MouseInput) Attach(o Inputer) {
 	s.listener = append(s.listener, o)

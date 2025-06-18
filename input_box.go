@@ -2,6 +2,7 @@ package eui
 
 import (
 	"strconv"
+	"time"
 	"unicode"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -24,10 +25,9 @@ type InputBox struct {
 
 func NewInputBox(text string, size int, onReturn func(*InputBox)) *InputBox {
 	i := &InputBox{
-		timerFlashing: NewTimer(500),
-		size:          size,
-		onReturn:      onReturn,
-		onlyDigits:    false,
+		size:       size,
+		onReturn:   onReturn,
+		onlyDigits: false,
 	}
 	i.setupBox(text)
 	return i
@@ -35,10 +35,9 @@ func NewInputBox(text string, size int, onReturn func(*InputBox)) *InputBox {
 
 func NewDigitInputBox(text string, size int, onReturn func(*InputBox)) *InputBox {
 	i := &InputBox{
-		timerFlashing: NewTimer(500),
-		size:          size,
-		onReturn:      onReturn,
-		onlyDigits:    true,
+		size:       size,
+		onReturn:   onReturn,
+		onlyDigits: true,
 	}
 	i.setupBox(text)
 	return i
@@ -56,6 +55,7 @@ func (inp *InputBox) setupBox(text string) {
 	inp.btn.Bg(inp.bg)
 	inp.cursor = NewCursor(inp.bg, inp.fg)
 	inp.keyListenerId = GetUi().GetInputKeyboard().Connect(inp.UpdateInput)
+	inp.timerFlashing = NewTimer(500*time.Millisecond, inp.onTimerFlashDone)
 }
 
 func (inp *InputBox) setPrompt() string {
@@ -120,36 +120,13 @@ func (inp *InputBox) parseInput(chars []rune) {
 func (inp *InputBox) Update(dt int) {
 	inp.btn.Update(dt)
 	inp.cursor.Update(dt)
-	inp.updatePrompt(dt)
 	if inp.state == ViewStateFocus {
 		inp.SetState(ViewStateActive)
-	}
-
-	if inp.state == ViewStateActive {
-		if inp.keyboardState == KeyBackspace {
-			if len(inp._text) > 0 {
-				inp._text = inp._text[:len(inp._text)-1]
-				inp.btn.SetText(inp.setPrompt())
-				inp.keyboardState = KeyReleased
-				if inp.onlyDigits {
-					_, err := strconv.ParseFloat(inp._text, 64)
-					if err == nil || len(inp._text) == 0 {
-						inp.btn.Bg(inp.bg)
-					}
-				}
-			}
-		}
-		if inp.keyboardState == KeyEnter {
-			if inp.onReturn != nil {
-				inp.onReturn(inp)
-			}
-			inp.keyboardState = KeyReleased
-		}
+		inp.timerFlashing.On()
 	}
 }
 
-func (inp *InputBox) updatePrompt(dt int) {
-	inp.timerFlashing.Update(dt)
+func (inp *InputBox) onTimerFlashDone() {
 	if inp.state == ViewStateActive || inp.state == ViewStateFocus {
 		if !inp.timerFlashing.IsOn() || inp.timerFlashing.IsDone() {
 			inp.timerFlashing.On()

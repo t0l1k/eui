@@ -5,6 +5,7 @@ package main
 import (
 	"log"
 	"strconv"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
@@ -30,7 +31,7 @@ func NewSceneCounter() *SceneCounter {
 	sc.lay1 = eui.NewVLayout() // Контейнер по вертикали
 	sc.lay2 = eui.NewHLayout() // Контейнер по горизонтали
 
-	eui.NewSnackBar("Test Counter!!!").Show(3000)
+	eui.NewSnackBar("Test Counter!!!").Show(3 * time.Second)
 
 	lblCount := eui.NewText("") // Текстовая метка
 	count := NewCount()         // Подписчикам передать оповещение при изменении переменной
@@ -96,3 +97,18 @@ func main() {
 	eui.Run(NewSceneCounter())
 	eui.Quit(func() {})
 }
+
+// eui.Init(
+// 	eui.GetUi().
+// 		SetTitle("Counter").
+// 		SetSize(800, 600).
+// 		SetTheme(eui.DefaultTheme()))
+// eui.Run(
+// 	eui.NewScene(
+// 		eui.NewContainer(eui.NewVBox()).
+// 			Add(eui.NewLabel("Count")).
+// 			Add(eui.NewContainer(eui.NewHBox()).
+// 				Add(eui.NewButton("Inc", func(b *eui.Button) { counter.Inc() })).
+// 				Add(eui.NewButton("Dec", func(b *eui.Button) { counter.Dec() })),
+// 			)))
+// eui.Quit(nil)

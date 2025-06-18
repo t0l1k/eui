@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
@@ -67,7 +68,7 @@ func (b *BoardSol15) MakeMove(move sols.Column) {
 	if b.game.MakeMove(move) {
 		if b.game.IsSolved() {
 			b.sw.Stop()
-			eui.NewSnackBar("Пасьянс собран за " + b.sw.String() + ". Победа!!!").Show(5000)
+			eui.NewSnackBar("Пасьянс собран за " + b.sw.String() + ". Победа!!!").Show(5 * time.Second)
 		}
 		b.moveIdx++
 		b.backupGame()
