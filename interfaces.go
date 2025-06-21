@@ -3,12 +3,19 @@ package eui
 import "github.com/hajimehoshi/ebiten/v2"
 
 type Drawabler interface {
+	Spriter
 	IsVisible() bool
 	Visible(bool)
 	Enable()
 	Disable()
-	Layouter
-	Spriter
+	Layout()
+	Rect() Rect
+	SetRect(Rect)
+	Resize(Rect)
+	IsDirty() bool
+	MarkDirty()
+	ClearDirty()
+	Traverse(func(d Drawabler), bool)
 	Close()
 }
 
@@ -18,13 +25,13 @@ type Spriter interface {
 }
 
 type Layouter interface {
-	Layout()
-	Resize([]int)
+	Apply([]Drawabler, Rect)
 }
 
 type Containerer interface {
+	Drawabler
 	Add(Drawabler)
-	GetContainer() []Layouter
+	Childrens() []Drawabler
 }
 
 type Sceneer interface {

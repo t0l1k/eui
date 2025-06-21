@@ -17,16 +17,17 @@ const (
 var actStrs = []string{actNextSol, actNew, actReset, actBackwardMove, actForwardMove}
 
 type BottomBar struct {
-	eui.DrawableBase
-	layout          *eui.BoxLayout
+	*eui.Container
+	layout          *eui.Container
 	fn              func(*eui.Button)
 	board           Sols
 	varSw, varMoves *eui.Signal[string]
 }
 
 func NewBottomBar(fn func(*eui.Button)) *BottomBar {
-	b := &BottomBar{}
-	b.layout = eui.NewHLayout()
+	b := &BottomBar{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
+	b.layout = eui.NewContainer(eui.NewHBoxLayout(1))
+	b.Add(b.layout)
 	b.fn = fn
 	b.varSw = eui.NewSignal(func(a, b string) bool { return a == b })
 	b.varMoves = eui.NewSignal(func(a, b string) bool { return a == b })
@@ -36,7 +37,7 @@ func NewBottomBar(fn func(*eui.Button)) *BottomBar {
 
 func (b *BottomBar) Setup(board Sols) {
 	b.board = board
-	b.layout.ResetContainerBase()
+	b.layout.ResetContainer()
 	for _, str := range actStrs {
 		b.layout.Add(eui.NewButton(str, b.fn))
 	}
@@ -58,7 +59,7 @@ func (b *BottomBar) Update(dt int) {
 	if !b.IsVisible() {
 		return
 	}
-	for _, v := range b.layout.GetContainer() {
+	for _, v := range b.layout.Childrens() {
 		v.Update(dt)
 	}
 	b.varSw.Emit(b.board.Stopwatch().StringShort())
@@ -68,13 +69,12 @@ func (b *BottomBar) Draw(surface *ebiten.Image) {
 	if !b.IsVisible() {
 		return
 	}
-	for _, v := range b.layout.GetContainer() {
+	for _, v := range b.layout.Childrens() {
 		v.Draw(surface)
 	}
 }
 
-func (b *BottomBar) Resize(rect []int) {
-	b.SpriteBase.Rect(eui.NewRect(rect))
-	b.Rect(eui.NewRect(rect))
+func (b *BottomBar) Resize(rect eui.Rect) {
+	b.SetRect(rect)
 	b.layout.Resize(rect)
 }

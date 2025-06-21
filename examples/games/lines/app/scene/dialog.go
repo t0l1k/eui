@@ -6,7 +6,7 @@ import (
 )
 
 type Dialog struct {
-	eui.DrawableBase
+	*eui.Container
 	btnHide, btnNew  *eui.Button
 	title, message   *eui.Text
 	comboSelGameDiff *eui.ComboBox
@@ -15,7 +15,7 @@ type Dialog struct {
 }
 
 func NewDialog(title string, f func(btn *eui.Button)) *Dialog {
-	d := &Dialog{}
+	d := &Dialog{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	d.dialogFunc = f
 	d.title = eui.NewText(title)
 	d.Add(d.title)
@@ -37,48 +37,30 @@ func NewDialog(title string, f func(btn *eui.Button)) *Dialog {
 }
 
 func (d *Dialog) Visible(value bool) {
-	for _, v := range d.GetContainer() {
-		switch vT := v.(type) {
-		case *eui.Text:
-			vT.Visible(value)
-			if value {
-				vT.Enable()
-			} else {
-				vT.Disable()
-			}
-		case *eui.Button:
-			vT.Visible(value)
-			if value {
-				vT.Enable()
-			} else {
-				vT.Disable()
-			}
-		case *eui.ComboBox:
-			vT.Visible(value)
-			if value {
-				vT.Enable()
-			} else {
-				vT.Disable()
-			}
+	d.Traverse(func(child eui.Drawabler) {
+		child.Visible(value)
+		if value {
+			child.Enable()
+		} else {
+			child.Disable()
 		}
-	}
+	}, false)
 }
 
 func (d *Dialog) SetTitle(title string) {
 	d.title.SetText(title)
 }
 
-func (d *Dialog) Resize(rect []int) {
-	d.Rect(eui.NewRect(rect))
-	d.SpriteBase.Resize(rect)
-	x, y := d.GetRect().Pos()
-	w, h := d.GetRect().W, d.GetRect().H/4
-	d.title.Resize([]int{x, y, w - h, h})
-	d.btnHide.Resize([]int{x + w - h, y, h, h})
+func (d *Dialog) Resize(rect eui.Rect) {
+	d.SetRect(rect)
+	x, y := d.Rect().Pos()
+	w, h := d.Rect().W, d.Rect().H/4
+	d.title.Resize(eui.NewRect([]int{x, y, w - h, h}))
+	d.btnHide.Resize(eui.NewRect([]int{x + w - h, y, h, h}))
 	y += h
-	d.message.Resize([]int{x, y, w, h})
+	d.message.Resize(eui.NewRect([]int{x, y, w, h}))
 	y += h
-	d.comboSelGameDiff.Resize([]int{x, y, w, h})
+	d.comboSelGameDiff.Resize(eui.NewRect([]int{x, y, w, h}))
 	y += h
-	d.btnNew.Resize([]int{x, y, w, h})
+	d.btnNew.Resize(eui.NewRect([]int{x, y, w, h}))
 }

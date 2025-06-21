@@ -6,7 +6,6 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"golang.org/x/image/colornames"
 )
@@ -233,13 +232,13 @@ func (f *Field) String() (result string) {
 }
 
 type CellIcon struct {
-	eui.DrawableBase
+	*eui.Container
 	btn   *eui.Button
 	field *Field
 }
 
 func NewCellIcon(field *Field, f func(b *eui.Button)) *CellIcon {
-	c := &CellIcon{}
+	c := &CellIcon{Container: eui.NewContainer(eui.NewVBoxLayout(1))}
 	c.field = field
 	c.btn = eui.NewButton(CellClosed, f)
 	c.Add(c.btn)
@@ -253,29 +252,28 @@ func (c *CellIcon) Setup(f func(b *eui.Button)) {
 	c.btn.Bg(colornames.Teal)
 	c.btn.Fg(colornames.Yellow)
 }
-
-func (b *CellIcon) Visible(value bool) {
-	for _, v := range b.GetContainer() {
-		v.Visible(value)
+func (d *CellIcon) Visible(value bool) {
+	d.Traverse(func(c eui.Drawabler) {
+		c.Visible(value)
 		if value {
-			v.Enable()
+			c.Enable()
 		} else {
-			v.Disable()
+			c.Disable()
 		}
-	}
+	}, false)
 }
 
 type Board struct {
-	eui.DrawableBase
+	*eui.Container
 	field     *Field
 	varArea   *eui.Signal[string]
-	layout    *eui.GridLayoutRightDown
+	layout    *eui.Container
 	stopwatch *eui.Stopwatch
 	bottomLbl *eui.Text
 }
 
 func NewBoard() *Board {
-	b := &Board{}
+	b := &Board{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	b.varArea = eui.NewSignal(func(a, b string) bool { return a == b })
 	b.field = NewField()
 	b.field.State.Connect(func(value string) {
@@ -297,7 +295,8 @@ func NewBoard() *Board {
 		log.Println("board got:", value)
 	})
 	r, c := b.field.Dim()
-	b.layout = eui.NewGridLayoutRightDown(float64(r), float64(c))
+	b.layout = eui.NewContainer(eui.NewGridLayout(float64(r), float64(c), 1))
+	b.Add(b.layout)
 	b.stopwatch = eui.NewStopwatch()
 	b.bottomLbl = eui.NewText("")
 	b.Add(b.bottomLbl)
@@ -310,8 +309,10 @@ func NewBoard() *Board {
 
 func (b *Board) NewGame() {
 	b.stopwatch.Reset()
-	b.layout.ResetContainerBase()
+	b.layout.ResetContainer()
 	b.field.NewGame()
+	r, c := b.field.Dim()
+	b.layout.SetLayout(eui.NewGridLayout(float64(r), float64(c), 1))
 	for i := 0; i < len(b.field.field); i++ {
 		btn := NewCellIcon(b.field, b.gameLogic)
 		x, y := b.field.pos(i)
@@ -335,18 +336,19 @@ func (b *Board) NewGame() {
 		})
 		b.layout.Add(btn)
 	}
-	r, c := b.field.Dim()
-	b.layout.SetDim(float64(r), float64(c))
 	b.bottomLbl.Visible(true)
 }
 
 func (b *Board) Reset() {
 	b.field.ResetGame()
 	b.stopwatch.Reset()
-	for _, v := range b.layout.GetContainer() {
+	for _, v := range b.layout.Childrens() {
 		v.Visible(true)
-		v.(*CellIcon).btn.Bg(colornames.Teal)
-		v.(*CellIcon).btn.Fg(colornames.Yellow)
+		cell, ok := v.(*CellIcon)
+		if ok {
+			cell.btn.Bg(colornames.Teal)
+			cell.btn.Fg(colornames.Yellow)
+		}
 	}
 	b.bottomLbl.Visible(true)
 }
@@ -357,7 +359,7 @@ func (b *Board) NextLevel() {
 }
 
 func (b *Board) gameLogic(c *eui.Button) {
-	for i, v := range b.layout.GetContainer() {
+	for i, v := range b.layout.Childrens() {
 		if v.(*CellIcon).btn == c {
 			x, y := b.field.pos(i)
 			if c.IsMouseDownLeft() {
@@ -375,62 +377,38 @@ func (b *Board) gameLogic(c *eui.Button) {
 		}
 	}
 }
-
-func (b *Board) Visible(value bool) {
-	for _, v := range b.layout.GetContainer() {
-		v.Visible(value)
+func (d *Board) Visible(value bool) {
+	d.Traverse(func(c eui.Drawabler) {
+		c.Visible(value)
 		if value {
-			v.Enable()
+			c.Enable()
 		} else {
-			v.Disable()
+			c.Disable()
 		}
-	}
-	for _, v := range b.GetContainer() {
-		v.Visible(value)
-		if value {
-			v.Enable()
-		} else {
-			v.Disable()
-		}
-	}
+	}, false)
+	d.MarkDirty()
 }
 
 func (b *Board) Update(dt int) {
-	for _, v := range b.layout.GetContainer() {
-		v.Update(dt)
-	}
-	for _, v := range b.GetContainer() {
-		v.Update(dt)
-	}
+	b.Container.Update(dt)
 	str := fmt.Sprintf("Время:[%v] Нажатий: %v Размер поля: %v", b.stopwatch, b.field.ClickCount, b.field.dim.String())
 	b.varArea.Emit(str)
 }
 
-func (b *Board) Draw(surface *ebiten.Image) {
-	for _, v := range b.layout.GetContainer() {
-		v.Draw(surface)
-	}
-	for _, v := range b.GetContainer() {
-		v.Draw(surface)
-	}
-}
-
-func (b *Board) Resize(rect []int) {
-	b.Rect(eui.NewRect(rect))
-	b.SpriteBase.Resize(rect)
-	hT := int(float64(b.GetRect().GetLowestSize()) * 0.05)
-	x, y := b.GetRect().X, b.GetRect().Y
-	w, h := b.GetRect().W, b.GetRect().H-hT
-	b.layout.Resize([]int{x, y, w, h})
-	b.layout.SetCellMargin(float64(b.GetRect().GetLowestSize()) * 0.008)
+func (b *Board) Resize(rect eui.Rect) {
+	b.SetRect(rect)
+	hT := int(float64(b.Rect().GetLowestSize()) * 0.05)
+	x, y := b.Rect().X, b.Rect().Y
+	w, h := b.Rect().W, b.Rect().H-hT
+	b.layout.Resize(eui.NewRect([]int{x, y, w, h}))
 	y += h
 	h = hT
-	b.bottomLbl.Resize([]int{x, y, w, h})
+	b.bottomLbl.Resize(eui.NewRect([]int{x, y, w, h}))
 	b.ImageReset()
 }
 
 type Dialog struct {
-	eui.DrawableBase
+	*eui.Container
 	btnQuit, btnNew, btnReset, btnNext, btnCont *eui.Button
 	title, message                              *eui.Text
 	dialFunc                                    func(d *eui.Button)
@@ -438,7 +416,7 @@ type Dialog struct {
 }
 
 func NewDialog(title string, board *Board, f func(d *eui.Button)) *Dialog {
-	t := &Dialog{}
+	t := &Dialog{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	t.board = board
 	t.dialFunc = f
 	t.title = eui.NewText(title)
@@ -461,49 +439,49 @@ func NewDialog(title string, board *Board, f func(d *eui.Button)) *Dialog {
 }
 
 func (d *Dialog) Visible(value bool) {
-	for _, v := range d.GetContainer() {
-		v.Visible(value)
+	d.Traverse(func(c eui.Drawabler) {
+		c.Visible(value)
 		if value {
-			v.Enable()
+			c.Enable()
 		} else {
-			v.Disable()
+			c.Disable()
 		}
-	}
+	}, false)
+	d.MarkDirty()
 }
 
 func (t *Dialog) SetTitle(title string) {
 	t.title.SetText(title)
 }
 
-func (t *Dialog) Resize(rect []int) {
-	t.Rect(eui.NewRect(rect))
-	t.SpriteBase.Resize(rect)
-	x, y := t.GetRect().Pos()
-	w, h := t.GetRect().W/4, t.GetRect().H/3
-	t.title.Resize([]int{x, y, w*4 - h, h})
-	t.btnQuit.Resize([]int{x + w*4 - h, y, h, h})
+func (t *Dialog) Resize(rect eui.Rect) {
+	t.SetRect(rect)
+	x, y := t.Rect().Pos()
+	w, h := t.Rect().W/4, t.Rect().H/3
+	t.title.Resize(eui.NewRect([]int{x, y, w*4 - h, h}))
+	t.btnQuit.Resize(eui.NewRect([]int{x + w*4 - h, y, h, h}))
 	y += h
-	t.message.Resize([]int{x, y, w * 4, h})
+	t.message.Resize(eui.NewRect([]int{x, y, w * 4, h}))
 	y += h
-	t.btnNew.Resize([]int{x, y, w, h})
+	t.btnNew.Resize(eui.NewRect([]int{x, y, w, h}))
 	x += w
-	t.btnReset.Resize([]int{x, y, w, h})
+	t.btnReset.Resize(eui.NewRect([]int{x, y, w, h}))
 	x += w
-	t.btnNext.Resize([]int{x, y, w, h})
+	t.btnNext.Resize(eui.NewRect([]int{x, y, w, h}))
 	x += w
-	t.btnCont.Resize([]int{x, y, w, h})
+	t.btnCont.Resize(eui.NewRect([]int{x, y, w, h}))
 	t.ImageReset()
 }
 
 type SceneGame struct {
-	eui.SceneBase
+	*eui.Scene
 	topBar *eui.TopBar
 	board  *Board
 	dialog *Dialog
 }
 
 func NewSceneGame() *SceneGame {
-	s := &SceneGame{}
+	s := &SceneGame{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	s.topBar = eui.NewTopBar("Найди пару", func(b *eui.Button) {
 		s.dialog.SetTitle("Выбор игры")
 		s.dialog.Visible(true)
@@ -563,8 +541,6 @@ func NewSceneGame() *SceneGame {
 
 	})
 	s.Add(s.board)
-
-	s.Resize()
 	return s
 }
 
@@ -575,19 +551,17 @@ func (s *SceneGame) Resize() {
 	rect := eui.NewRect([]int{x, y, w, h})
 	hT := int(float64(rect.GetLowestSize()) * 0.1)
 	h = hT
-	s.topBar.Resize([]int{x, y, w, h})
+	s.topBar.Resize(eui.NewRect([]int{x, y, w, h}))
 	x, y = hT/2, hT+hT/2
 	w, h = w0-hT, h0-hT*2
-	s.board.Resize([]int{x, y, w, h})
-	s.dialog.Resize([]int{x, y, w, h})
+	s.board.Resize(eui.NewRect([]int{x, y, w, h}))
+	s.dialog.Resize(eui.NewRect([]int{x, y, w, h}))
 }
 
 func NewGameMatch() *eui.Ui {
-	u := eui.GetUi()
-	u.SetTitle("Найди пару")
 	k := 60
 	w, h := 9*k, 6*k
-	u.SetSize(w, h)
+	u := eui.GetUi().SetTitle("Найди пару").SetSize(w, h)
 	u.GetTheme().Set(eui.ViewBg, colornames.Black)
 	return u
 }

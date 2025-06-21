@@ -8,12 +8,12 @@ import (
 )
 
 type Cursor struct {
-	DrawableBase
+	*Drawable
 	show bool
 }
 
 func NewCursor(bg, fg color.Color) *Cursor {
-	c := &Cursor{}
+	c := &Cursor{Drawable: NewDrawable()}
 	c.Bg(bg)
 	c.Fg(fg)
 	return c
@@ -25,16 +25,16 @@ func (s *Cursor) Visible(value bool) {
 		return
 	}
 	s.show = value
-	s.Dirty = true
+	s.MarkDirty()
 }
 
 func (c *Cursor) Layout() {
-	c.SpriteBase.Layout()
+	c.Drawable.Layout()
 	c.Image().Fill(color.Transparent)
 	if c.show {
 		c.Image().Fill(colornames.Red)
 	}
-	c.Dirty = false
+	c.ClearDirty()
 }
 
 func (s *Cursor) Update(dt int) {
@@ -46,16 +46,16 @@ func (s *Cursor) Draw(surface *ebiten.Image) {
 	if s.IsDisabled() {
 		return
 	}
-	if s.Dirty {
+	if s.IsDirty() {
 		s.Layout()
 	}
 	op := &ebiten.DrawImageOptions{}
-	x, y := s.GetRect().Pos()
+	x, y := s.Rect().Pos()
 	op.GeoM.Translate(float64(x), float64(y))
 	surface.DrawImage(s.Image(), op)
 }
 
-func (c *Cursor) Resize(rect []int) {
-	c.Rect(NewRect(rect))
+func (c *Cursor) Resize(rect Rect) {
+	c.SetRect(rect)
 	c.ImageReset()
 }

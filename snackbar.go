@@ -10,18 +10,17 @@ import (
 )
 
 type SnackBar struct {
-	DrawableBase
+	*Drawable
 	msg   *Text
 	timer *Timer
 }
 
 func NewSnackBar(message string) *SnackBar {
-	s := &SnackBar{}
+	s := &SnackBar{Drawable: NewDrawable()}
 	s.msg = NewText(message)
 	s.msg.Bg(colornames.Blue)
 	s.msg.Fg(colornames.Yellow)
-	s.Add(s.msg)
-	s.Resize([]int{})
+	s.Resize(NewRect([]int{0, 0, 0, 0}))
 	return s
 }
 
@@ -57,18 +56,16 @@ func (s *SnackBar) Draw(surface *ebiten.Image) {
 	}
 }
 
-func (s *SnackBar) Resize(r []int) {
+func (s *SnackBar) Resize(r Rect) {
 	w0, h0 := GetUi().Size()
 	rect := NewRect([]int{0, 0, w0, h0})
 	sz := int(float64(rect.GetLowestSize()) * 0.1)
 	x, y := rect.X+((w0-sz*8)/2), rect.Y+rect.Bottom()-sz*2
 	w, h := w0-sz*8, sz
-	s.msg.Resize([]int{x, y, w, h})
+	s.msg.Resize(NewRect([]int{x, y, w, h}))
 }
 
 func (s *SnackBar) Close() {
 	s.timer = nil
 	s.ImageReset()
-	s.ResetContainerBase()
-	log.Println("SnackBar:Close:", s)
 }

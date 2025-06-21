@@ -11,8 +11,8 @@ import (
 )
 
 type SelectDiff struct {
-	eui.SceneBase
-	frame                          *eui.BoxLayout
+	*eui.Scene
+	frame                          *eui.Container
 	topBar                         *eui.TopBar
 	comboRow, comboCol, comboMines *eui.ComboBox
 	btnExec                        *eui.Button
@@ -21,10 +21,10 @@ type SelectDiff struct {
 }
 
 func NewSelectDiff(title string) *SelectDiff {
-	s := &SelectDiff{}
+	s := &SelectDiff{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	s.topBar = eui.NewTopBar(title, nil)
 	s.Add(s.topBar)
-	s.frame = eui.NewVLayout()
+	s.frame = eui.NewContainer(eui.NewVBoxLayout(1))
 	lblTitle := eui.NewText("Настрой сложность")
 	s.frame.Add(lblTitle)
 	s.column, s.row, s.percent = 5, 5, 15
@@ -53,12 +53,9 @@ func NewSelectDiff(title string) *SelectDiff {
 		s.runGame()
 	})
 	s.frame.Add(s.btnExec)
-	return s
-}
-
-func (s *SelectDiff) Entered() {
-	s.Resize()
+	s.Add(s.frame)
 	s.kId = eui.GetUi().GetInputKeyboard().Connect(s.UpdateInput)
+	return s
 }
 
 func (s *SelectDiff) UpdateInput(ev eui.Event) {
@@ -72,33 +69,16 @@ func (s *SelectDiff) runGame() {
 	mines := s.percent * (s.row * s.column) / 100
 	str := "Игра на " + strconv.Itoa(s.column) + " столбиков" + strconv.Itoa(s.row) + " рядов " + strconv.Itoa(mines) + " мин"
 	game := scene_game.NewSceneGame(str, s.row, s.column, mines)
-	eui.GetUi().GetInputKeyboard().Disconnect(s.kId)
 	eui.GetUi().Push(game)
+	eui.GetUi().GetInputKeyboard().Disconnect(s.kId)
 	log.Println("run game", s.row, s.column, mines)
-}
-
-func (s *SelectDiff) Update(dt int) {
-	for _, v := range s.frame.GetContainer() {
-		v.Update(dt)
-	}
-	for _, v := range s.GetContainer() {
-		v.Update(dt)
-	}
-}
-
-func (s *SelectDiff) Draw(surface *ebiten.Image) {
-	for _, v := range s.frame.GetContainer() {
-		v.Draw(surface)
-	}
-	for _, v := range s.GetContainer() {
-		v.Draw(surface)
-	}
 }
 
 func (s *SelectDiff) Resize() {
 	w, h := eui.GetUi().Size()
 	rect := eui.NewRect([]int{0, 0, w, h})
+	s.SetRect(rect)
 	hTop := int(float64(rect.GetLowestSize()) * 0.05)
-	s.topBar.Resize([]int{0, 0, w, hTop})
-	s.frame.Resize([]int{0, hTop, w, h - hTop})
+	s.topBar.Resize(eui.NewRect([]int{0, 0, w, hTop}))
+	s.frame.Resize(eui.NewRect([]int{0, hTop, w, h - hTop}))
 }

@@ -6,13 +6,13 @@ import (
 
 // Умею показать кнопку под мышкой выделенной, или нажатой, или отпущенной(после отпускания исполняется прикрепленный метод), вторая иконка нажатая.
 type ButtonIcon struct {
-	DrawableBase
+	*Drawable
 	btn          *Button
 	icon1, icon2 *Icon
 }
 
 func NewButtonIcon(icons []*ebiten.Image, f func(*Button)) *ButtonIcon {
-	b := &ButtonIcon{}
+	b := &ButtonIcon{Drawable: NewDrawable()}
 	b.SetupButtonIcon(icons, f)
 	b.Visible(true)
 	return b
@@ -32,22 +32,22 @@ func (b *ButtonIcon) SetFunc(f func(*Button)) {
 func (b *ButtonIcon) SetIcons(icons []*ebiten.Image) {
 	b.icon1.SetIcon(icons[0])
 	b.icon2.SetIcon(icons[1])
-	b.Dirty = true
+	b.MarkDirty()
 }
 
 func (b *ButtonIcon) SetReleasedIcon(icon *ebiten.Image) {
 	b.icon1.SetIcon(icon)
-	b.Dirty = true
+	b.MarkDirty()
 }
 
 func (b *ButtonIcon) SetPressedIcon(icon *ebiten.Image) {
 	b.icon2.SetIcon(icon)
-	b.Dirty = true
+	b.MarkDirty()
 }
 
 func (b *ButtonIcon) Layout() {
-	b.SpriteBase.Layout()
-	b.Dirty = false
+	b.Drawable.Layout()
+	b.ClearDirty()
 }
 
 func (b *ButtonIcon) Update(dt int) {
@@ -66,7 +66,7 @@ func (b *ButtonIcon) Draw(surface *ebiten.Image) {
 	if !b.IsVisible() {
 		return
 	}
-	if b.Dirty {
+	if b.IsDirty() {
 		b.Layout()
 		b.icon1.Layout()
 		b.icon2.Layout()
@@ -77,9 +77,8 @@ func (b *ButtonIcon) Draw(surface *ebiten.Image) {
 	surface.DrawImage(b.Image(), op)
 }
 
-func (b *ButtonIcon) Resize(rect []int) {
-	b.Rect(NewRect(rect))
-	b.SpriteBase.Rect(NewRect(rect))
+func (b *ButtonIcon) Resize(rect Rect) {
+	b.SetRect(rect)
 	b.btn.Resize(rect)
 	b.icon1.Resize(rect)
 	b.icon2.Resize(rect)

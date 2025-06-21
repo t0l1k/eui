@@ -11,7 +11,7 @@ import (
 
 // Метка текста в одной строке, размер текста вычисляется исходя из размера
 type Text struct {
-	DrawableBase
+	*Drawable
 	txt               string
 	fontInit, oneFont bool
 	fontSize          int
@@ -19,9 +19,7 @@ type Text struct {
 }
 
 func NewText(txt string) *Text {
-	t := &Text{
-		txt: txt,
-	}
+	t := &Text{Drawable: NewDrawable(), txt: txt}
 	theme := GetUi().theme
 	t.Bg(theme.Get(TextBg))
 	t.Fg(theme.Get(TextFg))
@@ -32,7 +30,7 @@ func NewText(txt string) *Text {
 
 func (t *Text) OnlyOneFontSize(value bool) {
 	t.oneFont = value
-	t.Dirty = true
+	t.MarkDirty()
 }
 
 func (t *Text) GetText() string { return t.txt }
@@ -41,7 +39,7 @@ func (t *Text) SetText(value string) {
 		return
 	}
 	t.txt = value
-	t.Dirty = true
+	t.MarkDirty()
 }
 
 func (t *Text) UpdateData(value interface{}) {
@@ -57,7 +55,7 @@ func (t *Text) UpdateData(value interface{}) {
 }
 
 func (t *Text) Layout() {
-	t.SpriteBase.Layout()
+	t.Drawable.Layout()
 	t.Image().Fill(t.GetBg())
 	var font font.Face
 	if !t.oneFont || !t.fontInit {
@@ -76,23 +74,23 @@ func (t *Text) Layout() {
 		t.pos.Y = t.rect.H - (t.rect.H+b.Min.Y)/2
 	}
 	text.Draw(t.image, t.txt, font, t.pos.X, t.pos.Y, t.fg)
-	t.Dirty = false
+	t.MarkDirty()
 }
 
 func (t *Text) Draw(surface *ebiten.Image) {
 	if !t.IsVisible() {
 		return
 	}
-	if t.Dirty {
+	if t.IsDirty() {
 		t.Layout()
 	}
 	op := &ebiten.DrawImageOptions{}
-	x, y := t.GetRect().Pos()
+	x, y := t.Rect().Pos()
 	op.GeoM.Translate(float64(x), float64(y))
 	surface.DrawImage(t.Image(), op)
 }
 
-func (t *Text) Resize(rect []int) {
-	t.Rect(NewRect(rect))
+func (t *Text) Resize(rect Rect) {
+	t.SetRect(rect)
 	t.ImageReset()
 }

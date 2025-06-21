@@ -11,21 +11,21 @@ import (
 )
 
 type CellIcon struct {
-	eui.DrawableBase
-	cell            *game.Cell
-	dim             game.Dim
-	btn             *eui.Button
-	layout          *eui.GridLayoutRightDown
-	show, showNotes bool
-	f               func(b *eui.Button)
-	highlight       int
+	*eui.Container
+	cell      *game.Cell
+	dim       game.Dim
+	btn       *eui.Button
+	layout    *eui.Container
+	showNotes bool
+	f         func(b *eui.Button)
+	highlight int
 }
 
 func NewCellIcon(dim game.Dim, cell *game.Cell, f func(b *eui.Button), bg, fg color.RGBA) *CellIcon {
-	c := &CellIcon{}
+	c := &CellIcon{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	c.cell = cell
 	c.dim = dim
-	c.layout = eui.NewGridLayoutRightDown(1, 1)
+	c.layout = eui.NewContainer(eui.NewGridLayout(1, 1, 1))
 	c.f = f
 	c.btn = eui.NewButton("0", f)
 	c.Add(c.btn)
@@ -35,23 +35,24 @@ func NewCellIcon(dim game.Dim, cell *game.Cell, f func(b *eui.Button), bg, fg co
 	} else {
 		c.Fg(fg)
 	}
+	c.Add(c.layout)
 	c.Visible(true)
 	return c
 }
 
-func (c *CellIcon) ShowNotes(value bool)         { c.showNotes = value; c.Dirty = true }
-func (c *CellIcon) Highlight(value int)          { c.highlight = value; c.Dirty = true }
-func (c *CellIcon) UpdateData(value interface{}) { c.Dirty = true }
+func (c *CellIcon) ShowNotes(value bool) { c.showNotes = value; c.MarkDirty() }
+func (c *CellIcon) Highlight(value int)  { c.highlight = value; c.MarkDirty() }
+func (c *CellIcon) UpdateData(value int) { c.MarkDirty() }
 
 func (c *CellIcon) Layout() {
-	c.SpriteBase.Layout()
+	c.Drawable.Layout()
 	c.Image().Fill(c.GetBg())
-	c.layout.ResetContainerBase()
+	c.layout.ResetContainer()
 	value := c.cell.GetValue()
 	if value > 0 {
 		lbl := eui.NewText(strconv.Itoa(value))
 		c.layout.Add(lbl)
-		c.layout.SetDim(1, 1)
+		c.layout.SetLayout(eui.NewGridLayout(1, 1, 1))
 		defer lbl.Close()
 		if value == c.highlight {
 			lbl.Bg(colornames.Yellow)
@@ -83,12 +84,12 @@ func (c *CellIcon) Layout() {
 					lbl.SetText("")
 				}
 			}
-			c.layout.SetDim(float64(c.dim.W), float64(c.dim.H))
+			c.layout.SetLayout(eui.NewGridLayout(float64(c.dim.W), float64(c.dim.H), 1))
 			// log.Println("Иконка с заметкой", arr1)
 		} else {
 			lbl := eui.NewText("")
 			c.layout.Add(lbl)
-			c.layout.SetDim(1, 1)
+			c.layout.SetLayout(eui.NewGridLayout(1, 1, 1))
 			defer lbl.Close()
 			if len(notes) == 0 {
 				lbl.Bg(colornames.Orange)
@@ -99,7 +100,7 @@ func (c *CellIcon) Layout() {
 			// log.Println("Иконка без заметок", c.cell.GetValue())
 		}
 	}
-	c.Dirty = false
+	c.ClearDirty()
 }
 
 func (d *CellIcon) Update(dt int) {
@@ -109,28 +110,23 @@ func (d *CellIcon) Update(dt int) {
 	d.btn.Update(dt)
 }
 
-func (c *CellIcon) Draw(surface *ebiten.Image) {
-	if !c.IsVisible() {
+func (d *CellIcon) Draw(surface *ebiten.Image) {
+	if !d.IsVisible() {
 		return
 	}
-	if c.Dirty {
-		c.Layout()
+	if d.IsDirty() {
+		d.Layout()
 	}
-	op := &ebiten.DrawImageOptions{}
-	x, y := c.GetRect().Pos()
-	op.GeoM.Translate(float64(x), float64(y))
-	surface.DrawImage(c.Image(), op)
-	for _, v := range c.layout.GetContainer() {
-		v.Draw(surface)
-	}
+	d.Container.Draw(surface)
 }
 
-func (c *CellIcon) IsVisible() bool    { return c.show }
-func (c *CellIcon) Visible(value bool) { c.show = value }
+func (d *CellIcon) Visible(value bool) {
+	d.Drawable.Visible(value)
+	d.Traverse(func(c eui.Drawabler) { c.Visible(value); c.MarkDirty() }, false)
+}
 
-func (c *CellIcon) Resize(rect []int) {
-	c.Rect(eui.NewRect(rect))
-	c.SpriteBase.Resize(rect)
+func (c *CellIcon) Resize(rect eui.Rect) {
+	c.SetRect(rect)
 	c.btn.Resize(rect)
 	c.layout.Resize(rect)
 	c.ImageReset()

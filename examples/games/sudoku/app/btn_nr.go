@@ -9,19 +9,24 @@ import (
 )
 
 type BottomBarNr struct {
-	eui.DrawableBase
+	*eui.Container
 	valueBtn *eui.Button
 	countLbl *eui.Text
 }
 
 func NewBtn(fn func(btn *eui.Button)) *BottomBarNr {
-	b := &BottomBarNr{}
+	b := &BottomBarNr{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	b.valueBtn = eui.NewButton("", fn)
 	b.Add(b.valueBtn)
 	b.countLbl = eui.NewText("")
 	b.countLbl.Fg(colornames.Black)
 	b.Add(b.countLbl)
 	return b
+}
+
+func (d *BottomBarNr) Visible(value bool) {
+	d.Drawable.Visible(value)
+	d.Traverse(func(c eui.Drawabler) { c.Visible(value) }, false)
 }
 
 func (b *BottomBarNr) GetBg() color.Color   { return b.valueBtn.GetBg() }
@@ -40,11 +45,11 @@ func (b *BottomBarNr) SetCount(value int) {
 	}
 }
 
-func (b *BottomBarNr) Resize(rect []int) {
-	b.Rect(eui.NewRect(rect))
+func (b *BottomBarNr) Resize(rect eui.Rect) {
+	b.SetRect(rect)
 	b.valueBtn.Resize(rect)
-	x, y := b.GetRect().Pos()
-	w, h := b.GetRect().Size()
+	x, y := b.Rect().Pos()
+	w, h := b.Rect().Size()
 	x += w - w/3
-	b.countLbl.Resize([]int{x, y, w / 3, h / 3})
+	b.countLbl.Resize(eui.NewRect([]int{x, y, w / 3, h / 3}))
 }

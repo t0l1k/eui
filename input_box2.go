@@ -11,7 +11,7 @@ import (
 )
 
 type InputBox2 struct {
-	DrawableBase
+	*Drawable
 	lbl                   *Text
 	textVar               *Signal[string]
 	hasFocus, alwaysFocus bool
@@ -22,13 +22,12 @@ type InputBox2 struct {
 }
 
 func NewInputBox2(onReturn func(*InputBox2)) *InputBox2 {
-	i := &InputBox2{}
+	i := &InputBox2{Drawable: NewDrawable()}
 	i.onReturn = onReturn
 	i.textVar = NewSignal(func(a, b string) bool { return a == b })
 	i.lbl = NewText("")
 	i.textVar.Connect(func(data string) { i.lbl.SetText(data) })
 	i.textVar.Emit("")
-	i.Add(i.lbl)
 	theme := GetUi().theme
 	i.bg = theme.Get(InputBoxBg)
 	i.fg = theme.Get(InputBoxFg)
@@ -152,8 +151,8 @@ func (i *InputBox2) UpdateInput(value interface{}) {
 	}
 }
 
-func (i *InputBox2) Resize(rect []int) {
-	i.Rect(NewRect(rect))
+func (i *InputBox2) Resize(rect Rect) {
+	i.SetRect(rect)
 	i.lbl.Resize(rect)
 	i.ImageReset()
 }

@@ -11,14 +11,14 @@ import (
 )
 
 type Plot struct {
-	DrawableBase
+	*Drawable
 	xArr, yArr, values             []int
 	bg, fg, fgValues               color.Color
 	pTitle, xAxisTitle, yAxisTitle string
 }
 
 func NewPlot(xArr, yArr, values []int, title, xTitle, yTitle string) *Plot {
-	p := &Plot{xArr: xArr, yArr: yArr, values: values, pTitle: title, xAxisTitle: xTitle, yAxisTitle: yTitle}
+	p := &Plot{Drawable: NewDrawable(), xArr: xArr, yArr: yArr, values: values, pTitle: title, xAxisTitle: xTitle, yAxisTitle: yTitle}
 	p.Visible(true)
 	p.bg = colornames.Gray
 	p.fg = colornames.Yellowgreen
@@ -27,12 +27,12 @@ func NewPlot(xArr, yArr, values []int, title, xTitle, yTitle string) *Plot {
 }
 
 func (p *Plot) Layout() {
-	p.SpriteBase.Layout()
+	p.Drawable.Layout()
 	p.Image().Fill(p.bg)
 	axisXMax := len(p.xArr)
 	axisYMax := len(p.yArr)
-	w0, h0 := p.GetRect().Size()
-	margin := int(float64(p.GetRect().GetLowestSize()) * 0.05)
+	w0, h0 := p.Rect().Size()
+	margin := int(float64(p.Rect().GetLowestSize()) * 0.05)
 	x, y, w, h := margin, margin, w0-margin*2, h0-margin*2
 	axisRect := NewRect([]int{x, y, w, h})
 	stroke := float32(axisRect.GetLowestSize()) * 0.003
@@ -83,7 +83,7 @@ func (p *Plot) Layout() {
 			defer lbl.Close()
 			lbl.Bg(p.bg)
 			lbl.Fg(p.fg)
-			lbl.Resize([]int{xL, yL, w, h})
+			lbl.Resize(NewRect([]int{xL, yL, w, h}))
 			lbl.Draw(p.Image())
 		}
 		boxSize := margin
@@ -92,7 +92,7 @@ func (p *Plot) Layout() {
 		defer lbl.Close()
 		lbl.Bg(p.bg)
 		lbl.Fg(p.fg)
-		lbl.Resize([]int{xL, yL, w, h})
+		lbl.Resize(NewRect([]int{xL, yL, w, h}))
 		lbl.Draw(p.Image())
 	}
 	{ // Y Axis
@@ -114,7 +114,7 @@ func (p *Plot) Layout() {
 			defer lbl.Close()
 			lbl.Bg(p.bg)
 			lbl.Fg(p.fg)
-			lbl.Resize([]int{xL, yL, w, h})
+			lbl.Resize(NewRect([]int{xL, yL, w, h}))
 			lbl.Draw(p.Image())
 		}
 		boxSize := margin
@@ -123,7 +123,7 @@ func (p *Plot) Layout() {
 		defer lbl.Close()
 		lbl.Bg(p.bg)
 		lbl.Fg(p.fg)
-		lbl.Resize([]int{xL, yL, w, h})
+		lbl.Resize(NewRect([]int{xL, yL, w, h}))
 		lbl.Draw(p.Image())
 	}
 	{ // values line
@@ -150,27 +150,26 @@ func (p *Plot) Layout() {
 		defer lbl.Close()
 		lbl.Bg(p.bg)
 		lbl.Fg(p.fg)
-		lbl.Resize([]int{xL, yL, w, h})
+		lbl.Resize(NewRect([]int{xL, yL, w, h}))
 		lbl.Draw(p.Image())
 	}
-	p.Dirty = false
+	p.ClearDirty()
 }
 
 func (p *Plot) Draw(surface *ebiten.Image) {
 	if !p.IsVisible() {
 		return
 	}
-	if p.Dirty {
+	if p.IsDirty() {
 		p.Layout()
 	}
 	op := &ebiten.DrawImageOptions{}
-	x, y := p.GetRect().Pos()
+	x, y := p.Rect().Pos()
 	op.GeoM.Translate(float64(x), float64(y))
 	surface.DrawImage(p.Image(), op)
 }
 
-func (p *Plot) Resize(rect []int) {
-	p.SpriteBase.Rect(NewRect(rect))
-	p.Rect(NewRect(rect))
+func (p *Plot) Resize(rect Rect) {
+	p.SetRect(rect)
 	p.ImageReset()
 }

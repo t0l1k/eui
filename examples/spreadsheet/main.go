@@ -6,12 +6,12 @@ import (
 )
 
 type SceneSpreadSheet struct {
-	eui.SceneBase
+	*eui.Scene
 	ssView *app.SpreadsheetView
 }
 
 func NewSceneSpreadSheet() *SceneSpreadSheet {
-	sc := &SceneSpreadSheet{}
+	sc := &SceneSpreadSheet{Scene: eui.NewScene(eui.NewVBoxLayout(1))}
 	sc.ssView = app.NewSpreadSheetView(5, 25)
 	sc.Add(sc.ssView)
 	sc.Resize()

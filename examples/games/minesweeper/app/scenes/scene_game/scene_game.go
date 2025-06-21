@@ -11,7 +11,7 @@ import (
 )
 
 type SceneGame struct {
-	eui.SceneBase
+	*eui.Scene
 	topBar                 *eui.TopBar
 	game                   *Game
 	lblMines, lblGameTimer *eui.Text
@@ -20,7 +20,7 @@ type SceneGame struct {
 }
 
 func NewSceneGame(title string, r, c, m int) *SceneGame {
-	s := &SceneGame{}
+	s := &SceneGame{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	s.topBar = eui.NewTopBar(title, nil)
 	s.Add(s.topBar)
 	s.game = newGame(r, c, m)
@@ -57,7 +57,7 @@ func (s *SceneGame) Update(dt int) {
 	s.lblGameTimer.SetText(s.game.timer.StringShort())
 	str := strconv.Itoa(s.game.field.GetMarkedMines()) + "/" + strconv.Itoa(s.game.field.GetTotalMines())
 	s.lblMines.SetText(str)
-	s.SceneBase.Update(dt)
+	s.Scene.Update(dt)
 }
 
 func (s *SceneGame) checkBtnStatus() {
@@ -86,23 +86,24 @@ func (s *SceneGame) Resize() {
 	hTop := int(float64(h) * 0.05) // topbar height
 	hTopHalf := int((float64(h) * 0.05) / 2)
 	rect := eui.NewRect([]int{0, hTop, w, h - hTop})
+	s.SetRect(rect)
 
-	s.topBar.Resize([]int{0, 0, w, hTop})
-	s.game.Resize([]int{hTopHalf, hTop + hTopHalf, w - hTop, h - hTop*2})
+	s.topBar.Resize(eui.NewRect([]int{0, 0, w, hTop}))
+	s.game.Resize(eui.NewRect([]int{hTopHalf, hTop + hTopHalf, w - hTop, h - hTop*2}))
 
 	x := rect.CenterX() - hTop*3
 	y := 0
 	r := []int{x, y, hTop * 2, hTop}
-	s.lblMines.Resize(r)
+	s.lblMines.Resize(eui.NewRect(r))
 	x = rect.CenterX() + hTop
 	y = 0
 	r = []int{x, y, hTop * 2, hTop}
-	s.lblGameTimer.Resize(r)
+	s.lblGameTimer.Resize(eui.NewRect(r))
 	x = rect.CenterX() - hTop/2
 	y = 0
 	r = []int{x, y, hTop, hTop}
-	s.btnStatus.Resize(r)
+	s.btnStatus.Resize(eui.NewRect(r))
 	x = rect.CenterX() + hTop*4
 	r = []int{x, y, hTop * 3, hTop}
-	s.btnAF.Resize(r)
+	s.btnAF.Resize(eui.NewRect(r))
 }

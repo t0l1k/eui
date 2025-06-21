@@ -11,22 +11,24 @@ import (
 )
 
 type Board struct {
-	eui.DrawableBase
-	diff                   game.Difficult
-	dim                    game.Dim
-	game                   *game.Game
-	layoutCells            *eui.GridLayoutRightDown
-	grid                   *eui.GridView
-	fn                     func(*eui.Button)
-	show, showNotes, isWin bool
-	highlight              int
-	sw                     *eui.Stopwatch
+	*eui.Container
+	layoutCells      *eui.Container
+	diff             game.Difficult
+	dim              game.Dim
+	game             *game.Game
+	grid             *eui.GridView
+	fn               func(*eui.Button)
+	showNotes, isWin bool
+	highlight        int
+	sw               *eui.Stopwatch
+	spacing          int
 }
 
 func NewBoard(fn func(b *eui.Button)) *Board {
-	b := &Board{}
+	b := &Board{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
+	b.layoutCells = eui.NewContainer(eui.NewSquareGridLayout(2, 2, 1))
+	b.Add(b.layoutCells)
 	b.fn = fn
-	b.layoutCells = eui.NewGridLayoutRightDown(2, 2)
 	b.grid = eui.NewGridView(2, 2)
 	b.grid.Visible(false)
 	b.grid.DrawRect = true
@@ -34,6 +36,7 @@ func NewBoard(fn func(b *eui.Button)) *Board {
 	b.grid.Bg(colornames.Black)
 	b.Add(b.grid)
 	b.sw = eui.NewStopwatch()
+	b.spacing = 5
 	return b
 }
 
@@ -42,16 +45,16 @@ func (b *Board) Setup(dim game.Dim, diff game.Difficult) {
 	b.diff = diff
 	b.game = game.NewGame(b.dim)
 	b.game.Load(diff)
-	b.layoutCells.ResetContainerBase()
+	b.layoutCells.ResetContainer()
 	for y := 0; y < b.dim.Size(); y++ {
 		for x := 0; x < b.dim.Size(); x++ {
 			btn := NewCellIcon(b.dim, b.game.Cell(x, y), b.fn, colornames.Silver, colornames.Black)
-			b.game.Cell(x, y).Connect(func(data int) { btn.Dirty = true })
+			b.game.Cell(x, y).Connect(btn.UpdateData)
 			b.layoutCells.Add(btn)
 		}
 	}
 	b.grid.Set(float64(b.dim.H), float64(b.dim.W))
-	b.layoutCells.SetDim(float64(b.dim.Size()), float64(b.dim.Size()))
+	b.layoutCells.SetLayout(eui.NewSquareGridLayout(float64(b.dim.Size()), float64(b.dim.Size()), float64(b.spacing)))
 	b.ShowNotes(true)
 	b.isWin = false
 	b.sw.Reset()
@@ -67,9 +70,12 @@ func (b *Board) GetDiffStr() string {
 func (b *Board) IsShowNotes() bool { return b.showNotes }
 func (b *Board) ShowNotes(value bool) {
 	b.showNotes = value
-	for _, v := range b.layoutCells.GetContainer() {
-		v.(*CellIcon).ShowNotes(b.showNotes)
-	}
+	b.layoutCells.Traverse(func(d eui.Drawabler) {
+		c, ok := d.(*CellIcon)
+		if ok {
+			c.ShowNotes(value)
+		}
+	}, false)
 }
 
 func (b *Board) Undo() {
@@ -96,45 +102,33 @@ func (b *Board) Highlight(value string) {
 		panic(err)
 	}
 	b.highlight = int(n)
-	for _, v := range b.layoutCells.GetContainer() {
-		v.(*CellIcon).Highlight(b.highlight)
-	}
+
+	b.layoutCells.Traverse(func(d eui.Drawabler) {
+		c, ok := d.(*CellIcon)
+		if ok {
+			c.Highlight(b.highlight)
+		}
+	}, false)
 }
 
-func (b *Board) Update(dt int) {
-	if !b.IsVisible() {
-		return
+func (d *Board) Draw(surface *ebiten.Image) {
+	if d.IsDirty() {
+		d.Layout()
 	}
-	for _, v := range b.layoutCells.GetContainer() {
-		v.Update(dt)
-	}
-	for _, v := range b.GetContainer() {
-		v.Update(dt)
-	}
+	d.Traverse(func(d eui.Drawabler) { d.Draw(surface) }, false)
 }
 
-func (b *Board) Draw(surface *ebiten.Image) {
-	if !b.IsVisible() {
-		return
-	}
-	for _, v := range b.layoutCells.GetContainer() {
-		v.Draw(surface)
-	}
-	for _, v := range b.GetContainer() {
-		v.Draw(surface)
-	}
+func (d *Board) Visible(value bool) {
+	d.Drawable.Visible(value)
+	d.Traverse(func(c eui.Drawabler) { c.Visible(value); c.MarkDirty() }, false)
+	d.MarkDirty()
 }
 
-func (b *Board) IsVisible() bool    { return b.show }
-func (b *Board) Visible(value bool) { b.show = value; b.grid.Visible(value) }
-
-func (b *Board) Resize(rect []int) {
-	b.Rect(eui.NewRect(rect))
-	margin := float64(b.GetRect().GetLowestSize()) * 0.005
-	x, y, w, h := b.GetRect().GetRect()
-	b.layoutCells.Resize([]int{x + int(margin/2), y + int(margin/2), w, h})
-	b.layoutCells.SetCellMargin(margin)
-	x1, y1, w1, h1 := b.layoutCells.ItemsRect.GetRect()
-	b.grid.Resize([]int{x1 - int(margin/2), y1 - int(margin/2), w1, h1})
-	b.grid.SetStrokewidth(margin * 2)
+func (b *Board) Resize(rect eui.Rect) {
+	b.SetRect(rect)
+	x, y, w, h := b.Rect().GetRect()
+	b.layoutCells.Resize(eui.NewRect([]int{x + int(b.spacing/2), y + int(b.spacing/2), w, h}))
+	x1, y1, w1, h1 := b.Rect().GetRect()
+	b.grid.Resize(eui.NewRect([]int{x1 - int(b.spacing/2), y1 - int(b.spacing/2), w1, h1}))
+	b.grid.SetStrokewidth(float64(b.spacing))
 }

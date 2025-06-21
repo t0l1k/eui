@@ -8,7 +8,7 @@ import (
 )
 
 type SceneMain struct {
-	eui.SceneBase
+	*eui.Scene
 	topBar    *eui.TopBar
 	boards    []Sols
 	boardIdx  int
@@ -18,7 +18,7 @@ type SceneMain struct {
 }
 
 func NewSceneMain() *SceneMain {
-	s := &SceneMain{}
+	s := &SceneMain{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	s.topBar = eui.NewTopBar(title, nil)
 	s.topBar.SetUseStopwatch()
 	s.topBar.SetShowStoppwatch(true)
@@ -32,12 +32,12 @@ func NewSceneMain() *SceneMain {
 	board.Setup(true)
 	s.boards = append(s.boards, board)
 
-	board = nil
+	// board = nil
 
-	board = NewBoardFreecell(s.fn)
-	s.Add(board)
-	board.Setup(true)
-	s.boards = append(s.boards, board)
+	// board = NewBoardFreecell(s.fn)
+	// s.Add(board)
+	// board.Setup(true)
+	// s.boards = append(s.boards, board)
 
 	s.current = s.boards[s.boardIdx]
 	s.current.Visible(true)
@@ -81,7 +81,6 @@ func NewSceneMain() *SceneMain {
 	})
 	s.bottomBar.Setup(s.current)
 	s.Add(s.bottomBar)
-	s.Resize()
 	return s
 }
 
@@ -107,8 +106,9 @@ func (s *SceneMain) gameLogic(btn *eui.Button) {
 func (s *SceneMain) Resize() {
 	w0, h0 := eui.GetUi().Size()
 	rect := eui.NewRect([]int{0, 0, w0, h0})
+	s.SetRect(rect)
 	Htop := int(float64(rect.GetLowestSize()) * 0.05)
-	s.topBar.Resize([]int{0, 0, w0, Htop})
-	s.current.Resize([]int{0, Htop, w0, h0 - Htop*4})
-	s.bottomBar.Resize([]int{0, h0 - Htop, w0, Htop})
+	s.topBar.Resize(eui.NewRect([]int{0, 0, w0, Htop}))
+	s.current.Resize(eui.NewRect([]int{0, Htop, w0, h0 - Htop*4}))
+	s.bottomBar.Resize(eui.NewRect([]int{0, h0 - Htop, w0, Htop}))
 }

@@ -11,7 +11,7 @@ import (
 
 // Умею получить от клавиатуры нажатый символ(пока только английский), backspace удаляет последний введенный символ, enter запускает прикрепленный метод. Умею мигать курсором. Только при фокусе от клавиатуры доступен ввод, активированый нажатием левой кнопки мыши(меняется виджет обрамление былым). Есть проверка только на цифры, выбрать при создании экземпляра метод с настроенной проверкой на цифры.
 type InputBox struct {
-	View
+	*View
 	_text         string
 	btn           *Button
 	size          int
@@ -24,7 +24,7 @@ type InputBox struct {
 }
 
 func NewInputBox(text string, size int, onReturn func(*InputBox)) *InputBox {
-	i := &InputBox{
+	i := &InputBox{View: NewView(),
 		size:       size,
 		onReturn:   onReturn,
 		onlyDigits: false,
@@ -34,7 +34,7 @@ func NewInputBox(text string, size int, onReturn func(*InputBox)) *InputBox {
 }
 
 func NewDigitInputBox(text string, size int, onReturn func(*InputBox)) *InputBox {
-	i := &InputBox{
+	i := &InputBox{View: NewView(),
 		size:       size,
 		onReturn:   onReturn,
 		onlyDigits: true,
@@ -44,7 +44,6 @@ func NewDigitInputBox(text string, size int, onReturn func(*InputBox)) *InputBox
 }
 
 func (inp *InputBox) setupBox(text string) {
-	inp.SetupView()
 	inp.btn = NewButton(text, func(b *Button) {})
 	inp._text = ""
 	inp.btn.SetText(text)
@@ -155,7 +154,7 @@ func (inp *InputBox) GetDigit() (float64, error) {
 func (inp *InputBox) SetDigit(value string) {
 	inp._text = value
 	inp.btn.SetText(inp.setPrompt())
-	inp.Dirty = true
+	inp.MarkDirty()
 }
 
 func (inp *InputBox) Draw(surface *ebiten.Image) {
@@ -163,15 +162,15 @@ func (inp *InputBox) Draw(surface *ebiten.Image) {
 	inp.cursor.Draw(surface)
 }
 
-func (inp *InputBox) Resize(rect []int) {
+func (inp *InputBox) Resize(rect Rect) {
 	inp.View.Resize(rect)
 	sz := inp.size
-	w := inp.GetRect().W / sz
+	w := inp.Rect().W / sz
 	w1 := int(float64(w) * 0.2)
-	h := inp.GetRect().H
-	x, y := inp.GetRect().Pos()
-	inp.btn.Resize([]int{x, y, w * (inp.size), h})
-	inp.cursor.Resize([]int{x + w*(inp.size) - w1, y, w1, h})
+	h := inp.Rect().H
+	x, y := inp.Rect().Pos()
+	inp.btn.Resize(NewRect([]int{x, y, w * (inp.size), h}))
+	inp.cursor.Resize(NewRect([]int{x + w*(inp.size) - w1, y, w1, h}))
 }
 
 func (inp *InputBox) Close() { GetUi().GetInputKeyboard().Disconnect(inp.keyListenerId) }

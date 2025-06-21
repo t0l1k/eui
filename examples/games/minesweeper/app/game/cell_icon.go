@@ -10,7 +10,7 @@ import (
 
 // Умею обновить клетку игры по подписке на состояние клетки поля
 type CellIcon struct {
-	eui.DrawableBase
+	eui.Drawable
 	Btn   *eui.Button
 	field *MinedField
 }
@@ -101,7 +101,7 @@ func (c *CellIcon) Draw(surface *ebiten.Image) {
 func (c *CellIcon) Layout() {
 }
 
-func (c *CellIcon) Resize(rect []int) {
-	c.Rect(eui.NewRect(rect))
+func (c *CellIcon) Resize(rect eui.Rect) {
+	c.SetRect(rect)
 	c.Btn.Resize(rect)
 }

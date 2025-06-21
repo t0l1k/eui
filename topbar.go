@@ -1,7 +1,7 @@
 package eui
 
 type TopBar struct {
-	DrawableBase
+	*Container
 	btnMenu                        *Button
 	btnFunc                        func(b *Button)
 	lblTitle, tmLbl                *Text
@@ -13,7 +13,7 @@ type TopBar struct {
 
 // Умею показать вверху строку с меткой текста с кнопкой выход из сцены(если nil) или переопределенной функцией(для вызова диалога, например) в параметре и секундомером нахождения на сцене
 func NewTopBar(title string, f func(b *Button)) *TopBar {
-	t := &TopBar{coverTitle: 0.25, coverStopwatch: 0.1}
+	t := &TopBar{Container: NewContainer(NewAbsoluteLayout()), coverTitle: 0.25, coverStopwatch: 0.1}
 	t.show = true
 	t.showTitle = true
 	t.useSW = false
@@ -50,12 +50,12 @@ func (t *TopBar) SetButtonFunc(f func(b *Button)) {
 
 func (t *TopBar) SetTitleCoverArea(value float64) {
 	t.coverTitle = value
-	t.Dirty = true
+	t.MarkDirty()
 }
 
 func (t *TopBar) SetStopwatchCoverArea(value float64) {
 	t.coverStopwatch = value
-	t.Dirty = true
+	t.MarkDirty()
 }
 
 func (t *TopBar) setTheme() {
@@ -124,25 +124,24 @@ func (t *TopBar) Visible(value bool) {
 }
 
 func (t *TopBar) Update(dt int) {
-	t.DrawableBase.Update(dt)
+	t.Container.Update(dt)
 	if !t.useSW {
 		return
 	}
 	t.tmVar.Emit(t.Stopwatch.StringShort())
 }
 
-func (t *TopBar) Resize(rect []int) {
-	t.Rect(NewRect(rect))
-	t.SpriteBase.Resize(rect)
-	x, y, w, h := 0, 0, t.GetRect().H, t.GetRect().H
-	t.btnMenu.Resize([]int{x, y, w, h})
+func (t *TopBar) Resize(rect Rect) {
+	t.SetRect(rect)
+	x, y, w, h := 0, 0, t.Rect().H, t.Rect().H
+	t.btnMenu.Resize(NewRect([]int{x, y, w, h}))
 	x += h
-	w = int(float64(t.rect.W) * t.coverTitle)
-	t.lblTitle.Resize([]int{x, y, w, h})
+	w = int(float64(rect.W) * t.coverTitle)
+	t.lblTitle.Resize(NewRect([]int{x, y, w, h}))
 	if t.useSW {
-		w = int(float64(t.rect.W) * t.coverStopwatch)
-		x = t.GetRect().W - w
-		t.tmLbl.Resize([]int{x, y, w, h})
+		w = int(float64(rect.W) * t.coverStopwatch)
+		x = t.Rect().W - w
+		t.tmLbl.Resize(NewRect([]int{x, y, w, h}))
 	}
 	t.ImageReset()
 }

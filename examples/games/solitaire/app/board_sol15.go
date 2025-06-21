@@ -5,7 +5,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/solitaire/sols"
 	"github.com/t0l1k/eui/examples/games/solitaire/sols/deck"
@@ -13,9 +12,9 @@ import (
 )
 
 type BoardSol15 struct {
-	eui.DrawableBase
+	*eui.Container
 	game           *sol15.Lauout15
-	layout         *eui.GridLayoutRightDown
+	layout         *eui.Container
 	fn             func(*eui.Button)
 	deck           *deck.DeckCards52
 	sw             *eui.Stopwatch
@@ -24,11 +23,12 @@ type BoardSol15 struct {
 }
 
 func NewBoardSol15(fn func(*eui.Button)) *BoardSol15 {
-	b := &BoardSol15{}
+	b := &BoardSol15{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	b.fn = fn
 	b.deck = deck.NewDeckCards52().Shuffle()
 	b.game = sol15.NewLayout15(b.deck)
-	b.layout = eui.NewGridLayoutRightDown(14, 8)
+	b.layout = eui.NewContainer(eui.NewGridLayout(14, 8, 1))
+	b.Add(b.layout)
 	b.sw = eui.NewStopwatch()
 	return b
 }
@@ -39,7 +39,7 @@ func (b *BoardSol15) Setup(newDeck bool) {
 		b.sw.Reset()
 	}
 	b.game.Reset(b.deck)
-	b.layout.ResetContainerBase()
+	b.layout.ResetContainer()
 	for i := 0; i < 15; i++ {
 		for p := 0; p < 4; p++ {
 			cell := b.game.Column(sols.Column(i))[p]
@@ -61,7 +61,7 @@ func (b *BoardSol15) Setup(newDeck bool) {
 	b.moveIdx = 0
 	b.backupGame()
 	b.sw.Start()
-	b.Resize(b.GetRect().GetArr()) // обязательно после обнуления контейнеров
+	b.Resize(b.Rect()) // обязательно после обнуления контейнеров
 }
 
 func (b *BoardSol15) MakeMove(move sols.Column) {
@@ -95,30 +95,7 @@ func (b *BoardSol15) backupGame() {
 	fmt.Println("deck:", deck, b.moveIdx, len(b.historyOfMoves))
 }
 
-func (b *BoardSol15) Update(dt int) {
-	if !b.IsVisible() {
-		return
-	}
-	for _, v := range b.layout.GetContainer() {
-		v.Update(dt)
-	}
-	b.DrawableBase.Update(dt)
-}
-
-func (b *BoardSol15) Draw(surface *ebiten.Image) {
-	if !b.IsVisible() {
-		return
-	}
-	for _, v := range b.layout.GetContainer() {
-		v.Draw(surface)
-	}
-	b.DrawableBase.Draw(surface)
-}
-
-func (b *BoardSol15) Resize(rect []int) {
-	b.Rect(eui.NewRect(rect))
-	margin := float64(b.GetRect().GetLowestSize()) * 0.005
-	x, y, w, h := b.GetRect().GetRect()
-	b.layout.Resize([]int{x, y, w, h})
-	b.layout.SetCellMargin(margin)
+func (b *BoardSol15) Resize(rect eui.Rect) {
+	b.SetRect(rect)
+	b.layout.Resize(rect)
 }

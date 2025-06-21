@@ -31,12 +31,13 @@ func (u *Ui) GetInputTouch() *TouchInput       { return u.inputTouch }
 func (u *Ui) GetInputMouse() *MouseInput       { return u.inputMouse }
 func (u *Ui) GetInputKeyboard() *KeyboardInput { return u.inputKeyboard }
 func (u *Ui) GetTitle() string                 { return u.title }
-func (u *Ui) SetTitle(value string)            { u.title = value }
+func (u *Ui) SetTitle(value string) *Ui        { u.title = value; return u }
 func (u *Ui) SetFullscreen(value bool)         { u.settings.Set(UiFullscreen, value) }
 func (u *Ui) Size() (int, int)                 { return u.size.X, u.size.Y }
-func (u *Ui) SetSize(w, h int)                 { u.size = NewPointInt(w, h) }
+func (u *Ui) SetSize(w, h int) *Ui             { u.size = NewPointInt(w, h); return u }
 func (u *Ui) IsMainScene() bool                { return len(u.scenes) == 0 }
 func (u *Ui) GetTheme() *Theme                 { return u.theme }
+func (u *Ui) SetTheme(value *Theme) *Ui        { u.theme = value; return u }
 func (u *Ui) GetSettings() *Setting            { return u.settings }
 
 // Отсюда можно следить за изменением размера окна, при изменении обновляются размеры текущей сцены
@@ -137,6 +138,7 @@ func (u *Ui) getTick() (ticks int) {
 func (u *Ui) Push(sc Sceneer) {
 	u.scenes = append(u.scenes, sc)
 	u.currentScene = sc
+	u.resizeListener.Emit(NewEvent(EventResize, NewRect([]int{0, 0, u.size.X, u.size.Y})))
 	u.currentScene.Entered()
 	log.Println("Scene push", u.scenes)
 }

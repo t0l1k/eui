@@ -9,14 +9,14 @@ import (
 )
 
 type SceneMain struct {
-	eui.SceneBase
+	*eui.Scene
 	topBar    *eui.TopBar
 	board     *BoardMem
 	lblStatus *eui.Text
 }
 
 func NewSceneMain() *SceneMain {
-	s := &SceneMain{}
+	s := &SceneMain{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	s.topBar = eui.NewTopBar(title, nil)
 	s.topBar.SetUseStopwatch()
 	s.topBar.SetShowStoppwatch(true)
@@ -36,7 +36,7 @@ func NewSceneMain() *SceneMain {
 				s.board.SetupPreparation()
 			}
 		}
-		for i, v := range s.board.layout.GetContainer() {
+		for i, v := range s.board.Childrens() {
 			switch vv := v.(type) {
 			case *eui.Button:
 				if vv == btn {
@@ -66,7 +66,7 @@ func NewSceneMain() *SceneMain {
 func (s *SceneMain) Resize() {
 	w0, h0 := eui.GetUi().Size()
 	hTop := int(float64(h0) * 0.05) // topbar height
-	s.topBar.Resize([]int{0, 0, w0, hTop})
-	s.board.Resize([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*4})
-	s.lblStatus.Resize([]int{0, h0 - hTop, w0, hTop})
+	s.topBar.Resize(eui.NewRect([]int{0, 0, w0, hTop}))
+	s.board.Resize(eui.NewRect([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*4}))
+	s.lblStatus.Resize(eui.NewRect([]int{0, h0 - hTop, w0, hTop}))
 }

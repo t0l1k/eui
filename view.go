@@ -2,14 +2,14 @@ package eui
 
 // Базовый виджет умею хранить состояние от указателя мыши, при наведении(Hover) при нажатие на виджет(Focus) при покадании курсора мыши(Normal)
 type View struct {
-	DrawableBase
+	*Drawable
 	state                        InputState
 	isDragging                   bool
 	dragStartPoint, dragEndPoint PointInt
 }
 
 func NewView() *View {
-	v := &View{}
+	v := &View{Drawable: NewDrawable()}
 	v.SetupView()
 	v.Visible(true)
 	return v
@@ -28,7 +28,7 @@ func (v *View) Enable() {
 		return
 	}
 	v.disabled = false
-	v.Dirty = true
+	v.MarkDirty()
 }
 
 func (v *View) Disable() {
@@ -37,7 +37,7 @@ func (v *View) Disable() {
 	}
 	v.disabled = true
 	v.state = ViewStateNormal
-	v.Dirty = true
+	v.MarkDirty()
 }
 
 func (v *View) GetState() InputState {
@@ -49,7 +49,7 @@ func (v *View) SetState(state InputState) {
 		return
 	}
 	v.state = state
-	v.Dirty = true
+	v.MarkDirty()
 }
 
 func (v *View) UpdateInput(value interface{}) {
@@ -117,16 +117,12 @@ func (v *View) UpdateInput(value interface{}) {
 	}
 }
 
-func (v *View) Resize(rect []int) {
-	v.Rect(NewRect(rect))
-	v.SpriteBase.Rect(NewRect(rect))
+func (v *View) Resize(rect Rect) {
+	v.SetRect(rect)
 	v.ImageReset()
 }
 
 func (v *View) Close() {
 	GetUi().GetInputMouse().Detach(v)
 	GetUi().GetInputTouch().Detach(v)
-	for _, c := range v.GetContainer() {
-		c.Close()
-	}
 }

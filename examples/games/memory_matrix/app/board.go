@@ -12,8 +12,7 @@ import (
 )
 
 type BoardMem struct {
-	eui.DrawableBase
-	layout    *eui.GridLayoutRightDown
+	*eui.Container
 	game      *mem.Game
 	gamesData *mem.GamesData
 	showTimer *eui.Timer
@@ -23,7 +22,7 @@ type BoardMem struct {
 }
 
 func NewBoardMem(fn func(*eui.Button)) *BoardMem {
-	d := &BoardMem{}
+	d := &BoardMem{Container: eui.NewContainer(eui.NewGridLayout(1, 1, 1))}
 	d.varMsg = eui.NewSignal(func(a, b string) bool { return a == b })
 	d.varColor = eui.NewSignal(func(a, b []color.Color) bool {
 		// Если оба nil — считаем равными
@@ -52,7 +51,6 @@ func NewBoardMem(fn func(*eui.Button)) *BoardMem {
 	d.game = mem.NewGame(mem.Level(1))
 	d.gamesData = mem.NewGamesData()
 	d.Visible(true)
-	d.layout = eui.NewGridLayoutRightDown(1, 1)
 	d.showTimer = eui.NewTimer(1500*time.Millisecond, func() {
 		d.Game().SetNextStage()
 		d.SetupRecolection()
@@ -65,12 +63,11 @@ func NewBoardMem(fn func(*eui.Button)) *BoardMem {
 func (d *BoardMem) Game() *mem.Game { return d.game }
 
 func (d *BoardMem) SetupPreparation() {
-	d.layout.ResetContainerBase()
-	d.layout.SetDim(1, 1)
-	d.layout.FitToDim(false)
+	d.ResetContainer()
+	d.SetLayout(eui.NewGridLayout(1, 1, 1))
 	btn := eui.NewButton("Click to Start "+d.game.Level().String()+" "+d.game.Dim().String(), d.fn)
-	d.layout.Add(btn)
-	d.layout.Resize(d.GetRect().GetArr())
+	d.Add(btn)
+	d.Resize(d.Rect())
 	str := d.gamesData.String()
 	d.varMsg.Emit(str)
 	d.varColor.Emit([]color.Color{colornames.Yellowgreen, colornames.Black})
@@ -78,9 +75,9 @@ func (d *BoardMem) SetupPreparation() {
 }
 
 func (d *BoardMem) SetupShow() {
-	d.layout.ResetContainerBase()
+	d.ResetContainer()
 	w, h := d.game.Dim().Width(), d.Game().Dim().Height()
-	d.layout.SetDim(float64(w), float64(h))
+	d.SetLayout(eui.NewGridLayout(float64(w), float64(h), 1))
 	for y := 0; y < d.Game().Dim().Height(); y++ {
 		for x := 0; x < d.game.Dim().Width(); x++ {
 			cell := d.Game().Cell(d.Game().Idx(x, y))
@@ -89,10 +86,10 @@ func (d *BoardMem) SetupShow() {
 			if cell.IsReadOnly() {
 				btn.Bg(colornames.Orange)
 			}
-			d.layout.Add(btn)
+			d.Add(btn)
 		}
 	}
-	d.layout.Resize(d.GetRect().GetArr())
+	d.Resize(d.Rect())
 	str := d.gamesData.String()
 	d.varMsg.Emit(str)
 	d.varColor.Emit([]color.Color{colornames.Red, colornames.Black})
@@ -100,17 +97,17 @@ func (d *BoardMem) SetupShow() {
 }
 
 func (d *BoardMem) SetupRecolection() {
-	d.layout.ResetContainerBase()
+	d.ResetContainer()
 	w, h := d.game.Dim().Width(), d.Game().Dim().Height()
-	d.layout.SetDim(float64(w), float64(h))
+	d.SetLayout(eui.NewGridLayout(float64(w), float64(h), 1))
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
 			btn := eui.NewButton(" ", d.fn)
 			btn.Enable()
-			d.layout.Add(btn)
+			d.Add(btn)
 		}
 	}
-	d.layout.Resize(d.GetRect().GetArr())
+	d.Resize(d.Rect())
 	str := d.gamesData.String()
 	d.varMsg.Emit(str)
 	d.varColor.Emit([]color.Color{colornames.Blue, colornames.Yellow})
@@ -119,9 +116,8 @@ func (d *BoardMem) SetupRecolection() {
 
 func (d *BoardMem) SetupConclusion() {
 	var str string
-	d.layout.ResetContainerBase()
-	d.layout.SetDim(1, 1)
-	d.layout.FitToDim(true)
+	d.ResetContainer()
+	d.SetLayout(eui.NewSquareGridLayout(1, 1, 1))
 	sb := eui.NewSnackBar("")
 	if d.Game().Win {
 		str = "Winner"
@@ -131,12 +127,12 @@ func (d *BoardMem) SetupConclusion() {
 		sb.Bg(colornames.Red)
 	}
 	sb.SetText(str + " " + d.Game().String()).Show(3 * time.Second)
-	btn := d.setupScoreBtn()
-	d.layout.Add(btn)
-	d.layout.Resize(d.GetRect().GetArr())
 	d.varMsg.Emit(d.gamesData.String())
 	d.varColor.Emit([]color.Color{colornames.Fuchsia, colornames.Black})
-	log.Println("Setup Conclusion done", d.game.String())
+	btn := d.setupScoreBtn()
+	d.Add(btn)
+	d.Resize(d.Rect())
+	log.Println("Setup Conclusion done", d.game.String(), d.Rect(), btn.Rect())
 }
 
 func (d *BoardMem) setupScoreBtn() *eui.ButtonIcon {
@@ -151,9 +147,13 @@ func (d *BoardMem) setupScoreBtn() *eui.ButtonIcon {
 	}
 	levels = d.gamesData.Levels()
 	plot := eui.NewPlot(xArr, yArr, levels, "Memory Matrix", "Game", "Level")
-	plot.Resize(d.GetRect().GetArr())
+	log.Println("d.Rect()=", d.Rect())
+	plot.Resize(d.Rect())
+	log.Println("plot.Rect()=", plot.Rect())
 	plot.Layout()
+	log.Println("plot.Image().Bounds()=", plot.Image().Bounds())
 	btn := eui.NewButtonIcon([]*ebiten.Image{plot.Image(), plot.Image()}, d.fn)
+	log.Println("BoardMem:setupScoreBtn done", btn.Rect(), d.Rect(), plot.Rect())
 	return btn
 }
 
@@ -168,25 +168,8 @@ func (d *BoardMem) Update(dt int) {
 		d.Game().SetNextStage()
 		d.SetupConclusion()
 	}
-
-	for _, v := range d.layout.GetContainer() {
+	for _, v := range d.Childrens() {
 		v.Update(dt)
 	}
-	d.DrawableBase.Update(dt)
-}
-
-func (d *BoardMem) Draw(surface *ebiten.Image) {
-	if !d.IsVisible() {
-		return
-	}
-	for _, v := range d.layout.GetContainer() {
-		v.Draw(surface)
-	}
-	d.DrawableBase.Draw(surface)
-}
-
-func (d *BoardMem) Resize(rect []int) {
-	d.Rect(eui.NewRect(rect))
-	d.layout.Resize(rect)
-	d.ImageReset()
+	d.Container.Update(dt)
 }

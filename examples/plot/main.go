@@ -5,12 +5,12 @@ import (
 )
 
 type SceneTestPlot struct {
-	eui.SceneBase
+	*eui.Scene
 	plot *eui.Plot
 }
 
 func NewSceneTestPlot() *SceneTestPlot {
-	s := &SceneTestPlot{}
+	s := &SceneTestPlot{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	xArr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	yArr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
 	values := []int{1, 2, 3, 4, 5, 5, 6, 7, 7, 8}
@@ -26,7 +26,7 @@ func (s *SceneTestPlot) Resize() {
 	margin := int(float64(rect.GetLowestSize()) * 0.1)
 	x, y := margin, margin
 	w, h := w0-margin*2, h0-margin*2
-	s.plot.Resize([]int{x, y, w, h})
+	s.plot.Resize(eui.NewRect([]int{x, y, w, h}))
 }
 
 func NewGame() *eui.Ui {

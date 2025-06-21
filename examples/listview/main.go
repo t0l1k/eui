@@ -9,13 +9,13 @@ import (
 )
 
 type SceneTestListView struct {
-	eui.SceneBase
+	*eui.Scene
 	lstText, lstButtons, lstCheckBoxs *eui.ListView
 	btnRemoveSelected                 *eui.Button
 }
 
 func NewSceneTestListView() *SceneTestListView {
-	s := &SceneTestListView{}
+	s := &SceneTestListView{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	var list []string
 	for i := 0; i < 54; i++ {
 		list = append(list, "Item "+strconv.Itoa(i))
@@ -55,8 +55,6 @@ func NewSceneTestListView() *SceneTestListView {
 
 	})
 	s.Add(s.btnRemoveSelected)
-
-	s.Resize()
 	return s
 }
 
@@ -66,24 +64,22 @@ func (s *SceneTestListView) Resize() {
 	margin := int(float64(rect.GetLowestSize()) * 0.1)
 	x, y := margin, margin
 	w, h := margin*3, h0-margin*2
-	s.lstButtons.Resize([]int{x, y, w, h})
+	s.lstButtons.Resize(eui.NewRect([]int{x, y, w, h}))
 	x += margin*3 + margin
-	s.lstText.Resize([]int{x, y, w, h})
+	s.lstText.Resize(eui.NewRect([]int{x, y, w, h}))
 	x += margin*3 + margin
 	h -= margin * 3
-	s.lstCheckBoxs.Resize([]int{x, y, w, h})
+	s.lstCheckBoxs.Resize(eui.NewRect([]int{x, y, w, h}))
 	y += h + margin
 	h = margin
-	s.btnRemoveSelected.Resize([]int{x, y, w, h})
+	s.btnRemoveSelected.Resize(eui.NewRect([]int{x, y, w, h}))
+	log.Println("SceneTestListView:Resize:", rect, s.lstButtons.Rect(), s.lstCheckBoxs.Rect(), s.lstText.Rect(), s.btnRemoveSelected.Rect())
 }
 
 func NewGame() *eui.Ui {
-	u := eui.GetUi()
-	u.SetTitle("Test ListView")
 	k := 2
 	w, h := 500*k, 200*k
-	u.SetSize(w, h)
-	return u
+	return eui.GetUi().SetTitle("Test ListView").SetSize(w, h)
 }
 
 func main() {

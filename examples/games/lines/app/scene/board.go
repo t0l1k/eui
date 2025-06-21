@@ -5,15 +5,14 @@ import (
 	"log"
 	"strconv"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/lines/game"
 )
 
 type Board struct {
-	eui.DrawableBase
+	*eui.Container
 	table                  *Table
-	gameLayout             *eui.GridLayoutRightDown
+	gameLayout             *eui.Container
 	field                  *game.Field
 	showWay                bool
 	showWayDt              int
@@ -22,13 +21,14 @@ type Board struct {
 }
 
 func NewBoard(dim int) *Board {
-	b := &Board{}
+	b := &Board{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	b.field = game.NewField(dim)
 	b.table = NewTable()
 	b.table.Visible(false)
 	b.Add(b.table)
 	r, c := b.field.Dim()
-	b.gameLayout = eui.NewGridLayoutRightDown(float64(r), float64(c))
+	b.gameLayout = eui.NewContainer(eui.NewGridLayout(float64(r), float64(c), 1))
+	b.Add(b.gameLayout)
 	b.varScore = eui.NewSignal(func(a, b int) bool { return a == b })
 	b.varScore.Connect(func(data int) {
 		b.table.leftLbl.SetText(strconv.Itoa(data))
@@ -42,7 +42,7 @@ func NewBoard(dim int) *Board {
 }
 
 func (b *Board) NewGame(dim int) {
-	b.gameLayout.ResetContainerBase()
+	b.gameLayout.ResetContainer()
 	b.field.NewGame(dim)
 	for _, cell := range b.field.GetField() {
 		cell.Reset()
@@ -86,7 +86,7 @@ func (b *Board) NewGame(dim int) {
 		b.gameLayout.Add(btn)
 	}
 	r, c := b.field.Dim()
-	b.gameLayout.SetDim(float64(r), float64(c))
+	b.gameLayout.SetLayout(eui.NewGridLayout(float64(r), float64(c), 1))
 	b.field.NextMoveBalls()
 	b.field.ShowFilledNext()
 	b.field.NextMoveBalls()
@@ -95,8 +95,8 @@ func (b *Board) NewGame(dim int) {
 }
 
 func (b *Board) gameLogic(btn *eui.Button) {
-	for i := range b.gameLayout.GetContainer() {
-		if b.gameLayout.GetContainer()[i].(*CellIcon).btn == btn {
+	for i := range b.gameLayout.Childrens() {
+		if b.gameLayout.Childrens()[i].(*CellIcon).btn == btn {
 			cell := b.field.GetField()[i]
 			cellData := cell.State.Value()
 			state := cellData.State
@@ -122,10 +122,21 @@ func (b *Board) setWayCells(col game.BallColor, way []int) {
 	for _, value := range way {
 		bg := game.BallNoColor.Color()
 		fg := col.Color()
-		cell := b.gameLayout.GetContainer()[value].(*CellIcon)
+		cell := b.gameLayout.Childrens()[value].(*CellIcon)
 		cell.icon.setup(BallSmall, bg, fg)
 	}
 	log.Println("set way colors done", way, col)
+}
+
+func (d *Board) Visible(value bool) {
+	d.Traverse(func(child eui.Drawabler) {
+		child.Visible(value)
+		if value {
+			child.Enable()
+		} else {
+			child.Disable()
+		}
+	}, false)
 }
 
 func (b *Board) Update(dt int) {
@@ -142,12 +153,7 @@ func (b *Board) Update(dt int) {
 			b.showWay = false
 		}
 	}
-	for _, v := range b.GetContainer() {
-		v.Update(dt)
-	}
-	for _, v := range b.gameLayout.GetContainer() {
-		v.Update(dt)
-	}
+	b.Container.Update(dt)
 }
 
 func (b *Board) drawCellIcons() {
@@ -167,34 +173,20 @@ func (b *Board) drawCellIcons() {
 		case cell.IsMarkedForMove():
 			size = BallNormal
 		}
-		cl := b.gameLayout.GetContainer()[i].(*CellIcon)
+		cl := b.gameLayout.Childrens()[i].(*CellIcon)
 		cl.icon.setup(size, bg, fg)
 	}
 }
 
-func (b *Board) Draw(surface *ebiten.Image) {
-	if !b.IsVisible() {
-		return
-	}
-	for _, v := range b.GetContainer() {
-		v.Draw(surface)
-	}
-	for _, v := range b.gameLayout.GetContainer() {
-		v.Draw(surface)
-	}
-}
-
-func (b *Board) Resize(rect []int) {
-	b.Rect(eui.NewRect(rect))
-	b.SpriteBase.Resize(rect)
-	b.gameLayout.SetCellMargin(float64(b.GetRect().GetLowestSize()) * 0.008)
-	w0, h0 := b.GetRect().Size()
-	x0, y0 := b.GetRect().Pos()
+func (b *Board) Resize(rect eui.Rect) {
+	b.SetRect(rect)
+	w0, h0 := b.Rect().Size()
+	x0, y0 := b.Rect().Pos()
 	dim := b.field.Conf.Dim
-	cellSize := getCellSize(b.GetRect(), dim)
-	b.gameLayout.Resize([]int{x0, y0 + cellSize, w0, h0 - cellSize})
-	b.table.Resize([]int{x0 + (w0-cellSize*dim)/2, y0, cellSize * dim, cellSize})
-	b.Dirty = true
+	cellSize := getCellSize(b.Rect(), dim)
+	b.gameLayout.Resize(eui.NewRect([]int{x0, y0 + cellSize, w0, h0 - cellSize}))
+	b.table.Resize(eui.NewRect([]int{x0 + (w0-cellSize*dim)/2, y0, cellSize * dim, cellSize}))
+	b.MarkDirty()
 	log.Println("board resize done")
 }
 

@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/sudoku/game"
 	"golang.org/x/image/colornames"
@@ -20,11 +19,9 @@ const (
 var actsStr = []string{aUndo, aDel, aNote}
 
 type BottomBar struct {
-	eui.DrawableBase
-	layoutActs                                      *eui.BoxLayout
-	layoutNums                                      *eui.GridLayoutRightDown
+	*eui.Container
+	layoutActs, layoutNums                          *eui.Container
 	actBtns                                         []eui.Drawabler
-	show                                            bool
 	fn                                              func(*eui.Button)
 	actAccept, actUndo, actDel, actNotes, actNumber bool
 	varSw, varDiff                                  *eui.Signal[string]
@@ -32,19 +29,21 @@ type BottomBar struct {
 }
 
 func NewBottomBar(fn func(*eui.Button)) *BottomBar {
-	b := &BottomBar{}
+	b := &BottomBar{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	b.fn = fn
-	b.layoutActs = eui.NewVLayout()
-	b.layoutNums = eui.NewGridLayoutRightDown(2, 2)
+	b.layoutActs = eui.NewContainer(eui.NewVBoxLayout(1))
+	b.Add(b.layoutActs)
+	b.layoutNums = eui.NewContainer(eui.NewGridLayout(2, 2, 1))
+	b.Add(b.layoutNums)
 	return b
 }
 
 func (b *BottomBar) Setup(board *Board) {
 	b.board = board
-	b.layoutActs.ResetContainerBase()
-	b.layoutNums.ResetContainerBase()
-	b.layoutNums.SetDim(float64(board.dim.W), float64(board.dim.H))
-	b.layoutActs.Add(eui.NewText(title))
+	b.layoutActs.ResetContainer()
+	b.layoutNums.ResetContainer()
+	b.layoutNums.SetLayout(eui.NewGridLayout(float64(board.dim.W), float64(board.dim.H), 1))
+	b.layoutActs.Add(eui.NewText(Title))
 	b.layoutActs.Add(eui.NewText(board.dim.String()))
 	diffText := eui.NewText("")
 	b.layoutActs.Add(diffText)
@@ -73,12 +72,14 @@ func (b *BottomBar) Setup(board *Board) {
 		b.layoutNums.Add(btn)
 		b.actBtns = append(b.actBtns, btn)
 	}
-	b.Resize(b.GetRect().GetArr()) // обязательно после обнуления контейнеров
+	b.Resize(b.Rect()) // обязательно после обнуления контейнеров
 	b.setBtnClrs()
 }
 
-func (b *BottomBar) IsVisible() bool      { return b.show }
-func (b *BottomBar) Visible(value bool)   { b.show = value }
+func (d *BottomBar) Visible(value bool) {
+	d.Drawable.Visible(value)
+	d.Traverse(func(c eui.Drawabler) { c.Visible(value); c.MarkDirty() }, false)
+}
 func (b *BottomBar) IsActAccept() bool    { return b.actAccept }
 func (b *BottomBar) IsActUndo() bool      { return b.actUndo }
 func (b *BottomBar) IsActDel() bool       { return b.actDel }
@@ -111,7 +112,7 @@ func (b *BottomBar) SetAct(btn *eui.Button) (result bool) {
 		}
 		result = false
 	default:
-		for _, v := range b.layoutNums.GetContainer() {
+		for _, v := range b.layoutNums.Childrens() {
 			if v.(*BottomBarNr).GetText() == btn.GetText() {
 				v.(*BottomBarNr).Bg(colornames.Yellow)
 			}
@@ -147,7 +148,7 @@ func (b *BottomBar) UpdateNrs(counts map[int]int) {
 	b.varDiff.Emit(b.board.GetDiffStr())
 	size := b.board.dim.Size()
 	for k, v := range counts {
-		for _, btn := range b.layoutNums.GetContainer() {
+		for _, btn := range b.layoutNums.Childrens() {
 			if btn.(*BottomBarNr).GetValue() == strconv.Itoa(k) {
 				btn.(*BottomBarNr).SetCount(size - v)
 			}
@@ -156,7 +157,7 @@ func (b *BottomBar) UpdateNrs(counts map[int]int) {
 }
 
 func (b *BottomBar) UpdateUndoBtn(count int) {
-	for _, btn := range b.layoutActs.GetContainer() {
+	for _, btn := range b.layoutActs.Childrens() {
 		switch btn := btn.(type) {
 		case *eui.Button:
 			if strings.HasPrefix(btn.GetText(), aUndo) {
@@ -167,38 +168,22 @@ func (b *BottomBar) UpdateUndoBtn(count int) {
 }
 
 func (b *BottomBar) Update(dt int) {
-	if !b.IsVisible() {
+	b.Container.Update(dt)
+	if b.board == nil {
 		return
 	}
-	for _, v := range b.layoutActs.GetContainer() {
-		v.Update(dt)
-	}
-	for _, v := range b.layoutNums.GetContainer() {
-		v.Update(dt)
-	}
-	b.varSw.Emit(b.board.sw.StringShort())
-}
-
-func (b *BottomBar) Draw(surface *ebiten.Image) {
-	if !b.IsVisible() {
-		return
-	}
-	for _, v := range b.layoutActs.GetContainer() {
-		v.Draw(surface)
-	}
-	for _, v := range b.layoutNums.GetContainer() {
-		v.Draw(surface)
+	if b.board.sw.IsRun() {
+		b.varSw.Emit(b.board.sw.StringShort())
 	}
 }
 
-func (b *BottomBar) Resize(rect []int) {
-	b.Rect(eui.NewRect(rect))
-	b.SpriteBase.Resize(rect)
-	w0, h0 := b.GetRect().Size()
-	x, y := b.GetRect().Pos()
+func (b *BottomBar) Resize(rect eui.Rect) {
+	b.SetRect(rect)
+	w0, h0 := b.Rect().Size()
+	x, y := b.Rect().Pos()
 	h1 := h0 / 2
-	b.layoutActs.Resize([]int{x, y, w0, h1})
+	b.layoutActs.Resize(eui.NewRect([]int{x, y, w0, h1}))
 	y += h1
-	b.layoutNums.Resize([]int{x, y, w0, h1})
+	b.layoutNums.Resize(eui.NewRect([]int{x, y, w0, h1}))
 	b.ImageReset()
 }

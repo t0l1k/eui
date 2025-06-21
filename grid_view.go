@@ -8,14 +8,14 @@ import (
 )
 
 type GridView struct {
-	DrawableBase
+	*Drawable
 	r, c, strokeWidth float64
 	DrawRect          bool
 	bg, fg            color.Color
 }
 
 func NewGridView(row, column float64) *GridView {
-	gr := &GridView{r: row, c: column}
+	gr := &GridView{Drawable: NewDrawable(), r: row, c: column}
 	gr.DrawRect = false
 	gr.strokeWidth = 1
 	gr.Visible(true)
@@ -23,15 +23,13 @@ func NewGridView(row, column float64) *GridView {
 }
 
 func (gr *GridView) Bg(clr color.Color) {
-	r, g, b, _ := clr.RGBA()
-	a := 0 // invisible
-	gr.bg = color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
-	gr.Dirty = true
+	gr.bg = color.Transparent
+	gr.MarkDirty()
 }
 
 func (gr *GridView) Fg(clr color.Color) {
 	gr.fg = clr
-	gr.Dirty = true
+	gr.MarkDirty()
 }
 
 func (g *GridView) GetRow() float64 { return g.r }
@@ -40,15 +38,15 @@ func (g *GridView) GetCol() float64 { return g.c }
 func (g *GridView) Set(r, c float64) {
 	g.r = r
 	g.c = c
-	g.Dirty = true
+	g.MarkDirty()
 }
 
-func (g *GridView) SetRow(r float64)         { g.r = r; g.Dirty = true }
-func (g *GridView) SetColumn(c float64)      { g.c = c; g.Dirty = true }
-func (g *GridView) SetStrokewidth(w float64) { g.strokeWidth = w; g.Dirty = true }
+func (g *GridView) SetRow(r float64)         { g.r = r; g.MarkDirty() }
+func (g *GridView) SetColumn(c float64)      { g.c = c; g.MarkDirty() }
+func (g *GridView) SetStrokewidth(w float64) { g.strokeWidth = w; g.MarkDirty() }
 
 func (g *GridView) Layout() {
-	g.SpriteBase.Layout()
+	g.Drawable.Layout()
 	g.Image().Fill(g.bg)
 	cellSizeW := func() (size float64) {
 		r := g.r
@@ -66,7 +64,7 @@ func (g *GridView) Layout() {
 		return size
 	}()
 
-	r := g.GetRect()
+	r := g.Rect()
 	w0, h0 := r.Size()
 	marginX := (float64(w0) - cellSizeW*g.r) / 2
 	marginY := (float64(h0) - cellSizeH*g.c) / 2
@@ -107,25 +105,23 @@ func (g *GridView) Layout() {
 				float32(g.strokeWidth), g.fg, true)
 		}
 	}
-	g.Dirty = true
+	g.MarkDirty()
 }
 
 func (g *GridView) Draw(surface *ebiten.Image) {
 	if !g.IsVisible() {
 		return
 	}
-	if g.Dirty {
+	if g.IsDirty() {
 		g.Layout()
 	}
 	op := &ebiten.DrawImageOptions{}
-	x, y := g.GetRect().Pos()
+	x, y := g.Rect().Pos()
 	op.GeoM.Translate(float64(x), float64(y))
 	surface.DrawImage(g.Image(), op)
 }
 
-func (g *GridView) Resize(rect []int) {
-	g.Rect(NewRect(rect))
-	g.SpriteBase.Rect(NewRect(rect))
-	g.Dirty = true
+func (g *GridView) Resize(rect Rect) {
+	g.SetRect(rect)
 	g.ImageReset()
 }

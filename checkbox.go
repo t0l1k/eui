@@ -3,14 +3,14 @@ package eui
 import "github.com/hajimehoshi/ebiten/v2"
 
 type Checkbox struct {
-	DrawableBase
+	*Drawable
 	btn     *Button
 	txt     *Text
 	checked bool
 }
 
 func NewCheckbox(text string, f func(c *Checkbox)) *Checkbox {
-	c := &Checkbox{}
+	c := &Checkbox{Drawable: NewDrawable()}
 	c.SetupCheckbox(text, f)
 	c.Visible(true)
 	return c
@@ -40,12 +40,12 @@ func (c *Checkbox) SetChecked(value bool) {
 	} else {
 		c.btn.SetText(" ")
 	}
-	c.Dirty = true
+	c.MarkDirty()
 }
 
 func (c *Checkbox) Layout() {
-	c.SpriteBase.Layout()
-	c.Dirty = false
+	c.Drawable.Layout()
+	c.ClearDirty()
 }
 
 func (c *Checkbox) Update(dt int) {
@@ -59,7 +59,7 @@ func (b *Checkbox) Draw(surface *ebiten.Image) {
 	if !b.IsVisible() {
 		return
 	}
-	if b.Dirty {
+	if b.IsDirty() {
 		b.Layout()
 		b.btn.Layout()
 		b.txt.Layout()
@@ -68,12 +68,11 @@ func (b *Checkbox) Draw(surface *ebiten.Image) {
 	b.btn.Draw(surface)
 }
 
-func (c *Checkbox) Resize(rect []int) {
-	c.Rect(NewRect(rect))
-	c.SpriteBase.Rect(NewRect(rect))
+func (c *Checkbox) Resize(rect Rect) {
+	c.SetRect(rect)
 	w0, h0 := c.rect.Size()
 	x, y := c.rect.X, c.rect.Y
-	c.btn.Resize([]int{x, y, h0, h0})
+	c.btn.Resize(NewRect([]int{x, y, h0, h0}))
 	x += h0
-	c.txt.Resize([]int{x, y, w0 - h0, h0})
+	c.txt.Resize(NewRect([]int{x, y, w0 - h0, h0}))
 }

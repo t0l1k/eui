@@ -1,24 +1,23 @@
 package scene_main
 
 import (
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/minesweeper/app/scenes/scene_game"
 )
 
 type SceneSelectGame struct {
-	eui.SceneBase
+	*eui.Scene
 	topBar *eui.TopBar
-	frame  *eui.BoxLayout
+	frame  *eui.Container
 	sDiff  map[string][]int
 }
 
 func NewSceneSelectGame() *SceneSelectGame {
-	s := &SceneSelectGame{}
+	s := &SceneSelectGame{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	s.topBar = eui.NewTopBar("Игра Сапёр", nil)
 	s.topBar.SetUseStopwatch()
 	s.Add(s.topBar)
-	s.frame = eui.NewVLayout()
+	s.frame = eui.NewContainer(eui.NewVBoxLayout(1))
 	lblTitle := eui.NewText("Выбери сложность")
 	s.frame.Add(lblTitle)
 	s.sDiff = make(map[string][]int)
@@ -29,7 +28,7 @@ func NewSceneSelectGame() *SceneSelectGame {
 		button := eui.NewButton(k, s.selectGameLogic)
 		s.frame.Add(button)
 	}
-	s.Resize()
+	s.Add(s.frame)
 	return s
 }
 
@@ -44,28 +43,11 @@ func (s *SceneSelectGame) selectGameLogic(b *eui.Button) {
 	}
 }
 
-func (s *SceneSelectGame) Update(dt int) {
-	for _, v := range s.frame.GetContainer() {
-		v.Update(dt)
-	}
-	for _, v := range s.GetContainer() {
-		v.Update(dt)
-	}
-}
-
-func (s *SceneSelectGame) Draw(surface *ebiten.Image) {
-	for _, v := range s.frame.GetContainer() {
-		v.Draw(surface)
-	}
-	for _, v := range s.GetContainer() {
-		v.Draw(surface)
-	}
-}
-
 func (s *SceneSelectGame) Resize() {
 	w, h := eui.GetUi().Size()
 	rect := eui.NewRect([]int{0, 0, w, h})
+	s.SetRect(rect)
 	hT := int(float64(rect.GetLowestSize()) * 0.05)
-	s.topBar.Resize([]int{0, 0, w, hT})
-	s.frame.Resize([]int{hT / 2, hT + hT/2, w - hT, h - hT*2})
+	s.topBar.Resize(eui.NewRect([]int{0, 0, w, hT}))
+	s.frame.Resize(eui.NewRect([]int{hT / 2, hT + hT/2, w - hT, h - hT*2}))
 }

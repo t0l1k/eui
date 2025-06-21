@@ -6,18 +6,18 @@ import (
 
 // Умею показать изображение пропорционально маштабированное под размеры
 type Icon struct {
-	DrawableBase
+	*Drawable
 	icon *ebiten.Image
 }
 
 func NewIcon(icon *ebiten.Image) *Icon {
-	i := &Icon{icon: icon}
+	i := &Icon{Drawable: NewDrawable(), icon: icon}
 	i.Visible(true)
 	return i
 }
 
 func (i *Icon) Layout() {
-	i.SpriteBase.Layout()
+	i.Drawable.Layout()
 	w, h := i.rect.Size()
 	op := &ebiten.DrawImageOptions{}
 	iconSize := i.icon.Bounds().Size()
@@ -26,7 +26,7 @@ func (i *Icon) Layout() {
 	y1 = float64(h) / float64(iconSize.Y) //h
 	op.GeoM.Scale(x1, y1)
 	i.image.DrawImage(i.icon, op)
-	i.Dirty = false
+	i.ClearDirty()
 }
 
 func (i *Icon) GetIcon() *ebiten.Image { return i.image }
@@ -36,14 +36,14 @@ func (i *Icon) SetIcon(icon *ebiten.Image) {
 		return
 	}
 	i.icon = icon
-	i.Dirty = true
+	i.MarkDirty()
 }
 
 func (i *Icon) Draw(surface *ebiten.Image) {
 	if !i.IsVisible() {
 		return
 	}
-	if i.Dirty {
+	if i.IsDirty() {
 		i.Layout()
 	}
 	op := &ebiten.DrawImageOptions{}
@@ -52,9 +52,7 @@ func (i *Icon) Draw(surface *ebiten.Image) {
 	surface.DrawImage(i.image, op)
 }
 
-func (i *Icon) Resize(rect []int) {
-	i.Rect(NewRect(rect))
-	i.SpriteBase.Rect(NewRect(rect))
-	i.Dirty = true
+func (i *Icon) Resize(rect Rect) {
+	i.SetRect(rect)
 	i.ImageReset()
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type CardIcon struct {
-	eui.DrawableBase
+	*eui.Container
 	cell *sols.Cell
 	btn  *eui.Button
 	show bool
@@ -18,7 +18,7 @@ type CardIcon struct {
 }
 
 func NewCardIcon(cell *sols.Cell, f func(b *eui.Button)) *CardIcon {
-	c := &CardIcon{}
+	c := &CardIcon{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	c.cell = cell
 	c.f = f
 	str := ""
@@ -46,7 +46,7 @@ func (c *CardIcon) UpdateData(value *deck.Card) {
 		c.btn.SetText(value.StringShort())
 		c.btn.Fg(c.cell.GetCard().Color())
 	}
-	c.Dirty = true
+	c.MarkDirty()
 }
 
 func (d *CardIcon) Update(dt int) {
@@ -59,9 +59,8 @@ func (d *CardIcon) Update(dt int) {
 func (c *CardIcon) IsVisible() bool    { return c.show }
 func (c *CardIcon) Visible(value bool) { c.show = value }
 
-func (c *CardIcon) Resize(rect []int) {
-	c.Rect(eui.NewRect(rect))
-	c.SpriteBase.Resize(rect)
+func (c *CardIcon) Resize(rect eui.Rect) {
+	c.SetRect(rect)
 	c.btn.Resize(rect)
 	c.ImageReset()
 }

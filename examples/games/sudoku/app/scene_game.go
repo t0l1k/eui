@@ -9,7 +9,7 @@ import (
 )
 
 type SceneSudoku struct {
-	eui.SceneBase
+	*eui.Scene
 	topBar       *eui.TopBar
 	dialogSelect *DialogSelect
 	board        *Board
@@ -18,12 +18,12 @@ type SceneSudoku struct {
 
 func NewSceneSudoku() *SceneSudoku {
 	gamesData := game.NewGamesData()
-	s := &SceneSudoku{}
-	s.topBar = eui.NewTopBar(title, func(b *eui.Button) {
+	s := &SceneSudoku{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
+	s.topBar = eui.NewTopBar(Title, func(b *eui.Button) {
 		s.dialogSelect.Visible(true)
 		s.board.Visible(false)
 		s.bottomBar.Visible(false)
-		s.topBar.SetTitle(title)
+		s.topBar.SetTitle(Title)
 		s.topBar.SetShowTitle(true)
 		s.topBar.SetShowStoppwatch(true)
 	})
@@ -50,8 +50,11 @@ func NewSceneSudoku() *SceneSudoku {
 	s.Add(s.dialogSelect)
 	s.dialogSelect.Visible(true)
 	s.board = NewBoard(func(btn *eui.Button) {
-		for i := range s.board.layoutCells.GetContainer() {
-			icon := s.board.layoutCells.GetContainer()[i].(*CellIcon)
+		for i := range s.board.layoutCells.Childrens() {
+			icon, ok := s.board.layoutCells.Childrens()[i].(*CellIcon)
+			if !ok {
+				continue
+			}
 			if icon.btn == btn {
 				x, y := s.board.game.Pos(i)
 				if s.bottomBar.IsActDel() {
@@ -78,7 +81,7 @@ func NewSceneSudoku() *SceneSudoku {
 						s.board.Visible(false)
 						s.bottomBar.Visible(false)
 						s.dialogSelect.Visible(true)
-						s.topBar.SetTitle(title)
+						s.topBar.SetTitle(Title)
 						s.topBar.SetShowTitle(true)
 						s.topBar.SetShowStoppwatch(true)
 					}
@@ -113,17 +116,17 @@ func NewSceneSudoku() *SceneSudoku {
 		}
 	})
 	s.Add(s.bottomBar)
-	s.Resize()
 	return s
 }
 
 func (s *SceneSudoku) Resize() {
 	w0, h0 := eui.GetUi().Size()
 	rect := eui.NewRect([]int{0, 0, w0, h0})
+	s.SetRect(rect)
 	hT := int(float64(rect.GetLowestSize()) * 0.1)
-	s.topBar.Resize([]int{0, 0, w0, hT})
-	s.dialogSelect.Resize([]int{hT / 2, hT + hT/2, w0 - hT, h0 - hT*2})
+	s.topBar.Resize(eui.NewRect([]int{0, 0, w0, hT}))
+	s.dialogSelect.Resize(eui.NewRect([]int{hT / 2, hT + hT/2, w0 - hT, h0 - hT*2}))
 	w1 := (w0 - hT) / 3
-	s.board.Resize([]int{hT, 0, w1 * 2, h0})
-	s.bottomBar.Resize([]int{hT + w1*2, 0, w1, h0})
+	s.board.Resize(eui.NewRect([]int{hT, 0, w1 * 2, h0}))
+	s.bottomBar.Resize(eui.NewRect([]int{hT + w1*2, 0, w1, h0}))
 }

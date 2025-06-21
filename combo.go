@@ -8,7 +8,7 @@ import (
 )
 
 type ComboBox struct {
-	DrawableBase
+	*Drawable
 	btnPlus, btnMinus *Button
 	lblValue, lblText *Text
 	valueVar          *Signal[string]
@@ -18,7 +18,7 @@ type ComboBox struct {
 }
 
 func NewComboBox(text string, data []interface{}, index int, f func(*ComboBox)) *ComboBox {
-	c := &ComboBox{}
+	c := &ComboBox{Drawable: NewDrawable()}
 	c.SetupCombo(text, data, index, f)
 	c.Visible(true)
 	return c
@@ -94,8 +94,8 @@ func (c *ComboBox) SetValue(value interface{}) {
 }
 
 func (c *ComboBox) Layout() {
-	c.SpriteBase.Layout()
-	c.Dirty = false
+	c.Drawable.Layout()
+	c.ClearDirty()
 }
 
 func (c *ComboBox) Update(dt int) {
@@ -110,7 +110,7 @@ func (b *ComboBox) Draw(surface *ebiten.Image) {
 	if !b.IsVisible() {
 		return
 	}
-	if b.Dirty {
+	if b.IsDirty() {
 		b.Layout()
 		b.btnPlus.Layout()
 		b.btnMinus.Layout()
@@ -123,19 +123,18 @@ func (b *ComboBox) Draw(surface *ebiten.Image) {
 	b.btnMinus.Draw(surface)
 }
 
-func (c *ComboBox) Resize(rect []int) {
-	c.Rect(NewRect(rect))
-	c.SpriteBase.Rect(NewRect(rect))
-	x, y, w0, h0 := c.GetRect().GetRect()
+func (c *ComboBox) Resize(rect Rect) {
+	c.SetRect(rect)
+	x, y, w0, h0 := c.Rect().GetRect()
 	w, h := h0, h0
-	c.lblValue.Resize([]int{x, y, w, h})
+	c.lblValue.Resize(NewRect([]int{x, y, w, h}))
 	x += h0
 	h = h0 / 2
-	c.btnPlus.Resize([]int{x, y, w, h})
+	c.btnPlus.Resize(NewRect([]int{x, y, w, h}))
 	y += h
-	c.btnMinus.Resize([]int{x, y, w, h})
+	c.btnMinus.Resize(NewRect([]int{x, y, w, h}))
 	x += h0
 	y -= h
 	w, h = w0-h0*2, h0
-	c.lblText.Resize([]int{x, y, w, h})
+	c.lblText.Resize(NewRect([]int{x, y, w, h}))
 }
