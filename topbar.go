@@ -131,7 +131,7 @@ func (t *TopBar) Update(dt int) {
 	t.tmVar.Emit(t.Stopwatch.StringShort())
 }
 
-func (t *TopBar) Resize(rect Rect) {
+func (t *TopBar) Resize(rect Rect[int]) {
 	t.SetRect(rect)
 	x, y, w, h := 0, 0, t.Rect().H, t.Rect().H
 	t.btnMenu.Resize(NewRect([]int{x, y, w, h}))

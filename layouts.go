@@ -6,8 +6,10 @@ import (
 
 type AbsoluteLayout struct{}
 
-func NewAbsoluteLayout() *AbsoluteLayout              { return &AbsoluteLayout{} }
-func (a *AbsoluteLayout) Apply(d []Drawabler, r Rect) { log.Println("AbsoluteLayout:Apply:", d, r) }
+func NewAbsoluteLayout() *AbsoluteLayout { return &AbsoluteLayout{} }
+func (a *AbsoluteLayout) Apply(d []Drawabler, r Rect[int]) {
+	log.Println("AbsoluteLayout:Apply:", d, r)
+}
 
 // Умею размеры виджетов во мне разделить одинаково по горизонтали или по вертикали
 type BoxLayout struct {
@@ -19,7 +21,7 @@ func NewHBoxLayout(spacing float64) *BoxLayout { return &BoxLayout{horizontal: t
 func NewVBoxLayout(spacing float64) *BoxLayout {
 	return &BoxLayout{horizontal: false, spacing: spacing}
 }
-func (l *BoxLayout) Apply(widgets []Drawabler, rect Rect) {
+func (l *BoxLayout) Apply(widgets []Drawabler, rect Rect[int]) {
 	count := len(widgets)
 	if count == 0 {
 		return
@@ -57,7 +59,7 @@ func NewSquareGridLayout(r, c, spacing float64) *GridLayout {
 	return &GridLayout{rows: r, columns: c, spacing: spacing, square: true}
 }
 
-func (c *GridLayout) GetCellSize(r Rect) (size float64) {
+func (c *GridLayout) GetCellSize(r Rect[int]) (size float64) {
 	row := c.rows
 	col := c.columns
 	for row*size < float64(r.W) && col*size < float64(r.H) {
@@ -66,14 +68,14 @@ func (c *GridLayout) GetCellSize(r Rect) (size float64) {
 	return size
 }
 
-func (c *GridLayout) GetRowSize(r Rect) (size float64) {
+func (c *GridLayout) GetRowSize(r Rect[int]) (size float64) {
 	row := c.rows
 	for row*size < float64(r.W) {
 		size += 0.01
 	}
 	return size
 }
-func (c *GridLayout) GetColumnSize(r Rect) (size float64) {
+func (c *GridLayout) GetColumnSize(r Rect[int]) (size float64) {
 	col := c.columns
 	for col*size < float64(r.H) {
 		size += 0.01
@@ -81,7 +83,7 @@ func (c *GridLayout) GetColumnSize(r Rect) (size float64) {
 	return size
 }
 
-func (c *GridLayout) Apply(components []Drawabler, rect Rect) {
+func (c *GridLayout) Apply(components []Drawabler, rect Rect[int]) {
 	w0, h0 := rect.Size()
 	x0, y0 := rect.Pos()
 	if !c.square {

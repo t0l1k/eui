@@ -124,7 +124,7 @@ func (d *Board) Visible(value bool) {
 	d.MarkDirty()
 }
 
-func (b *Board) Resize(rect eui.Rect) {
+func (b *Board) Resize(rect eui.Rect[int]) {
 	b.SetRect(rect)
 	x, y, w, h := b.Rect().GetRect()
 	b.layoutCells.Resize(eui.NewRect([]int{x + int(b.spacing/2), y + int(b.spacing/2), w, h}))

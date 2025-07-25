@@ -18,7 +18,7 @@ import (
 // Стрелка часов с рисованием прозрачного фона и самой стрелки, можно напрямую рисовать через draw, только стрелку, но так элегантнее, все через макет и уже в контейнере обновить и перерисовать
 type Hand struct {
 	*eui.Drawable
-	faceCenter, tip          eui.Point
+	faceCenter, tip          eui.Point[float64]
 	value, lenght, thickness float64
 }
 
@@ -32,7 +32,7 @@ func NewHand(bg, fg color.Color) *Hand {
 	return h
 }
 
-func (h *Hand) Setup(center eui.Point, lenght float64, thickness float64, visible bool) {
+func (h *Hand) Setup(center eui.Point[float64], lenght float64, thickness float64, visible bool) {
 	h.faceCenter = center
 	h.lenght = lenght
 	h.thickness = thickness
@@ -78,7 +78,7 @@ func (h *Hand) Draw(surface *ebiten.Image) {
 	surface.DrawImage(h.Image(), op)
 }
 
-func (t *Hand) Resize(rect eui.Rect) { t.SetRect(rect); t.MarkDirty() }
+func (t *Hand) Resize(rect eui.Rect[int]) { t.SetRect(rect); t.MarkDirty() }
 
 // Сами часы, рисуется "лицо часов", а поверх него стрелки в порядке добавления друг поверх друга.
 type AnalogClock struct {
@@ -117,12 +117,12 @@ func (a *AnalogClock) drawClockFace() {
 	x, y := a.Rect().Center()
 	m := float64(a.Rect().GetLowestSize()) * 0.01
 	vector.DrawFilledCircle(a.Image(), float32(x), float32(y), float32(m)*3, a.GetBg(), true)
-	center := eui.Point{X: float64(x), Y: float64(y)}
+	center := eui.Point[float64]{X: float64(x), Y: float64(y)}
 	vector.DrawFilledCircle(a.Image(), float32(center.X), float32(center.Y), float32(m)*2, a.FaceBg, true)
 	vector.DrawFilledCircle(a.Image(), float32(center.X), float32(center.Y), float32(m), a.FaceFg, true)
 	for i := 0; i < 60; i++ {
 		var (
-			tip eui.Point
+			tip eui.Point[float64]
 			rad float64
 		)
 		if i%5 == 0 {
@@ -176,7 +176,7 @@ func (t *AnalogClock) Draw(surface *ebiten.Image) {
 	}
 }
 
-func (a *AnalogClock) Resize(r eui.Rect) {
+func (a *AnalogClock) Resize(r eui.Rect[int]) {
 	a.SetRect(r)
 	a.MsHand.Resize(r)
 	a.secHand.Resize(r)
@@ -202,7 +202,7 @@ func (a *AnalogClock) setupHands() {
 	a.hourHand.Setup(center, lenght, 8, true)
 }
 
-func GetTip(center eui.Point, percent, lenght, width, height float64) (tip eui.Point) {
+func GetTip(center eui.Point[float64], percent, lenght, width, height float64) (tip eui.Point[float64]) {
 	radians := (0.5 - percent) * (2.0 * math.Pi)
 	sine := math.Sin(radians)
 	cosine := math.Cos(radians)

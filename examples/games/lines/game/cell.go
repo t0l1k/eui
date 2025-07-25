@@ -9,18 +9,18 @@ import (
 type Cell struct {
 	State *CellState
 	color BallColor
-	pos   eui.PointInt
+	pos   eui.Point[int]
 }
 
 func NewCell(x, y int) *Cell {
-	pos := eui.NewPointInt(x, y)
+	pos := eui.NewPoint[int](x, y)
 	return &Cell{pos: pos,
 		color: BallNoColor,
 		State: NewCellState(CellEmpty, BallNoColor, pos),
 	}
 }
 
-func (c *Cell) Pos() eui.PointInt {
+func (c *Cell) Pos() eui.Point[int] {
 	return c.pos
 }
 

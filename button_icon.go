@@ -77,7 +77,7 @@ func (b *ButtonIcon) Draw(surface *ebiten.Image) {
 	surface.DrawImage(b.Image(), op)
 }
 
-func (b *ButtonIcon) Resize(rect Rect) {
+func (b *ButtonIcon) Resize(rect Rect[int]) {
 	b.SetRect(rect)
 	b.btn.Resize(rect)
 	b.icon1.Resize(rect)

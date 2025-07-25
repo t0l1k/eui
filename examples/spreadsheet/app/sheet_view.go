@@ -91,7 +91,7 @@ func (s *SpreadsheetView) Update(dt int) {
 	s.Container.Update(dt)
 }
 
-func (s *SpreadsheetView) Resize(rect eui.Rect) {
+func (s *SpreadsheetView) Resize(rect eui.Rect[int]) {
 	s.SetRect(rect)
 	cellSize := float64(s.Rect().GetLowestSize()) * 0.05
 	x0, y0, w0, h0 := s.Rect().X, s.Rect().Y, s.Rect().W, s.Rect().H

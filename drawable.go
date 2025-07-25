@@ -8,7 +8,7 @@ import (
 )
 
 type Drawable struct {
-	rect                     Rect
+	rect                     Rect[int]
 	dirty, visible, disabled bool
 	image                    *ebiten.Image
 	bg, fg                   color.Color
@@ -76,8 +76,8 @@ func (s *Drawable) Draw(surface *ebiten.Image) {
 	surface.DrawImage(s.Image(), op)
 }
 
-func (s *Drawable) Rect() Rect        { return s.rect }
-func (s *Drawable) SetRect(rect Rect) { s.rect = rect; s.MarkDirty() }
-func (s *Drawable) Resize(rect Rect)  { s.rect = rect; s.MarkDirty() }
+func (s *Drawable) Rect() Rect[int]        { return s.rect }
+func (s *Drawable) SetRect(rect Rect[int]) { s.rect = rect; s.MarkDirty() }
+func (s *Drawable) Resize(rect Rect[int])  { s.rect = rect; s.MarkDirty() }
 
 func (s *Drawable) Close() {}

@@ -9,9 +9,9 @@ type Drawabler interface {
 	Enable()
 	Disable()
 	Layout()
-	Rect() Rect
-	SetRect(Rect)
-	Resize(Rect)
+	Rect() Rect[int]
+	SetRect(Rect[int])
+	Resize(Rect[int])
 	IsDirty() bool
 	MarkDirty()
 	ClearDirty()
@@ -25,7 +25,7 @@ type Spriter interface {
 }
 
 type Layouter interface {
-	Apply([]Drawabler, Rect)
+	Apply([]Drawabler, Rect[int])
 }
 
 type Containerer interface {

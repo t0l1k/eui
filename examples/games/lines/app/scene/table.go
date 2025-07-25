@@ -56,7 +56,7 @@ func (t *Table) SetNextMoveBalls(cells []*game.Cell) {
 	}
 }
 
-func (t *Table) Resize(rect eui.Rect) {
+func (t *Table) Resize(rect eui.Rect[int]) {
 	t.SetRect(rect)
 	w0 := t.Rect().W
 	x, y := t.Rect().Pos()

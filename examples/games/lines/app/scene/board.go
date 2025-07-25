@@ -178,7 +178,7 @@ func (b *Board) drawCellIcons() {
 	}
 }
 
-func (b *Board) Resize(rect eui.Rect) {
+func (b *Board) Resize(rect eui.Rect[int]) {
 	b.SetRect(rect)
 	w0, h0 := b.Rect().Size()
 	x0, y0 := b.Rect().Pos()
@@ -190,7 +190,7 @@ func (b *Board) Resize(rect eui.Rect) {
 	log.Println("board resize done")
 }
 
-func getCellSize(rect eui.Rect, dim int) (size int) {
+func getCellSize(rect eui.Rect[int], dim int) (size int) {
 	r := dim
 	c := dim
 	for r*size < rect.W && c*size < rect.H {

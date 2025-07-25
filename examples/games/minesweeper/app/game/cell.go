@@ -22,10 +22,10 @@ type cell struct {
 	State *eui.Signal[*cellData]
 	count byte
 	mined bool
-	pos   eui.PointInt
+	pos   eui.Point[int]
 }
 
-func newCell(pos eui.PointInt) *cell {
+func newCell(pos eui.Point[int]) *cell {
 	v := newCellData(closed, cellClosed, pos)
 	c := &cell{
 		State: eui.NewSignal[*cellData](),

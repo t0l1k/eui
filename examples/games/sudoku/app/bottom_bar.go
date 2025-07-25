@@ -177,7 +177,7 @@ func (b *BottomBar) Update(dt int) {
 	}
 }
 
-func (b *BottomBar) Resize(rect eui.Rect) {
+func (b *BottomBar) Resize(rect eui.Rect[int]) {
 	b.SetRect(rect)
 	w0, h0 := b.Rect().Size()
 	x, y := b.Rect().Pos()

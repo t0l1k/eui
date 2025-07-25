@@ -56,7 +56,7 @@ func (s *SnackBar) Draw(surface *ebiten.Image) {
 	}
 }
 
-func (s *SnackBar) Resize(r Rect) {
+func (s *SnackBar) Resize(r Rect[int]) {
 	w0, h0 := GetUi().Size()
 	rect := NewRect([]int{0, 0, w0, h0})
 	sz := int(float64(rect.GetLowestSize()) * 0.1)

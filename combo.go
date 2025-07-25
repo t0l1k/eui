@@ -123,7 +123,7 @@ func (b *ComboBox) Draw(surface *ebiten.Image) {
 	b.btnMinus.Draw(surface)
 }
 
-func (c *ComboBox) Resize(rect Rect) {
+func (c *ComboBox) Resize(rect Rect[int]) {
 	c.SetRect(rect)
 	x, y, w0, h0 := c.Rect().GetRect()
 	w, h := h0, h0

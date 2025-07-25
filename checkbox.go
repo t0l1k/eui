@@ -68,7 +68,7 @@ func (b *Checkbox) Draw(surface *ebiten.Image) {
 	b.btn.Draw(surface)
 }
 
-func (c *Checkbox) Resize(rect Rect) {
+func (c *Checkbox) Resize(rect Rect[int]) {
 	c.SetRect(rect)
 	w0, h0 := c.rect.Size()
 	x, y := c.rect.X, c.rect.Y

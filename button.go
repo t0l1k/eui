@@ -170,7 +170,7 @@ func (b *Button) Draw(surface *ebiten.Image) {
 	surface.DrawImage(b.Image(), op)
 }
 
-func (b *Button) Resize(rect Rect) {
+func (b *Button) Resize(rect Rect[int]) {
 	b.View.Resize(rect)
 	b.margin = int(float64(b.Rect().GetLowestSize()) * 0.03)
 	x, y, w, h := b.Rect().GetRect()

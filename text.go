@@ -15,7 +15,7 @@ type Text struct {
 	txt               string
 	fontInit, oneFont bool
 	fontSize          int
-	pos               PointInt
+	pos               Point[int]
 }
 
 func NewText(txt string) *Text {
@@ -90,7 +90,7 @@ func (t *Text) Draw(surface *ebiten.Image) {
 	surface.DrawImage(t.Image(), op)
 }
 
-func (t *Text) Resize(rect Rect) {
+func (t *Text) Resize(rect Rect[int]) {
 	t.SetRect(rect)
 	t.ImageReset()
 }

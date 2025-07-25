@@ -45,7 +45,7 @@ func (b *BottomBarNr) SetCount(value int) {
 	}
 }
 
-func (b *BottomBarNr) Resize(rect eui.Rect) {
+func (b *BottomBarNr) Resize(rect eui.Rect[int]) {
 	b.SetRect(rect)
 	b.valueBtn.Resize(rect)
 	x, y := b.Rect().Pos()

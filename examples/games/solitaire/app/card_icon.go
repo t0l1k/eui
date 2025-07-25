@@ -59,7 +59,7 @@ func (d *CardIcon) Update(dt int) {
 func (c *CardIcon) IsVisible() bool    { return c.show }
 func (c *CardIcon) Visible(value bool) { c.show = value }
 
-func (c *CardIcon) Resize(rect eui.Rect) {
+func (c *CardIcon) Resize(rect eui.Rect[int]) {
 	c.SetRect(rect)
 	c.btn.Resize(rect)
 	c.ImageReset()

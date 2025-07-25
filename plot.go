@@ -169,7 +169,7 @@ func (p *Plot) Draw(surface *ebiten.Image) {
 	surface.DrawImage(p.Image(), op)
 }
 
-func (p *Plot) Resize(rect Rect) {
+func (p *Plot) Resize(rect Rect[int]) {
 	p.SetRect(rect)
 	p.ImageReset()
 }

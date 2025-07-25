@@ -17,7 +17,7 @@ type Ui struct {
 	settings       *Setting
 	tick           int
 	start          time.Time
-	size           PointInt
+	size           Point[int]
 	inputMouse     *MouseInput
 	inputTouch     *TouchInput
 	inputKeyboard  *KeyboardInput
@@ -34,7 +34,7 @@ func (u *Ui) GetTitle() string                 { return u.title }
 func (u *Ui) SetTitle(value string) *Ui        { u.title = value; return u }
 func (u *Ui) SetFullscreen(value bool)         { u.settings.Set(UiFullscreen, value) }
 func (u *Ui) Size() (int, int)                 { return u.size.X, u.size.Y }
-func (u *Ui) SetSize(w, h int) *Ui             { u.size = NewPointInt(w, h); return u }
+func (u *Ui) SetSize(w, h int) *Ui             { u.size = NewPoint(w, h); return u }
 func (u *Ui) IsMainScene() bool                { return len(u.scenes) == 0 }
 func (u *Ui) GetTheme() *Theme                 { return u.theme }
 func (u *Ui) SetTheme(value *Theme) *Ui        { u.theme = value; return u }
@@ -55,7 +55,7 @@ func (u *Ui) HandleEvent(ev Event) {
 		// tc := ev.Value.(TickData)
 		// log.Println("Ui:HandleEvent:Tick", tc.String())
 	case EventResize:
-		r := ev.Value.(Rect)
+		r := ev.Value.(Rect[int])
 		u.SetSize(r.W, r.H)
 		u.currentScene.Resize()
 		for _, scene := range u.scenes {

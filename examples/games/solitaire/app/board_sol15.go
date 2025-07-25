@@ -95,7 +95,7 @@ func (b *BoardSol15) backupGame() {
 	fmt.Println("deck:", deck, b.moveIdx, len(b.historyOfMoves))
 }
 
-func (b *BoardSol15) Resize(rect eui.Rect) {
+func (b *BoardSol15) Resize(rect eui.Rect[int]) {
 	b.SetRect(rect)
 	b.layout.Resize(rect)
 }

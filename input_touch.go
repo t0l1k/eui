@@ -6,7 +6,7 @@ import (
 )
 
 type TouchData struct {
-	pos PointInt
+	pos Point[int]
 	id  ebiten.TouchID
 }
 
@@ -52,7 +52,7 @@ func (s *TouchInput) update(_ int) {
 		x, y := ebiten.TouchPosition(id)
 		s.touches = append(s.touches, TouchData{
 			id: id,
-			pos: PointInt{
+			pos: Point[int]{
 				X: x,
 				Y: y,
 			},
@@ -65,7 +65,7 @@ func (s *TouchInput) update(_ int) {
 			x, y := inpututil.TouchPositionInPreviousTick(id)
 			s.touches = append(s.touches, TouchData{
 				id: -1,
-				pos: PointInt{
+				pos: Point[int]{
 					X: x,
 					Y: y,
 				},

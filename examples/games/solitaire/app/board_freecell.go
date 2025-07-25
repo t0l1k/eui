@@ -157,7 +157,7 @@ func (b *BoardFreecell) backupGame() {
 // 	b.Container.Draw(surface)
 // }
 
-func (b *BoardFreecell) Resize(rect eui.Rect) {
+func (b *BoardFreecell) Resize(rect eui.Rect[int]) {
 	b.SetRect(rect)
 	x0, y0, w0, h0 := b.Rect().GetRect()
 	cellSize := b.Rect().GetLowestSize() / 8

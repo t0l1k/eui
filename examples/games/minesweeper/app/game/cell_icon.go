@@ -101,7 +101,7 @@ func (c *CellIcon) Draw(surface *ebiten.Image) {
 func (c *CellIcon) Layout() {
 }
 
-func (c *CellIcon) Resize(rect eui.Rect) {
+func (c *CellIcon) Resize(rect eui.Rect[int]) {
 	c.SetRect(rect)
 	c.Btn.Resize(rect)
 }

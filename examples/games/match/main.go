@@ -34,29 +34,29 @@ const (
 
 type CellData struct {
 	state string
-	pos   eui.PointInt
+	pos   eui.Point[int]
 }
 
-func NewCellData(state string, pos eui.PointInt) *CellData {
+func NewCellData(state string, pos eui.Point[int]) *CellData {
 	return &CellData{state: state, pos: pos}
 }
 
 type Cell struct {
 	state       *eui.Signal[*CellData]
-	pos         eui.PointInt
+	pos         eui.Point[int]
 	sym         int
 	open, match bool
 }
 
 func NewCell(x, y int) *Cell {
-	pos := eui.NewPointInt(x, y)
+	pos := eui.NewPoint(x, y)
 	return &Cell{
 		pos:   pos,
 		state: eui.NewSignal[*CellData]()}
 }
 
 func (c *Cell) Pos() (int, int)    { return c.pos.X, c.pos.Y }
-func (c *Cell) SetPos(x, y int)    { c.pos = eui.NewPointInt(x, y) }
+func (c *Cell) SetPos(x, y int)    { c.pos = eui.NewPoint(x, y) }
 func (c *Cell) SetValue(value int) { c.sym = value }
 func (c *Cell) IsOpen() bool       { return c.open }
 func (c *Cell) IsMatch() bool      { return c.match }
@@ -102,12 +102,12 @@ func NewFieldState() *FieldState {
 type Field struct {
 	State        *FieldState
 	field, moves []*Cell
-	dim          eui.PointInt
+	dim          eui.Point[int]
 	ClickCount   int
 }
 
 func NewField() *Field {
-	f := &Field{State: NewFieldState(), dim: eui.NewPointInt(3, 2)}
+	f := &Field{State: NewFieldState(), dim: eui.NewPoint(3, 2)}
 	return f
 }
 
@@ -395,7 +395,7 @@ func (b *Board) Update(dt int) {
 	b.varArea.Emit(str)
 }
 
-func (b *Board) Resize(rect eui.Rect) {
+func (b *Board) Resize(rect eui.Rect[int]) {
 	b.SetRect(rect)
 	hT := int(float64(b.Rect().GetLowestSize()) * 0.05)
 	x, y := b.Rect().X, b.Rect().Y
@@ -454,7 +454,7 @@ func (t *Dialog) SetTitle(title string) {
 	t.title.SetText(title)
 }
 
-func (t *Dialog) Resize(rect eui.Rect) {
+func (t *Dialog) Resize(rect eui.Rect[int]) {
 	t.SetRect(rect)
 	x, y := t.Rect().Pos()
 	w, h := t.Rect().W/4, t.Rect().H/3

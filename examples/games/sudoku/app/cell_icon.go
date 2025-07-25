@@ -125,7 +125,7 @@ func (d *CellIcon) Visible(value bool) {
 	d.Traverse(func(c eui.Drawabler) { c.Visible(value); c.MarkDirty() }, false)
 }
 
-func (c *CellIcon) Resize(rect eui.Rect) {
+func (c *CellIcon) Resize(rect eui.Rect[int]) {
 	c.SetRect(rect)
 	c.btn.Resize(rect)
 	c.layout.Resize(rect)

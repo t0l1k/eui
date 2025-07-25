@@ -12,7 +12,7 @@ type ListView struct {
 	*Container
 	list               []string
 	itemSize, rows     int
-	contentRect        Rect
+	contentRect        Rect[int]
 	contentImage       *ebiten.Image
 	offset, lastOffset int
 	cameraRect         image.Rectangle
@@ -226,7 +226,7 @@ func (l *ListView) Draw(surface *ebiten.Image) {
 	surface.DrawImage(l.contentImage.SubImage(l.cameraRect).(*ebiten.Image), op)
 }
 
-func (l *ListView) Resize(r Rect) {
+func (l *ListView) Resize(r Rect[int]) {
 	l.SetRect(r)
 	l.resizeChilds()
 	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)

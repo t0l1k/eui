@@ -14,7 +14,7 @@ type MinedField struct {
 	field                                              []*cell
 	saved                                              []string
 	row, column, totalMines, countMarked, countFlagged int
-	firstMove                                          eui.PointInt
+	firstMove                                          eui.Point[int]
 }
 
 func NewMinedField(r, c, m int) *MinedField {
@@ -74,7 +74,7 @@ func (mf *MinedField) New() {
 	}
 	for y := 0; y < mf.column; y++ {
 		for x := 0; x < mf.row; x++ {
-			cell := newCell(eui.NewPointInt(x, y))
+			cell := newCell(eui.NewPoint[int](x, y))
 			cell.State.Connect(mf.UpdateCell)
 			mf.field = append(mf.field, cell)
 		}
@@ -124,7 +124,7 @@ func (mf *MinedField) Shuffle(fX, fY int) {
 	if mf.State.Value() != GameStart {
 		return
 	}
-	mf.firstMove = eui.NewPointInt(fX, fY)
+	mf.firstMove = eui.NewPoint[int](fX, fY)
 	rand.Seed(time.Now().UTC().UnixNano())
 	var mines int
 	for mines < mf.totalMines {

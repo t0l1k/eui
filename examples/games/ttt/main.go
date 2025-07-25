@@ -49,7 +49,7 @@ func (d *BoardTTT) Reset() {
 // 	}
 // }
 
-// func (d *BoardTTT) Resize(rect eui.Rect) {
+// func (d *BoardTTT) Resize(rect eui.Rect[int]) {
 // 	d.SetRect(rect)
 // 	d.ImageReset()
 // }

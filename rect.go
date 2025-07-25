@@ -2,57 +2,54 @@ package eui
 
 import (
 	"fmt"
+
+	"golang.org/x/exp/constraints"
 )
 
-type Point struct{ X, Y float64 }
+type Numbers interface {
+	constraints.Integer | constraints.Float
+}
 
-func NewPoint(x, y float64) Point       { return Point{X: x, Y: y} }
-func (p Point) Get() (float64, float64) { return p.X, p.Y }
-func (p Point) GetX() float64           { return p.X }
-func (p Point) GetY() float64           { return p.Y }
-func (p Point) Equal(value Point) bool  { return p.X == value.X && p.Y == value.Y }
-func (p Point) String() string          { return fmt.Sprintf("[%.2f, %.2f]", p.X, p.Y) }
+type Point[T Numbers] struct{ X, Y T }
 
-type PointInt struct{ X, Y int }
+func NewPoint[T Numbers](x, y T) Point[T]      { return Point[T]{X: x, Y: y} }
+func (p Point[T]) Get() (T, T)                 { return p.X, p.Y }
+func (p Point[T]) GetX() T                     { return p.X }
+func (p Point[T]) GetY() T                     { return p.Y }
+func (p Point[T]) Equal(value Point[T]) bool   { return p.X == value.X && p.Y == value.Y }
+func (p Point[T]) Offset(a Point[T]) *Point[T] { return &Point[T]{p.X - a.X, p.Y - a.Y} }
+func (p Point[T]) String() string              { return fmt.Sprintf("[%.2v, %.2v]", p.X, p.Y) }
 
-func NewPointInt(x, y int) PointInt            { return PointInt{X: x, Y: y} }
-func (p PointInt) Get() (int, int)             { return p.X, p.Y }
-func (p PointInt) GetX() int                   { return p.X }
-func (p PointInt) GetY() int                   { return p.Y }
-func (p PointInt) Equal(a PointInt) bool       { return p.X == a.X && p.Y == a.Y }
-func (p PointInt) Offset(a PointInt) *PointInt { return &PointInt{p.X - a.X, p.Y - a.Y} }
-func (p PointInt) String() string              { return fmt.Sprintf("[%.2d, %.2d]", p.X, p.Y) }
+type Rect[T Numbers] struct{ X, Y, W, H T }
 
-type Rect struct{ X, Y, W, H int }
-
-func NewRect(arr []int) Rect { return Rect{X: arr[0], Y: arr[1], W: arr[2], H: arr[3]} }
-func (r Rect) InRect(x, y int) bool {
+func NewRect[T Numbers](arr []T) Rect[T] { return Rect[T]{X: arr[0], Y: arr[1], W: arr[2], H: arr[3]} }
+func (r Rect[T]) InRect(x, y T) bool {
 	return r.Left() <= x && r.Right() >= x && r.Top() <= y && r.Bottom() >= y
 }
-func (r Rect) Pos() (int, int)               { return r.X, r.Y }
-func (r Rect) Size() (int, int)              { return r.W, r.H }
-func (r Rect) GetArr() []int                 { return []int{r.X, r.Y, r.W, r.H} }
-func (r Rect) GetRect() (int, int, int, int) { return r.X, r.Y, r.W, r.H }
-func (r Rect) GetRectFloat() (float32, float32, float32, float32) {
+func (r Rect[T]) Pos() (T, T)           { return r.X, r.Y }
+func (r Rect[T]) Size() (T, T)          { return r.W, r.H }
+func (r Rect[T]) GetArr() []T           { return []T{r.X, r.Y, r.W, r.H} }
+func (r Rect[T]) GetRect() (T, T, T, T) { return r.X, r.Y, r.W, r.H }
+func (r Rect[T]) GetRectFloat() (float32, float32, float32, float32) {
 	return float32(r.X), float32(r.Y), float32(r.W), float32(r.H)
 }
-func (r Rect) GetRectFloat64() (float64, float64, float64, float64) {
+func (r Rect[T]) GetRectFloat64() (float64, float64, float64, float64) {
 	return float64(r.X), float64(r.Y), float64(r.W), float64(r.H)
 }
-func (r Rect) Left() int               { return r.X }
-func (r Rect) Right() int              { return r.X + r.W }
-func (r Rect) Top() int                { return r.Y }
-func (r Rect) Bottom() int             { return r.Y + r.H }
-func (r Rect) CenterX() int            { return (r.Right() - r.X) / 2 }
-func (r Rect) CenterY() int            { return (r.Bottom() - r.Y) / 2 }
-func (r Rect) Center() (int, int)      { return r.CenterX(), r.CenterY() }
-func (r Rect) TopLeft() (int, int)     { return r.X, r.Y }
-func (r Rect) TopRight() (int, int)    { return r.X + r.W, r.Y }
-func (r Rect) BottomLeft() (int, int)  { return r.X, r.Y + r.H }
-func (r Rect) BottomRight() (int, int) { return r.X + r.W, r.Y + r.H }
-func (r Rect) Width() int              { return r.W }
-func (r Rect) Height() int             { return r.H }
-func (r Rect) GetLowestSize() int      { return min(r.W, r.H) }
-func (a Rect) Equal(b Rect) bool       { return a.X == b.X && a.Y == b.Y && a.W == b.W && a.H == b.H }
-func (a Rect) IsEmpty() bool           { return a.W == 0 && a.H == 0 }
-func (r Rect) String() string          { return fmt.Sprintf("[%v, %v, %v, %v]", r.X, r.Y, r.W, r.H) }
+func (r Rect[T]) Left() T              { return r.X }
+func (r Rect[T]) Right() T             { return r.X + r.W }
+func (r Rect[T]) Top() T               { return r.Y }
+func (r Rect[T]) Bottom() T            { return r.Y + r.H }
+func (r Rect[T]) CenterX() T           { return (r.Right() - r.X) / 2 }
+func (r Rect[T]) CenterY() T           { return (r.Bottom() - r.Y) / 2 }
+func (r Rect[T]) Center() (T, T)       { return r.CenterX(), r.CenterY() }
+func (r Rect[T]) TopLeft() (T, T)      { return r.X, r.Y }
+func (r Rect[T]) TopRight() (T, T)     { return r.X + r.W, r.Y }
+func (r Rect[T]) BottomLeft() (T, T)   { return r.X, r.Y + r.H }
+func (r Rect[T]) BottomRight() (T, T)  { return r.X + r.W, r.Y + r.H }
+func (r Rect[T]) Width() T             { return r.W }
+func (r Rect[T]) Height() T            { return r.H }
+func (r Rect[T]) GetLowestSize() T     { return min(r.W, r.H) }
+func (a Rect[T]) Equal(b Rect[T]) bool { return a.X == b.X && a.Y == b.Y && a.W == b.W && a.H == b.H }
+func (a Rect[T]) IsEmpty() bool        { return a.W == 0 && a.H == 0 }
+func (r Rect[T]) String() string       { return fmt.Sprintf("[%v, %v, %v, %v]", r.X, r.Y, r.W, r.H) }

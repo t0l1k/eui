@@ -55,7 +55,7 @@ func (i *InputKey) Update(dt int) {
 	}
 }
 
-func (i *InputKey) Resize(rect eui.Rect) {
+func (i *InputKey) Resize(rect eui.Rect[int]) {
 	i.SetRect(rect)
 	w0, h0 := i.Rect().Size()
 	x0, y0 := i.Rect().Pos()
@@ -102,7 +102,7 @@ func (d *HotkeyDialog) Visible(value bool) {
 	d.Traverse(func(c eui.Drawabler) { c.Visible(value) }, false)
 }
 
-func (d *HotkeyDialog) Resize(rect eui.Rect) {
+func (d *HotkeyDialog) Resize(rect eui.Rect[int]) {
 	d.SetRect(rect)
 	w0, h0 := d.Rect().Size()
 	x0, y0 := d.Rect().Pos()

@@ -5,7 +5,7 @@ type View struct {
 	*Drawable
 	state                        InputState
 	isDragging                   bool
-	dragStartPoint, dragEndPoint PointInt
+	dragStartPoint, dragEndPoint Point[int]
 }
 
 func NewView() *View {
@@ -69,7 +69,7 @@ func (v *View) UpdateInput(value interface{}) {
 					v.SetState(ViewStateHover)
 				}
 				if v.isDragging {
-					v.dragEndPoint = PointInt{x, y}
+					v.dragEndPoint = Point[int]{x, y}
 					v.isDragging = false
 				}
 			}
@@ -79,10 +79,10 @@ func (v *View) UpdateInput(value interface{}) {
 				}
 				if !v.isDragging {
 					v.isDragging = true
-					v.dragStartPoint = PointInt{x, y}
+					v.dragStartPoint = Point[int]{x, y}
 				}
 			}
-			v.dragEndPoint = PointInt{x, y}
+			v.dragEndPoint = Point[int]{x, y}
 		} else if v.state != ViewStateNormal {
 			v.SetState(ViewStateNormal)
 		}
@@ -97,16 +97,16 @@ func (v *View) UpdateInput(value interface{}) {
 					}
 					if !v.isDragging {
 						v.isDragging = true
-						v.dragStartPoint = PointInt{x, y}
+						v.dragStartPoint = Point[int]{x, y}
 					}
 				}
-				v.dragEndPoint = PointInt{x, y}
+				v.dragEndPoint = Point[int]{x, y}
 				if b == -1 {
 					if v.state == ViewStateFocus {
 						v.SetState(ViewStateExec)
 					}
 					if v.isDragging {
-						v.dragEndPoint = PointInt{x, y}
+						v.dragEndPoint = Point[int]{x, y}
 						v.isDragging = false
 					}
 				}
@@ -117,7 +117,7 @@ func (v *View) UpdateInput(value interface{}) {
 	}
 }
 
-func (v *View) Resize(rect Rect) {
+func (v *View) Resize(rect Rect[int]) {
 	v.SetRect(rect)
 	v.ImageReset()
 }

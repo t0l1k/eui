@@ -162,7 +162,7 @@ func (inp *InputBox) Draw(surface *ebiten.Image) {
 	inp.cursor.Draw(surface)
 }
 
-func (inp *InputBox) Resize(rect Rect) {
+func (inp *InputBox) Resize(rect Rect[int]) {
 	inp.View.Resize(rect)
 	sz := inp.size
 	w := inp.Rect().W / sz

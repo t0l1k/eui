@@ -17,11 +17,11 @@ const (
 )
 
 type cellData struct {
-	pos          eui.PointInt
+	pos          eui.Point[int]
 	state, value string
 }
 
-func newCellData(state, value string, pos eui.PointInt) *cellData {
+func newCellData(state, value string, pos eui.Point[int]) *cellData {
 	return &cellData{pos: pos, state: state, value: value}
 }
 func (c *cellData) State() string   { return c.state }

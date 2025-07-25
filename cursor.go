@@ -55,7 +55,7 @@ func (s *Cursor) Draw(surface *ebiten.Image) {
 	surface.DrawImage(s.Image(), op)
 }
 
-func (c *Cursor) Resize(rect Rect) {
+func (c *Cursor) Resize(rect Rect[int]) {
 	c.SetRect(rect)
 	c.ImageReset()
 }

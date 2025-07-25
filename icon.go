@@ -52,7 +52,7 @@ func (i *Icon) Draw(surface *ebiten.Image) {
 	surface.DrawImage(i.image, op)
 }
 
-func (i *Icon) Resize(rect Rect) {
+func (i *Icon) Resize(rect Rect[int]) {
 	i.SetRect(rect)
 	i.ImageReset()
 }

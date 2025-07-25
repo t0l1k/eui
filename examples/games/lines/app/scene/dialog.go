@@ -51,7 +51,7 @@ func (d *Dialog) SetTitle(title string) {
 	d.title.SetText(title)
 }
 
-func (d *Dialog) Resize(rect eui.Rect) {
+func (d *Dialog) Resize(rect eui.Rect[int]) {
 	d.SetRect(rect)
 	x, y := d.Rect().Pos()
 	w, h := d.Rect().W, d.Rect().H/4

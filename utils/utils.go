@@ -7,7 +7,7 @@ import (
 	"golang.org/x/image/colornames"
 )
 
-func DrawDebugLines(surface *ebiten.Image, rect *eui.Rect) {
+func DrawDebugLines(surface *ebiten.Image, rect *eui.Rect[int]) {
 	x0, y0 := rect.Pos()
 	w0, h0 := rect.BottomRight()
 	x, y := float32(x0), float32(y0)

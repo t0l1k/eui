@@ -73,7 +73,7 @@ func (d *DialogSelect) Visible(value bool) {
 	d.Traverse(func(c eui.Drawabler) { c.Visible(value) }, false)
 }
 
-func (d *DialogSelect) Resize(rect eui.Rect) {
+func (d *DialogSelect) Resize(rect eui.Rect[int]) {
 	d.SetRect(rect)
 	w0, h0 := d.Rect().Size()
 	h1 := float64(h0) / 7

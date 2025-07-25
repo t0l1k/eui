@@ -12,7 +12,7 @@ const (
 )
 
 type MouseData struct {
-	position PointInt
+	position Point[int]
 	button   buttonPressStatus
 }
 
@@ -65,11 +65,11 @@ func (s *MouseInput) update(_ int) {
 	b := s.getButton()
 	if !b0 && b != buttonReleased || !b0 && (x != x0 || y != y0) {
 		// Изменилось местоположение курсора мыши кнопка отпущена
-		s.set(MouseData{position: PointInt{x0, y0}, button: buttonReleased})
+		s.set(MouseData{position: Point[int]{x0, y0}, button: buttonReleased})
 		// log.Println("Новые кординаты у мыши", x0, y0, b0, dt)
 	} else if (b0 && b != buttonPressed) || (x != x0 || y != y0) {
 		// Нажата кнопка мыши
-		s.set(MouseData{position: PointInt{x0, y0}, button: buttonPressed})
+		s.set(MouseData{position: Point[int]{x0, y0}, button: buttonPressed})
 		// log.Println("Нажата кнопка или новые кординаты", x0, y0, b0, dt)
 	}
 }

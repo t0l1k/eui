@@ -20,26 +20,23 @@ func (c *Count) Dec() {
 }
 func (c *Count) Value() string { return strconv.Itoa(c.Signal.Value()) }
 
-type SceneCounter struct{ *eui.Scene }
-
-func NewSceneCounter() *SceneCounter {
-	sc := &SceneCounter{Scene: eui.NewScene(eui.NewVBoxLayout(1))}              // Контейнер сцены по вертикали
-	lay2 := eui.NewContainer(eui.NewHBoxLayout(1))                              // Контейнер кнопок по горизонтали
-	lblCount := eui.NewText("")                                                 // Текстовая метка
-	count := NewCount()                                                         // Сигнал подписчикам передать автоматически оповещение при изменении переменной
-	count.ConnectAndFire(func(data int) { lblCount.SetText(count.Value()) }, 0) // Подписка на уведомления от этой переменной
-	sc.Add(lblCount)                                                            // Добавить в контейнер метку
-	btnInc := eui.NewButton("+", func(b *eui.Button) { count.Inc() })           // Кнопка увеличить на единицу и передать подписчикам об этом
-	btnDec := eui.NewButton("-", func(b *eui.Button) { count.Dec() })           // Кнопка уменьшить на единицу и передать подписчикам об этом
-	lay2.Add(btnInc)                                                            // Добавить в контейнер кнопку увеличить
-	lay2.Add(btnDec)                                                            // Добавить в контейнер кнопку уменьшить
-	sc.Add(lay2)                                                                // Добавить в контейнер сцены контейнер кнопок
-	eui.NewSnackBar("Test Counter!!!").Show(3 * time.Second)
-	return sc
-}
-
 func main() {
-	eui.Init(eui.GetUi().SetTitle("Counter").SetSize(320, 200))
-	eui.Run(NewSceneCounter())
-	eui.Quit(func() {})
+	eui.Init( // Перед запуском настроить приложение
+		eui.GetUi(). // Получить экземляр gui
+				SetTitle("Counter"). // Текст окна приложения
+				SetSize(320, 200))   // Размер окна приложения <F12> тумблер окно на/из полный экран
+	eui.Run(func() *eui.Scene {
+		counter := NewCount()                                                             // Сигнал подписчикам передать автоматически оповещение при изменении счетчика
+		s := eui.NewScene(eui.NewVBoxLayout(1))                                           // Контейнер сцены по вертикали
+		lblCounter := eui.NewText("Count")                                                // Текстовая метка
+		s.Add(lblCounter)                                                                 // Добавить в контейнер текстовую метку
+		counter.ConnectAndFire(func(data int) { lblCounter.SetText(counter.Value()) }, 0) // Подписка на уведомления от счетчика
+		s.Add(eui.NewContainer(                                                           // Добавить в контейнер сцены контейнер кнопок
+			eui.NewHBoxLayout(1)).                                          // Контейнер кнопок по горизонтали
+			Add(eui.NewButton("+", func(b *eui.Button) { counter.Inc() })). // Добавить в контейнер кнопку увеличить на единицу и передать подписчикам об этом
+			Add(eui.NewButton("-", func(b *eui.Button) { counter.Dec() }))) // Добавить в контейнер кнопку уменьшить на единицу и передать подписчикам об этом
+		eui.NewSnackBar("Test Counter! Click Escape to quit").Show(3 * time.Second) // Показать сообщение 3 секунды после запуска
+		return s
+	}())
+	eui.Quit(func() {}) // Завершить приложение
 }

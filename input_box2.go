@@ -151,7 +151,7 @@ func (i *InputBox2) UpdateInput(value interface{}) {
 	}
 }
 
-func (i *InputBox2) Resize(rect Rect) {
+func (i *InputBox2) Resize(rect Rect[int]) {
 	i.SetRect(rect)
 	i.lbl.Resize(rect)
 	i.ImageReset()
