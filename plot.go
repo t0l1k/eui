@@ -19,7 +19,7 @@ type Plot struct {
 
 func NewPlot(xArr, yArr, values []int, title, xTitle, yTitle string) *Plot {
 	p := &Plot{Drawable: NewDrawable(), xArr: xArr, yArr: yArr, values: values, pTitle: title, xAxisTitle: xTitle, yAxisTitle: yTitle}
-	p.Visible(true)
+	// p.SetHidden(true)
 	p.bg = colornames.Gray
 	p.fg = colornames.Yellowgreen
 	p.fgValues = colornames.Blue
@@ -157,7 +157,7 @@ func (p *Plot) Layout() {
 }
 
 func (p *Plot) Draw(surface *ebiten.Image) {
-	if !p.IsVisible() {
+	if p.IsHidden() {
 		return
 	}
 	if p.IsDirty() {

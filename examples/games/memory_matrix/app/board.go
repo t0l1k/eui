@@ -50,7 +50,7 @@ func NewBoardMem(fn func(*eui.Button)) *BoardMem {
 	})
 	d.game = mem.NewGame(mem.Level(1))
 	d.gamesData = mem.NewGamesData()
-	d.Visible(true)
+	// d.SetHidden(true)
 	d.showTimer = eui.NewTimer(1500*time.Millisecond, func() {
 		d.Game().SetNextStage()
 		d.SetupRecolection()
@@ -158,7 +158,7 @@ func (d *BoardMem) setupScoreBtn() *eui.ButtonIcon {
 }
 
 func (d *BoardMem) Update(dt int) {
-	if !d.IsVisible() {
+	if d.IsHidden() {
 		return
 	}
 	switch d.game.Stage() {

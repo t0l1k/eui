@@ -20,7 +20,7 @@ type ListView struct {
 
 func NewListView() *ListView {
 	l := &ListView{Container: NewContainer(NewVBoxLayout(1)), rows: 1, itemSize: 30}
-	l.Visible(true)
+	// l.SetHidden(true)
 	return l
 }
 
@@ -214,7 +214,7 @@ func (l *ListView) Update(dt int) {
 }
 
 func (l *ListView) Draw(surface *ebiten.Image) {
-	if !l.visible || l.disabled {
+	if !l.hidden || l.disabled {
 		return
 	}
 	if l.IsDirty() {

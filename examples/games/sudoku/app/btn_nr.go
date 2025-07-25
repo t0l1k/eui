@@ -24,9 +24,9 @@ func NewBtn(fn func(btn *eui.Button)) *BottomBarNr {
 	return b
 }
 
-func (d *BottomBarNr) Visible(value bool) {
-	d.Drawable.Visible(value)
-	d.Traverse(func(c eui.Drawabler) { c.Visible(value) }, false)
+func (d *BottomBarNr) SetHidden(value bool) {
+	d.Drawable.SetHidden(value)
+	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value) }, false)
 }
 
 func (b *BottomBarNr) GetBg() color.Color   { return b.valueBtn.GetBg() }

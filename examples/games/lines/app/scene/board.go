@@ -24,7 +24,7 @@ func NewBoard(dim int) *Board {
 	b := &Board{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	b.field = game.NewField(dim)
 	b.table = NewTable()
-	b.table.Visible(false)
+	// b.table.SetHidden(false)
 	b.Add(b.table)
 	r, c := b.field.Dim()
 	b.gameLayout = eui.NewContainer(eui.NewGridLayout(float64(r), float64(c), 1))
@@ -91,7 +91,7 @@ func (b *Board) NewGame(dim int) {
 	b.field.ShowFilledNext()
 	b.field.NextMoveBalls()
 	b.table.Setup(b.field.Conf.Balls)
-	b.table.Visible(true)
+	// b.table.SetHidden(true)
 }
 
 func (b *Board) gameLogic(btn *eui.Button) {
@@ -128,10 +128,10 @@ func (b *Board) setWayCells(col game.BallColor, way []int) {
 	log.Println("set way colors done", way, col)
 }
 
-func (d *Board) Visible(value bool) {
+func (d *Board) SetHidden(value bool) {
 	d.Traverse(func(child eui.Drawabler) {
-		child.Visible(value)
-		if value {
+		child.SetHidden(value)
+		if !value {
 			child.Enable()
 		} else {
 			child.Disable()

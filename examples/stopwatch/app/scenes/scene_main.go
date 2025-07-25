@@ -119,15 +119,15 @@ func (s *SceneStopwatch) Update(dt int) {
 		switch s.state {
 		case watchStart:
 			s.btnsCont.Childrens()[1].(*eui.Button).SetText(s.sBtns[1])
-			s.btnsCont.Childrens()[0].(*eui.Button).Visible(false)
-			s.btnsCont.Childrens()[2].(*eui.Button).Visible(false)
+			s.btnsCont.Childrens()[0].(*eui.Button).SetHidden(true)
+			s.btnsCont.Childrens()[2].(*eui.Button).SetHidden(true)
 			// s.list.Reset()
 		case watchPlay:
-			s.btnsCont.Childrens()[0].(*eui.Button).Visible(false)
-			s.btnsCont.Childrens()[2].(*eui.Button).Visible(true)
+			s.btnsCont.Childrens()[0].(*eui.Button).SetHidden(true)
+			s.btnsCont.Childrens()[2].(*eui.Button).SetHidden(false)
 		case watchPause:
-			s.btnsCont.Childrens()[0].(*eui.Button).Visible(true)
-			s.btnsCont.Childrens()[2].(*eui.Button).Visible(false)
+			s.btnsCont.Childrens()[0].(*eui.Button).SetHidden(false)
+			s.btnsCont.Childrens()[2].(*eui.Button).SetHidden(true)
 		}
 		s._dirty = false
 	}

@@ -14,7 +14,7 @@ type ButtonIcon struct {
 func NewButtonIcon(icons []*ebiten.Image, f func(*Button)) *ButtonIcon {
 	b := &ButtonIcon{Drawable: NewDrawable()}
 	b.SetupButtonIcon(icons, f)
-	b.Visible(true)
+	// b.SetHidden(true)
 	return b
 }
 
@@ -63,7 +63,7 @@ func (b *ButtonIcon) Update(dt int) {
 }
 
 func (b *ButtonIcon) Draw(surface *ebiten.Image) {
-	if !b.IsVisible() {
+	if b.IsHidden() {
 		return
 	}
 	if b.IsDirty() {

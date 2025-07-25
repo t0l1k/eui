@@ -76,9 +76,9 @@ func (b *BottomBar) Setup(board *Board) {
 	b.setBtnClrs()
 }
 
-func (d *BottomBar) Visible(value bool) {
-	d.Drawable.Visible(value)
-	d.Traverse(func(c eui.Drawabler) { c.Visible(value); c.MarkDirty() }, false)
+func (d *BottomBar) SetHidden(value bool) {
+	d.Drawable.SetHidden(value)
+	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value); c.MarkDirty() }, false)
 }
 func (b *BottomBar) IsActAccept() bool    { return b.actAccept }
 func (b *BottomBar) IsActUndo() bool      { return b.actUndo }

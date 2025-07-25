@@ -24,7 +24,7 @@ func NewText(txt string) *Text {
 	t.Bg(theme.Get(TextBg))
 	t.Fg(theme.Get(TextFg))
 	t.SetText(txt)
-	t.Visible(true)
+	// t.SetHidden(true)
 	return t
 }
 
@@ -78,7 +78,7 @@ func (t *Text) Layout() {
 }
 
 func (t *Text) Draw(surface *ebiten.Image) {
-	if !t.IsVisible() {
+	if t.IsHidden() {
 		return
 	}
 	if t.IsDirty() {

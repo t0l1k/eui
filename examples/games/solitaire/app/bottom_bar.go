@@ -31,7 +31,7 @@ func NewBottomBar(fn func(*eui.Button)) *BottomBar {
 	b.fn = fn
 	b.varSw = eui.NewSignal(func(a, b string) bool { return a == b })
 	b.varMoves = eui.NewSignal(func(a, b string) bool { return a == b })
-	b.Visible(true)
+	// b.SetHidden(true)
 	return b
 }
 
@@ -56,7 +56,7 @@ func (s *BottomBar) UpdateMoveCount() bool {
 }
 
 func (b *BottomBar) Update(dt int) {
-	if !b.IsVisible() {
+	if b.IsHidden() {
 		return
 	}
 	for _, v := range b.layout.Childrens() {
@@ -66,7 +66,7 @@ func (b *BottomBar) Update(dt int) {
 }
 
 func (b *BottomBar) Draw(surface *ebiten.Image) {
-	if !b.IsVisible() {
+	if b.IsHidden() {
 		return
 	}
 	for _, v := range b.layout.Childrens() {

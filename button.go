@@ -22,7 +22,7 @@ func NewButton(text string, f func(*Button)) *Button {
 	b := &Button{View: NewView(), onPressed: f}
 	b.text = NewText(text)
 	b.SetupButton(text, f)
-	b.Visible(true)
+	// b.SetHidden(true)
 	return b
 }
 
@@ -156,7 +156,7 @@ func (b *Button) Update(dt int) {
 }
 
 func (b *Button) Draw(surface *ebiten.Image) {
-	if !b.IsVisible() {
+	if b.IsHidden() {
 		return
 	}
 	if b.IsDirty() {

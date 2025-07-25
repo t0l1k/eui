@@ -43,9 +43,9 @@ func (d *DiffButton) UpdateData(value interface{}) {
 	}
 }
 
-func (d *DiffButton) Visible(value bool) {
-	d.Drawable.Visible(value)
-	d.Traverse(func(c eui.Drawabler) { c.Visible(value) }, false)
+func (d *DiffButton) SetHidden(value bool) {
+	d.Drawable.SetHidden(value)
+	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value) }, false)
 }
 
 func (d *DiffButton) Resize(rect eui.Rect[int]) {

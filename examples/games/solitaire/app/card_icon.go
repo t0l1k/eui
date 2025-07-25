@@ -34,7 +34,7 @@ func NewCardIcon(cell *sols.Cell, f func(b *eui.Button)) *CardIcon {
 	c.btn.Bg(colornames.White)
 	c.btn.Fg(col)
 	c.Add(c.btn)
-	c.Visible(true)
+	// c.SetHidden(true)
 	return c
 }
 
@@ -50,14 +50,14 @@ func (c *CardIcon) UpdateData(value *deck.Card) {
 }
 
 func (d *CardIcon) Update(dt int) {
-	if !d.IsVisible() {
+	if d.IsHidden() {
 		return
 	}
 	d.btn.Update(dt)
 }
 
-func (c *CardIcon) IsVisible() bool    { return c.show }
-func (c *CardIcon) Visible(value bool) { c.show = value }
+func (c *CardIcon) IsHidden() bool       { return c.show }
+func (c *CardIcon) SetHidden(value bool) { c.show = value; c.MarkDirty() }
 
 func (c *CardIcon) Resize(rect eui.Rect[int]) {
 	c.SetRect(rect)

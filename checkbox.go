@@ -12,7 +12,7 @@ type Checkbox struct {
 func NewCheckbox(text string, f func(c *Checkbox)) *Checkbox {
 	c := &Checkbox{Drawable: NewDrawable()}
 	c.SetupCheckbox(text, f)
-	c.Visible(true)
+	// c.SetHidden(true)
 	return c
 }
 
@@ -56,7 +56,7 @@ func (c *Checkbox) Update(dt int) {
 }
 
 func (b *Checkbox) Draw(surface *ebiten.Image) {
-	if !b.IsVisible() {
+	if b.IsHidden() {
 		return
 	}
 	if b.IsDirty() {

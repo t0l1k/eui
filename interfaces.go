@@ -4,8 +4,9 @@ import "github.com/hajimehoshi/ebiten/v2"
 
 type Drawabler interface {
 	Spriter
-	IsVisible() bool
-	Visible(bool)
+	IsHidden() bool
+	SetHidden(bool)
+	IsDisabled() bool
 	Enable()
 	Disable()
 	Layout()

@@ -16,8 +16,8 @@ func NewSceneGame() *SceneGame {
 	s := &SceneGame{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	s.topBar = eui.NewTopBar(app.GameTitle, func(b *eui.Button) {
 		s.dialog.SetTitle("Выбор новой игры")
-		s.dialog.Visible(true)
-		s.board.Visible(false)
+		s.dialog.SetHidden(false)
+		s.board.SetHidden(true)
 	})
 	s.topBar.SetUseStopwatch()
 	s.topBar.SetTitleCoverArea(0.5)
@@ -26,8 +26,8 @@ func NewSceneGame() *SceneGame {
 		if dlg.GetText() == app.BNew {
 			s.board.NewGame(s.dialog.diff)
 		}
-		s.dialog.Visible(false)
-		s.board.Visible(true)
+		s.dialog.SetHidden(true)
+		s.board.SetHidden(false)
 	})
 	s.Add(s.dialog)
 	s.board = NewBoard(s.dialog.diff)

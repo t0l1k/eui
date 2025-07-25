@@ -82,9 +82,9 @@ func (t *TopBar) initStopwatch() {
 func (t *TopBar) SetShowStoppwatch(value bool) {
 	t.showSW = value
 	if t.showSW {
-		t.tmLbl.Visible(true)
+		t.tmLbl.SetHidden(false)
 	} else {
-		t.tmLbl.Visible(false)
+		t.tmLbl.SetHidden(true)
 	}
 }
 
@@ -100,9 +100,9 @@ func (t *TopBar) SetUseStopwatch() {
 func (t *TopBar) SetShowTitle(value bool) {
 	t.showTitle = value
 	if t.showTitle {
-		t.lblTitle.Visible(true)
+		t.lblTitle.SetHidden(false)
 	} else {
-		t.lblTitle.Visible(false)
+		t.lblTitle.SetHidden(true)
 	}
 }
 
@@ -110,17 +110,17 @@ func (t *TopBar) IsVisible() bool { return t.show }
 func (t *TopBar) Visible(value bool) {
 	t.show = value
 	if t.showTitle {
-		t.lblTitle.Visible(value)
+		t.lblTitle.SetHidden(value)
 	}
 	if t.showSW {
-		t.tmLbl.Visible(value)
+		t.tmLbl.SetHidden(value)
 	}
 	if !value {
 		t.btnMenu.Disable()
 	} else {
 		t.btnMenu.Enable()
 	}
-	t.btnMenu.Visible(value)
+	t.btnMenu.SetHidden(value)
 }
 
 func (t *TopBar) Update(dt int) {

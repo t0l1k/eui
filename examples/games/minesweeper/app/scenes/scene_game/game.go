@@ -92,7 +92,7 @@ func (g *Game) Update(dt int) {
 			g.field.State.Emit(game.GamePause)
 			g.timer.Stop()
 			for _, cell := range g.Childrens() {
-				cell.(*game.CellIcon).Visible(false)
+				cell.(*game.CellIcon).SetHidden(true)
 			}
 		}
 	case game.GamePause:
@@ -100,7 +100,7 @@ func (g *Game) Update(dt int) {
 			g.field.State.Emit(game.GamePlay)
 			g.timer.Start()
 			for _, cell := range g.Childrens() {
-				cell.(*game.CellIcon).Visible(true)
+				cell.(*game.CellIcon).SetHidden(false)
 			}
 		}
 	}

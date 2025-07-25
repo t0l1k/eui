@@ -45,7 +45,7 @@ func (c *Container) Layout() {
 }
 func (c *Container) Update(dt int) { c.Traverse(func(d Drawabler) { d.Update(dt) }, false) }
 func (c *Container) Draw(surface *ebiten.Image) {
-	if !c.IsVisible() {
+	if c.IsHidden() {
 		return
 	}
 	if c.IsDirty() {

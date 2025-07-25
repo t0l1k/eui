@@ -15,7 +15,7 @@ type BoardTTT struct{ *eui.Container }
 
 func NewBoardTTT(fn func(*eui.Button)) *BoardTTT {
 	d := &BoardTTT{Container: eui.NewContainer(eui.NewGridLayout(3, 3, 1))}
-	d.Visible(true)
+	// d.SetHidden(true)
 	for i := 0; i < 9; i++ {
 		btn := eui.NewButton(string(pos.TurnEmpty), fn)
 		d.Add(btn)

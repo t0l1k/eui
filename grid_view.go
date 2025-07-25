@@ -18,7 +18,6 @@ func NewGridView(row, column float64) *GridView {
 	gr := &GridView{Drawable: NewDrawable(), r: row, c: column}
 	gr.DrawRect = false
 	gr.strokeWidth = 1
-	gr.Visible(true)
 	return gr
 }
 
@@ -109,7 +108,7 @@ func (g *GridView) Layout() {
 }
 
 func (g *GridView) Draw(surface *ebiten.Image) {
-	if !g.IsVisible() {
+	if g.IsHidden() {
 		return
 	}
 	if g.IsDirty() {

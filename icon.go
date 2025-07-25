@@ -12,7 +12,7 @@ type Icon struct {
 
 func NewIcon(icon *ebiten.Image) *Icon {
 	i := &Icon{Drawable: NewDrawable(), icon: icon}
-	i.Visible(true)
+	// i.SetHidden(true)
 	return i
 }
 
@@ -40,7 +40,7 @@ func (i *Icon) SetIcon(icon *ebiten.Image) {
 }
 
 func (i *Icon) Draw(surface *ebiten.Image) {
-	if !i.IsVisible() {
+	if i.IsHidden() {
 		return
 	}
 	if i.IsDirty() {

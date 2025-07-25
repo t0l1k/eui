@@ -40,7 +40,7 @@ func (s *SnackBar) SetText(value string) *SnackBar {
 }
 
 func (s *SnackBar) Show(durration time.Duration) *SnackBar {
-	s.Visible(true)
+	s.SetHidden(false)
 	s.timer = NewTimer(durration, func() {
 		log.Println("Show snackbar done", s.msg.GetText())
 		GetUi().HideModal()

@@ -20,7 +20,7 @@ func NewDialog(title string, f func(btn *eui.Button)) *Dialog {
 	d.title = eui.NewText(title)
 	d.Add(d.title)
 	d.btnHide = eui.NewButton("X", func(b *eui.Button) {
-		d.Visible(false)
+		d.SetHidden(true)
 	})
 	d.Add(d.btnHide)
 	d.btnNew = eui.NewButton(app.BNew, f)
@@ -36,10 +36,10 @@ func NewDialog(title string, f func(btn *eui.Button)) *Dialog {
 	return d
 }
 
-func (d *Dialog) Visible(value bool) {
+func (d *Dialog) SetHidden(value bool) {
 	d.Traverse(func(child eui.Drawabler) {
-		child.Visible(value)
-		if value {
+		child.SetHidden(value)
+		if !value {
 			child.Enable()
 		} else {
 			child.Disable()

@@ -25,7 +25,7 @@ func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSe
 	d.gamesData = gamesData
 	d.title = eui.NewText("Выбрать размер поля и сложность")
 	d.Add(d.title)
-	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.Visible(false); eui.GetUi().Pop() })
+	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.SetHidden(true); eui.GetUi().Pop() })
 	d.Add(d.btnClose)
 	var data []interface{}
 	for _, dim := range gamesData.SortedDims() {
@@ -68,9 +68,9 @@ func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSe
 	return d
 }
 
-func (d *DialogSelect) Visible(value bool) {
-	d.Drawable.Visible(value)
-	d.Traverse(func(c eui.Drawabler) { c.Visible(value) }, false)
+func (d *DialogSelect) SetHidden(value bool) {
+	d.Drawable.SetHidden(value)
+	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value) }, false)
 }
 
 func (d *DialogSelect) Resize(rect eui.Rect[int]) {

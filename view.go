@@ -11,7 +11,7 @@ type View struct {
 func NewView() *View {
 	v := &View{Drawable: NewDrawable()}
 	v.SetupView()
-	v.Visible(true)
+	// v.SetHidden(true)
 	return v
 }
 

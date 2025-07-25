@@ -30,7 +30,7 @@ func NewBoard(fn func(b *eui.Button)) *Board {
 	b.Add(b.layoutCells)
 	b.fn = fn
 	b.grid = eui.NewGridView(2, 2)
-	b.grid.Visible(false)
+	b.grid.SetHidden(true)
 	b.grid.DrawRect = true
 	b.grid.Fg(colornames.Red)
 	b.grid.Bg(colornames.Black)
@@ -118,9 +118,9 @@ func (d *Board) Draw(surface *ebiten.Image) {
 	d.Traverse(func(d eui.Drawabler) { d.Draw(surface) }, false)
 }
 
-func (d *Board) Visible(value bool) {
-	d.Drawable.Visible(value)
-	d.Traverse(func(c eui.Drawabler) { c.Visible(value); c.MarkDirty() }, false)
+func (d *Board) SetHidden(value bool) {
+	d.Drawable.SetHidden(value)
+	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value); c.MarkDirty() }, false)
 	d.MarkDirty()
 }
 

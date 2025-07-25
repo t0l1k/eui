@@ -36,8 +36,8 @@ func NewCellIcon(cell *game.Cell, f func(b *eui.Button)) *CellIcon {
 	c.cell = cell
 	c.icon = NewBallIcon(BallHidden, game.BallNoColor.Color(), game.BallNoColor.Color())
 	c.icon.Resize(eui.NewRect([]int{0, 0, 1, 1}))
-	c.icon.Visible(true)
-	c.Visible(true)
+	// c.icon.SetHidden(true)
+	// c.SetHidden(true)
 	c.btn = eui.NewButton("", f)
 	c.anim = BallAnimNo
 	c.animStatus = BallHidden
@@ -101,7 +101,7 @@ func (c *CellIcon) updateIcon(ballStatus BallStatusType) {
 }
 
 func (c *CellIcon) Draw(surface *ebiten.Image) {
-	if !c.IsVisible() {
+	if c.IsHidden() {
 		return
 	}
 	if c.IsDirty() {

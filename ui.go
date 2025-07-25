@@ -95,19 +95,19 @@ func (u *Ui) Update() error {
 func (u *Ui) Draw(screen *ebiten.Image) {
 	screen.Fill(u.theme.Get(SceneBg))
 	u.currentScene.Draw(screen)
-	if u.modal != nil && u.modal.IsVisible() {
+	if u.modal != nil && !u.modal.IsHidden() {
 		u.modal.Draw(screen)
 	}
 }
 
 func (u *Ui) ShowModal(d Drawabler) {
 	u.modal = d
-	u.modal.Visible(true)
+	u.modal.SetHidden(false)
 }
 
 func (u *Ui) HideModal() {
 	if u.modal != nil {
-		u.modal.Visible(false)
+		u.modal.SetHidden(true)
 		u.modal.Close()
 		u.modal = nil
 	}

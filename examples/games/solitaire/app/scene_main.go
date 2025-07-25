@@ -40,11 +40,11 @@ func NewSceneMain() *SceneMain {
 	// s.boards = append(s.boards, board)
 
 	s.current = s.boards[s.boardIdx]
-	s.current.Visible(true)
+	// s.current.SetHidden(true)
 	s.bottomBar = NewBottomBar(func(btn *eui.Button) {
 		switch btn.GetText() {
 		case actNextSol:
-			s.current.Visible(false)
+			s.current.SetHidden(true)
 			s.current = nil
 			s.boardIdx++
 			if s.boardIdx >= len(s.boards) {
@@ -52,7 +52,7 @@ func NewSceneMain() *SceneMain {
 			}
 			s.current = s.boards[s.boardIdx]
 			s.current.Setup(true)
-			s.current.Visible(true)
+			s.current.SetHidden(false)
 			s.Add(s.current)
 			s.Resize()
 			fmt.Println("pressed:", btn.GetText(), s.boardIdx)

@@ -8,22 +8,22 @@ import (
 )
 
 type Drawable struct {
-	rect                     Rect[int]
-	dirty, visible, disabled bool
-	image                    *ebiten.Image
-	bg, fg                   color.Color
+	rect                    Rect[int]
+	dirty, hidden, disabled bool
+	image                   *ebiten.Image
+	bg, fg                  color.Color
 }
 
-func NewDrawable() *Drawable             { return &Drawable{visible: true} }
+func NewDrawable() *Drawable             { return &Drawable{} }
 func (s *Drawable) GetBg() color.Color   { return s.bg }
 func (s *Drawable) Bg(value color.Color) { s.bg = value; s.MarkDirty() }
 func (s *Drawable) GetFg() color.Color   { return s.fg }
 func (s *Drawable) Fg(value color.Color) { s.fg = value; s.MarkDirty() }
 
-func (s *Drawable) IsVisible() bool { return s.visible }
-func (s *Drawable) Visible(value bool) {
-	s.visible = value
-	if value {
+func (s *Drawable) IsHidden() bool { return s.hidden }
+func (s *Drawable) SetHidden(value bool) {
+	s.hidden = value
+	if !value {
 		s.Enable()
 	} else {
 		s.Disable()
@@ -64,7 +64,7 @@ func (s *Drawable) Update(dt int) {
 	}
 }
 func (s *Drawable) Draw(surface *ebiten.Image) {
-	if !s.IsVisible() {
+	if s.IsHidden() {
 		return
 	}
 	if s.IsDirty() {

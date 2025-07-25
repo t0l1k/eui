@@ -36,11 +36,11 @@ func (h *Hand) Setup(center eui.Point[float64], lenght float64, thickness float6
 	h.faceCenter = center
 	h.lenght = lenght
 	h.thickness = thickness
-	h.Visible(visible)
+	h.SetHidden(!visible)
 }
 
 func (h *Hand) ToggleVisible() {
-	h.Visible(!h.IsVisible())
+	h.SetHidden(!h.IsHidden())
 	h.MarkDirty()
 }
 
@@ -66,7 +66,7 @@ func (h *Hand) Layout() {
 }
 
 func (h *Hand) Draw(surface *ebiten.Image) {
-	if !h.IsVisible() || h.IsDisabled() {
+	if h.IsHidden() || h.IsDisabled() {
 		return
 	}
 	if h.IsDirty() {
@@ -78,7 +78,7 @@ func (h *Hand) Draw(surface *ebiten.Image) {
 	surface.DrawImage(h.Image(), op)
 }
 
-func (t *Hand) Resize(rect eui.Rect[int]) { t.SetRect(rect); t.MarkDirty() }
+func (t *Hand) Resize(rect eui.Rect[int]) { t.Drawable.SetRect(rect); t.MarkDirty() }
 
 // Сами часы, рисуется "лицо часов", а поверх него стрелки в порядке добавления друг поверх друга.
 type AnalogClock struct {
@@ -101,7 +101,6 @@ func NewAnalogClock() *AnalogClock {
 	a.Add(a.minuteHand)
 	a.Add(a.secHand)
 	a.Add(a.MsHand)
-	a.Visible(true)
 	return a
 }
 
@@ -158,7 +157,7 @@ func (g *AnalogClock) Update(dt int) {
 }
 
 func (t *AnalogClock) Draw(surface *ebiten.Image) {
-	if !t.IsVisible() {
+	if t.IsHidden() {
 		return
 	}
 	if t.IsDirty() {
@@ -177,7 +176,7 @@ func (t *AnalogClock) Draw(surface *ebiten.Image) {
 }
 
 func (a *AnalogClock) Resize(r eui.Rect[int]) {
-	a.SetRect(r)
+	a.Drawable.SetRect(r)
 	a.MsHand.Resize(r)
 	a.secHand.Resize(r)
 	a.minuteHand.Resize(r)
@@ -272,6 +271,7 @@ func (s *SceneAnalogClock) Update(dt int) {
 func (s *SceneAnalogClock) Resize() {
 	w0, h0 := eui.GetUi().Size()
 	h := int(float64(h0) * 0.05)
+	s.Drawable.SetRect(eui.NewRect([]int{0, 0, w0, h0}))
 	s.topBar.Resize(eui.NewRect([]int{0, 0, w0, h}))
 	s.clock.Resize(eui.NewRect([]int{0, h, w0, h0 - h}))
 	s.lblTm.Resize(eui.NewRect([]int{0, h0 - h, h * 4, h}))

@@ -20,7 +20,7 @@ type ComboBox struct {
 func NewComboBox(text string, data []interface{}, index int, f func(*ComboBox)) *ComboBox {
 	c := &ComboBox{Drawable: NewDrawable()}
 	c.SetupCombo(text, data, index, f)
-	c.Visible(true)
+	// c.SetHidden(true)
 	return c
 }
 
@@ -107,7 +107,7 @@ func (c *ComboBox) Update(dt int) {
 }
 
 func (b *ComboBox) Draw(surface *ebiten.Image) {
-	if !b.IsVisible() {
+	if b.IsHidden() {
 		return
 	}
 	if b.IsDirty() {
