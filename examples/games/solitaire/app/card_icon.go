@@ -59,8 +59,8 @@ func (d *CardIcon) Update(dt int) {
 func (c *CardIcon) IsHidden() bool       { return c.show }
 func (c *CardIcon) SetHidden(value bool) { c.show = value; c.MarkDirty() }
 
-func (c *CardIcon) Resize(rect eui.Rect[int]) {
-	c.SetRect(rect)
-	c.btn.Resize(rect)
+func (c *CardIcon) SetRect(rect eui.Rect[int]) {
+	c.Container.SetRect(rect)
+	c.btn.SetRect(rect)
 	c.ImageReset()
 }

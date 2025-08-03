@@ -61,7 +61,7 @@ func (b *BoardSol15) Setup(newDeck bool) {
 	b.moveIdx = 0
 	b.backupGame()
 	b.sw.Start()
-	b.Resize(b.Rect()) // обязательно после обнуления контейнеров
+	b.SetRect(b.Rect()) // обязательно после обнуления контейнеров
 }
 
 func (b *BoardSol15) MakeMove(move sols.Column) {
@@ -95,7 +95,7 @@ func (b *BoardSol15) backupGame() {
 	fmt.Println("deck:", deck, b.moveIdx, len(b.historyOfMoves))
 }
 
-func (b *BoardSol15) Resize(rect eui.Rect[int]) {
-	b.SetRect(rect)
-	b.layout.Resize(rect)
+func (b *BoardSol15) SetRect(rect eui.Rect[int]) {
+	b.Container.SetRect(rect)
+	b.layout.SetRect(rect)
 }

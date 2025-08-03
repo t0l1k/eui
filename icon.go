@@ -12,7 +12,6 @@ type Icon struct {
 
 func NewIcon(icon *ebiten.Image) *Icon {
 	i := &Icon{Drawable: NewDrawable(), icon: icon}
-	// i.SetHidden(true)
 	return i
 }
 
@@ -52,7 +51,7 @@ func (i *Icon) Draw(surface *ebiten.Image) {
 	surface.DrawImage(i.image, op)
 }
 
-func (i *Icon) Resize(rect Rect[int]) {
-	i.SetRect(rect)
+func (i *Icon) SetRect(rect Rect[int]) {
+	i.Drawable.SetRect(rect)
 	i.ImageReset()
 }

@@ -124,11 +124,11 @@ func (d *Board) SetHidden(value bool) {
 	d.MarkDirty()
 }
 
-func (b *Board) Resize(rect eui.Rect[int]) {
-	b.SetRect(rect)
+func (b *Board) SetRect(rect eui.Rect[int]) {
+	b.Container.SetRect(rect)
 	x, y, w, h := b.Rect().GetRect()
-	b.layoutCells.Resize(eui.NewRect([]int{x + int(b.spacing/2), y + int(b.spacing/2), w, h}))
+	b.layoutCells.SetRect(eui.NewRect([]int{x + int(b.spacing/2), y + int(b.spacing/2), w, h}))
 	x1, y1, w1, h1 := b.Rect().GetRect()
-	b.grid.Resize(eui.NewRect([]int{x1 - int(b.spacing/2), y1 - int(b.spacing/2), w1, h1}))
+	b.grid.SetRect(eui.NewRect([]int{x1 - int(b.spacing/2), y1 - int(b.spacing/2), w1, h1}))
 	b.grid.SetStrokewidth(float64(b.spacing))
 }

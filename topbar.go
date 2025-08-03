@@ -131,17 +131,17 @@ func (t *TopBar) Update(dt int) {
 	t.tmVar.Emit(t.Stopwatch.StringShort())
 }
 
-func (t *TopBar) Resize(rect Rect[int]) {
-	t.SetRect(rect)
+func (t *TopBar) SetRect(rect Rect[int]) {
+	t.Drawable.SetRect(rect)
 	x, y, w, h := 0, 0, t.Rect().H, t.Rect().H
-	t.btnMenu.Resize(NewRect([]int{x, y, w, h}))
+	t.btnMenu.SetRect(NewRect([]int{x, y, w, h}))
 	x += h
 	w = int(float64(rect.W) * t.coverTitle)
-	t.lblTitle.Resize(NewRect([]int{x, y, w, h}))
+	t.lblTitle.SetRect(NewRect([]int{x, y, w, h}))
 	if t.useSW {
 		w = int(float64(rect.W) * t.coverStopwatch)
 		x = t.Rect().W - w
-		t.tmLbl.Resize(NewRect([]int{x, y, w, h}))
+		t.tmLbl.SetRect(NewRect([]int{x, y, w, h}))
 	}
 	t.ImageReset()
 }

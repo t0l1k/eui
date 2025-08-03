@@ -243,7 +243,6 @@ func NewCellIcon(field *Field, f func(b *eui.Button)) *CellIcon {
 	c.btn = eui.NewButton(CellClosed, f)
 	c.Add(c.btn)
 	c.Setup(f)
-	// c.SetHidden(true)
 	return c
 }
 
@@ -395,15 +394,15 @@ func (b *Board) Update(dt int) {
 	b.varArea.Emit(str)
 }
 
-func (b *Board) Resize(rect eui.Rect[int]) {
-	b.SetRect(rect)
+func (b *Board) SetRect(rect eui.Rect[int]) {
+	b.Container.SetRect(rect)
 	hT := int(float64(b.Rect().GetLowestSize()) * 0.05)
 	x, y := b.Rect().X, b.Rect().Y
 	w, h := b.Rect().W, b.Rect().H-hT
-	b.layout.Resize(eui.NewRect([]int{x, y, w, h}))
+	b.layout.SetRect(eui.NewRect([]int{x, y, w, h}))
 	y += h
 	h = hT
-	b.bottomLbl.Resize(eui.NewRect([]int{x, y, w, h}))
+	b.bottomLbl.SetRect(eui.NewRect([]int{x, y, w, h}))
 	b.ImageReset()
 }
 
@@ -454,22 +453,22 @@ func (t *Dialog) SetTitle(title string) {
 	t.title.SetText(title)
 }
 
-func (t *Dialog) Resize(rect eui.Rect[int]) {
-	t.SetRect(rect)
+func (t *Dialog) SetRect(rect eui.Rect[int]) {
+	t.Container.SetRect(rect)
 	x, y := t.Rect().Pos()
 	w, h := t.Rect().W/4, t.Rect().H/3
-	t.title.Resize(eui.NewRect([]int{x, y, w*4 - h, h}))
-	t.btnQuit.Resize(eui.NewRect([]int{x + w*4 - h, y, h, h}))
+	t.title.SetRect(eui.NewRect([]int{x, y, w*4 - h, h}))
+	t.btnQuit.SetRect(eui.NewRect([]int{x + w*4 - h, y, h, h}))
 	y += h
-	t.message.Resize(eui.NewRect([]int{x, y, w * 4, h}))
+	t.message.SetRect(eui.NewRect([]int{x, y, w * 4, h}))
 	y += h
-	t.btnNew.Resize(eui.NewRect([]int{x, y, w, h}))
+	t.btnNew.SetRect(eui.NewRect([]int{x, y, w, h}))
 	x += w
-	t.btnReset.Resize(eui.NewRect([]int{x, y, w, h}))
+	t.btnReset.SetRect(eui.NewRect([]int{x, y, w, h}))
 	x += w
-	t.btnNext.Resize(eui.NewRect([]int{x, y, w, h}))
+	t.btnNext.SetRect(eui.NewRect([]int{x, y, w, h}))
 	x += w
-	t.btnCont.Resize(eui.NewRect([]int{x, y, w, h}))
+	t.btnCont.SetRect(eui.NewRect([]int{x, y, w, h}))
 	t.ImageReset()
 }
 
@@ -544,18 +543,17 @@ func NewSceneGame() *SceneGame {
 	return s
 }
 
-func (s *SceneGame) Resize() {
-	w0, h0 := eui.GetUi().Size()
+func (s *SceneGame) SetRect(rect eui.Rect[int]) {
+	w0, h0 := rect.Size()
 	x, y := 0, 0
 	w, h := w0, h0
-	rect := eui.NewRect([]int{x, y, w, h})
 	hT := int(float64(rect.GetLowestSize()) * 0.1)
 	h = hT
-	s.topBar.Resize(eui.NewRect([]int{x, y, w, h}))
+	s.topBar.SetRect(eui.NewRect([]int{x, y, w, h}))
 	x, y = hT/2, hT+hT/2
 	w, h = w0-hT, h0-hT*2
-	s.board.Resize(eui.NewRect([]int{x, y, w, h}))
-	s.dialog.Resize(eui.NewRect([]int{x, y, w, h}))
+	s.board.SetRect(eui.NewRect([]int{x, y, w, h}))
+	s.dialog.SetRect(eui.NewRect([]int{x, y, w, h}))
 }
 
 func NewGameMatch() *eui.Ui {

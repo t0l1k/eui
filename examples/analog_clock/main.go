@@ -78,7 +78,7 @@ func (h *Hand) Draw(surface *ebiten.Image) {
 	surface.DrawImage(h.Image(), op)
 }
 
-func (t *Hand) Resize(rect eui.Rect[int]) { t.Drawable.SetRect(rect); t.MarkDirty() }
+func (t *Hand) SetRect(rect eui.Rect[int]) { t.Drawable.SetRect(rect); t.MarkDirty() }
 
 // Сами часы, рисуется "лицо часов", а поверх него стрелки в порядке добавления друг поверх друга.
 type AnalogClock struct {
@@ -175,12 +175,12 @@ func (t *AnalogClock) Draw(surface *ebiten.Image) {
 	}
 }
 
-func (a *AnalogClock) Resize(r eui.Rect[int]) {
+func (a *AnalogClock) SetRect(r eui.Rect[int]) {
 	a.Drawable.SetRect(r)
-	a.MsHand.Resize(r)
-	a.secHand.Resize(r)
-	a.minuteHand.Resize(r)
-	a.hourHand.Resize(r)
+	a.MsHand.SetRect(r)
+	a.secHand.SetRect(r)
+	a.minuteHand.SetRect(r)
+	a.hourHand.SetRect(r)
 	a.setupHands()
 	a.ImageReset()
 }
@@ -245,7 +245,6 @@ func NewSceneAnalogClock() *SceneAnalogClock {
 	s.Add(s.checkBox)
 	s.checkBox.SetChecked(conf.Get(ShowMSecondHand).(bool))
 	s.setupTheme()
-	s.Resize()
 	return s
 }
 
@@ -268,14 +267,14 @@ func (s *SceneAnalogClock) Update(dt int) {
 	s.Scene.Update(dt)
 }
 
-func (s *SceneAnalogClock) Resize() {
-	w0, h0 := eui.GetUi().Size()
+func (s *SceneAnalogClock) SetRect(rect eui.Rect[int]) {
+	w0, h0 := rect.Size()
 	h := int(float64(h0) * 0.05)
 	s.Drawable.SetRect(eui.NewRect([]int{0, 0, w0, h0}))
-	s.topBar.Resize(eui.NewRect([]int{0, 0, w0, h}))
-	s.clock.Resize(eui.NewRect([]int{0, h, w0, h0 - h}))
-	s.lblTm.Resize(eui.NewRect([]int{0, h0 - h, h * 4, h}))
-	s.checkBox.Resize(eui.NewRect([]int{w0 - h*4, h0 - h, h * 4, h}))
+	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, h}))
+	s.clock.SetRect(eui.NewRect([]int{0, h, w0, h0 - h}))
+	s.lblTm.SetRect(eui.NewRect([]int{0, h0 - h, h * 4, h}))
+	s.checkBox.SetRect(eui.NewRect([]int{w0 - h*4, h0 - h, h * 4, h}))
 }
 
 func NewGame() *eui.Ui {

@@ -73,28 +73,28 @@ func (d *DialogSelect) SetHidden(value bool) {
 	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value) }, false)
 }
 
-func (d *DialogSelect) Resize(rect eui.Rect[int]) {
-	d.SetRect(rect)
+func (d *DialogSelect) SetRect(rect eui.Rect[int]) {
+	d.Container.SetRect(rect)
 	w0, h0 := d.Rect().Size()
 	h1 := float64(h0) / 7
 	d.margin = int(h1 / 2)
 	hTop := h1 * 0.8
 	wTop := float64(w0) * 0.7
 	x0, y0 := d.Rect().Pos()
-	d.title.Resize(eui.NewRect([]int{x0, y0, w0 - int(hTop), int(hTop)}))
+	d.title.SetRect(eui.NewRect([]int{x0, y0, w0 - int(hTop), int(hTop)}))
 	x := x0 + (w0 - int(hTop))
 	y := y0
-	d.btnClose.Resize(eui.NewRect([]int{x, y, int(hTop), int(hTop)}))
+	d.btnClose.SetRect(eui.NewRect([]int{x, y, int(hTop), int(hTop)}))
 	x = x0
 	y += int(h1)
-	d.cSize.Resize(eui.NewRect([]int{x, y, int(wTop), int(h1)}))
+	d.cSize.SetRect(eui.NewRect([]int{x, y, int(wTop), int(h1)}))
 	x = x0 + w0 - (w0 - int(wTop))
-	d.lblHistory.Resize(eui.NewRect([]int{x, y, w0 - int(wTop), int(hTop)}))
+	d.lblHistory.SetRect(eui.NewRect([]int{x, y, w0 - int(wTop), int(hTop)}))
 	y += int(h1)
-	d.history.Resize(eui.NewRect([]int{x, y, (w0 - int(wTop)), h0 - int(h1*2)}))
+	d.history.SetRect(eui.NewRect([]int{x, y, (w0 - int(wTop)), h0 - int(h1*2)}))
 	x = x0
 	for _, v := range d.btnsDiff {
-		v.Resize(eui.NewRect([]int{x, y, int(wTop), int(h1)}))
+		v.SetRect(eui.NewRect([]int{x, y, int(wTop), int(h1)}))
 		y += int(h1)
 	}
 	d.ImageReset()

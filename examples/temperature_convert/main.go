@@ -32,7 +32,6 @@ func NewSceneTemp() *SceneTemp {
 	})
 	s.Add(c)
 	s.Add(eui.NewText("Fahrenheit"))
-	s.Resize()
 	return s
 }
 

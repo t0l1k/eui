@@ -45,11 +45,11 @@ func (b *BottomBarNr) SetCount(value int) {
 	}
 }
 
-func (b *BottomBarNr) Resize(rect eui.Rect[int]) {
-	b.SetRect(rect)
-	b.valueBtn.Resize(rect)
+func (b *BottomBarNr) SetRect(rect eui.Rect[int]) {
+	b.Container.SetRect(rect)
+	b.valueBtn.SetRect(rect)
 	x, y := b.Rect().Pos()
 	w, h := b.Rect().Size()
 	x += w - w/3
-	b.countLbl.Resize(eui.NewRect([]int{x, y, w / 3, h / 3}))
+	b.countLbl.SetRect(eui.NewRect([]int{x, y, w / 3, h / 3}))
 }

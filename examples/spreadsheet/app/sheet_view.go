@@ -91,14 +91,14 @@ func (s *SpreadsheetView) Update(dt int) {
 	s.Container.Update(dt)
 }
 
-func (s *SpreadsheetView) Resize(rect eui.Rect[int]) {
+func (s *SpreadsheetView) SetRect(rect eui.Rect[int]) {
 	s.SetRect(rect)
 	cellSize := float64(s.Rect().GetLowestSize()) * 0.05
 	x0, y0, w0, h0 := s.Rect().X, s.Rect().Y, s.Rect().W, s.Rect().H
 	x, y, w, h := x0, y0, int(cellSize*10), int(cellSize*2)
-	s.layFooter.Resize(eui.NewRect([]int{x, y, w, h}))
+	s.layFooter.SetRect(eui.NewRect([]int{x, y, w, h}))
 	y += int(cellSize * 2)
 	w = w0
 	h = h0 - int(cellSize*2)
-	s.laySheet.Resize(eui.NewRect([]int{x, y, w, h}))
+	s.laySheet.SetRect(eui.NewRect([]int{x, y, w, h}))
 }

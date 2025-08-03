@@ -78,6 +78,5 @@ func (s *Drawable) Draw(surface *ebiten.Image) {
 
 func (s *Drawable) Rect() Rect[int]        { return s.rect }
 func (s *Drawable) SetRect(rect Rect[int]) { s.rect = rect; s.MarkDirty() }
-func (s *Drawable) Resize(rect Rect[int])  { s.rect = rect; s.MarkDirty() }
 
 func (s *Drawable) Close() {}

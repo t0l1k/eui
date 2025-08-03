@@ -48,7 +48,6 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 		}
 	})
 	s.Add(s.btnAF)
-	s.Resize()
 	return s
 }
 
@@ -81,29 +80,29 @@ func (s *SceneGame) UpdateData(value string) {
 	}
 }
 
-func (s *SceneGame) Resize() {
-	w, h := eui.GetUi().Size()
+func (s *SceneGame) SetRect(rect eui.Rect[int]) {
+	w, h := rect.Size()
 	hTop := int(float64(h) * 0.05) // topbar height
 	hTopHalf := int((float64(h) * 0.05) / 2)
-	rect := eui.NewRect([]int{0, hTop, w, h - hTop})
-	s.SetRect(rect)
+	h = h - hTop
+	s.Scene.SetRect(rect)
 
-	s.topBar.Resize(eui.NewRect([]int{0, 0, w, hTop}))
-	s.game.Resize(eui.NewRect([]int{hTopHalf, hTop + hTopHalf, w - hTop, h - hTop*2}))
+	s.topBar.SetRect(eui.NewRect([]int{0, 0, w, hTop}))
+	s.game.SetRect(eui.NewRect([]int{hTopHalf, hTop + hTopHalf, w - hTop, h - hTop*2}))
 
 	x := rect.CenterX() - hTop*3
 	y := 0
 	r := []int{x, y, hTop * 2, hTop}
-	s.lblMines.Resize(eui.NewRect(r))
+	s.lblMines.SetRect(eui.NewRect(r))
 	x = rect.CenterX() + hTop
 	y = 0
 	r = []int{x, y, hTop * 2, hTop}
-	s.lblGameTimer.Resize(eui.NewRect(r))
+	s.lblGameTimer.SetRect(eui.NewRect(r))
 	x = rect.CenterX() - hTop/2
 	y = 0
 	r = []int{x, y, hTop, hTop}
-	s.btnStatus.Resize(eui.NewRect(r))
+	s.btnStatus.SetRect(eui.NewRect(r))
 	x = rect.CenterX() + hTop*4
 	r = []int{x, y, hTop * 3, hTop}
-	s.btnAF.Resize(eui.NewRect(r))
+	s.btnAF.SetRect(eui.NewRect(r))
 }

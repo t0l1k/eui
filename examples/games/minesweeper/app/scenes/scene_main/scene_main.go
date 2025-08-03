@@ -43,11 +43,10 @@ func (s *SceneSelectGame) selectGameLogic(b *eui.Button) {
 	}
 }
 
-func (s *SceneSelectGame) Resize() {
-	w, h := eui.GetUi().Size()
-	rect := eui.NewRect([]int{0, 0, w, h})
-	s.SetRect(rect)
+func (s *SceneSelectGame) SetRect(rect eui.Rect[int]) {
+	w, h := rect.Size()
+	s.Scene.SetRect(rect)
 	hT := int(float64(rect.GetLowestSize()) * 0.05)
-	s.topBar.Resize(eui.NewRect([]int{0, 0, w, hT}))
-	s.frame.Resize(eui.NewRect([]int{hT / 2, hT + hT/2, w - hT, h - hT*2}))
+	s.topBar.SetRect(eui.NewRect([]int{0, 0, w, hT}))
+	s.frame.SetRect(eui.NewRect([]int{hT / 2, hT + hT/2, w - hT, h - hT*2}))
 }

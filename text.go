@@ -24,7 +24,6 @@ func NewText(txt string) *Text {
 	t.Bg(theme.Get(TextBg))
 	t.Fg(theme.Get(TextFg))
 	t.SetText(txt)
-	// t.SetHidden(true)
 	return t
 }
 
@@ -90,7 +89,7 @@ func (t *Text) Draw(surface *ebiten.Image) {
 	surface.DrawImage(t.Image(), op)
 }
 
-func (t *Text) Resize(rect Rect[int]) {
-	t.SetRect(rect)
+func (t *Text) SetRect(rect Rect[int]) {
+	t.Drawable.SetRect(rect)
 	t.ImageReset()
 }

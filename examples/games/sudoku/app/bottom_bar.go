@@ -72,7 +72,7 @@ func (b *BottomBar) Setup(board *Board) {
 		b.layoutNums.Add(btn)
 		b.actBtns = append(b.actBtns, btn)
 	}
-	b.Resize(b.Rect()) // обязательно после обнуления контейнеров
+	b.SetRect(b.Rect()) // обязательно после обнуления контейнеров
 	b.setBtnClrs()
 }
 
@@ -177,13 +177,13 @@ func (b *BottomBar) Update(dt int) {
 	}
 }
 
-func (b *BottomBar) Resize(rect eui.Rect[int]) {
-	b.SetRect(rect)
+func (b *BottomBar) SetRect(rect eui.Rect[int]) {
+	b.Container.SetRect(rect)
 	w0, h0 := b.Rect().Size()
 	x, y := b.Rect().Pos()
 	h1 := h0 / 2
-	b.layoutActs.Resize(eui.NewRect([]int{x, y, w0, h1}))
+	b.layoutActs.SetRect(eui.NewRect([]int{x, y, w0, h1}))
 	y += h1
-	b.layoutNums.Resize(eui.NewRect([]int{x, y, w0, h1}))
+	b.layoutNums.SetRect(eui.NewRect([]int{x, y, w0, h1}))
 	b.ImageReset()
 }

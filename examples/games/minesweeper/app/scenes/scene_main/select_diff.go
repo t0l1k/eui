@@ -74,11 +74,10 @@ func (s *SelectDiff) runGame() {
 	log.Println("run game", s.row, s.column, mines)
 }
 
-func (s *SelectDiff) Resize() {
-	w, h := eui.GetUi().Size()
-	rect := eui.NewRect([]int{0, 0, w, h})
-	s.SetRect(rect)
+func (s *SelectDiff) SetRect(rect eui.Rect[int]) {
+	w, h := rect.Size()
+	s.Scene.SetRect(rect)
 	hTop := int(float64(rect.GetLowestSize()) * 0.05)
-	s.topBar.Resize(eui.NewRect([]int{0, 0, w, hTop}))
-	s.frame.Resize(eui.NewRect([]int{0, hTop, w, h - hTop}))
+	s.topBar.SetRect(eui.NewRect([]int{0, 0, w, hTop}))
+	s.frame.SetRect(eui.NewRect([]int{0, hTop, w, h - hTop}))
 }

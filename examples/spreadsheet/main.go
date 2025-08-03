@@ -14,7 +14,6 @@ func NewSceneSpreadSheet() *SceneSpreadSheet {
 	sc := &SceneSpreadSheet{Scene: eui.NewScene(eui.NewVBoxLayout(1))}
 	sc.ssView = app.NewSpreadSheetView(5, 25)
 	sc.Add(sc.ssView)
-	sc.Resize()
 	return sc
 }
 

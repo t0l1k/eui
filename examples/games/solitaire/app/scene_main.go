@@ -54,7 +54,7 @@ func NewSceneMain() *SceneMain {
 			s.current.Setup(true)
 			s.current.SetHidden(false)
 			s.Add(s.current)
-			s.Resize()
+			s.SetRect(s.Rect())
 			fmt.Println("pressed:", btn.GetText(), s.boardIdx)
 		case actNew:
 			s.current.Setup(true)
@@ -103,12 +103,11 @@ func (s *SceneMain) gameLogic(btn *eui.Button) {
 	}
 }
 
-func (s *SceneMain) Resize() {
-	w0, h0 := eui.GetUi().Size()
-	rect := eui.NewRect([]int{0, 0, w0, h0})
-	s.SetRect(rect)
+func (s *SceneMain) SetRect(rect eui.Rect[int]) {
+	w0, h0 := rect.Size()
+	s.Scene.SetRect(rect)
 	Htop := int(float64(rect.GetLowestSize()) * 0.05)
-	s.topBar.Resize(eui.NewRect([]int{0, 0, w0, Htop}))
-	s.current.Resize(eui.NewRect([]int{0, Htop, w0, h0 - Htop*4}))
-	s.bottomBar.Resize(eui.NewRect([]int{0, h0 - Htop, w0, Htop}))
+	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, Htop}))
+	s.current.SetRect(eui.NewRect([]int{0, Htop, w0, h0 - Htop*4}))
+	s.bottomBar.SetRect(eui.NewRect([]int{0, h0 - Htop, w0, Htop}))
 }

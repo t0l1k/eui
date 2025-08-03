@@ -51,16 +51,16 @@ func (d *Dialog) SetTitle(title string) {
 	d.title.SetText(title)
 }
 
-func (d *Dialog) Resize(rect eui.Rect[int]) {
-	d.SetRect(rect)
+func (d *Dialog) SetRect(rect eui.Rect[int]) {
+	d.Container.SetRect(rect)
 	x, y := d.Rect().Pos()
 	w, h := d.Rect().W, d.Rect().H/4
-	d.title.Resize(eui.NewRect([]int{x, y, w - h, h}))
-	d.btnHide.Resize(eui.NewRect([]int{x + w - h, y, h, h}))
+	d.title.SetRect(eui.NewRect([]int{x, y, w - h, h}))
+	d.btnHide.SetRect(eui.NewRect([]int{x + w - h, y, h, h}))
 	y += h
-	d.message.Resize(eui.NewRect([]int{x, y, w, h}))
+	d.message.SetRect(eui.NewRect([]int{x, y, w, h}))
 	y += h
-	d.comboSelGameDiff.Resize(eui.NewRect([]int{x, y, w, h}))
+	d.comboSelGameDiff.SetRect(eui.NewRect([]int{x, y, w, h}))
 	y += h
-	d.btnNew.Resize(eui.NewRect([]int{x, y, w, h}))
+	d.btnNew.SetRect(eui.NewRect([]int{x, y, w, h}))
 }

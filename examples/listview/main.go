@@ -58,21 +58,20 @@ func NewSceneTestListView() *SceneTestListView {
 	return s
 }
 
-func (s *SceneTestListView) Resize() {
-	w0, h0 := eui.GetUi().Size()
-	rect := eui.NewRect([]int{0, 0, w0, h0})
+func (s *SceneTestListView) SetRect(rect eui.Rect[int]) {
+	_, h0 := rect.Size()
 	margin := int(float64(rect.GetLowestSize()) * 0.1)
 	x, y := margin, margin
 	w, h := margin*3, h0-margin*2
-	s.lstButtons.Resize(eui.NewRect([]int{x, y, w, h}))
+	s.lstButtons.SetRect(eui.NewRect([]int{x, y, w, h}))
 	x += margin*3 + margin
-	s.lstText.Resize(eui.NewRect([]int{x, y, w, h}))
+	s.lstText.SetRect(eui.NewRect([]int{x, y, w, h}))
 	x += margin*3 + margin
 	h -= margin * 3
-	s.lstCheckBoxs.Resize(eui.NewRect([]int{x, y, w, h}))
+	s.lstCheckBoxs.SetRect(eui.NewRect([]int{x, y, w, h}))
 	y += h + margin
 	h = margin
-	s.btnRemoveSelected.Resize(eui.NewRect([]int{x, y, w, h}))
+	s.btnRemoveSelected.SetRect(eui.NewRect([]int{x, y, w, h}))
 	log.Println("SceneTestListView:Resize:", rect, s.lstButtons.Rect(), s.lstCheckBoxs.Rect(), s.lstText.Rect(), s.btnRemoveSelected.Rect())
 }
 

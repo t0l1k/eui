@@ -48,17 +48,17 @@ func (d *DiffButton) SetHidden(value bool) {
 	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value) }, false)
 }
 
-func (d *DiffButton) Resize(rect eui.Rect[int]) {
-	d.SetRect(rect)
+func (d *DiffButton) SetRect(rect eui.Rect[int]) {
+	d.Container.SetRect(rect)
 	w0, h0 := d.Rect().Size()
 	h1 := float64(h0) / 2
 	hTop := h1 * 0.8
 	wTop := float64(w0) * 0.8
 	x, y := d.Rect().Pos()
-	d.title.Resize(eui.NewRect([]int{x, y, int(wTop), int(hTop)}))
+	d.title.SetRect(eui.NewRect([]int{x, y, int(wTop), int(hTop)}))
 	y += int(h1)
 	w2 := w0 / 3
-	d.lblScore.Resize(eui.NewRect([]int{x, y, w2, int(h1)}))
-	d.btn.Resize(eui.NewRect([]int{x + w2, y, w2 * 2, int(h1)}))
+	d.lblScore.SetRect(eui.NewRect([]int{x, y, w2, int(h1)}))
+	d.btn.SetRect(eui.NewRect([]int{x + w2, y, w2 * 2, int(h1)}))
 	d.ImageReset()
 }

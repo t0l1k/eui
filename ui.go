@@ -57,9 +57,9 @@ func (u *Ui) HandleEvent(ev Event) {
 	case EventResize:
 		r := ev.Value.(Rect[int])
 		u.SetSize(r.W, r.H)
-		u.currentScene.Resize()
+		u.currentScene.SetRect(r)
 		for _, scene := range u.scenes {
-			scene.Resize()
+			scene.SetRect(r)
 		}
 		log.Println("Resize app done, new size:", r)
 	case EventKeyReleased:

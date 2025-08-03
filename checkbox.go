@@ -12,7 +12,6 @@ type Checkbox struct {
 func NewCheckbox(text string, f func(c *Checkbox)) *Checkbox {
 	c := &Checkbox{Drawable: NewDrawable()}
 	c.SetupCheckbox(text, f)
-	// c.SetHidden(true)
 	return c
 }
 
@@ -68,11 +67,11 @@ func (b *Checkbox) Draw(surface *ebiten.Image) {
 	b.btn.Draw(surface)
 }
 
-func (c *Checkbox) Resize(rect Rect[int]) {
-	c.SetRect(rect)
+func (c *Checkbox) SetRect(rect Rect[int]) {
+	c.Drawable.SetRect(rect)
 	w0, h0 := c.rect.Size()
 	x, y := c.rect.X, c.rect.Y
-	c.btn.Resize(NewRect([]int{x, y, h0, h0}))
+	c.btn.SetRect(NewRect([]int{x, y, h0, h0}))
 	x += h0
-	c.txt.Resize(NewRect([]int{x, y, w0 - h0, h0}))
+	c.txt.SetRect(NewRect([]int{x, y, w0 - h0, h0}))
 }

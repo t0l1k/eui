@@ -29,31 +29,6 @@ func (d *BoardTTT) Reset() {
 	}
 }
 
-// func (d *BoardTTT) Update(dt int) {
-// 	if !d.IsVisible() {
-// 		return
-// 	}
-// 	d.Drawable.Update(dt)
-// 	for _, v := range d.Childrens() {
-// 		v.Update(dt)
-// 	}
-// }
-
-// func (d *BoardTTT) Draw(surface *ebiten.Image) {
-// 	if !d.IsVisible() {
-// 		return
-// 	}
-// 	d.Drawable.Draw(surface)
-// 	for _, v := range d.Childrens() {
-// 		v.Draw(surface)
-// 	}
-// }
-
-// func (d *BoardTTT) Resize(rect eui.Rect[int]) {
-// 	d.SetRect(rect)
-// 	d.ImageReset()
-// }
-
 type SceneMain struct {
 	*eui.Scene
 	topBar    *eui.TopBar
@@ -109,17 +84,16 @@ func NewSceneMain() *SceneMain {
 		s.lblStatus.SetText("Turn:" + s.game.GetTurn())
 	})
 	s.Add(s.btnReset)
-	s.Resize()
 	return s
 }
 
-func (s *SceneMain) Resize() {
-	w0, h0 := eui.GetUi().Size()
+func (s *SceneMain) SetRect(rect eui.Rect[int]) {
+	w0, h0 := rect.Size()
 	hTop := int(float64(h0) * 0.05) // topbar height
-	s.topBar.Resize(eui.NewRect([]int{0, 0, w0, hTop}))
-	s.board.Resize(eui.NewRect([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*4}))
-	s.btnReset.Resize(eui.NewRect([]int{0, h0 - hTop, hTop * 3, hTop}))
-	s.lblStatus.Resize(eui.NewRect([]int{hTop * 3, h0 - hTop, w0 - hTop*3, hTop}))
+	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, hTop}))
+	s.board.SetRect(eui.NewRect([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*4}))
+	s.btnReset.SetRect(eui.NewRect([]int{0, h0 - hTop, hTop * 3, hTop}))
+	s.lblStatus.SetRect(eui.NewRect([]int{hTop * 3, h0 - hTop, w0 - hTop*3, hTop}))
 }
 
 func NewGame() *eui.Ui {

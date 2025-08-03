@@ -55,12 +55,12 @@ func (i *InputKey) Update(dt int) {
 	}
 }
 
-func (i *InputKey) Resize(rect eui.Rect[int]) {
-	i.SetRect(rect)
+func (i *InputKey) SetRect(rect eui.Rect[int]) {
+	i.Container.SetRect(rect)
 	w0, h0 := i.Rect().Size()
 	x0, y0 := i.Rect().Pos()
-	i.btn.Resize(eui.NewRect([]int{x0, y0, h0 * 2, h0}))
-	i.lbl.Resize(eui.NewRect([]int{x0 + h0*2, y0, w0 - h0*2, h0}))
+	i.btn.SetRect(eui.NewRect([]int{x0, y0, h0 * 2, h0}))
+	i.lbl.SetRect(eui.NewRect([]int{x0 + h0*2, y0, w0 - h0*2, h0}))
 	i.ImageReset()
 }
 
@@ -102,16 +102,16 @@ func (d *HotkeyDialog) SetHidden(value bool) {
 	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value) }, false)
 }
 
-func (d *HotkeyDialog) Resize(rect eui.Rect[int]) {
-	d.SetRect(rect)
+func (d *HotkeyDialog) SetRect(rect eui.Rect[int]) {
+	d.Container.SetRect(rect)
 	w0, h0 := d.Rect().Size()
 	x0, y0 := d.Rect().Pos()
 	hTop := int(float64(h0) * 0.1) // topbar height
-	d.title.Resize(eui.NewRect([]int{x0, y0, w0 - hTop, hTop}))
-	d.btnHide.Resize(eui.NewRect([]int{x0 + w0 - hTop, y0, hTop, hTop}))
+	d.title.SetRect(eui.NewRect([]int{x0, y0, w0 - hTop, hTop}))
+	d.btnHide.SetRect(eui.NewRect([]int{x0 + w0 - hTop, y0, hTop, hTop}))
 	x, y := x0, y0+hTop
 	w, h := w0, h0-hTop
-	d.layV.Resize(eui.NewRect([]int{x, y, w, h}))
+	d.layV.SetRect(eui.NewRect([]int{x, y, w, h}))
 	d.ImageReset()
 }
 
@@ -133,11 +133,11 @@ func NewSceneSelectHotkey() *SceneSelectHotkey {
 	return s
 }
 
-func (s *SceneSelectHotkey) Resize() {
-	w0, h0 := eui.GetUi().Size()
+func (s *SceneSelectHotkey) SetRect(rect eui.Rect[int]) {
+	w0, h0 := rect.Size()
 	hTop := int(float64(h0) * 0.05) // topbar height
-	s.topBar.Resize(eui.NewRect([]int{0, 0, w0, hTop}))
-	s.dialog.Resize(eui.NewRect([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*3}))
+	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, hTop}))
+	s.dialog.SetRect(eui.NewRect([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*3}))
 }
 
 func NewGame() *eui.Ui {

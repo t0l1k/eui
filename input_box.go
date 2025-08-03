@@ -162,15 +162,15 @@ func (inp *InputBox) Draw(surface *ebiten.Image) {
 	inp.cursor.Draw(surface)
 }
 
-func (inp *InputBox) Resize(rect Rect[int]) {
-	inp.View.Resize(rect)
+func (inp *InputBox) SetRect(rect Rect[int]) {
+	inp.View.SetRect(rect)
 	sz := inp.size
 	w := inp.Rect().W / sz
 	w1 := int(float64(w) * 0.2)
 	h := inp.Rect().H
 	x, y := inp.Rect().Pos()
-	inp.btn.Resize(NewRect([]int{x, y, w * (inp.size), h}))
-	inp.cursor.Resize(NewRect([]int{x + w*(inp.size) - w1, y, w1, h}))
+	inp.btn.SetRect(NewRect([]int{x, y, w * (inp.size), h}))
+	inp.cursor.SetRect(NewRect([]int{x + w*(inp.size) - w1, y, w1, h}))
 }
 
 func (inp *InputBox) Close() { GetUi().GetInputKeyboard().Disconnect(inp.keyListenerId) }

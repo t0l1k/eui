@@ -14,7 +14,6 @@ type ButtonIcon struct {
 func NewButtonIcon(icons []*ebiten.Image, f func(*Button)) *ButtonIcon {
 	b := &ButtonIcon{Drawable: NewDrawable()}
 	b.SetupButtonIcon(icons, f)
-	// b.SetHidden(true)
 	return b
 }
 
@@ -77,10 +76,10 @@ func (b *ButtonIcon) Draw(surface *ebiten.Image) {
 	surface.DrawImage(b.Image(), op)
 }
 
-func (b *ButtonIcon) Resize(rect Rect[int]) {
-	b.SetRect(rect)
-	b.btn.Resize(rect)
-	b.icon1.Resize(rect)
-	b.icon2.Resize(rect)
+func (b *ButtonIcon) SetRect(rect Rect[int]) {
+	b.Drawable.SetRect(rect)
+	b.btn.SetRect(rect)
+	b.icon1.SetRect(rect)
+	b.icon2.SetRect(rect)
 	b.ImageReset()
 }

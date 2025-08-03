@@ -125,9 +125,9 @@ func (d *CellIcon) SetHidden(value bool) {
 	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value); c.MarkDirty() }, false)
 }
 
-func (c *CellIcon) Resize(rect eui.Rect[int]) {
-	c.SetRect(rect)
-	c.btn.Resize(rect)
-	c.layout.Resize(rect)
+func (c *CellIcon) SetRect(rect eui.Rect[int]) {
+	c.Container.SetRect(rect)
+	c.btn.SetRect(rect)
+	c.layout.SetRect(rect)
 	c.ImageReset()
 }

@@ -50,7 +50,6 @@ func NewBoardMem(fn func(*eui.Button)) *BoardMem {
 	})
 	d.game = mem.NewGame(mem.Level(1))
 	d.gamesData = mem.NewGamesData()
-	// d.SetHidden(true)
 	d.showTimer = eui.NewTimer(1500*time.Millisecond, func() {
 		d.Game().SetNextStage()
 		d.SetupRecolection()
@@ -67,7 +66,7 @@ func (d *BoardMem) SetupPreparation() {
 	d.SetLayout(eui.NewGridLayout(1, 1, 1))
 	btn := eui.NewButton("Click to Start "+d.game.Level().String()+" "+d.game.Dim().String(), d.fn)
 	d.Add(btn)
-	d.Resize(d.Rect())
+	d.SetRect(d.Rect())
 	str := d.gamesData.String()
 	d.varMsg.Emit(str)
 	d.varColor.Emit([]color.Color{colornames.Yellowgreen, colornames.Black})
@@ -89,7 +88,7 @@ func (d *BoardMem) SetupShow() {
 			d.Add(btn)
 		}
 	}
-	d.Resize(d.Rect())
+	d.SetRect(d.Rect())
 	str := d.gamesData.String()
 	d.varMsg.Emit(str)
 	d.varColor.Emit([]color.Color{colornames.Red, colornames.Black})
@@ -107,7 +106,7 @@ func (d *BoardMem) SetupRecolection() {
 			d.Add(btn)
 		}
 	}
-	d.Resize(d.Rect())
+	d.SetRect(d.Rect())
 	str := d.gamesData.String()
 	d.varMsg.Emit(str)
 	d.varColor.Emit([]color.Color{colornames.Blue, colornames.Yellow})
@@ -131,7 +130,7 @@ func (d *BoardMem) SetupConclusion() {
 	d.varColor.Emit([]color.Color{colornames.Fuchsia, colornames.Black})
 	btn := d.setupScoreBtn()
 	d.Add(btn)
-	d.Resize(d.Rect())
+	d.SetRect(d.Rect())
 	log.Println("Setup Conclusion done", d.game.String(), d.Rect(), btn.Rect())
 }
 
@@ -148,7 +147,7 @@ func (d *BoardMem) setupScoreBtn() *eui.ButtonIcon {
 	levels = d.gamesData.Levels()
 	plot := eui.NewPlot(xArr, yArr, levels, "Memory Matrix", "Game", "Level")
 	log.Println("d.Rect()=", d.Rect())
-	plot.Resize(d.Rect())
+	plot.SetRect(d.Rect())
 	log.Println("plot.Rect()=", plot.Rect())
 	plot.Layout()
 	log.Println("plot.Image().Bounds()=", plot.Image().Bounds())

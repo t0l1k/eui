@@ -120,7 +120,7 @@ func (g *GridView) Draw(surface *ebiten.Image) {
 	surface.DrawImage(g.Image(), op)
 }
 
-func (g *GridView) Resize(rect Rect[int]) {
-	g.SetRect(rect)
+func (g *GridView) SetRect(rect Rect[int]) {
+	g.Drawable.SetRect(rect)
 	g.ImageReset()
 }

@@ -59,14 +59,13 @@ func NewSceneMain() *SceneMain {
 		s.lblStatus.Fg(arr[1])
 	})
 	s.lblStatus.SetText(s.board.Game().String())
-	s.Resize()
 	return s
 }
 
-func (s *SceneMain) Resize() {
-	w0, h0 := eui.GetUi().Size()
+func (s *SceneMain) SetRect(rect eui.Rect[int]) {
+	w0, h0 := rect.Size()
 	hTop := int(float64(h0) * 0.05) // topbar height
-	s.topBar.Resize(eui.NewRect([]int{0, 0, w0, hTop}))
-	s.board.Resize(eui.NewRect([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*4}))
-	s.lblStatus.Resize(eui.NewRect([]int{0, h0 - hTop, w0, hTop}))
+	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, hTop}))
+	s.board.SetRect(eui.NewRect([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*4}))
+	s.lblStatus.SetRect(eui.NewRect([]int{0, h0 - hTop, w0, hTop}))
 }

@@ -119,14 +119,13 @@ func NewSceneSudoku() *SceneSudoku {
 	return s
 }
 
-func (s *SceneSudoku) Resize() {
-	w0, h0 := eui.GetUi().Size()
-	rect := eui.NewRect([]int{0, 0, w0, h0})
-	s.SetRect(rect)
+func (s *SceneSudoku) SetRect(rect eui.Rect[int]) {
+	w0, h0 := rect.Size()
+	s.Scene.SetRect(rect)
 	hT := int(float64(rect.GetLowestSize()) * 0.1)
-	s.topBar.Resize(eui.NewRect([]int{0, 0, w0, hT}))
-	s.dialogSelect.Resize(eui.NewRect([]int{hT / 2, hT + hT/2, w0 - hT, h0 - hT*2}))
+	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, hT}))
+	s.dialogSelect.SetRect(eui.NewRect([]int{hT / 2, hT + hT/2, w0 - hT, h0 - hT*2}))
 	w1 := (w0 - hT) / 3
-	s.board.Resize(eui.NewRect([]int{hT, 0, w1 * 2, h0}))
-	s.bottomBar.Resize(eui.NewRect([]int{hT + w1*2, 0, w1, h0}))
+	s.board.SetRect(eui.NewRect([]int{hT, 0, w1 * 2, h0}))
+	s.bottomBar.SetRect(eui.NewRect([]int{hT + w1*2, 0, w1, h0}))
 }

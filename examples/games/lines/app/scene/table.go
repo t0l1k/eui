@@ -28,10 +28,10 @@ func (t *Table) Setup(balls int) {
 	for i := 0; i < balls; i++ {
 		icon := NewBallIcon(BallHidden, game.BallNoColor.Color(), game.BallNoColor.Color())
 		x, y, w, h := t.nextBallsLayout.Rect().GetRect()
-		icon.Resize(eui.NewRect([]int{x, y, w / 3, h}))
+		icon.SetRect(eui.NewRect([]int{x, y, w / 3, h}))
 		t.nextBallsLayout.Add(eui.NewIcon(icon.GetImage()))
 	}
-	t.Resize(t.Rect())
+	t.SetRect(t.Rect())
 }
 
 func (t *Table) SetNextMoveBalls(cells []*game.Cell) {
@@ -51,17 +51,17 @@ func (t *Table) SetNextMoveBalls(cells []*game.Cell) {
 		defer icon.Close()
 		icon.setup(size, bg, fg)
 		x, y, w, h := t.nextBallsLayout.Rect().GetRect()
-		icon.Resize(eui.NewRect([]int{x, y, w / len(cells), h}))
+		icon.SetRect(eui.NewRect([]int{x, y, w / len(cells), h}))
 		t.nextBallsLayout.Childrens()[i].(*eui.Icon).SetIcon(icon.GetImage())
 	}
 }
 
-func (t *Table) Resize(rect eui.Rect[int]) {
-	t.SetRect(rect)
+func (t *Table) SetRect(rect eui.Rect[int]) {
+	t.Container.SetRect(rect)
 	w0 := t.Rect().W
 	x, y := t.Rect().Pos()
 	w, h := int(float64(t.Rect().W)*0.3), t.Rect().H
-	t.leftLbl.Resize(eui.NewRect([]int{x, y, w, h}))
-	t.rightLbl.Resize(eui.NewRect([]int{x + w0 - w, y, w, h}))
-	t.nextBallsLayout.Resize(eui.NewRect([]int{x + (w0-w)/2, y, w, h}))
+	t.leftLbl.SetRect(eui.NewRect([]int{x, y, w, h}))
+	t.rightLbl.SetRect(eui.NewRect([]int{x + w0 - w, y, w, h}))
+	t.nextBallsLayout.SetRect(eui.NewRect([]int{x + (w0-w)/2, y, w, h}))
 }

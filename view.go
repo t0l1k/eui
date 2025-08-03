@@ -11,7 +11,6 @@ type View struct {
 func NewView() *View {
 	v := &View{Drawable: NewDrawable()}
 	v.SetupView()
-	// v.SetHidden(true)
 	return v
 }
 
@@ -117,8 +116,8 @@ func (v *View) UpdateInput(value interface{}) {
 	}
 }
 
-func (v *View) Resize(rect Rect[int]) {
-	v.SetRect(rect)
+func (v *View) SetRect(rect Rect[int]) {
+	v.Drawable.SetRect(rect)
 	v.ImageReset()
 }
 

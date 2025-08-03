@@ -22,7 +22,6 @@ func NewButton(text string, f func(*Button)) *Button {
 	b := &Button{View: NewView(), onPressed: f}
 	b.text = NewText(text)
 	b.SetupButton(text, f)
-	// b.SetHidden(true)
 	return b
 }
 
@@ -170,10 +169,10 @@ func (b *Button) Draw(surface *ebiten.Image) {
 	surface.DrawImage(b.Image(), op)
 }
 
-func (b *Button) Resize(rect Rect[int]) {
-	b.View.Resize(rect)
+func (b *Button) SetRect(rect Rect[int]) {
+	b.View.SetRect(rect)
 	b.margin = int(float64(b.Rect().GetLowestSize()) * 0.03)
 	x, y, w, h := b.Rect().GetRect()
-	b.text.Resize(NewRect([]int{x + b.margin, y + b.margin, w - b.margin*2, h - b.margin*2}))
+	b.text.SetRect(NewRect([]int{x + b.margin, y + b.margin, w - b.margin*2, h - b.margin*2}))
 	b.ImageReset()
 }

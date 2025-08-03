@@ -75,7 +75,7 @@ func (i *BallIcon) GetImage() *ebiten.Image {
 	return i.Image()
 }
 
-func (i *BallIcon) Resize(rect eui.Rect[int]) {
-	i.SetRect(rect)
+func (i *BallIcon) SetRect(rect eui.Rect[int]) {
+	i.Drawable.SetRect(rect)
 	i.ImageReset()
 }

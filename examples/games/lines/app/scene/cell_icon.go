@@ -35,9 +35,7 @@ func NewCellIcon(cell *game.Cell, f func(b *eui.Button)) *CellIcon {
 	c := &CellIcon{}
 	c.cell = cell
 	c.icon = NewBallIcon(BallHidden, game.BallNoColor.Color(), game.BallNoColor.Color())
-	c.icon.Resize(eui.NewRect([]int{0, 0, 1, 1}))
-	// c.icon.SetHidden(true)
-	// c.SetHidden(true)
+	c.icon.SetRect(eui.NewRect([]int{0, 0, 1, 1}))
 	c.btn = eui.NewButton("", f)
 	c.anim = BallAnimNo
 	c.animStatus = BallHidden
@@ -97,7 +95,7 @@ func (c *CellIcon) Update(dt int) {
 func (c *CellIcon) updateIcon(ballStatus BallStatusType) {
 	bg := game.BallNoColor.Color()
 	c.icon.setup(ballStatus, bg, c.fg)
-	c.icon.Resize(c.Rect())
+	c.icon.SetRect(c.Rect())
 }
 
 func (c *CellIcon) Draw(surface *ebiten.Image) {
@@ -115,9 +113,9 @@ func (c *CellIcon) Draw(surface *ebiten.Image) {
 
 func (c *CellIcon) Layout() {}
 
-func (c *CellIcon) Resize(rect eui.Rect[int]) {
-	c.SetRect(rect)
-	c.btn.Resize(rect)
-	c.icon.Resize(rect)
+func (c *CellIcon) SetRect(rect eui.Rect[int]) {
+	c.Drawable.SetRect(rect)
+	c.btn.SetRect(rect)
+	c.icon.SetRect(rect)
 	c.ImageReset()
 }

@@ -74,7 +74,7 @@ func (b *BottomBar) Draw(surface *ebiten.Image) {
 	}
 }
 
-func (b *BottomBar) Resize(rect eui.Rect[int]) {
-	b.SetRect(rect)
-	b.layout.Resize(rect)
+func (b *BottomBar) SetRect(rect eui.Rect[int]) {
+	b.Container.SetRect(rect)
+	b.layout.SetRect(rect)
 }

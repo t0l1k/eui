@@ -20,7 +20,6 @@ type ListView struct {
 
 func NewListView() *ListView {
 	l := &ListView{Container: NewContainer(NewVBoxLayout(1)), rows: 1, itemSize: 30}
-	// l.SetHidden(true)
 	return l
 }
 
@@ -226,8 +225,8 @@ func (l *ListView) Draw(surface *ebiten.Image) {
 	surface.DrawImage(l.contentImage.SubImage(l.cameraRect).(*ebiten.Image), op)
 }
 
-func (l *ListView) Resize(r Rect[int]) {
-	l.SetRect(r)
+func (l *ListView) SetRect(r Rect[int]) {
+	l.Container.SetRect(r)
 	l.resizeChilds()
 	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)
 	l.MarkDirty()
@@ -241,7 +240,7 @@ func (l *ListView) resizeChilds() {
 	for _, v := range l.Childrens() {
 		switch value := v.(type) {
 		case *Text, *Button, *Checkbox:
-			value.Resize(NewRect([]int{x, y, w - 1, h - 1}))
+			value.SetRect(NewRect([]int{x, y, w - 1, h - 1}))
 		}
 		x += w
 		row++

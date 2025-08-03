@@ -19,7 +19,6 @@ type Plot struct {
 
 func NewPlot(xArr, yArr, values []int, title, xTitle, yTitle string) *Plot {
 	p := &Plot{Drawable: NewDrawable(), xArr: xArr, yArr: yArr, values: values, pTitle: title, xAxisTitle: xTitle, yAxisTitle: yTitle}
-	// p.SetHidden(true)
 	p.bg = colornames.Gray
 	p.fg = colornames.Yellowgreen
 	p.fgValues = colornames.Blue
@@ -83,7 +82,7 @@ func (p *Plot) Layout() {
 			defer lbl.Close()
 			lbl.Bg(p.bg)
 			lbl.Fg(p.fg)
-			lbl.Resize(NewRect([]int{xL, yL, w, h}))
+			lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 			lbl.Draw(p.Image())
 		}
 		boxSize := margin
@@ -92,7 +91,7 @@ func (p *Plot) Layout() {
 		defer lbl.Close()
 		lbl.Bg(p.bg)
 		lbl.Fg(p.fg)
-		lbl.Resize(NewRect([]int{xL, yL, w, h}))
+		lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 		lbl.Draw(p.Image())
 	}
 	{ // Y Axis
@@ -114,7 +113,7 @@ func (p *Plot) Layout() {
 			defer lbl.Close()
 			lbl.Bg(p.bg)
 			lbl.Fg(p.fg)
-			lbl.Resize(NewRect([]int{xL, yL, w, h}))
+			lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 			lbl.Draw(p.Image())
 		}
 		boxSize := margin
@@ -123,7 +122,7 @@ func (p *Plot) Layout() {
 		defer lbl.Close()
 		lbl.Bg(p.bg)
 		lbl.Fg(p.fg)
-		lbl.Resize(NewRect([]int{xL, yL, w, h}))
+		lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 		lbl.Draw(p.Image())
 	}
 	{ // values line
@@ -150,7 +149,7 @@ func (p *Plot) Layout() {
 		defer lbl.Close()
 		lbl.Bg(p.bg)
 		lbl.Fg(p.fg)
-		lbl.Resize(NewRect([]int{xL, yL, w, h}))
+		lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 		lbl.Draw(p.Image())
 	}
 	p.ClearDirty()
@@ -169,7 +168,7 @@ func (p *Plot) Draw(surface *ebiten.Image) {
 	surface.DrawImage(p.Image(), op)
 }
 
-func (p *Plot) Resize(rect Rect[int]) {
-	p.SetRect(rect)
+func (p *Plot) SetRect(rect Rect[int]) {
+	p.Drawable.SetRect(rect)
 	p.ImageReset()
 }

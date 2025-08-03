@@ -131,39 +131,5 @@ func (s *SceneStopwatch) Update(dt int) {
 		}
 		s._dirty = false
 	}
-	// s.SceneBase.Update(dt)
 
-	// for _, v := range s.frame0.GetContainer() {
-	// 	v.Update(dt)
-	// }
-	// for _, v := range s.frame1.GetContainer() {
-	// 	v.Update(dt)
-	// }
 }
-
-// func (s *SceneStopwatch) Draw(surface *ebiten.Image) {
-// 	s.SceneBase.Draw(surface)
-// 	for _, v := range s.frame0.GetContainer() {
-// 		v.Draw(surface)
-// 	}
-// 	for _, v := range s.frame1.GetContainer() {
-// 		v.Draw(surface)
-// 	}
-// }
-
-// func (s *SceneStopwatch) Resize() {
-// 	w0, h0 := eui.GetUi().Size()
-// 	x, y := 0, 0
-// 	rect := eui.NewRect([]int{x, y, w0, h0})
-// 	hTop := int(float64(rect.GetLowestSize()) * 0.05)
-// 	s.topBar.Resize([]int{x, y, w0, hTop})
-
-// 	y += hTop
-// 	h1 := (h0 - hTop) / 5
-// 	s.frame0.Resize([]int{x, y, w0, h1 * 2})
-// 	y += h1 * 2
-// 	s.list.Resize([]int{x, y, w0, h1 * 2})
-// 	s.list.Itemsize(hTop)
-// 	y += h1 * 2
-// 	s.frame1.Resize([]int{x, y, w0, h1})
-// }

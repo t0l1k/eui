@@ -36,22 +36,20 @@ func NewSceneGame() *SceneGame {
 }
 
 func (s *SceneGame) Entered() {
-	s.Resize()
 	s.dialog.comboSelGameDiff.SetValue(app.FieldSizeNormal)
 	s.dialog.diff = s.dialog.comboSelGameDiff.Value().(int)
 }
 
-func (s *SceneGame) Resize() {
-	w, h := eui.GetUi().Size()
-	rect := eui.NewRect([]int{0, 0, w, h})
+func (s *SceneGame) SetRect(rect eui.Rect[int]) {
+	w, h := rect.Size()
 	hT := int(float64(rect.GetLowestSize()) * 0.1)
-	s.topBar.Resize(eui.NewRect([]int{0, 0, w, hT}))
-	s.board.Resize(eui.NewRect([]int{hT / 2, hT + hT/2, w - hT, h - hT*2}))
+	s.topBar.SetRect(eui.NewRect([]int{0, 0, w, hT}))
+	s.board.SetRect(eui.NewRect([]int{hT / 2, hT + hT/2, w - hT, h - hT*2}))
 	w0, h0 := w, h
 	x0, y0 := 0, 0
 	w1 := w0 / 2
 	h1 := h0 / 2
 	x1 := x0 + (w0-w1)/2
 	y1 := y0 + (h0-h1)/2
-	s.dialog.Resize(eui.NewRect([]int{x1, y1, w1, h1}))
+	s.dialog.SetRect(eui.NewRect([]int{x1, y1, w1, h1}))
 }

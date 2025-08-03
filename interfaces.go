@@ -12,7 +12,6 @@ type Drawabler interface {
 	Layout()
 	Rect() Rect[int]
 	SetRect(Rect[int])
-	Resize(Rect[int])
 	IsDirty() bool
 	MarkDirty()
 	ClearDirty()
@@ -38,7 +37,7 @@ type Containerer interface {
 type Sceneer interface {
 	Spriter
 	Entered()
-	Resize()
+	SetRect(Rect[int])
 	Quit()
 }
 

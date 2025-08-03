@@ -24,7 +24,6 @@ func NewBoard(dim int) *Board {
 	b := &Board{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	b.field = game.NewField(dim)
 	b.table = NewTable()
-	// b.table.SetHidden(false)
 	b.Add(b.table)
 	r, c := b.field.Dim()
 	b.gameLayout = eui.NewContainer(eui.NewGridLayout(float64(r), float64(c), 1))
@@ -91,7 +90,6 @@ func (b *Board) NewGame(dim int) {
 	b.field.ShowFilledNext()
 	b.field.NextMoveBalls()
 	b.table.Setup(b.field.Conf.Balls)
-	// b.table.SetHidden(true)
 }
 
 func (b *Board) gameLogic(btn *eui.Button) {
@@ -178,14 +176,14 @@ func (b *Board) drawCellIcons() {
 	}
 }
 
-func (b *Board) Resize(rect eui.Rect[int]) {
-	b.SetRect(rect)
+func (b *Board) SetRect(rect eui.Rect[int]) {
+	b.Container.SetRect(rect)
 	w0, h0 := b.Rect().Size()
 	x0, y0 := b.Rect().Pos()
 	dim := b.field.Conf.Dim
 	cellSize := getCellSize(b.Rect(), dim)
-	b.gameLayout.Resize(eui.NewRect([]int{x0, y0 + cellSize, w0, h0 - cellSize}))
-	b.table.Resize(eui.NewRect([]int{x0 + (w0-cellSize*dim)/2, y0, cellSize * dim, cellSize}))
+	b.gameLayout.SetRect(eui.NewRect([]int{x0, y0 + cellSize, w0, h0 - cellSize}))
+	b.table.SetRect(eui.NewRect([]int{x0 + (w0-cellSize*dim)/2, y0, cellSize * dim, cellSize}))
 	b.MarkDirty()
 	log.Println("board resize done")
 }

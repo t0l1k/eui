@@ -88,7 +88,7 @@ func (b *BoardFreecell) Setup(resetDeck bool) {
 	b.moveIdx = 0
 	b.backupGame()
 	b.sw.Start()
-	b.Resize(b.Rect()) // обязательно после обнуления контейнеров
+	b.SetRect(b.Rect()) // обязательно после обнуления контейнеров
 }
 
 func (b *BoardFreecell) MakeMove(move sols.Column) {
@@ -121,53 +121,17 @@ func (b *BoardFreecell) backupGame() {
 	b.historyOfMoves = append(b.historyOfMoves, deck)
 }
 
-// func (b *BoardFreecell) Update(dt int) {
-// 	if !b.IsVisible() {
-// 		return
-// 	}
-// 	for _, v := range b.layoutFC.Childrens() {
-// 		v.Update(dt)
-// 	}
-// 	for _, v := range b.layoutHome.Childrens() {
-// 		v.Update(dt)
-// 	}
-// 	for _, layout := range b.layoutCols {
-// 		for _, v := range layout.Childrens() {
-// 			v.Update(dt)
-// 		}
-// 	}
-// 	b.Container.Update(dt)
-// }
-
-// func (b *BoardFreecell) Draw(surface *ebiten.Image) {
-// 	if !b.IsVisible() {
-// 		return
-// 	}
-// 	for _, v := range b.layoutFC.Childrens() {
-// 		v.Draw(surface)
-// 	}
-// 	for _, v := range b.layoutHome.Childrens() {
-// 		v.Draw(surface)
-// 	}
-// 	for _, layout := range b.layoutCols {
-// 		for _, v := range layout.Childrens() {
-// 			v.Draw(surface)
-// 		}
-// 	}
-// 	b.Container.Draw(surface)
-// }
-
-func (b *BoardFreecell) Resize(rect eui.Rect[int]) {
-	b.SetRect(rect)
+func (b *BoardFreecell) SetRect(rect eui.Rect[int]) {
+	b.Container.SetRect(rect)
 	x0, y0, w0, h0 := b.Rect().GetRect()
 	cellSize := b.Rect().GetLowestSize() / 8
 	x := x0 + (w0-cellSize*8)/2
 	y := y0 + (h0-cellSize*8)/2
 	w, h := cellSize, cellSize
-	b.layoutFC.Resize(eui.NewRect([]int{x, y, w * 4, h}))
-	b.layoutHome.Resize(eui.NewRect([]int{x + cellSize*4, y, w * 4, h}))
+	b.layoutFC.SetRect(eui.NewRect([]int{x, y, w * 4, h}))
+	b.layoutHome.SetRect(eui.NewRect([]int{x + cellSize*4, y, w * 4, h}))
 	y += cellSize
 	for i, layout := range b.layoutCols {
-		layout.Resize(eui.NewRect([]int{x + cellSize*i, y, w, h * 8}))
+		layout.SetRect(eui.NewRect([]int{x + cellSize*i, y, w, h * 8}))
 	}
 }

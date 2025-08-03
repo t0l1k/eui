@@ -32,14 +32,14 @@ func (l *BoxLayout) Apply(widgets []Drawabler, rect Rect[int]) {
 		w, h := width, rect.Height()
 		for i, v := range widgets {
 			x, y := w*float64(i)+l.spacing, l.spacing
-			v.Resize(NewRect([]int{x0 + int(x), y0 + int(y), int(w), h}))
+			v.SetRect(NewRect([]int{x0 + int(x), y0 + int(y), int(w), h}))
 		}
 	} else {
 		height := (float64(rect.Height()) - float64(count-1)*l.spacing) / float64(count)
 		w, h := rect.Width(), height
 		for i, v := range widgets {
 			x, y := l.spacing, h*float64(i)+l.spacing
-			v.Resize(NewRect([]int{x0 + int(x), y0 + int(y), w, int(h)}))
+			v.SetRect(NewRect([]int{x0 + int(x), y0 + int(y), w, int(h)}))
 		}
 	}
 	log.Println("BoxLayout:Apply", count, widgets, rect)
@@ -93,7 +93,7 @@ func (c *GridLayout) Apply(components []Drawabler, rect Rect[int]) {
 		x, y := float64(x0)+marginX, float64(y0)+marginY
 		i := 0
 		for _, icon := range components {
-			icon.Resize(NewRect([]int{int(x), int(y), int(cellSize - c.spacing), int(cellSize - c.spacing)}))
+			icon.SetRect(NewRect([]int{int(x), int(y), int(cellSize - c.spacing), int(cellSize - c.spacing)}))
 			x += cellSize
 			i++
 			if i > 0 && i%int(c.rows) == 0 {
@@ -109,7 +109,7 @@ func (c *GridLayout) Apply(components []Drawabler, rect Rect[int]) {
 		x, y := float64(x0)+marginX, float64(y0)+marginY
 		i := 0
 		for _, icon := range components {
-			icon.Resize(NewRect([]int{int(x), int(y), int(cellSizeRow - c.spacing), int(cellSizeColumn - c.spacing)}))
+			icon.SetRect(NewRect([]int{int(x), int(y), int(cellSizeRow - c.spacing), int(cellSizeColumn - c.spacing)}))
 			x += cellSizeRow
 			i++
 			if i > 0 && i%int(c.rows) == 0 {
