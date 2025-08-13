@@ -29,13 +29,13 @@ func NewSceneTestListView() *SceneTestListView {
 
 	s.lstButtons = eui.NewListView()
 	s.lstButtons.SetupListViewButtons(list, 30, 1, bg, fg, func(b *eui.Button) {
-		log.Println("pressed:", b.GetText())
+		log.Println("pressed:", b.Text())
 	})
 	s.Add(s.lstButtons)
 
 	s.lstCheckBoxs = eui.NewListView()
 	s.lstCheckBoxs.SetupListViewCheckBoxs(list, 30, 1, bg, fg, func(b *eui.Checkbox) {
-		log.Println("pressed:", b.GetText())
+		log.Println("pressed:", b.Text())
 	})
 	s.Add(s.lstCheckBoxs)
 
@@ -43,14 +43,14 @@ func NewSceneTestListView() *SceneTestListView {
 		list = nil
 		for _, v := range s.lstCheckBoxs.GetCheckBoxes() {
 			if v.IsChecked() {
-				fmt.Println("selected:", v.GetText())
+				fmt.Println("selected:", v.Text())
 				continue
 			}
-			list = append(list, v.GetText())
+			list = append(list, v.Text())
 		}
 		s.lstCheckBoxs.Reset()
 		s.lstCheckBoxs.SetupListViewCheckBoxs(list, 30, 1, bg, fg, func(b *eui.Checkbox) {
-			log.Println("pressed:", b.GetText())
+			log.Println("pressed:", b.Text())
 		})
 
 	})

@@ -56,7 +56,7 @@ func DefaultTheme() *Theme {
 	t.Set(TextBg, colornames.Green)
 	t.Set(TextFg, colornames.White)
 	t.Set(CheckboxBg, colornames.Teal)
-	t.Set(CheckboxFg, colornames.Black)
+	t.Set(CheckboxFg, colornames.Yellow)
 	t.Set(ComboBoxBg, colornames.Navy)
 	t.Set(ComboBoxFg, colornames.White)
 	t.Set(InputBoxBg, colornames.Greenyellow)

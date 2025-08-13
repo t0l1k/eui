@@ -8,31 +8,32 @@ import (
 )
 
 type Drawable struct {
-	rect                    Rect[int]
-	dirty, hidden, disabled bool
-	image                   *ebiten.Image
-	bg, fg                  color.Color
+	state  ViewState
+	rect   Rect[int]
+	dirty  bool
+	image  *ebiten.Image
+	bg, fg color.Color
 }
 
-func NewDrawable() *Drawable             { return &Drawable{} }
+func NewDrawable() *Drawable {
+	return &Drawable{state: StateNormal, dirty: true, bg: color.Transparent, fg: color.Black}
+}
+
+func (s *Drawable) State() ViewState         { return s.state }
+func (s *Drawable) SetState(value ViewState) { s.state = value; s.MarkDirty() }
+
 func (s *Drawable) GetBg() color.Color   { return s.bg }
 func (s *Drawable) Bg(value color.Color) { s.bg = value; s.MarkDirty() }
 func (s *Drawable) GetFg() color.Color   { return s.fg }
 func (s *Drawable) Fg(value color.Color) { s.fg = value; s.MarkDirty() }
 
-func (s *Drawable) IsHidden() bool { return s.hidden }
-func (s *Drawable) SetHidden(value bool) {
-	s.hidden = value
-	if !value {
-		s.Enable()
-	} else {
-		s.Disable()
-	}
-	s.MarkDirty()
-}
-func (s *Drawable) IsDisabled() bool { return s.disabled }
-func (s *Drawable) Enable()          { s.disabled = false }
-func (s *Drawable) Disable()         { s.disabled = true }
+func (s *Drawable) IsHidden() bool { return s.state.IsHidden() }
+func (s *Drawable) Show()          { s.SetState(StateNormal); s.MarkDirty() }
+func (s *Drawable) Hide()          { s.SetState(StateHidden); s.ImageReset() }
+
+func (s *Drawable) IsDisabled() bool { return s.state.IsDisabled() }
+func (s *Drawable) Enable()          { s.SetState(StateNormal); s.MarkDirty() }
+func (s *Drawable) Disable()         { s.SetState(StateDisabled); s.MarkDirty() }
 
 func (s *Drawable) IsDirty() bool { return s.dirty }
 func (s *Drawable) MarkDirty()    { s.dirty = true }
@@ -77,6 +78,6 @@ func (s *Drawable) Draw(surface *ebiten.Image) {
 }
 
 func (s *Drawable) Rect() Rect[int]        { return s.rect }
-func (s *Drawable) SetRect(rect Rect[int]) { s.rect = rect; s.MarkDirty() }
+func (s *Drawable) SetRect(rect Rect[int]) { s.rect = rect; s.ImageReset() }
 
 func (s *Drawable) Close() {}

@@ -52,7 +52,7 @@ func (t *Table) SetNextMoveBalls(cells []*game.Cell) {
 		icon.setup(size, bg, fg)
 		x, y, w, h := t.nextBallsLayout.Rect().GetRect()
 		icon.SetRect(eui.NewRect([]int{x, y, w / len(cells), h}))
-		t.nextBallsLayout.Childrens()[i].(*eui.Icon).SetIcon(icon.GetImage())
+		t.nextBallsLayout.Children()[i].(*eui.Icon).SetIcon(icon.GetImage())
 	}
 }
 

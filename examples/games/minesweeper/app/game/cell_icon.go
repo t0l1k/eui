@@ -24,7 +24,8 @@ func NewCellIcon(field *MinedField, f func(b *eui.Button)) *CellIcon {
 
 func (c *CellIcon) Setup(field *MinedField, f func(b *eui.Button)) {
 	c.field = field
-	c.Btn.SetupButton(cellClosed, f)
+	// c.Btn.SetupButton(cellClosed, f)
+	c.Btn.SetText(cellClosed)
 	c.Btn.Bg(colornames.Gray)
 	c.Btn.Fg(colornames.Red)
 }

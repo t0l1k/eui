@@ -18,7 +18,7 @@ type InputBox2 struct {
 	onReturn              func(*InputBox2)
 	onlyDigits            bool
 	bg, fg                color.Color
-	state                 InputState
+	state                 ViewState
 }
 
 func NewInputBox2(onReturn func(*InputBox2)) *InputBox2 {
@@ -31,7 +31,6 @@ func NewInputBox2(onReturn func(*InputBox2)) *InputBox2 {
 	theme := GetUi().theme
 	i.bg = theme.Get(InputBoxBg)
 	i.fg = theme.Get(InputBoxFg)
-	GetUi().inputMouse.Attach(i)
 	i.alwaysFocus = false
 	return i
 }
@@ -109,54 +108,8 @@ func (i *InputBox2) Update(dt int) {
 	}
 }
 
-func (i *InputBox2) GetState() InputState {
-	return i.state
-}
-
-func (i *InputBox2) SetState(state InputState) {
-	if i.state == state {
-		return
-	}
-	i.state = state
-	i.ImageReset()
-}
-
-func (i *InputBox2) UpdateInput(value interface{}) {
-	if i.disabled || i.alwaysFocus {
-		return
-	}
-	switch vl := value.(type) {
-	case MouseData:
-		x, y, b := vl.position.X, vl.position.Y, vl.button
-		inRect := i.rect.InRect(x, y)
-		if inRect {
-			if b == buttonReleased {
-				if i.state == ViewStateNormal {
-					i.SetState(ViewStateHover)
-				}
-				if i.state == ViewStateFocus {
-					i.SetState(ViewStateHover)
-				}
-			}
-			if b == buttonPressed {
-				if i.state == ViewStateHover {
-					i.SetState(ViewStateFocus)
-					i.SetFocus()
-				}
-			}
-		} else if i.state != ViewStateNormal {
-			i.SetState(ViewStateNormal)
-			i.Blur()
-		}
-	}
-}
-
 func (i *InputBox2) SetRect(rect Rect[int]) {
 	i.Drawable.SetRect(rect)
 	i.lbl.SetRect(rect)
 	i.ImageReset()
-}
-
-func (i *InputBox2) Close() {
-	GetUi().inputMouse.Detach(i)
 }

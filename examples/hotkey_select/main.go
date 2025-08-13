@@ -18,139 +18,81 @@ type InputKey struct {
 	lbl    *eui.Text
 	btn    *eui.Button
 	active bool
-	Value  ebiten.Key
+	key    *eui.Signal[ebiten.Key]
 	kId    int64
 }
 
 func NewInputKey(title string) *InputKey {
-	i := &InputKey{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
+	i := &InputKey{Container: eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{70, 30}, 5)), key: eui.NewSignal(func(a, b ebiten.Key) bool { return a == b })}
 	i.lbl = eui.NewText(title)
 	i.Add(i.lbl)
 	i.btn = eui.NewButton("(?)", func(b *eui.Button) {
-		if b.IsPressed() {
-			i.active = true
-			i.btn.Bg(colornames.Yellow)
-		}
+		i.active = true
+		i.btn.Bg(colornames.Yellow)
 	})
 	i.Add(i.btn)
-	i.kId = eui.GetUi().GetInputKeyboard().Connect(i.UpdateInput)
+	i.kId = i.key.Connect(func(key ebiten.Key) {
+		i.active = false
+		i.btn.SetText(key.String())
+		i.btn.Bg(colornames.Navy)
+		i.btn.Fg(colornames.Yellow)
+	})
 	return i
 }
 
-func (i *InputKey) UpdateInput(ev eui.Event) {
-	kd := ev.Value.(eui.KeyboardData)
-	if i.active {
-		if ev.Type == eui.EventKeyReleased {
-			i.btn.SetText(kd.GetKeysReleased()[0].String())
-			i.Value = kd.GetKeysReleased()[0]
-		}
+func (i *InputKey) KeyPressed(kd eui.KeyboardData) {
+	if !i.active {
+		return
 	}
+	i.key.Emit(kd.GetKeysPressed()[0])
+	log.Println("InputKey:KeyPressed:", kd)
 }
-
-func (i *InputKey) Update(dt int) {
-	i.Container.Update(dt)
-	if i.btn.GetState() == eui.ViewStateNormal {
-		i.active = false
-		i.btn.Bg(colornames.Silver)
-	}
-}
-
-func (i *InputKey) SetRect(rect eui.Rect[int]) {
-	i.Container.SetRect(rect)
-	w0, h0 := i.Rect().Size()
-	x0, y0 := i.Rect().Pos()
-	i.btn.SetRect(eui.NewRect([]int{x0, y0, h0 * 2, h0}))
-	i.lbl.SetRect(eui.NewRect([]int{x0 + h0*2, y0, w0 - h0*2, h0}))
-	i.ImageReset()
-}
-
 func (i *InputKey) String() string {
-	return fmt.Sprintf("%v: %v", i.lbl.GetText(), i.Value)
+	return fmt.Sprintf("%v: %v", i.lbl.GetText(), i.key.Value().String())
 }
+func (i *InputKey) Close() { i.key.Disconnect(i.kId) }
 
-func (i *InputKey) Close() { eui.GetUi().GetInputKeyboard().Disconnect(i.kId) }
-
-type HotkeyDialog struct {
-	*eui.Container
-	layV    *eui.Container
-	title   *eui.Text
-	btnHide *eui.Button
-}
+type HotkeyDialog struct{ *eui.Container }
 
 func NewHotkeyDialog() *HotkeyDialog {
-	d := &HotkeyDialog{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
-	d.title = eui.NewText(title)
-	d.Add(d.title)
-	d.btnHide = eui.NewButton("X", func(b *eui.Button) {
-		d.SetHidden(true)
-		for _, v := range d.layV.Childrens() {
+	d := &HotkeyDialog{Container: eui.NewContainer(eui.NewLayoutVerticalPercent([]int{10, 90}, 5))}
+	contInputLines := eui.NewContainer(eui.NewVBoxLayout(10))
+	contTitle := eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{90, 10}, 5))
+	contTitle.Add(eui.NewText(title))
+	contTitle.Add(eui.NewButton("X", func(b *eui.Button) {
+		d.Hide()
+		for _, v := range contInputLines.Children() {
 			log.Println("hide dialog, result:", v.(*InputKey).String())
 		}
-	})
-	d.Add(d.btnHide)
-	d.layV = eui.NewContainer(eui.NewVBoxLayout(1))
+	}))
+	d.Add(contTitle)
 	str := []string{"Выбрать управление движения влево", "Выбрать управление движения вправо", "Выбрать управление движения вверх", "Выбрать управление движения вниз"}
 	for _, v := range str {
 		btn := NewInputKey(v)
-		d.layV.Add(btn)
+		contInputLines.Add(btn)
 	}
-	d.Add(d.layV)
+	d.Add(contInputLines)
 	return d
 }
 
-func (d *HotkeyDialog) SetHidden(value bool) {
-	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value) }, false)
-}
-
-func (d *HotkeyDialog) SetRect(rect eui.Rect[int]) {
-	d.Container.SetRect(rect)
-	w0, h0 := d.Rect().Size()
-	x0, y0 := d.Rect().Pos()
-	hTop := int(float64(h0) * 0.1) // topbar height
-	d.title.SetRect(eui.NewRect([]int{x0, y0, w0 - hTop, hTop}))
-	d.btnHide.SetRect(eui.NewRect([]int{x0 + w0 - hTop, y0, hTop, hTop}))
-	x, y := x0, y0+hTop
-	w, h := w0, h0-hTop
-	d.layV.SetRect(eui.NewRect([]int{x, y, w, h}))
-	d.ImageReset()
-}
-
-type SceneSelectHotkey struct {
-	*eui.Scene
-	dialog *HotkeyDialog
-	topBar *eui.TopBar
-}
-
-func NewSceneSelectHotkey() *SceneSelectHotkey {
-	s := &SceneSelectHotkey{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
-	s.topBar = eui.NewTopBar(title, func(b *eui.Button) {
-		s.dialog.SetHidden(false)
-		log.Println("selrct menu: dialog visible")
-	})
-	s.Add(s.topBar)
-	s.dialog = NewHotkeyDialog()
-	s.Add(s.dialog)
-	return s
-}
-
-func (s *SceneSelectHotkey) SetRect(rect eui.Rect[int]) {
-	w0, h0 := rect.Size()
-	hTop := int(float64(h0) * 0.05) // topbar height
-	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, hTop}))
-	s.dialog.SetRect(eui.NewRect([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*3}))
-}
-
-func NewGame() *eui.Ui {
-	u := eui.GetUi()
-	u.SetTitle(title)
-	k := 2
-	w, h := 320*k, 200*k
-	u.SetSize(w, h)
-	return u
-}
-
 func main() {
-	eui.Init(NewGame())
-	eui.Run(NewSceneSelectHotkey())
+	eui.Init(func() *eui.Ui {
+		u := eui.GetUi()
+		u.SetTitle(title)
+		k := 2
+		w, h := 320*k, 200*k
+		u.SetSize(w, h)
+		return u
+	}())
+	eui.Run(func() *eui.Scene {
+		s := eui.NewScene(eui.NewLayoutVerticalPercent([]int{10, 90}, 5))
+		dialog := NewHotkeyDialog()
+		s.Add(eui.NewTopBar(title, func(b *eui.Button) {
+			dialog.Show()
+			log.Println("select menu: dialog visible")
+		}))
+		s.Add(dialog)
+		return s
+	}())
 	eui.Quit(func() {})
 }

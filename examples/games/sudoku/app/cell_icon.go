@@ -36,7 +36,6 @@ func NewCellIcon(dim game.Dim, cell *game.Cell, f func(b *eui.Button), bg, fg co
 		c.Fg(fg)
 	}
 	c.Add(c.layout)
-	// c.SetHidden(true)
 	return c
 }
 
@@ -118,11 +117,6 @@ func (d *CellIcon) Draw(surface *ebiten.Image) {
 		d.Layout()
 	}
 	d.Container.Draw(surface)
-}
-
-func (d *CellIcon) SetHidden(value bool) {
-	d.Drawable.SetHidden(value)
-	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value); c.MarkDirty() }, false)
 }
 
 func (c *CellIcon) SetRect(rect eui.Rect[int]) {

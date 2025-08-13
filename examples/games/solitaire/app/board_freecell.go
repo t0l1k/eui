@@ -95,7 +95,7 @@ func (b *BoardFreecell) MakeMove(move sols.Column) {
 	if b.game.MakeMove(move) {
 		if b.game.IsSolved() {
 			b.sw.Stop()
-			eui.NewSnackBar("Пасьянс собран за " + b.sw.String() + ". Победа!!!").Show(5 * time.Second)
+			eui.NewSnackBar("Пасьянс собран за " + b.sw.String() + ". Победа!!!").ShowTime(5 * time.Second)
 		}
 		b.moveIdx++
 		b.backupGame()

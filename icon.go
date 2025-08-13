@@ -10,26 +10,8 @@ type Icon struct {
 	icon *ebiten.Image
 }
 
-func NewIcon(icon *ebiten.Image) *Icon {
-	i := &Icon{Drawable: NewDrawable(), icon: icon}
-	return i
-}
-
-func (i *Icon) Layout() {
-	i.Drawable.Layout()
-	w, h := i.rect.Size()
-	op := &ebiten.DrawImageOptions{}
-	iconSize := i.icon.Bounds().Size()
-	var x1, y1 float64
-	x1 = float64(w) / float64(iconSize.X) //w
-	y1 = float64(h) / float64(iconSize.Y) //h
-	op.GeoM.Scale(x1, y1)
-	i.image.DrawImage(i.icon, op)
-	i.ClearDirty()
-}
-
-func (i *Icon) GetIcon() *ebiten.Image { return i.image }
-
+func NewIcon(icon *ebiten.Image) *Icon { return &Icon{Drawable: NewDrawable(), icon: icon} }
+func (i *Icon) Icon() *ebiten.Image    { return i.image }
 func (i *Icon) SetIcon(icon *ebiten.Image) {
 	if i.icon == icon {
 		return
@@ -37,21 +19,15 @@ func (i *Icon) SetIcon(icon *ebiten.Image) {
 	i.icon = icon
 	i.MarkDirty()
 }
-
-func (i *Icon) Draw(surface *ebiten.Image) {
-	if i.IsHidden() {
-		return
-	}
-	if i.IsDirty() {
-		i.Layout()
-	}
+func (i *Icon) Layout() {
+	i.Drawable.Layout()
+	w, h := i.rect.Size()
+	iconSize := i.icon.Bounds().Size()
+	var x1, y1 float64
+	x1 = float64(w) / float64(iconSize.X) //w
+	y1 = float64(h) / float64(iconSize.Y) //h
 	op := &ebiten.DrawImageOptions{}
-	x, y := i.rect.Pos()
-	op.GeoM.Translate(float64(x), float64(y))
-	surface.DrawImage(i.image, op)
-}
-
-func (i *Icon) SetRect(rect Rect[int]) {
-	i.Drawable.SetRect(rect)
-	i.ImageReset()
+	op.GeoM.Scale(x1, y1)
+	i.Image().DrawImage(i.icon, op)
+	i.ClearDirty()
 }

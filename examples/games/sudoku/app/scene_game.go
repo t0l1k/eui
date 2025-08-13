@@ -20,27 +20,29 @@ func NewSceneSudoku() *SceneSudoku {
 	gamesData := game.NewGamesData()
 	s := &SceneSudoku{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	s.topBar = eui.NewTopBar(Title, func(b *eui.Button) {
-		s.dialogSelect.SetHidden(false)
-		s.board.SetHidden(true)
-		s.bottomBar.SetHidden(true)
+		s.dialogSelect.Show()
+		s.board.Hide()
+		s.bottomBar.Hide()
 		s.topBar.SetTitle(Title)
 		s.topBar.SetShowTitle(false)
 		s.topBar.SetShowStoppwatch(false)
 	})
 	s.topBar.SetUseStopwatch()
-	s.topBar.SetTitleCoverArea(0.85)
 	s.Add(s.topBar)
 	s.dialogSelect = NewDialogSelect(gamesData, func(b *eui.Button) {
 		for _, v := range s.dialogSelect.btnsDiff {
-			if v.btn.IsPressed() {
+			newVar, newVar1 := v.GetData()
+			log.Println(b.Rect(), v.Rect(), b.Text(), newVar, newVar1, v.State(), b.State(), v.Rect().InRect(b.Rect().Pos()))
+			// if v.btn.IsPressed() {
+			if v.Rect().InRect(b.Rect().Pos()) {
 				dim, diff := v.GetData()
 				s.topBar.SetTitle("Sudoku " + dim.String() + diff.String())
-				s.dialogSelect.SetHidden(true)
+				s.dialogSelect.Hide()
 				s.board.Setup(dim, diff)
 				s.topBar.SetShowTitle(false)
-				s.board.SetHidden(false)
+				s.board.Show()
 				s.bottomBar.Setup(s.board)
-				s.bottomBar.SetHidden(false)
+				s.bottomBar.Show()
 				s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
 				s.bottomBar.ShowNotes(s.board.IsShowNotes())
 				s.topBar.SetShowStoppwatch(false)
@@ -48,10 +50,10 @@ func NewSceneSudoku() *SceneSudoku {
 		}
 	})
 	s.Add(s.dialogSelect)
-	s.dialogSelect.SetHidden(false)
+	s.dialogSelect.Show()
 	s.board = NewBoard(func(btn *eui.Button) {
-		for i := range s.board.layoutCells.Childrens() {
-			icon, ok := s.board.layoutCells.Childrens()[i].(*CellIcon)
+		for i := range s.board.layoutCells.Children() {
+			icon, ok := s.board.layoutCells.Children()[i].(*CellIcon)
 			if !ok {
 				continue
 			}
@@ -78,9 +80,9 @@ func NewSceneSudoku() *SceneSudoku {
 								v.SetScore(value)
 							}
 						}
-						s.board.SetHidden(true)
-						s.bottomBar.SetHidden(true)
-						s.dialogSelect.SetHidden(false)
+						s.board.Hide()
+						s.bottomBar.Hide()
+						s.dialogSelect.Show()
 						s.topBar.SetTitle(Title)
 						s.topBar.SetShowTitle(true)
 						s.topBar.SetShowStoppwatch(true)
@@ -92,7 +94,7 @@ func NewSceneSudoku() *SceneSudoku {
 	s.Add(s.board)
 	s.bottomBar = NewBottomBar(func(btn *eui.Button) {
 		if s.bottomBar.SetAct(btn) {
-			s.board.Highlight(btn.GetText())
+			s.board.Highlight(btn.Text())
 		} else {
 			s.board.Highlight("0")
 			if s.bottomBar.IsActNotes() {

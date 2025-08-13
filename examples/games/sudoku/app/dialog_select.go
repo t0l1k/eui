@@ -13,21 +13,21 @@ type DialogSelect struct {
 	btnClose   *eui.Button
 	lblHistory *eui.Text
 	history    *eui.ListView
-	cSize      *eui.ComboBox
+	cSize      *eui.SpinBox[game.Dim]
 	btnsDiff   []*DiffButton
 	modes      *eui.Signal[game.Dim]
 	gamesData  *game.GamesData
 	margin     int
 }
 
-func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSelect {
+func NewDialogSelect(gamesData *game.GamesData, fn func(b *eui.Button)) *DialogSelect {
 	d := &DialogSelect{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	d.gamesData = gamesData
 	d.title = eui.NewText("Выбрать размер поля и сложность")
 	d.Add(d.title)
-	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.SetHidden(true); eui.GetUi().Pop() })
+	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.Hide(); eui.GetUi().Pop() })
 	d.Add(d.btnClose)
-	var data []interface{}
+	var data []game.Dim
 	for _, dim := range gamesData.SortedDims() {
 		data = append(data, dim)
 	}
@@ -47,16 +47,25 @@ func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSe
 			}
 		}
 	})
-	d.modes.Emit(data[idx].(game.Dim))
-	d.cSize = eui.NewComboBox(fmt.Sprintf("Размер поля %v", data[idx].(game.Dim)), data, idx, func(cb *eui.ComboBox) {
-		d.modes.Emit(cb.Value().(game.Dim))
-		str := fmt.Sprintf("Размер поля %v", cb.Value())
-		d.cSize.SetText(str)
+	d.modes.Emit(data[idx])
+	d.cSize = eui.NewSpinBox(
+		fmt.Sprintf("Размер поля %v", data[idx]),
+		data,
+		0,
+		func(d game.Dim) string { return d.String() },
+		func(a, b game.Dim) int { return a.W*a.H - b.W*b.H },
+		func(a, b game.Dim) bool { return a.Eq(b) },
+		false,
+		0,
+	)
+	d.cSize.SelectedValue.Connect(func(data game.Dim) {
+		d.modes.Emit(data)
 	})
+
 	d.Add(d.cSize)
 	for i := 0; i < 5; i++ {
 		dim := d.modes.Value()
-		btn := NewDiffButton(dim, game.NewDiff(game.Difficult(i)), f)
+		btn := NewDiffButton(dim, game.NewDiff(game.Difficult(i)), fn)
 		d.modes.Connect(func(data game.Dim) { btn.dim = data })
 		d.btnsDiff = append(d.btnsDiff, btn)
 		d.Add(btn)
@@ -66,11 +75,6 @@ func NewDialogSelect(gamesData *game.GamesData, f func(b *eui.Button)) *DialogSe
 	d.history = eui.NewListView()
 	d.Add(d.history)
 	return d
-}
-
-func (d *DialogSelect) SetHidden(value bool) {
-	d.Drawable.SetHidden(value)
-	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value) }, false)
 }
 
 func (d *DialogSelect) SetRect(rect eui.Rect[int]) {

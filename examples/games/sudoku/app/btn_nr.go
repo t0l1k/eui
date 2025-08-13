@@ -24,15 +24,10 @@ func NewBtn(fn func(btn *eui.Button)) *BottomBarNr {
 	return b
 }
 
-func (d *BottomBarNr) SetHidden(value bool) {
-	d.Drawable.SetHidden(value)
-	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value) }, false)
-}
-
 func (b *BottomBarNr) GetBg() color.Color   { return b.valueBtn.GetBg() }
 func (b *BottomBarNr) Bg(value color.Color) { b.valueBtn.Bg(value) }
-func (b *BottomBarNr) GetText() string      { return b.valueBtn.GetText() }
-func (b *BottomBarNr) GetValue() string     { return b.valueBtn.GetText() }
+func (b *BottomBarNr) GetText() string      { return b.valueBtn.Text() }
+func (b *BottomBarNr) GetValue() string     { return b.valueBtn.Text() }
 func (b *BottomBarNr) SetValue(value int)   { b.valueBtn.SetText(strconv.Itoa(value)) }
 func (b *BottomBarNr) GetCount() string     { return b.countLbl.GetText() }
 func (b *BottomBarNr) SetCount(value int) {

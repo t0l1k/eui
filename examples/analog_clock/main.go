@@ -20,14 +20,12 @@ type Hand struct {
 	*eui.Drawable
 	faceCenter, tip          eui.Point[float64]
 	value, lenght, thickness float64
+	show                     bool
 }
 
 func NewHand(bg, fg color.Color) *Hand {
 	h := &Hand{Drawable: eui.NewDrawable()}
-	r, g, b, _ := bg.RGBA()
-	a := 0
-	col := color.RGBA{uint8(r), uint8(g), uint8(b), uint8(a)}
-	h.Bg(col)
+	h.Bg(color.Transparent)
 	h.Fg(fg)
 	return h
 }
@@ -36,16 +34,21 @@ func (h *Hand) Setup(center eui.Point[float64], lenght float64, thickness float6
 	h.faceCenter = center
 	h.lenght = lenght
 	h.thickness = thickness
-	h.SetHidden(!visible)
+	h.show = !visible
+	h.ToggleVisible()
 }
 
 func (h *Hand) ToggleVisible() {
-	h.SetHidden(!h.IsHidden())
+	h.show = !h.show
+	if h.show {
+		h.Show()
+	} else {
+		h.Hide()
+	}
 	h.MarkDirty()
 }
 
 func (h *Hand) Get() float64 { return h.value }
-
 func (h *Hand) Set(value float64) {
 	if h.value == value {
 		return
@@ -66,7 +69,7 @@ func (h *Hand) Layout() {
 }
 
 func (h *Hand) Draw(surface *ebiten.Image) {
-	if h.IsHidden() || h.IsDisabled() {
+	if h.IsHidden() || h.IsDisabled() || !h.show {
 		return
 	}
 	if h.IsDirty() {
@@ -77,8 +80,6 @@ func (h *Hand) Draw(surface *ebiten.Image) {
 	op.GeoM.Translate(float64(x), float64(y))
 	surface.DrawImage(h.Image(), op)
 }
-
-func (t *Hand) SetRect(rect eui.Rect[int]) { t.Drawable.SetRect(rect); t.MarkDirty() }
 
 // Сами часы, рисуется "лицо часов", а поверх него стрелки в порядке добавления друг поверх друга.
 type AnalogClock struct {
@@ -162,7 +163,7 @@ func (t *AnalogClock) Draw(surface *ebiten.Image) {
 	}
 	if t.IsDirty() {
 		t.Layout()
-		for _, c := range t.Childrens() {
+		for _, c := range t.Children() {
 			c.Layout()
 		}
 	}
@@ -170,7 +171,7 @@ func (t *AnalogClock) Draw(surface *ebiten.Image) {
 	x, y := t.Rect().Pos()
 	op.GeoM.Translate(float64(x), float64(y))
 	surface.DrawImage(t.Image(), op)
-	for _, v := range t.Childrens() {
+	for _, v := range t.Children() {
 		v.Draw(surface)
 	}
 }
@@ -226,13 +227,16 @@ type SceneAnalogClock struct {
 }
 
 func NewSceneAnalogClock() *SceneAnalogClock {
-	s := &SceneAnalogClock{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
+	s := &SceneAnalogClock{Scene: eui.NewScene(eui.NewLayoutVerticalPercent([]int{5, 90, 5}, 5))}
 	s.topBar = eui.NewTopBar("Analog Clock Example", nil)
 	s.Add(s.topBar)
 	s.clock = NewAnalogClock()
 	s.Add(s.clock)
+	contStatus := eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{30, 40, 30}, 5))
+	s.Add(contStatus)
 	s.lblTm = eui.NewText("")
-	s.Add(s.lblTm)
+	contStatus.Add(s.lblTm)
+	contStatus.Add(eui.NewText(""))
 	s.tmVar = eui.NewSignal(func(a, b string) bool { return a == b })
 	s.tmVar.Connect(func(data string) {
 		s.lblTm.SetText(data)
@@ -242,7 +246,7 @@ func NewSceneAnalogClock() *SceneAnalogClock {
 		s.clock.MsHand.ToggleVisible()
 		conf.Set(ShowMSecondHand, c.IsChecked())
 	})
-	s.Add(s.checkBox)
+	contStatus.Add(s.checkBox)
 	s.checkBox.SetChecked(conf.Get(ShowMSecondHand).(bool))
 	s.setupTheme()
 	return s
@@ -265,24 +269,6 @@ func (s *SceneAnalogClock) Update(dt int) {
 	tm := time.Now().Format(dtFormat)
 	s.tmVar.Emit(tm)
 	s.Scene.Update(dt)
-}
-
-func (s *SceneAnalogClock) SetRect(rect eui.Rect[int]) {
-	w0, h0 := rect.Size()
-	h := int(float64(h0) * 0.05)
-	s.Drawable.SetRect(eui.NewRect([]int{0, 0, w0, h0}))
-	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, h}))
-	s.clock.SetRect(eui.NewRect([]int{0, h, w0, h0 - h}))
-	s.lblTm.SetRect(eui.NewRect([]int{0, h0 - h, h * 4, h}))
-	s.checkBox.SetRect(eui.NewRect([]int{w0 - h*4, h0 - h, h * 4, h}))
-}
-
-func NewGame() *eui.Ui {
-	u := eui.GetUi().SetTitle("Analog Clock").SetSize(800, 600)
-	u.GetSettings().Set(eui.UiFullscreen, false)
-	u.GetSettings().Set(ShowMSecondHand, false)
-	setAppTheme()
-	return u
 }
 
 const (
@@ -315,7 +301,13 @@ func setAppTheme() {
 }
 
 func main() {
-	eui.Init(NewGame())
+	eui.Init(func() *eui.Ui {
+		u := eui.GetUi().SetTitle("Analog Clock").SetSize(800, 600)
+		u.GetSettings().Set(eui.UiFullscreen, false)
+		u.GetSettings().Set(ShowMSecondHand, false)
+		setAppTheme()
+		return u
+	}())
 	eui.Run(NewSceneAnalogClock())
 	eui.Quit(func() {})
 }

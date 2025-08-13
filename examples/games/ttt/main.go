@@ -7,106 +7,71 @@ import (
 	"github.com/t0l1k/eui/examples/games/ttt/pos"
 )
 
-const (
-	title = "Крестики-Нолики с minimax ai"
-)
-
-type BoardTTT struct{ *eui.Container }
-
-func NewBoardTTT(fn func(*eui.Button)) *BoardTTT {
-	d := &BoardTTT{Container: eui.NewContainer(eui.NewGridLayout(3, 3, 1))}
-	// d.SetHidden(true)
-	for i := 0; i < 9; i++ {
-		btn := eui.NewButton(string(pos.TurnEmpty), fn)
-		d.Add(btn)
-	}
-	return d
-}
-
-func (d *BoardTTT) Reset() {
-	for _, v := range d.Childrens() {
-		v.(*eui.Button).SetText(string(pos.TurnEmpty))
-	}
-}
-
-type SceneMain struct {
-	*eui.Scene
-	topBar    *eui.TopBar
-	game      *pos.Posititon
-	board     *BoardTTT
-	lblStatus *eui.Text
-	btnReset  *eui.Button
-}
-
-func NewSceneMain() *SceneMain {
-	s := &SceneMain{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
-	s.game = pos.NewPosititon(3)
-	s.topBar = eui.NewTopBar(title, nil)
-	s.Add(s.topBar)
-	s.board = NewBoardTTT(func(btn *eui.Button) {
-		for i, v := range s.board.Childrens() {
-			if v.(*eui.Button) == btn {
-				if s.game.IsGameEnd() || s.game.GetBoard()[i] != pos.TurnEmpty {
-					return
-				}
-				s.game.Move(i)
-				s.board.Childrens()[i].(*eui.Button).SetText(s.game.GetNextTurn())
-				if !s.game.IsGameEnd() {
-					best := s.game.BestMove()
-					s.game.Move(best)
-					s.board.Childrens()[best].(*eui.Button).SetText(s.game.GetNextTurn())
-					s.lblStatus.SetText("Turn:" + s.game.GetTurn())
-				}
-				if s.game.IsGameEnd() {
-					str := ""
-					if s.game.IsGameEnd() {
-						if s.game.IsWinFor(pos.TurnX) {
-							str += "Won " + string(pos.TurnX)
-						} else if s.game.IsWinFor(pos.TurnO) {
-							str += "Won " + string(pos.TurnO)
-						} else if s.game.Blanks() == 0 {
-							str = "Draw!"
-						}
-					}
-					s.lblStatus.SetText(str)
-				}
-				fmt.Println(s.game)
-			}
-		}
-	})
-	s.Add(s.board)
-	s.lblStatus = eui.NewText("")
-	s.lblStatus.SetText("Turn:" + s.game.GetTurn())
-	s.Add(s.lblStatus)
-	s.btnReset = eui.NewButton("Reset Game", func(b *eui.Button) {
-		s.game.Reset()
-		s.board.Reset()
-		s.lblStatus.SetText("Turn:" + s.game.GetTurn())
-	})
-	s.Add(s.btnReset)
-	return s
-}
-
-func (s *SceneMain) SetRect(rect eui.Rect[int]) {
-	w0, h0 := rect.Size()
-	hTop := int(float64(h0) * 0.05) // topbar height
-	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, hTop}))
-	s.board.SetRect(eui.NewRect([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*4}))
-	s.btnReset.SetRect(eui.NewRect([]int{0, h0 - hTop, hTop * 3, hTop}))
-	s.lblStatus.SetRect(eui.NewRect([]int{hTop * 3, h0 - hTop, w0 - hTop*3, hTop}))
-}
-
-func NewGame() *eui.Ui {
-	u := eui.GetUi()
-	u.SetTitle(title)
-	k := 2
-	w, h := 320*k, 200*k
-	u.SetSize(w, h)
-	return u
-}
+const title = "Крестики-Нолики с minimax ai"
 
 func main() {
-	eui.Init(NewGame())
-	eui.Run(NewSceneMain())
+	eui.Init(func() *eui.Ui {
+		u := eui.GetUi()
+		u.SetTitle(title)
+		k := 2
+		w, h := 320*k, 200*k
+		u.SetSize(w, h)
+		return u
+	}())
+	eui.Run(
+		func() *eui.Scene {
+			s := eui.NewScene(eui.NewLayoutVerticalPercent([]int{10, 80, 10}, 5))
+
+			game := pos.NewPosititon(3)
+
+			lblStatus := eui.NewText("")
+			lblStatus.SetText("Turn:" + game.GetTurn())
+
+			board := eui.NewContainer(eui.NewGridLayout(3, 3, 5))
+			for i := range 9 {
+				board.Add(eui.NewButton("", func(b *eui.Button) {
+					if game.IsGameEnd() || game.GetBoard()[i] != pos.TurnEmpty {
+						return
+					}
+					game.Move(i)
+					board.Children()[i].(*eui.Button).SetText(game.GetNextTurn())
+					if !game.IsGameEnd() {
+						best := game.BestMove()
+						game.Move(best)
+						board.Children()[best].(*eui.Button).SetText(game.GetNextTurn())
+						lblStatus.SetText("Turn:" + game.GetTurn())
+					}
+					if game.IsGameEnd() {
+						str := ""
+						if game.IsGameEnd() {
+							if game.IsWinFor(pos.TurnX) {
+								str += "Won " + string(pos.TurnX)
+							} else if game.IsWinFor(pos.TurnO) {
+								str += "Won " + string(pos.TurnO)
+							} else if game.Blanks() == 0 {
+								str = "Draw!"
+							}
+						}
+						lblStatus.SetText(str)
+					}
+					fmt.Println(game)
+				}))
+			}
+
+			statusLine := eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{30, 70}, 5))
+			statusLine.Add(eui.NewButton("Reset game", func(b *eui.Button) {
+				game.Reset()
+				lblStatus.SetText("Turn:" + game.GetTurn())
+				for _, v := range board.Children() {
+					v.(*eui.Button).SetText(string(pos.TurnEmpty))
+				}
+			}))
+			statusLine.Add(lblStatus)
+
+			s.Add(eui.NewTopBar(title, nil))
+			s.Add(board)
+			s.Add(statusLine)
+			return s
+		}())
 	eui.Quit(func() {})
 }

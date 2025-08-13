@@ -1,11 +1,16 @@
 package eui
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type Drawabler interface {
 	Spriter
+	State() ViewState
+	SetState(ViewState)
 	IsHidden() bool
-	SetHidden(bool)
+	Hide()
+	Show()
 	IsDisabled() bool
 	Enable()
 	Disable()
@@ -31,16 +36,28 @@ type Layouter interface {
 type Containerer interface {
 	Drawabler
 	Add(Drawabler)
-	Childrens() []Drawabler
+	Children() []Drawabler
 }
 
 type Sceneer interface {
-	Spriter
+	Drawabler
 	Entered()
-	SetRect(Rect[int])
 	Quit()
 }
 
-type Inputer interface {
-	UpdateInput(interface{})
+type KeybordHandlerer interface {
+	KeyPressed(KeyboardData)
+	KeyReleased(KeyboardData)
+}
+
+type MouseHandlerer interface {
+	Hit(Point[int]) Drawable
+	MouseDown(MouseData)
+	MouseUp(MouseData)
+	MouseMotion(MouseData)
+	MouseDrag(MouseData)
+	MouseWheel(MouseData)
+	MouseEnter()
+	MouseLeave()
+	WantBlur() bool
 }

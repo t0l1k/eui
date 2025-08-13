@@ -33,12 +33,12 @@ func NewSceneSelectGame() *SceneSelectGame {
 }
 
 func (s *SceneSelectGame) selectGameLogic(b *eui.Button) {
-	if b.GetText() == "Настроить сложность" {
-		game := NewSelectDiff(b.GetText())
+	if b.Text() == "Настроить сложность" {
+		game := NewSelectDiff(b.Text())
 		eui.GetUi().Push(game)
 	} else {
-		r, c, m := s.sDiff[b.GetText()][0], s.sDiff[b.GetText()][1], s.sDiff[b.GetText()][2]
-		game := scene_game.NewSceneGame(b.GetText(), r, c, m)
+		r, c, m := s.sDiff[b.Text()][0], s.sDiff[b.Text()][1], s.sDiff[b.Text()][2]
+		game := scene_game.NewSceneGame(b.Text(), r, c, m)
 		eui.GetUi().Push(game)
 	}
 }

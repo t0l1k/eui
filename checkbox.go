@@ -1,77 +1,83 @@
 package eui
 
-import "github.com/hajimehoshi/ebiten/v2"
+import (
+	"log"
+
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
+)
 
 type Checkbox struct {
 	*Drawable
-	btn     *Button
-	txt     *Text
+	txt     string
 	checked bool
+	onClick *Signal[*Checkbox]
 }
 
-func NewCheckbox(text string, f func(c *Checkbox)) *Checkbox {
-	c := &Checkbox{Drawable: NewDrawable()}
-	c.SetupCheckbox(text, f)
-	return c
-}
-
-func (c *Checkbox) SetupCheckbox(text string, f func(c *Checkbox)) {
+func NewCheckbox(txt string, fn func(c *Checkbox)) *Checkbox {
+	c := &Checkbox{Drawable: NewDrawable(), onClick: NewSignal[*Checkbox](), txt: txt}
+	c.onClick.Connect(fn)
 	theme := GetUi().theme
 	c.Bg(theme.Get(CheckboxBg))
 	c.Fg(theme.Get(CheckboxFg))
-	c.btn = NewButton("", func(b *Button) {
-		c.checked = !c.checked
-		f(c)
-		c.SetChecked(c.checked)
-	})
-	c.txt = NewText(text)
-	c.txt.Bg(c.bg)
-	c.txt.Fg(c.fg)
+	return c
 }
 
-func (c *Checkbox) GetText() string      { return c.txt.GetText() }
-func (c *Checkbox) SetText(value string) { c.txt.SetText(value) }
-func (c *Checkbox) IsChecked() bool      { return c.checked }
-func (c *Checkbox) SetChecked(value bool) {
-	c.checked = value
-	if c.checked {
-		c.btn.SetText("*")
-	} else {
-		c.btn.SetText(" ")
+func (c *Checkbox) Text() string          { return c.txt }
+func (c *Checkbox) SetText(value string)  { c.txt = value; c.MarkDirty() }
+func (c *Checkbox) IsChecked() bool       { return c.checked }
+func (c *Checkbox) SetChecked(value bool) { c.checked = value; c.MarkDirty() }
+
+func (c *Checkbox) Hit(pt Point[int]) Drawabler {
+	if !pt.In(c.rect) {
+		return nil
 	}
-	c.MarkDirty()
+	log.Println("Checkbox:Hit:", c.Text(), c.checked, c.Rect(), pt)
+	return c
 }
+func (c *Checkbox) MouseUp(md MouseData) {
+	if c.onClick != nil {
+		c.checked = !c.checked
+		c.onClick.Emit(c)
+		c.MarkDirty()
+	}
+}
+func (c *Checkbox) WantBlur() bool { return true }
 
 func (c *Checkbox) Layout() {
 	c.Drawable.Layout()
+	w, h := c.rect.Size()
+	str := ""
+	if c.checked {
+		str = "*"
+	}
+	lblCheck := NewText(str)
+	margin := int(float64(c.Rect().GetLowestSize()) * 0.03)
+	r := NewRect([]int{int(margin), int(margin), h - int(margin*2), h - int(margin*2)})
+	lblCheck.SetRect(r)
+	lblCheck.Bg(c.GetFg())
+	lblCheck.Fg(c.GetBg())
+	lblCheck.Layout()
+	lblCheck.Draw(c.Image())
+
+	lblTxt := NewText(c.txt)
+	lblTxt.SetRect(NewRect([]int{h + int(margin), int(margin), (w - h) - int(margin*2), h - int(margin*2)}))
+	lblTxt.Bg(c.GetBg())
+	lblTxt.Fg(c.GetFg())
+	lblTxt.Layout()
+	lblTxt.Draw(c.Image())
+
+	vector.StrokeRect(c.Image(), 0, 0, float32(w), float32(h), float32(margin), c.State().Color(), true)
+
 	c.ClearDirty()
 }
 
-func (c *Checkbox) Update(dt int) {
-	if c.disabled {
+func (c *Checkbox) Draw(surface *ebiten.Image) {
+	if c.IsHidden() {
 		return
 	}
-	c.btn.Update(dt)
-}
-
-func (b *Checkbox) Draw(surface *ebiten.Image) {
-	if b.IsHidden() {
-		return
+	if c.IsDirty() {
+		c.Layout()
 	}
-	if b.IsDirty() {
-		b.Layout()
-		b.btn.Layout()
-		b.txt.Layout()
-	}
-	b.txt.Draw(surface)
-	b.btn.Draw(surface)
-}
-
-func (c *Checkbox) SetRect(rect Rect[int]) {
-	c.Drawable.SetRect(rect)
-	w0, h0 := c.rect.Size()
-	x, y := c.rect.X, c.rect.Y
-	c.btn.SetRect(NewRect([]int{x, y, h0, h0}))
-	x += h0
-	c.txt.SetRect(NewRect([]int{x, y, w0 - h0, h0}))
+	c.Drawable.Draw(surface)
 }

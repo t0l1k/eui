@@ -3,46 +3,41 @@ package app
 import (
 	"image/color"
 
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/memory_matrix/mem"
 	"golang.org/x/image/colornames"
 )
 
-type SceneMain struct {
-	*eui.Scene
-	topBar    *eui.TopBar
-	board     *BoardMem
-	lblStatus *eui.Text
-}
+type SceneMain struct{ *eui.Scene }
 
 func NewSceneMain() *SceneMain {
-	s := &SceneMain{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
-	s.topBar = eui.NewTopBar(title, nil)
-	s.topBar.SetUseStopwatch()
-	s.topBar.SetShowStoppwatch(true)
-	s.topBar.SetTitleCoverArea(0.9)
-	s.Add(s.topBar)
-	s.lblStatus = eui.NewText("")
-	s.Add(s.lblStatus)
-	s.board = NewBoardMem(func(btn *eui.Button) {
-		if btn.IsPressed() {
-			switch s.board.Game().Stage() {
+	s := &SceneMain{Scene: eui.NewScene(eui.NewLayoutVerticalPercent([]int{5, 90, 5}, 5))}
+	topBar := eui.NewTopBar(title, nil)
+	topBar.SetUseStopwatch()
+	topBar.SetShowStoppwatch(true)
+	lblStatus := eui.NewText("")
+	var board *BoardMem
+	board = NewBoardMem(func(btn *eui.Button) {
+		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) {
+			switch board.Game().Stage() {
 			case mem.Preparation:
-				s.board.game.Move(0)
-				s.board.showTimer.On()
-				s.board.SetupShow()
+				board.game.Move(0)
+				board.showTimer.On()
+				board.SetupShow()
 			case mem.Restart:
-				s.board.game.NextLevel()
-				s.board.SetupPreparation()
+				board.game.NextLevel()
+				board.SetupPreparation()
 			}
 		}
-		for i, v := range s.board.Childrens() {
+		for i, v := range board.Children() {
 			switch vv := v.(type) {
 			case *eui.Button:
 				if vv == btn {
-					switch s.board.Game().Stage() {
+					switch board.Game().Stage() {
 					case mem.Recollection:
-						if s.board.game.Move(i) {
+						if board.game.Move(i) {
 							v.(*eui.Button).Bg(colornames.Aqua)
 						} else {
 							v.(*eui.Button).Bg(colornames.Orange)
@@ -52,20 +47,14 @@ func NewSceneMain() *SceneMain {
 			}
 		}
 	})
-	s.Add(s.board)
-	s.board.varMsg.Connect(func(data string) { s.lblStatus.SetText(data) })
-	s.board.varColor.Connect(func(arr []color.Color) {
-		s.lblStatus.Bg(arr[0])
-		s.lblStatus.Fg(arr[1])
+	board.varMsg.Connect(func(data string) { lblStatus.SetText(data) })
+	board.varColor.Connect(func(arr []color.Color) {
+		lblStatus.Bg(arr[0])
+		lblStatus.Fg(arr[1])
 	})
-	s.lblStatus.SetText(s.board.Game().String())
+	lblStatus.SetText(board.Game().String())
+	s.Add(topBar)
+	s.Add(board)
+	s.Add(lblStatus)
 	return s
-}
-
-func (s *SceneMain) SetRect(rect eui.Rect[int]) {
-	w0, h0 := rect.Size()
-	hTop := int(float64(h0) * 0.05) // topbar height
-	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, hTop}))
-	s.board.SetRect(eui.NewRect([]int{hTop, hTop * 2, w0 - hTop*2, h0 - hTop*4}))
-	s.lblStatus.SetRect(eui.NewRect([]int{0, h0 - hTop, w0, hTop}))
 }

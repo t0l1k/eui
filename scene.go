@@ -1,6 +1,10 @@
 package eui
 
-import "log"
+import (
+	"log"
+
+	"github.com/hajimehoshi/ebiten/v2"
+)
 
 type Scene struct{ *Container }
 
@@ -12,7 +16,14 @@ func (s *Scene) SetRect(rect Rect[int]) {
 	log.Println("SceneBase:Resize", rect)
 }
 func (s *Scene) Quit() {
-	for _, v := range s.Childrens() {
+	for _, v := range s.Children() {
 		v.Close()
+	}
+}
+
+func (s *Scene) KeyPressed(kd KeyboardData) {}
+func (s *Scene) KeyReleased(kd KeyboardData) {
+	if kd.IsReleased(ebiten.KeyEscape) {
+		GetUi().Pop()
 	}
 }

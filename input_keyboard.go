@@ -31,7 +31,7 @@ type KeyboardInput struct {
 }
 
 // Пауза 250мс до следующего нажатия
-func NewKeyboardInput(fn SlotFunc[Event]) *KeyboardInput {
+func NewKeyboardListener(fn SlotFunc[Event]) *KeyboardInput {
 	k := &KeyboardInput{
 		Signal: NewSignal[Event](),
 		timer:  NewTimer(250*time.Millisecond, nil),
@@ -43,7 +43,7 @@ func NewKeyboardInput(fn SlotFunc[Event]) *KeyboardInput {
 func (s *KeyboardInput) SetKeypressDelay(value time.Duration) { s.timer.SetDuration(value) }
 
 // Передать новое или повторное нажатие клавиши после истечения паузы, для символов([]rune) повтор не работает
-func (s *KeyboardInput) update(int) {
+func (s *KeyboardInput) update() {
 	keysP := inpututil.AppendPressedKeys(nil)
 	keysR := inpututil.AppendJustReleasedKeys(nil)
 	runes := ebiten.AppendInputChars(nil)

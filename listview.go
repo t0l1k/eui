@@ -4,24 +4,29 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"golang.org/x/image/colornames"
 )
 
 type ListView struct {
-	*Container
+	*Drawable
+	children           []Drawabler
 	list               []string
 	itemSize, rows     int
 	contentRect        Rect[int]
 	contentImage       *ebiten.Image
 	offset, lastOffset int
 	cameraRect         image.Rectangle
+	isDragging         bool
+	dragStartY         int
+	dragStartOffset    int
 }
 
-func NewListView() *ListView {
-	l := &ListView{Container: NewContainer(NewVBoxLayout(1)), rows: 1, itemSize: 30}
-	return l
-}
+func NewListView() *ListView { return &ListView{Drawable: NewDrawable(), rows: 1, itemSize: 30} }
+
+func (c *ListView) Items() []Drawabler { return c.children }
 
 func (l *ListView) SetupListViewButtons(list []string, itemSize, rows int, bg, fg color.Color, f func(b *Button)) {
 	l.itemSize = itemSize
@@ -50,7 +55,7 @@ func (l *ListView) SetupListViewCheckBoxs(list []string, itemSize, rows int, bg,
 }
 
 func (l *ListView) GetCheckBoxes() (values []*Checkbox) {
-	for _, v := range l.Childrens() {
+	for _, v := range l.children {
 		switch value := v.(type) {
 		case *Checkbox:
 			values = append(values, value)
@@ -84,7 +89,7 @@ func (l *ListView) SetListViewTextWithBgFgColors(list []string, bg, fg []color.C
 }
 
 func (l *ListView) AddBgFg(d Drawabler, bg, fg color.Color) {
-	l.Container.Add(d)
+	l.children = append(l.children, d)
 	switch value := d.(type) {
 	case *Text:
 		value.Bg(bg)
@@ -93,11 +98,11 @@ func (l *ListView) AddBgFg(d Drawabler, bg, fg color.Color) {
 	case *Button:
 		value.Bg(bg)
 		value.Fg(fg)
-		l.list = append(l.list, value.GetText())
+		l.list = append(l.list, value.Text())
 	case *Checkbox:
 		value.Bg(bg)
 		value.Fg(fg)
-		l.list = append(l.list, value.GetText())
+		l.list = append(l.list, value.Text())
 	}
 	l.resizeChilds()
 }
@@ -127,7 +132,10 @@ func (l *ListView) Rows(rows int) {
 
 func (l *ListView) Reset() {
 	l.list = nil
-	l.ResetContainer()
+	for _, v := range l.children {
+		v.Close()
+	}
+	l.children = nil
 	l.contentImage = nil
 	l.offset = 0
 	l.lastOffset = 0
@@ -148,8 +156,8 @@ func (l *ListView) Layout() {
 	} else {
 		l.contentImage.Clear()
 	}
-	// l.contentImage.Fill(l.bg)
-	for _, v := range l.Childrens() {
+	l.contentImage.Fill(colornames.Fuchsia)
+	for _, v := range l.children {
 		switch value := v.(type) {
 		case *Text, *Button, *Checkbox:
 			value.Draw(l.contentImage)
@@ -158,62 +166,97 @@ func (l *ListView) Layout() {
 	l.ClearDirty()
 }
 
-func (l *ListView) Update(dt int) {
-	l.Container.Update(dt)
-	//	if l.isDragging {
-	//		l.offset = -(l.dragEndPoint.Offset(l.dragStartPoint).Y)
-	//		y := l.cameraRect.Min.Y + l.offset - l.lastOffset
-	//		h := y + l.rect.H
-	//		height := l.contentRect.H - l.rect.H
-	//		if y <= 0 {
-	//			y = 0
-	//		} else if y >= height {
-	//			y = height
-	//		}
-	//		if h < l.rect.H {
-	//			h = l.rect.H
-	//		}
-	//		l.cameraRect = image.Rect(0, y, l.rect.W, h)
-	//		l.lastOffset = l.offset
-	//	} else if !l.isDragging {
-	//
-	//		l.lastOffset = 0
-	//	}
-	//
-	//	if l.state != ViewStateNormal {
-	//		x0 := l.dragEndPoint.X - l.rect.X + l.cameraRect.Min.X
-	//		y0 := l.dragEndPoint.Y - l.rect.Y + l.cameraRect.Min.Y
-	//		for _, v := range l.GetContainer() {
-	//			switch value := v.(type) {
-	//			case *Button:
-	//				r := value.rect
-	//				if r.InRect(x0, y0) && value.state != l.state {
-	//					value.SetState(l.state)
-	//					if l.lastOffset == 0 && l.offset == 0 {
-	//						value.Update(dt)
-	//					}
-	//					l.MarkDirty()
-	//				} else if value.state != ViewStateNormal {
-	//					value.SetState(ViewStateNormal)
-	//				}
-	//			case *Checkbox:
-	//				r := value.btn.rect
-	//				if r.InRect(x0, y0) && value.btn.state != l.state {
-	//					value.btn.SetState(l.state)
-	//					if l.lastOffset == 0 && l.offset == 0 {
-	//						value.btn.Update(dt)
-	//					}
-	//					l.MarkDirty()
-	//				} else if value.btn.state != ViewStateNormal {
-	//					value.btn.SetState(ViewStateNormal)
-	//				}
-	//			}
-	//		}
-	//	}
+func (l *ListView) Hit(pt Point[int]) Drawabler {
+	if !pt.In(l.rect) || l.IsHidden() {
+		return nil
+	}
+	log.Println("ListView:Hit:", l.Rect(), pt)
+	return l
 }
 
+func (l *ListView) MouseDown(md MouseData) {
+	if l.contentRect.H <= l.rect.H {
+		return
+	}
+	l.isDragging = true
+	l.dragStartY = md.Pos().Y
+	l.dragStartOffset = l.cameraRect.Min.Y
+	log.Println("ListView:MouseDown:", l.Rect(), l.cameraRect.String(), l.isDragging, l.dragStartY, l.dragStartOffset, md)
+}
+
+func (l *ListView) MouseDrag(md MouseData) {
+	if !l.isDragging {
+		return
+	}
+	delta := l.dragStartY - md.Pos().Y
+	newY := l.dragStartOffset + delta
+	maxY := l.contentRect.H - l.rect.H
+	if newY < 0 {
+		newY = 0
+	}
+	if newY > maxY {
+		newY = maxY
+	}
+	l.cameraRect = image.Rect(0, newY, l.rect.W, newY+l.rect.H)
+	l.MarkDirty()
+	log.Println("ListView:MouseDrag:", delta, newY, maxY, l.cameraRect)
+}
+
+func (l *ListView) MouseUp(md MouseData) {
+	l.isDragging = false
+	if md.Pos().Y != l.dragStartY {
+		return
+	}
+
+	x0 := md.Pos().X - l.rect.X + l.cameraRect.Min.X
+	y0 := md.Pos().Y - l.rect.Y + l.cameraRect.Min.Y
+
+	pos := NewPoint(x0, y0)
+
+	for _, d := range l.children {
+		if mh, ok := d.(interface{ Hit(Point[int]) Drawabler }); ok {
+			if mh.Hit(pos) != nil && !d.State().IsFocused() {
+				d.SetState(StateFocused)
+
+				if mp, ok := d.(interface{ MouseUp(MouseData) }); ok {
+					mp.MouseUp(md)
+				}
+				if mp, ok := d.(interface{ WantBlur() bool }); ok {
+					if mp.WantBlur() {
+						d.SetState(StateNormal)
+					}
+				}
+
+			} else if !d.State().IsBlurred() {
+				d.SetState(StateNormal)
+			}
+		}
+	}
+	log.Println("ListView:MouseUp:", l.isDragging, l.cameraRect, x0, y0)
+}
+
+func (l *ListView) MouseWheel(md MouseData) {
+	if l.contentRect.H <= l.rect.H {
+		return
+	}
+	scrollStep := float64(l.itemSize / 2)
+	delta := md.WPos().Y * scrollStep
+	newY := l.cameraRect.Min.Y - int(delta)
+	maxY := l.contentRect.H - l.rect.H
+	if newY < 0 {
+		newY = 0
+	}
+	if newY > maxY {
+		newY = maxY
+	}
+	l.cameraRect = image.Rect(0, newY, l.rect.W, newY+l.rect.H)
+	l.MarkDirty()
+	log.Println("ListView:MouseWheel:", scrollStep, delta, newY, maxY, l.cameraRect)
+}
+func (l *ListView) WantBlur() bool { return true }
+
 func (l *ListView) Draw(surface *ebiten.Image) {
-	if !l.hidden || l.disabled {
+	if l.IsHidden() {
 		return
 	}
 	if l.IsDirty() {
@@ -226,7 +269,7 @@ func (l *ListView) Draw(surface *ebiten.Image) {
 }
 
 func (l *ListView) SetRect(r Rect[int]) {
-	l.Container.SetRect(r)
+	l.Drawable.SetRect(r)
 	l.resizeChilds()
 	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)
 	l.MarkDirty()
@@ -237,7 +280,7 @@ func (l *ListView) resizeChilds() {
 	w, h := l.rect.W/l.rows, l.itemSize
 	row := 0
 	col := 1
-	for _, v := range l.Childrens() {
+	for _, v := range l.children {
 		switch value := v.(type) {
 		case *Text, *Button, *Checkbox:
 			value.SetRect(NewRect([]int{x, y, w - 1, h - 1}))
@@ -254,7 +297,7 @@ func (l *ListView) resizeChilds() {
 	if y == 0 {
 		y = l.rect.H
 	} else {
-		if len(l.Childrens())%l.rows == 0 {
+		if len(l.children)%l.rows == 0 {
 			col--
 		}
 		y = col * l.itemSize

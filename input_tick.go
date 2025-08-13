@@ -29,7 +29,7 @@ func NewTickListener(fn SlotFunc[Event], i time.Duration) *TickListener {
 	return t
 }
 
-func (t *TickListener) update(int) {
+func (t *TickListener) update() {
 	value, ok := t.Value().Value.(TickData)
 	if !ok {
 		t.Emit(NewEvent(EventTick, NewTickData(time.Now(), 0)))

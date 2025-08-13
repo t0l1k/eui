@@ -4,72 +4,97 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-type buttonPressStatus int
-
-const (
-	buttonPressed  buttonPressStatus = 1
-	buttonReleased buttonPressStatus = -1
-)
-
 type MouseData struct {
-	position Point[int]
-	button   buttonPressStatus
+	pos, dragStart          Point[int]
+	wPos                    Point[float64]
+	isBtnPressed, isDraging bool
+	buttons                 map[ebiten.MouseButton]bool
 }
 
-// Умею передать подписчикам события от мыши это текущее местоположение на экране и нажатие кнопок левая средняя или правая
-type MouseInput struct {
-	value    MouseData
-	listener []Inputer
+func NewMouseData(pos, dragStart Point[int], wPos Point[float64], buttons map[ebiten.MouseButton]bool, pressStatus, isDraging bool) MouseData {
+	return MouseData{pos: pos, wPos: wPos, dragStart: dragStart, isBtnPressed: pressStatus, isDraging: isDraging, buttons: buttons}
 }
+func (m *MouseData) Pos() Point[int]                         { return m.pos }
+func (m *MouseData) WPos() Point[float64]                    { return m.wPos }
+func (m *MouseData) DragStart() Point[int]                   { return m.dragStart }
+func (m *MouseData) IsDrag() bool                            { return m.isDraging }
+func (m *MouseData) IsPressed(value ebiten.MouseButton) bool { return m.buttons[value] }
 
-func NewMouseInput(fn SlotFunc[Event]) *MouseInput { return &MouseInput{} }
-
-func (s *MouseInput) Attach(o Inputer) {
-	s.listener = append(s.listener, o)
-}
-
-func (s *MouseInput) Detach(o Inputer) {
-	for i, observer := range s.listener {
-		if observer == o {
-			s.listener = append(s.listener[:i], s.listener[i+1:]...)
-			break
+func (m *MouseData) EqBtns(other map[ebiten.MouseButton]bool) bool {
+	isBtnsEq := true
+	for k := range m.buttons {
+		if m.buttons[k] != other[k] {
+			isBtnsEq = false
 		}
 	}
+	return !isBtnsEq
+}
+func (m *MouseData) Eq(other MouseData) bool {
+	return m.pos.Eq(other.pos) && m.wPos.Eq(other.wPos) && m.dragStart.Eq(other.dragStart) && m.isBtnPressed == other.isBtnPressed && m.isDraging == other.isDraging && !m.EqBtns(other.buttons)
 }
 
-func (s *MouseInput) Notify() {
-	for _, observer := range s.listener {
-		observer.UpdateInput(s.value)
+type MouseListener struct {
+	*Signal[Event]
+	LastData MouseData
+}
+
+func NewMouseListener(fn func(Event)) *MouseListener {
+	pt := NewPoint(-1, -1)
+	dt := NewMouseData(pt, pt, NewPoint(0.0, 0.0), make(map[ebiten.MouseButton]bool), false, false)
+	m := &MouseListener{
+		Signal:   NewSignal[Event](),
+		LastData: dt,
 	}
+	m.Connect(fn)
+	return m
 }
 
-func (s *MouseInput) getPosition() (int, int) {
-	return s.value.position.X, s.value.position.Y
-}
-
-func (s *MouseInput) getButton() buttonPressStatus {
-	return s.value.button
-}
-
-func (s *MouseInput) set(value MouseData) {
-	s.value = value
-	s.Notify()
-}
-
-func (s *MouseInput) update(_ int) {
-	x0, y0 := ebiten.CursorPosition()
-	b0 := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) ||
-		ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) ||
-		ebiten.IsMouseButtonPressed(ebiten.MouseButtonMiddle)
-	x, y := s.getPosition()
-	b := s.getButton()
-	if !b0 && b != buttonReleased || !b0 && (x != x0 || y != y0) {
-		// Изменилось местоположение курсора мыши кнопка отпущена
-		s.set(MouseData{position: Point[int]{x0, y0}, button: buttonReleased})
-		// log.Println("Новые кординаты у мыши", x0, y0, b0, dt)
-	} else if (b0 && b != buttonPressed) || (x != x0 || y != y0) {
-		// Нажата кнопка мыши
-		s.set(MouseData{position: Point[int]{x0, y0}, button: buttonPressed})
-		// log.Println("Нажата кнопка или новые кординаты", x0, y0, b0, dt)
+func (ml *MouseListener) update() {
+	currentPos := NewPoint(ebiten.CursorPosition())
+	x, y := ebiten.Wheel()
+	whellPos := NewPoint(x, y)
+	currentPressed := false
+	btns := make(map[ebiten.MouseButton]bool)
+	for btn := range ebiten.MouseButtonMax {
+		status := ebiten.IsMouseButtonPressed(btn)
+		btns[btn] = status
+		if status {
+			currentPressed = true
+		}
 	}
+	isDrag := ml.LastData.isDraging
+	// tmpD := isDrag
+	ptS := ml.LastData.dragStart
+	if currentPressed && !ml.LastData.isBtnPressed && !isDrag {
+		isDrag = true
+		ptS = currentPos
+	}
+	newData := NewMouseData(currentPos, ptS, whellPos, btns, currentPressed, isDrag)
+	// if !ml.Value.Eq(newData) {
+	// 	log.Println("MD00:", newData, ml.Value, tmpD)
+	// }
+	// Если позиция изменилась, посылаем событие движения
+	if !currentPos.Eq(ml.LastData.pos) {
+		ml.Emit(NewEvent(EventMouseMovement, newData))
+		if isDrag {
+			ml.Emit(NewEvent(EventMouseDrag, newData))
+		}
+	}
+	// Если кнопка только что нажата, посылаем событие нажатия
+	if currentPressed && !ml.LastData.isBtnPressed {
+		ml.Emit(NewEvent(EventMouseDown, newData))
+	}
+	// Если кнопка отпущена, посылаем событие отпускания
+	if !currentPressed && ml.LastData.isBtnPressed {
+		ml.Emit(NewEvent(EventMouseUp, newData))
+	}
+	if !whellPos.Eq(ml.LastData.wPos) {
+		ml.Emit(NewEvent(EventMouseWheel, newData))
+	}
+	if !currentPressed && ml.LastData.isBtnPressed && isDrag {
+		isDrag = false
+		ptS = NewPoint(-1, -1)
+		newData = NewMouseData(currentPos, ptS, whellPos, btns, currentPressed, isDrag)
+	}
+	ml.LastData = newData
 }

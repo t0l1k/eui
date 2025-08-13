@@ -1,8 +1,7 @@
 package eui
 
 import (
-	"image/color"
-	"strconv"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -10,148 +9,83 @@ import (
 
 // Умею показать кнопку под мышкой выделенной, или нажатой, или отпущенной(после отпускания исполняется прикрепленный метод)
 type Button struct {
-	*View
-	text                *Text
-	onPressed           func(*Button)
-	buttonPressed       bool
-	left, right, middle bool
-	margin              int
+	*Drawable
+	txt            string
+	onPressed      func(*Button)
+	icons          []*ebiten.Image
+	useIcon, press bool
 }
 
-func NewButton(text string, f func(*Button)) *Button {
-	b := &Button{View: NewView(), onPressed: f}
-	b.text = NewText(text)
-	b.SetupButton(text, f)
+func NewButton(txt string, fn func(*Button)) *Button {
+	b := &Button{Drawable: NewDrawable(), txt: txt, onPressed: fn}
+	theme := GetUi().theme
+	b.Bg(theme.Get(ButtonBg))
+	b.Fg(theme.Get(ButtonFg))
 	return b
 }
 
-func (b *Button) SetupButton(text string, f func(*Button)) {
-	b.onPressed = f
-	b.text.SetText(text)
-	theme := GetUi().theme
-	bg := theme.Get(ButtonBg)
-	fg := theme.Get(ButtonFg)
-	b.Bg(bg)
-	b.Fg(fg)
+func NewButtonIcon(icons []*ebiten.Image, fn func(*Button)) *Button {
+	return &Button{Drawable: NewDrawable(), icons: icons, onPressed: fn, useIcon: true}
 }
 
-func (b *Button) UpdateData(value interface{}) {
-	switch v := value.(type) {
-	case string:
-		b.text.SetText(v)
-	case int:
-		b.text.SetText(strconv.Itoa(v))
-	}
-}
+func (b *Button) Text() string         { return b.txt }
+func (b *Button) SetText(value string) { b.txt = value; b.MarkDirty() }
 
-func (b *Button) GetText() string { return b.text.GetText() }
-func (b *Button) SetText(value string) {
-	if b.text.GetText() == value {
-		return
+func (b *Button) Hit(pt Point[int]) Drawabler {
+	if !pt.In(b.rect) || b.IsHidden() {
+		return nil
 	}
-	b.text.SetText(value)
+	log.Println("Button:Hit:", b.txt, b.Rect(), pt)
+	return b
+}
+func (b *Button) WantBlur() bool { return true }
+func (b *Button) MouseDown(md MouseData) {
+	b.press = true
 	b.MarkDirty()
 }
-
-func (b *Button) Bg(bg color.Color) {
-	if b.bg == bg {
-		return
+func (b *Button) MouseUp(md MouseData) {
+	if b.onPressed != nil {
+		b.onPressed(b)
 	}
-	b.bg = bg
-	b.text.Bg(bg)
-	b.MarkDirty()
+	b.press = false
+	log.Println("Button:MouseReleased:", b.txt, b.Rect())
 }
 
-func (b *Button) Fg(fg color.Color) {
-	if b.fg == fg {
-		return
-	}
-	b.fg = fg
-	b.text.Fg(fg)
-	b.MarkDirty()
-}
-
-func (b *Button) SetFunc(f func(*Button)) {
-	b.onPressed = f
-}
-
-func (b *Button) IsMouseDownLeft() bool {
-	return b.left && b.buttonPressed || b.buttonPressed && b.state == ViewStateExec
-}
-
-func (b *Button) IsMouseDownRight() bool {
-	return b.right
-}
-
-func (b *Button) IsMouseDownMiddle() bool {
-	return b.middle
-}
+func (b *Button) SetIcons(icons []*ebiten.Image) { b.icons = icons; b.MarkDirty() }
+func (b *Button) IconUp() *ebiten.Image          { return b.icons[0] }
+func (b *Button) IconDown() *ebiten.Image        { return b.icons[1] }
+func (b *Button) SetUpIcon(icon *ebiten.Image)   { b.icons[0] = icon; b.MarkDirty() }
+func (b *Button) SetDownIcon(icon *ebiten.Image) { b.icons[1] = icon; b.MarkDirty() }
 
 func (b *Button) Layout() {
-	b.View.Layout()
-	var fg color.Color
-	theme := GetUi().theme
-	switch b.state {
-	case ViewStateHover:
-		fg = theme.Get(ButtonHover)
-	case ViewStateFocus:
-		fg = theme.Get(ButtonFocus)
-	case ViewStateNormal:
-		fg = theme.Get(ButtonNormal)
-	case ViewStateSelected:
-		fg = theme.Get(ButtonSelected)
-	case ViewStateDisabled:
-		fg = theme.Get(ButtonDisabled)
-	case ViewStateActive:
-		fg = theme.Get(ButtonActive)
-	}
-	_, _, w, h := b.Rect().GetRectFloat()
-	bold := b.margin
-	if b.buttonPressed {
-		bold = b.margin * 2
-	}
-	vector.StrokeRect(b.Image(), 0, 0, w, h, float32(bold), fg, true)
-	b.ClearDirty()
-}
+	b.Drawable.Layout()
 
-func (b *Button) IsPressed() bool { return b.buttonPressed }
+	w, h := b.Rect().Size()
 
-func (b *Button) Pressed(value bool) {
-	b.buttonPressed = value
-	if value {
-		if ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft) {
-			b.left = true
-		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonRight) {
-			b.right = true
-		} else if ebiten.IsMouseButtonPressed(ebiten.MouseButtonMiddle) {
-			b.middle = true
+	if b.useIcon {
+		var icon *Icon
+		if b.press {
+			icon = NewIcon(b.IconUp())
+		} else {
+			icon = NewIcon(b.IconDown())
 		}
+		icon.SetRect(NewRect([]int{0, 0, w, h}))
+		icon.Layout()
+		icon.Draw(b.Image())
+		log.Printf("btnStatus: IconUp=%v IconDown=%v useIcon=%v len:%v", b.IconUp(), b.IconDown(), b.useIcon, len(b.icons))
+		log.Println("ButtonIcon:Layout:", b.Rect(), icon.Rect(), b.press, b.State(), icon.State(), icon.Image().Bounds())
 	} else {
-		b.left = false
-		b.right = false
-		b.middle = false
+		lbl := NewText(b.txt)
+		margin := int(float64(b.Rect().GetLowestSize()) * 0.03)
+		lbl.SetRect(NewRect([]int{margin, margin, w - margin*2, h - margin*2}))
+		lbl.Bg(b.GetBg())
+		lbl.Fg(b.GetFg())
+		lbl.Layout()
+		lbl.Draw(b.Image())
+		vector.StrokeRect(b.Image(), 0, 0, float32(w), float32(h), float32(margin), b.state.Color(), true)
 	}
-}
 
-func (b *Button) Update(dt int) {
-	if b.IsDisabled() {
-		return
-	}
-	if b.state == ViewStateFocus && !b.buttonPressed {
-		b.Pressed(true)
-	}
-	if (b.state == ViewStateHover || b.state == ViewStateExec) && b.buttonPressed {
-		if b.onPressed != nil {
-			b.onPressed(b)
-		}
-		b.Pressed(false)
-		if b.state == ViewStateExec {
-			b.state = ViewStateNormal
-		}
-	}
-	if b.state == ViewStateNormal {
-		b.Pressed(false)
-	}
+	b.ClearDirty()
 }
 
 func (b *Button) Draw(surface *ebiten.Image) {
@@ -160,19 +94,17 @@ func (b *Button) Draw(surface *ebiten.Image) {
 	}
 	if b.IsDirty() {
 		b.Layout()
-		b.text.Layout()
 	}
-	b.text.Draw(surface)
-	op := &ebiten.DrawImageOptions{}
-	x, y := b.Rect().Pos()
-	op.GeoM.Translate(float64(x), float64(y))
-	surface.DrawImage(b.Image(), op)
+	b.Drawable.Draw(surface)
 }
 
-func (b *Button) SetRect(rect Rect[int]) {
-	b.View.SetRect(rect)
-	b.margin = int(float64(b.Rect().GetLowestSize()) * 0.03)
-	x, y, w, h := b.Rect().GetRect()
-	b.text.SetRect(NewRect([]int{x + b.margin, y + b.margin, w - b.margin*2, h - b.margin*2}))
-	b.ImageReset()
+func (d *Button) MouseEnter() {
+	if !d.State().IsHovered() {
+		d.SetState(StateHover)
+	}
+}
+func (d *Button) MouseLeave() {
+	if d.State().IsHovered() {
+		d.SetState(StateNormal)
+	}
 }

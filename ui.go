@@ -18,17 +18,16 @@ type Ui struct {
 	tick           int
 	start          time.Time
 	size           Point[int]
-	inputMouse     *MouseInput
-	inputTouch     *TouchInput
+	inputMouse     *MouseListener
 	inputKeyboard  *KeyboardInput
 	resizeListener *ResizeListener
 	tickListener   *TickListener
 	modal          Drawabler
+	focusManager   *FocusManager
 }
 
 func (u *Ui) GetStartTime() time.Time          { return u.start }
-func (u *Ui) GetInputTouch() *TouchInput       { return u.inputTouch }
-func (u *Ui) GetInputMouse() *MouseInput       { return u.inputMouse }
+func (u *Ui) GetInputMouse() *MouseListener    { return u.inputMouse }
 func (u *Ui) GetInputKeyboard() *KeyboardInput { return u.inputKeyboard }
 func (u *Ui) GetTitle() string                 { return u.title }
 func (u *Ui) SetTitle(value string) *Ui        { u.title = value; return u }
@@ -52,8 +51,12 @@ func (u *Ui) Layout(w, h int) (int, int) {
 func (u *Ui) HandleEvent(ev Event) {
 	switch ev.Type {
 	case EventTick:
-		// tc := ev.Value.(TickData)
-		// log.Println("Ui:HandleEvent:Tick", tc.String())
+		tc := ev.Value.(TickData)
+		u.currentScene.Traverse(func(d Drawabler) {
+			if t, ok := d.(interface{ Tick(TickData) }); ok {
+				t.Tick(tc)
+			}
+		}, false)
 	case EventResize:
 		r := ev.Value.(Rect[int])
 		u.SetSize(r.W, r.H)
@@ -62,29 +65,149 @@ func (u *Ui) HandleEvent(ev Event) {
 			scene.SetRect(r)
 		}
 		log.Println("Resize app done, new size:", r)
+	}
+	u.HandleKeybordEvent(ev)
+	u.HandleMouseEvent(ev)
+	if !(ev.Type == EventTick || ev.Type == EventMouseMovement) {
+		log.Println("Ui:HandleEvent:", ev)
+	}
+}
+
+func (u *Ui) HandleKeybordEvent(ev Event) {
+	switch ev.Type {
+	case EventKeyPressed:
+		kd := ev.Value.(KeyboardData)
+		u.currentScene.Traverse(func(d Drawabler) {
+			if kh, ok := d.(interface{ KeyPressed(KeyboardData) }); ok {
+				kh.KeyPressed(kd)
+			}
+		}, false)
+		d := u.currentScene
+		if kh, ok := d.(interface{ KeyPressed(KeyboardData) }); ok {
+			kh.KeyPressed(kd)
+		}
+		log.Println("Ui:HandleEvent:EventKeyPressed", ev)
 	case EventKeyReleased:
 		kd := ev.Value.(KeyboardData)
 		if kd.IsReleased(ebiten.KeyF12) {
 			u.ToggleFullscreen()
 		}
-		if kd.IsReleased(ebiten.KeyEscape) {
-			err := u.Pop()
-			if err != nil {
-				os.Exit(0)
+		u.currentScene.Traverse(func(d Drawabler) {
+			if kh, ok := d.(interface{ KeyReleased(KeyboardData) }); ok {
+				kh.KeyReleased(kd)
+			}
+		}, false)
+		d := u.currentScene
+		if kh, ok := d.(interface{ KeyReleased(KeyboardData) }); ok {
+			kh.KeyReleased(kd)
+		}
+		log.Println("Ui:HandleEvent:EventKeyReleased", ev)
+	}
+}
+
+func (u *Ui) HandleMouseEvent(ev Event) {
+	switch ev.Type {
+	case EventMouseDown:
+		var pressed Drawabler
+		md := ev.Value.(MouseData)
+		u.currentScene.Traverse(func(d Drawabler) {
+			if mh, ok := d.(interface{ Hit(Point[int]) Drawabler }); ok {
+				if mh.Hit(md.pos) != nil && pressed == nil {
+					pressed = d
+					return
+				}
+			}
+		}, false)
+		if pressed != nil {
+			u.focusManager.SetFocused(pressed)
+			if mp, ok := pressed.(interface{ MouseDown(MouseData) }); ok {
+				mp.MouseDown(md)
+			}
+			log.Println("Ui:HandleMouseEvent:01", md)
+		} else {
+			u.focusManager.Blur()
+		}
+	case EventMouseUp:
+		md := ev.Value.(MouseData)
+		if u.focusManager.Focused() != nil {
+			d := u.focusManager.Focused()
+			if mp, ok := d.(interface{ MouseUp(MouseData) }); ok {
+				mp.MouseUp(md)
+			}
+			if mp, ok := d.(interface{ WantBlur() bool }); ok {
+				if mp.WantBlur() {
+					u.focusManager.Blur()
+				}
+			}
+			log.Println("Ui:HandleMouseEvent:02", md)
+		}
+	case EventMouseWheel:
+		var wheel Drawabler
+		md := ev.Value.(MouseData)
+		u.currentScene.Traverse(func(d Drawabler) {
+			if mh, ok := d.(interface{ Hit(Point[int]) Drawabler }); ok {
+				if mh.Hit(md.pos) != nil && wheel == nil {
+					wheel = d
+				}
+			}
+
+		}, false)
+		if wheel != nil {
+			if m, ok := wheel.(interface{ MouseWheel(MouseData) }); ok {
+				m.MouseWheel(md)
+			}
+			log.Println("Ui:HandleMouseEvent:04", wheel.Rect())
+		}
+	case EventMouseMovement, EventMouseDrag:
+		var hovered Drawabler
+		md := ev.Value.(MouseData)
+		u.currentScene.Traverse(func(d Drawabler) {
+			if mh, ok := d.(interface{ Hit(Point[int]) Drawabler }); ok {
+				if mh.Hit(md.pos) != nil && hovered == nil {
+					hovered = d
+				}
+			}
+		}, false)
+		if u.focusManager.Focused() == nil {
+			if u.focusManager.Hovered() != hovered {
+				if u.focusManager.Hovered() != nil {
+					if m, ok := hovered.(interface{ MouseLeave() }); ok {
+						m.MouseLeave()
+					}
+					log.Println("Ui:HandleMouseEvent:05")
+				}
+				if hovered != nil {
+					if m, ok := hovered.(interface{ MouseEnter() }); ok {
+						m.MouseEnter()
+					}
+					log.Println("Ui:HandleMouseEvent:06", hovered.Rect())
+				}
+				u.focusManager.SetHovered(hovered)
 			}
 		}
-	}
-	if !(ev.Type == EventTick) {
-		log.Println("Ui:HandleEvent:", ev)
+		if u.focusManager.Hovered() != nil || u.focusManager.Focused() != nil {
+			if hovered != nil {
+				if ev.Type == EventMouseDrag {
+					if m, ok := hovered.(interface{ MouseDrag(MouseData) }); ok {
+						m.MouseDrag(md)
+					}
+					log.Println("Ui:HandleMouseEvent:07", hovered.Rect())
+				} else {
+					if m, ok := hovered.(interface{ MouseMotion(MouseData) }); ok {
+						m.MouseMotion(md)
+					}
+					log.Println("Ui:HandleMouseEvent:08", hovered.Rect())
+				}
+			}
+		}
 	}
 }
 
 func (u *Ui) Update() error {
 	tick := u.getTick()
-	u.tickListener.update(tick)
-	u.inputMouse.update(tick)
-	u.inputTouch.update(tick)
-	u.inputKeyboard.update(tick)
+	u.tickListener.update()
+	u.inputMouse.update()
+	u.inputKeyboard.update()
 	u.currentScene.Update(tick)
 	if u.modal != nil {
 		u.modal.Update(tick)
@@ -102,12 +225,12 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 
 func (u *Ui) ShowModal(d Drawabler) {
 	u.modal = d
-	u.modal.SetHidden(false)
+	u.modal.Show()
 }
 
 func (u *Ui) HideModal() {
 	if u.modal != nil {
-		u.modal.SetHidden(true)
+		u.modal.Hide()
 		u.modal.Close()
 		u.modal = nil
 	}

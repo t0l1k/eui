@@ -39,20 +39,20 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 	sv.laySheet.Rows(row + 1)
 	sv.Add(sv.laySheet)
 	sv.sheet = sheet.NewSheet()
-	sv.laySheet.Add(eui.NewText(" "))
+	sv.laySheet.AddItem(eui.NewText(" "))
 	for i := 0; i < row; i++ {
 		grid := sheet.NewGrid(i, 0)
-		sv.laySheet.Add(eui.NewText(grid.GetRow()))
+		sv.laySheet.AddItem(eui.NewText(grid.GetRow()))
 	}
 	for y := 0; y < column; y++ {
 		grid := sheet.NewGrid(0, y+1)
 		lblCol := eui.NewText(grid.GetColumn())
-		sv.laySheet.Add(lblCol)
+		sv.laySheet.AddItem(lblCol)
 		for x := 0; x < row; x++ {
 			grid := sheet.NewGrid(x, y+1)
 			cell := sheet.NewCell(grid)
 			btn := eui.NewButton(cell.String(), func(b *eui.Button) {
-				for _, v := range sv.laySheet.Childrens() {
+				for _, v := range sv.laySheet.Items() {
 					switch vv := v.(type) {
 					case *eui.Button:
 						if vv.GetBg() == colornames.Aqua {
@@ -71,7 +71,7 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 				if cell.IsContainFormula() {
 					sv.input.SetText(cell.GetFormula().String())
 				} else {
-					sv.input.SetText(b.GetText())
+					sv.input.SetText(b.Text())
 				}
 				sv.curCellLbl.SetText(grid.String())
 				cell.SetActive()
@@ -92,7 +92,7 @@ func (s *SpreadsheetView) Update(dt int) {
 }
 
 func (s *SpreadsheetView) SetRect(rect eui.Rect[int]) {
-	s.SetRect(rect)
+	s.Container.SetRect(rect)
 	cellSize := float64(s.Rect().GetLowestSize()) * 0.05
 	x0, y0, w0, h0 := s.Rect().X, s.Rect().Y, s.Rect().W, s.Rect().H
 	x, y, w, h := x0, y0, int(cellSize*10), int(cellSize*2)

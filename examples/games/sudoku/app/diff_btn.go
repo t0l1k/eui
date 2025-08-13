@@ -11,19 +11,19 @@ type DiffButton struct {
 	btn             *eui.Button
 	dim             game.Dim
 	diff            game.Difficult
-	f               func(b *eui.Button)
+	fn              func(b *eui.Button)
 }
 
-func NewDiffButton(dim game.Dim, diff game.Difficult, f func(b *eui.Button)) *DiffButton {
+func NewDiffButton(dim game.Dim, diff game.Difficult, fn func(b *eui.Button)) *DiffButton {
 	d := &DiffButton{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	d.dim = dim
 	d.diff = diff
-	d.f = f
+	d.fn = fn
 	d.title = eui.NewText(diff.String())
 	d.Add(d.title)
 	d.lblScore = eui.NewText("")
 	d.Add(d.lblScore)
-	d.btn = eui.NewButton("Запустить", f)
+	d.btn = eui.NewButton("Запустить", fn)
 	d.Add(d.btn)
 	return d
 }
@@ -41,11 +41,6 @@ func (d *DiffButton) UpdateData(value interface{}) {
 	case game.Dim:
 		d.dim = v
 	}
-}
-
-func (d *DiffButton) SetHidden(value bool) {
-	d.Drawable.SetHidden(value)
-	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value) }, false)
 }
 
 func (d *DiffButton) SetRect(rect eui.Rect[int]) {

@@ -34,7 +34,7 @@ func NewCardIcon(cell *sols.Cell, f func(b *eui.Button)) *CardIcon {
 	c.btn.Bg(colornames.White)
 	c.btn.Fg(col)
 	c.Add(c.btn)
-	// c.SetHidden(true)
+	// c.Hide()
 	return c
 }
 

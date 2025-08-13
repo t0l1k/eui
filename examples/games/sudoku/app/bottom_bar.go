@@ -76,10 +76,6 @@ func (b *BottomBar) Setup(board *Board) {
 	b.setBtnClrs()
 }
 
-func (d *BottomBar) SetHidden(value bool) {
-	d.Drawable.SetHidden(value)
-	d.Traverse(func(c eui.Drawabler) { c.SetHidden(value); c.MarkDirty() }, false)
-}
 func (b *BottomBar) IsActAccept() bool    { return b.actAccept }
 func (b *BottomBar) IsActUndo() bool      { return b.actUndo }
 func (b *BottomBar) IsActDel() bool       { return b.actDel }
@@ -88,7 +84,7 @@ func (b *BottomBar) ShowNotes(value bool) { b.actNotes = value }
 
 func (b *BottomBar) SetAct(btn *eui.Button) (result bool) {
 	b.setBtnClrs()
-	btnStr := (btn.GetText())
+	btnStr := (btn.Text())
 	if strings.HasPrefix(btnStr, aUndo) {
 		btnStr = aUndo
 	}
@@ -112,8 +108,8 @@ func (b *BottomBar) SetAct(btn *eui.Button) (result bool) {
 		}
 		result = false
 	default:
-		for _, v := range b.layoutNums.Childrens() {
-			if v.(*BottomBarNr).GetText() == btn.GetText() {
+		for _, v := range b.layoutNums.Children() {
+			if v.(*BottomBarNr).GetText() == btn.Text() {
 				v.(*BottomBarNr).Bg(colornames.Yellow)
 			}
 		}
@@ -131,7 +127,7 @@ func (b *BottomBar) setBtnClrs() {
 	for _, v := range b.actBtns {
 		switch vv := v.(type) {
 		case *eui.Button:
-			if vv.GetText() == aNote && b.actNotes {
+			if vv.Text() == aNote && b.actNotes {
 				vv.Bg(colornames.Yellow)
 			} else if vv.GetBg() == colornames.Yellow {
 				vv.Bg(colornames.Silver)
@@ -148,7 +144,7 @@ func (b *BottomBar) UpdateNrs(counts map[int]int) {
 	b.varDiff.Emit(b.board.GetDiffStr())
 	size := b.board.dim.Size()
 	for k, v := range counts {
-		for _, btn := range b.layoutNums.Childrens() {
+		for _, btn := range b.layoutNums.Children() {
 			if btn.(*BottomBarNr).GetValue() == strconv.Itoa(k) {
 				btn.(*BottomBarNr).SetCount(size - v)
 			}
@@ -157,10 +153,10 @@ func (b *BottomBar) UpdateNrs(counts map[int]int) {
 }
 
 func (b *BottomBar) UpdateUndoBtn(count int) {
-	for _, btn := range b.layoutActs.Childrens() {
+	for _, btn := range b.layoutActs.Children() {
 		switch btn := btn.(type) {
 		case *eui.Button:
-			if strings.HasPrefix(btn.GetText(), aUndo) {
+			if strings.HasPrefix(btn.Text(), aUndo) {
 				btn.SetText(aUndo + ":" + strconv.Itoa(count))
 			}
 		}

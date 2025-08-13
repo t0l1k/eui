@@ -9,9 +9,7 @@ import (
 
 var uiInstance *Ui = nil
 
-func init() {
-	uiInstance = GetUi()
-}
+func init() { uiInstance = GetUi() }
 
 // Инициализация и настройка размеров окна
 func Init(u *Ui) {
@@ -22,10 +20,10 @@ func Init(u *Ui) {
 	log.Println("Set Window Size:", u.size.X, u.size.Y)
 	ebiten.SetFullscreen(u.settings.Get(UiFullscreen).(bool))
 	u.tickListener = NewTickListener(u.HandleEvent, 10*time.Millisecond)
-	u.inputKeyboard = NewKeyboardInput(u.HandleEvent)
-	u.inputMouse = NewMouseInput(u.HandleEvent)
-	u.inputTouch = NewTouchInput(u.HandleEvent)
+	u.inputKeyboard = NewKeyboardListener(u.HandleEvent)
+	u.inputMouse = NewMouseListener(u.HandleEvent)
 	u.resizeListener = NewResizeListener(u.HandleEvent)
+	u.focusManager = &FocusManager{}
 }
 
 // Переход в вечный цикл...

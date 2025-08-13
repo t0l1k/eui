@@ -5,6 +5,8 @@ import (
 	"log"
 	"strconv"
 
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/lines/game"
 )
@@ -93,12 +95,12 @@ func (b *Board) NewGame(dim int) {
 }
 
 func (b *Board) gameLogic(btn *eui.Button) {
-	for i := range b.gameLayout.Childrens() {
-		if b.gameLayout.Childrens()[i].(*CellIcon).btn == btn {
+	for i := range b.gameLayout.Children() {
+		if b.gameLayout.Children()[i].(*CellIcon).btn == btn {
 			cell := b.field.GetField()[i]
 			cellData := cell.State.Value()
 			state := cellData.State
-			if btn.IsMouseDownLeft() && b.field.InGame {
+			if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) && b.field.InGame {
 				if state == game.CellFilled || state == game.CellEmpty || state == game.CellFilledNext {
 					if way := b.field.MakeMove(b.field.Pos(i)); len(way) > 0 {
 						b.showWay = true
@@ -108,8 +110,6 @@ func (b *Board) gameLogic(btn *eui.Button) {
 						log.Println("make move for:", cell, cell.Color().String(), cellData, state, way)
 					}
 				}
-			} else if btn.IsMouseDownRight() {
-				log.Printf("data:(%v)(empty:%v)(filled:%v)(filledNext:%v)(filledAfterMove;%v)(markedForMove:%v)(markedFoeDel:%v)", cellData, cell.IsEmpty(), cell.IsFilled(), cell.IsFilledNext(), cell.IsFilledAfterMove(), cell.IsMarkedForMove(), cell.IsMarkedForDelete())
 			}
 			fmt.Println(b.field)
 		}
@@ -120,21 +120,10 @@ func (b *Board) setWayCells(col game.BallColor, way []int) {
 	for _, value := range way {
 		bg := game.BallNoColor.Color()
 		fg := col.Color()
-		cell := b.gameLayout.Childrens()[value].(*CellIcon)
+		cell := b.gameLayout.Children()[value].(*CellIcon)
 		cell.icon.setup(BallSmall, bg, fg)
 	}
 	log.Println("set way colors done", way, col)
-}
-
-func (d *Board) SetHidden(value bool) {
-	d.Traverse(func(child eui.Drawabler) {
-		child.SetHidden(value)
-		if !value {
-			child.Enable()
-		} else {
-			child.Disable()
-		}
-	}, false)
 }
 
 func (b *Board) Update(dt int) {
@@ -171,7 +160,7 @@ func (b *Board) drawCellIcons() {
 		case cell.IsMarkedForMove():
 			size = BallNormal
 		}
-		cl := b.gameLayout.Childrens()[i].(*CellIcon)
+		cl := b.gameLayout.Children()[i].(*CellIcon)
 		cl.icon.setup(size, bg, fg)
 	}
 }

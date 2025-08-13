@@ -12,6 +12,13 @@ const (
 	EventTick
 	EventKeyPressed
 	EventKeyReleased
+	EventMouseDown
+	EventMouseUp
+	EventMouseDrag
+	EventMouseMovement
+	EventMouseWheel
+	EventMouseEnter
+	EventMouseLeave
 )
 
 func (e EventType) String() string {
@@ -20,6 +27,13 @@ func (e EventType) String() string {
 		"Tick",
 		"KeyPressed",
 		"KeyReleased",
+		"MouseDown",
+		"MouseUp",
+		"MouseDrag",
+		"MouseMovement",
+		"MouseWheel",
+		"MouseEnter",
+		"MouseLeave",
 	}[e]
 }
 
@@ -30,7 +44,7 @@ type Event struct {
 
 func NewEvent(t EventType, v any) Event {
 	e := Event{Type: t, Value: v}
-	if !(e.Type == EventTick) {
+	if !(e.Type == EventTick || e.Type == EventMouseMovement) {
 		log.Println("New:", e.String())
 	}
 	return e

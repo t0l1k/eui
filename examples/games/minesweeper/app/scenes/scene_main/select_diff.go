@@ -1,6 +1,7 @@
 package scene_main
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 
@@ -12,12 +13,12 @@ import (
 
 type SelectDiff struct {
 	*eui.Scene
-	frame                          *eui.Container
-	topBar                         *eui.TopBar
-	comboRow, comboCol, comboMines *eui.ComboBox
-	btnExec                        *eui.Button
-	percent, row, column           int
-	kId                            int64
+	frame                *eui.Container
+	topBar               *eui.TopBar
+	cRow, cCol, cPerc    *eui.SpinBox[int]
+	btnExec              *eui.Button
+	percent, row, column int
+	kId                  int64
 }
 
 func NewSelectDiff(title string) *SelectDiff {
@@ -28,27 +29,57 @@ func NewSelectDiff(title string) *SelectDiff {
 	lblTitle := eui.NewText("Настрой сложность")
 	s.frame.Add(lblTitle)
 	s.column, s.row, s.percent = 5, 5, 15
-	var data []interface{}
-	for i := 5; i <= 50; i += 5 {
-		data = append(data, i)
-	}
-	s.comboCol = eui.NewComboBox("Сколько рядов", data, 0, func(combo *eui.ComboBox) {
-		s.row = combo.Value().(int)
-	})
-	s.frame.Add(s.comboCol)
-	s.comboRow = eui.NewComboBox("Сколько столбиков", data, 0, func(combo *eui.ComboBox) {
-		s.column = combo.Value().(int)
-	})
-	s.frame.Add(s.comboRow)
-	s.comboMines = eui.NewComboBox("Сколько % мин", func() (arr []interface{}) {
-		for i := 10; i <= 30; i++ {
+
+	gn := func(a, b int) []int {
+		arr := make([]int, 0)
+		for i := a; i < b; i++ {
 			arr = append(arr, i)
 		}
 		return arr
-	}(), 5, func(combo *eui.ComboBox) {
-		s.percent = combo.Value().(int)
+	}
+
+	s.cRow = eui.NewSpinBox(
+		"Сколько рядов",
+		gn(5, 51),
+		0,
+		func(i int) string { return fmt.Sprintf("%v", i) },
+		func(a, b int) int { return a - b },
+		func(a, b int) bool { return a == b },
+		true,
+		2,
+	)
+	s.cRow.SelectedValue.Connect(func(value int) {
+		s.row = value
 	})
-	s.frame.Add(s.comboMines)
+	s.frame.Add(s.cRow)
+	s.cCol = eui.NewSpinBox(
+		"Сколько столбиков",
+		gn(5, 51),
+		0,
+		func(i int) string { return fmt.Sprintf("%v", i) },
+		func(a, b int) int { return a - b },
+		func(a, b int) bool { return a == b },
+		true,
+		2,
+	)
+	s.cCol.SelectedValue.Connect(func(value int) {
+		s.column = value
+	})
+	s.frame.Add(s.cCol)
+	s.cPerc = eui.NewSpinBox(
+		"Сколько % мин", gn(15, 31),
+		0,
+		func(i int) string { return fmt.Sprintf("%v", i) },
+		func(a, b int) int { return a - b },
+		func(a, b int) bool { return a == b },
+		true,
+		2,
+	)
+	s.cPerc.SelectedValue.Connect(func(value int) {
+		s.percent = value
+	})
+	s.frame.Add(s.cPerc)
+
 	s.btnExec = eui.NewButton("Запустить игру", func(b *eui.Button) {
 		s.runGame()
 	})
@@ -71,7 +102,7 @@ func (s *SelectDiff) runGame() {
 	game := scene_game.NewSceneGame(str, s.row, s.column, mines)
 	eui.GetUi().Push(game)
 	eui.GetUi().GetInputKeyboard().Disconnect(s.kId)
-	log.Println("run game", s.row, s.column, mines)
+	log.Println("run game", s.row, s.column, mines, s.percent)
 }
 
 func (s *SelectDiff) SetRect(rect eui.Rect[int]) {

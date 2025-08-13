@@ -6,6 +6,8 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/t0l1k/eui"
 	"golang.org/x/image/colornames"
 )
@@ -215,7 +217,7 @@ func (f *Field) IsWin() bool {
 	return true
 }
 
-func (f *Field) Dim() (int, int)        { return f.dim.X, f.dim.GetY() }
+func (f *Field) Dim() (int, int)        { return f.dim.X, f.dim.Y }
 func (f *Field) pos(idx int) (int, int) { return idx % f.dim.X, idx / f.dim.X }
 func (f *Field) idx(x, y int) int       { return y*f.dim.X + x }
 func (f *Field) GetCell(x, y int) *Cell { return f.field[f.idx(x, y)] }
@@ -242,24 +244,9 @@ func NewCellIcon(field *Field, f func(b *eui.Button)) *CellIcon {
 	c.field = field
 	c.btn = eui.NewButton(CellClosed, f)
 	c.Add(c.btn)
-	c.Setup(f)
-	return c
-}
-
-func (c *CellIcon) Setup(f func(b *eui.Button)) {
-	c.btn.SetupButton(CellClosed, f)
 	c.btn.Bg(colornames.Teal)
 	c.btn.Fg(colornames.Yellow)
-}
-func (d *CellIcon) SetHidden(value bool) {
-	d.Traverse(func(c eui.Drawabler) {
-		c.SetHidden(value)
-		if !value {
-			c.Enable()
-		} else {
-			c.Disable()
-		}
-	}, false)
+	return c
 }
 
 type Board struct {
@@ -284,10 +271,10 @@ func NewBoard() *Board {
 			}
 		case GamePause:
 			b.stopwatch.Stop()
-			b.SetHidden(true)
+			b.Hide()
 		case GameWin:
 			b.stopwatch.Stop()
-			b.SetHidden(true)
+			b.Hide()
 			str := fmt.Sprintf("Время:[%v] Нажатий: %v Размер поля: %v", b.stopwatch, b.field.ClickCount, b.field.dim.String())
 			b.varArea.Emit(str)
 		}
@@ -335,21 +322,21 @@ func (b *Board) NewGame() {
 		})
 		b.layout.Add(btn)
 	}
-	b.bottomLbl.SetHidden(false)
+	b.bottomLbl.Show()
 }
 
 func (b *Board) Reset() {
 	b.field.ResetGame()
 	b.stopwatch.Reset()
-	for _, v := range b.layout.Childrens() {
-		v.SetHidden(false)
+	for _, v := range b.layout.Children() {
+		v.Show()
 		cell, ok := v.(*CellIcon)
 		if ok {
 			cell.btn.Bg(colornames.Teal)
 			cell.btn.Fg(colornames.Yellow)
 		}
 	}
-	b.bottomLbl.SetHidden(false)
+	b.bottomLbl.Show()
 }
 
 func (b *Board) NextLevel() {
@@ -358,10 +345,10 @@ func (b *Board) NextLevel() {
 }
 
 func (b *Board) gameLogic(c *eui.Button) {
-	for i, v := range b.layout.Childrens() {
+	for i, v := range b.layout.Children() {
 		if v.(*CellIcon).btn == c {
 			x, y := b.field.pos(i)
-			if c.IsMouseDownLeft() {
+			if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) {
 				switch b.field.State.Value() {
 				case GameStart:
 					b.field.State.Emit(GamePlay)
@@ -375,17 +362,6 @@ func (b *Board) gameLogic(c *eui.Button) {
 			}
 		}
 	}
-}
-func (d *Board) SetHidden(value bool) {
-	d.Traverse(func(c eui.Drawabler) {
-		c.SetHidden(value)
-		if !value {
-			c.Enable()
-		} else {
-			c.Disable()
-		}
-	}, false)
-	d.MarkDirty()
 }
 
 func (b *Board) Update(dt int) {
@@ -437,18 +413,6 @@ func NewDialog(title string, board *Board, f func(d *eui.Button)) *Dialog {
 	return t
 }
 
-func (d *Dialog) SetHidden(value bool) {
-	d.Traverse(func(c eui.Drawabler) {
-		c.SetHidden(value)
-		if !value {
-			c.Enable()
-		} else {
-			c.Disable()
-		}
-	}, false)
-	d.MarkDirty()
-}
-
 func (t *Dialog) SetTitle(title string) {
 	t.title.SetText(title)
 }
@@ -483,37 +447,36 @@ func NewSceneGame() *SceneGame {
 	s := &SceneGame{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	s.topBar = eui.NewTopBar("Найди пару", func(b *eui.Button) {
 		s.dialog.SetTitle("Выбор игры")
-		s.dialog.SetHidden(false)
-		s.board.SetHidden(true)
+		s.dialog.Show()
+		s.board.Hide()
 		if s.board.field.State.Value() == GamePlay {
 			s.board.field.State.Emit(GamePause)
 		}
 		log.Println("Set Game to pause")
 	})
 	s.topBar.SetUseStopwatch()
-	s.topBar.SetTitleCoverArea(0.5)
 	s.Add(s.topBar)
 
 	s.dialog = NewDialog("Выбор игры", s.board, func(btn *eui.Button) {
-		if btn.GetText() == bNew {
+		if btn.Text() == bNew {
 			s.board.NewGame()
 		}
-		if btn.GetText() == bReset {
+		if btn.Text() == bReset {
 			s.board.Reset()
 		}
-		if btn.GetText() == bNext {
+		if btn.Text() == bNext {
 			s.board.NextLevel()
 		}
-		if btn.GetText() == bCont {
+		if btn.Text() == bCont {
 			if s.board.field.State.Value() == GamePause {
 				s.board.field.State.Emit(GamePlay)
 			}
-			s.board.SetHidden(false)
+			s.board.Show()
 			log.Println("Set Game continue play")
 		}
-		s.dialog.SetHidden(true)
+		s.dialog.Hide()
 	})
-	s.dialog.SetHidden(true)
+	s.dialog.Hide()
 	s.Add(s.dialog)
 
 	s.board = NewBoard()
@@ -530,9 +493,9 @@ func NewSceneGame() *SceneGame {
 			}
 		case GamePause:
 			b.title.SetText("Пауза!")
-			b.SetHidden(false)
+			b.Show()
 		case GameWin:
-			b.SetHidden(false)
+			b.Show()
 			b.title.SetText("Победа!")
 		}
 

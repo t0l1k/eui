@@ -2,6 +2,7 @@ package scene_game
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/minesweeper/app/game"
 )
@@ -24,7 +25,7 @@ func newGame(r, c, m int) *Game {
 func (g *Game) setupBoard() {
 	g.field.New()
 	var firstStart bool
-	if g.Childrens() == nil {
+	if g.Children() == nil {
 		firstStart = true
 	}
 	for i := 0; i < len(g.field.GetField()); i++ {
@@ -33,7 +34,7 @@ func (g *Game) setupBoard() {
 			btn = game.NewCellIcon(g.field, g.gameLogic)
 			g.Add(btn)
 		} else {
-			btn = g.Childrens()[i].(*game.CellIcon)
+			btn = g.Children()[i].(*game.CellIcon)
 			btn.Setup(g.field, g.gameLogic)
 		}
 		x, y := g.field.GetPos(i)
@@ -56,10 +57,10 @@ func (g *Game) Reset() {
 func (g *Game) gameLogic(b *eui.Button) {
 	switch g.field.State.Value() {
 	case game.GameStart:
-		for i, v := range g.Childrens() {
+		for i, v := range g.Children() {
 			if b == v.(*game.CellIcon).Btn {
 				x, y := g.field.GetPos(i)
-				if b.IsMouseDownLeft() {
+				if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) {
 					g.field.Shuffle(x, y)
 					g.field.Open(x, y)
 					g.timer.Start()
@@ -69,14 +70,14 @@ func (g *Game) gameLogic(b *eui.Button) {
 		}
 	case game.GamePlay:
 		g.field.SaveGame()
-		for i, v := range g.Childrens() {
+		for i, v := range g.Children() {
 			if b == v.(*game.CellIcon).Btn {
 				x, y := g.field.GetPos(i)
-				if b.IsMouseDownLeft() && !g.field.IsCellOpen(i) {
+				if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) && !g.field.IsCellOpen(i) {
 					g.field.Open(x, y)
-				} else if b.IsMouseDownLeft() && g.field.IsCellOpen(i) {
+				} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) && g.field.IsCellOpen(i) {
 					g.field.AutoMarkFlags(x, y)
-				} else if b.IsMouseDownRight() {
+				} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton1) {
 					g.field.MarkFlag(x, y)
 				}
 				break
@@ -91,16 +92,16 @@ func (g *Game) Update(dt int) {
 		if !ebiten.IsFocused() && g.field.State.Value() == game.GamePlay {
 			g.field.State.Emit(game.GamePause)
 			g.timer.Stop()
-			for _, cell := range g.Childrens() {
-				cell.(*game.CellIcon).SetHidden(true)
+			for _, cell := range g.Children() {
+				cell.(*game.CellIcon).Hide()
 			}
 		}
 	case game.GamePause:
 		if ebiten.IsFocused() {
 			g.field.State.Emit(game.GamePlay)
 			g.timer.Start()
-			for _, cell := range g.Childrens() {
-				cell.(*game.CellIcon).SetHidden(false)
+			for _, cell := range g.Children() {
+				cell.(*game.CellIcon).Show()
 			}
 		}
 	}
@@ -110,14 +111,14 @@ func (g *Game) Update(dt int) {
 func (g *Game) UpdateData(value string) {
 	switch value {
 	case game.GameStart, game.GamePlay:
-		for _, cell := range g.Childrens() {
+		for _, cell := range g.Children() {
 			if cell.(*game.CellIcon).Btn.IsDisabled() {
 				cell.(*game.CellIcon).Btn.Enable()
 			}
 		}
 	case game.GameWin, game.GameOver:
 		g.timer.Stop()
-		for _, cell := range g.Childrens() {
+		for _, cell := range g.Children() {
 			if !cell.(*game.CellIcon).Btn.IsDisabled() {
 				cell.(*game.CellIcon).Btn.Disable()
 			}

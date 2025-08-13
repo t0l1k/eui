@@ -125,7 +125,7 @@ func (d *BoardMem) SetupConclusion() {
 		str = "Game Over"
 		sb.Bg(colornames.Red)
 	}
-	sb.SetText(str + " " + d.Game().String()).Show(3 * time.Second)
+	sb.SetText(str + " " + d.Game().String()).ShowTime(3 * time.Second)
 	d.varMsg.Emit(d.gamesData.String())
 	d.varColor.Emit([]color.Color{colornames.Fuchsia, colornames.Black})
 	btn := d.setupScoreBtn()
@@ -134,7 +134,7 @@ func (d *BoardMem) SetupConclusion() {
 	log.Println("Setup Conclusion done", d.game.String(), d.Rect(), btn.Rect())
 }
 
-func (d *BoardMem) setupScoreBtn() *eui.ButtonIcon {
+func (d *BoardMem) setupScoreBtn() *eui.Button {
 	level := d.gamesData.Max()
 	count := d.gamesData.Size()
 	var xArr, yArr, levels []int
@@ -167,7 +167,7 @@ func (d *BoardMem) Update(dt int) {
 		d.Game().SetNextStage()
 		d.SetupConclusion()
 	}
-	for _, v := range d.Childrens() {
+	for _, v := range d.Children() {
 		v.Update(dt)
 	}
 	d.Container.Update(dt)

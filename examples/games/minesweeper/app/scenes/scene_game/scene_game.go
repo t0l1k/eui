@@ -12,42 +12,47 @@ import (
 
 type SceneGame struct {
 	*eui.Scene
-	topBar                 *eui.TopBar
 	game                   *Game
 	lblMines, lblGameTimer *eui.Text
-	btnStatus              *eui.ButtonIcon
+	btnStatus              *eui.Button
 	btnAF                  *eui.Button
 }
 
 func NewSceneGame(title string, r, c, m int) *SceneGame {
-	s := &SceneGame{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
-	s.topBar = eui.NewTopBar(title, nil)
-	s.Add(s.topBar)
+	s := &SceneGame{Scene: eui.NewScene(eui.NewLayoutVerticalPercent([]int{5, 90, 5}, 5))}
 	s.game = newGame(r, c, m)
-	s.Add(s.game)
 	s.game.field.State.Connect(s.UpdateData)
 	s.lblMines = eui.NewText("" + strconv.Itoa(s.game.field.GetTotalMines()))
-	s.Add(s.lblMines)
 	s.lblGameTimer = eui.NewText("00:00")
-	s.Add(s.lblGameTimer)
-	s.btnStatus = eui.NewButtonIcon([]*ebiten.Image{res.SmileSprites[0], res.SmileSprites[1]}, func(b *eui.Button) {
-		if b.IsMouseDownLeft() {
+	s.btnStatus = eui.NewButtonIcon([]*ebiten.Image{res.SmileSprites[1], res.SmileSprites[0]}, func(b *eui.Button) {
+		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 			s.game.New()
-		} else if b.IsMouseDownRight() {
+		} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonRight) {
 			s.game.Reset()
-		} else if b.IsMouseDownMiddle() {
+		} else if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonMiddle) {
 			s.game.field.RestoreGame()
 			s.game.timer.Start()
 		}
 	})
-	s.Add(s.btnStatus)
+	s.btnStatus.SetState(eui.StateNormal)
 
 	s.btnAF = eui.NewButton("Auto Mark Flags", func(b *eui.Button) {
 		if s.game.field.State.Value() == game.GamePlay {
 			s.game.field.AutoMarkAllFlags()
 		}
 	})
-	s.Add(s.btnAF)
+
+	contStatus := eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{40, 5, 5, 10, 10, 40}, 1))
+	contStatus.Add(eui.NewDrawable())
+	contStatus.Add(s.lblMines)
+	contStatus.Add(s.btnStatus)
+	contStatus.Add(s.btnAF)
+	contStatus.Add(s.lblGameTimer)
+	contStatus.Add(eui.NewDrawable())
+
+	s.Add(eui.NewTopBar(title, nil))
+	s.Add(s.game)
+	s.Add(contStatus)
 	return s
 }
 
@@ -62,9 +67,9 @@ func (s *SceneGame) Update(dt int) {
 func (s *SceneGame) checkBtnStatus() {
 	if s.game.field.State.Value() == game.GamePlay {
 		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
-			s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
+			s.btnStatus.SetUpIcon(res.SmileSprites[0])
 		} else if inpututil.IsMouseButtonJustPressed(ebiten.MouseButtonLeft) {
-			s.btnStatus.SetReleasedIcon(res.SmileSprites[2])
+			s.btnStatus.SetUpIcon(res.SmileSprites[2])
 		}
 	}
 }
@@ -72,37 +77,10 @@ func (s *SceneGame) checkBtnStatus() {
 func (s *SceneGame) UpdateData(value string) {
 	switch value {
 	case game.GameStart:
-		s.btnStatus.SetReleasedIcon(res.SmileSprites[0])
+		s.btnStatus.SetUpIcon(res.SmileSprites[0])
 	case game.GameWin:
-		s.btnStatus.SetReleasedIcon(res.SmileSprites[3])
+		s.btnStatus.SetUpIcon(res.SmileSprites[3])
 	case game.GameOver:
-		s.btnStatus.SetReleasedIcon(res.SmileSprites[4])
+		s.btnStatus.SetUpIcon(res.SmileSprites[4])
 	}
-}
-
-func (s *SceneGame) SetRect(rect eui.Rect[int]) {
-	w, h := rect.Size()
-	hTop := int(float64(h) * 0.05) // topbar height
-	hTopHalf := int((float64(h) * 0.05) / 2)
-	h = h - hTop
-	s.Scene.SetRect(rect)
-
-	s.topBar.SetRect(eui.NewRect([]int{0, 0, w, hTop}))
-	s.game.SetRect(eui.NewRect([]int{hTopHalf, hTop + hTopHalf, w - hTop, h - hTop*2}))
-
-	x := rect.CenterX() - hTop*3
-	y := 0
-	r := []int{x, y, hTop * 2, hTop}
-	s.lblMines.SetRect(eui.NewRect(r))
-	x = rect.CenterX() + hTop
-	y = 0
-	r = []int{x, y, hTop * 2, hTop}
-	s.lblGameTimer.SetRect(eui.NewRect(r))
-	x = rect.CenterX() - hTop/2
-	y = 0
-	r = []int{x, y, hTop, hTop}
-	s.btnStatus.SetRect(eui.NewRect(r))
-	x = rect.CenterX() + hTop*4
-	r = []int{x, y, hTop * 3, hTop}
-	s.btnAF.SetRect(eui.NewRect(r))
 }

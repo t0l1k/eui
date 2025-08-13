@@ -47,7 +47,7 @@ func NewSceneStopwatch() *SceneStopwatch {
 	s.sBtns = []string{"Обнулить", "Старт", "Круг"}
 	for _, value := range s.sBtns {
 		button := eui.NewButton(value, func(b *eui.Button) {
-			log.Println(b.GetText())
+			log.Println(b.Text())
 		})
 		s.btnsCont.Add(button)
 	}
@@ -62,7 +62,7 @@ func NewSceneStopwatch() *SceneStopwatch {
 }
 
 func (s *SceneStopwatch) stopwatchAppLogic(b *eui.Button) {
-	switch b.GetText() {
+	switch b.Text() {
 	case s.sBtns[0]:
 		switch s.state {
 		case watchPause, watchPlay:
@@ -118,16 +118,16 @@ func (s *SceneStopwatch) Update(dt int) {
 	if s._dirty {
 		switch s.state {
 		case watchStart:
-			s.btnsCont.Childrens()[1].(*eui.Button).SetText(s.sBtns[1])
-			s.btnsCont.Childrens()[0].(*eui.Button).SetHidden(true)
-			s.btnsCont.Childrens()[2].(*eui.Button).SetHidden(true)
+			s.btnsCont.Children()[1].(*eui.Button).SetText(s.sBtns[1])
+			s.btnsCont.Children()[0].(*eui.Button).Hide()
+			s.btnsCont.Children()[2].(*eui.Button).Hide()
 			// s.list.Reset()
 		case watchPlay:
-			s.btnsCont.Childrens()[0].(*eui.Button).SetHidden(true)
-			s.btnsCont.Childrens()[2].(*eui.Button).SetHidden(false)
+			s.btnsCont.Children()[0].(*eui.Button).Hide()
+			s.btnsCont.Children()[2].(*eui.Button).Show()
 		case watchPause:
-			s.btnsCont.Childrens()[0].(*eui.Button).SetHidden(false)
-			s.btnsCont.Childrens()[2].(*eui.Button).SetHidden(true)
+			s.btnsCont.Children()[0].(*eui.Button).Show()
+			s.btnsCont.Children()[2].(*eui.Button).Hide()
 		}
 		s._dirty = false
 	}

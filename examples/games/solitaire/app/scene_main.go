@@ -22,7 +22,6 @@ func NewSceneMain() *SceneMain {
 	s.topBar = eui.NewTopBar(title, nil)
 	s.topBar.SetUseStopwatch()
 	s.topBar.SetShowStoppwatch(true)
-	s.topBar.SetTitleCoverArea(0.9)
 	s.Add(s.topBar)
 	s.fn = s.gameLogic
 	var board Sols
@@ -40,11 +39,11 @@ func NewSceneMain() *SceneMain {
 	// s.boards = append(s.boards, board)
 
 	s.current = s.boards[s.boardIdx]
-	// s.current.SetHidden(true)
+	// s.current.Hide()
 	s.bottomBar = NewBottomBar(func(btn *eui.Button) {
-		switch btn.GetText() {
+		switch btn.Text() {
 		case actNextSol:
-			s.current.SetHidden(true)
+			s.current.Hide()
 			s.current = nil
 			s.boardIdx++
 			if s.boardIdx >= len(s.boards) {
@@ -52,19 +51,19 @@ func NewSceneMain() *SceneMain {
 			}
 			s.current = s.boards[s.boardIdx]
 			s.current.Setup(true)
-			s.current.SetHidden(false)
+			s.current.Show()
 			s.Add(s.current)
 			s.SetRect(s.Rect())
-			fmt.Println("pressed:", btn.GetText(), s.boardIdx)
+			fmt.Println("pressed:", btn.Text(), s.boardIdx)
 		case actNew:
 			s.current.Setup(true)
 			s.bottomBar.UpdateMoveCount()
-			eui.NewSnackBar("Новый рассклад!").Show(2 * time.Second)
+			eui.NewSnackBar("Новый рассклад!").ShowTime(2 * time.Second)
 		case actReset:
 			s.current.Stopwatch().Stop()
 			s.current.Setup(false)
 			s.bottomBar.UpdateMoveCount()
-			eui.NewSnackBar("Повторить собирать рассклад!").Show(1 * time.Second)
+			eui.NewSnackBar("Повторить собирать рассклад!").ShowTime(1 * time.Second)
 		case actBackwardMove:
 			if s.current.GetMoveNr() > 0 {
 				s.current.SetMoveNr(s.current.GetMoveNr() - 1)
@@ -89,15 +88,15 @@ func (s *SceneMain) gameLogic(btn *eui.Button) {
 		if card == nil {
 			continue
 		}
-		if card.StringShort() == btn.GetText() {
+		if card.StringShort() == btn.Text() {
 			column, idx := s.current.Game().Index(card)
-			fmt.Println("sc mv:", column, idx, btn.GetText())
+			fmt.Println("sc mv:", column, idx, btn.Text())
 			for idx >= 0 {
 				s.current.MakeMove(column)
 				idx--
 			}
 			if s.bottomBar.UpdateMoveCount() {
-				eui.NewSnackBar("Нет ходов").Show(1 * time.Second)
+				eui.NewSnackBar("Нет ходов").ShowTime(1 * time.Second)
 			}
 		}
 	}

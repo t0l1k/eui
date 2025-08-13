@@ -16,28 +16,22 @@ func NewSceneGame() *SceneGame {
 	s := &SceneGame{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
 	s.topBar = eui.NewTopBar(app.GameTitle, func(b *eui.Button) {
 		s.dialog.SetTitle("Выбор новой игры")
-		s.dialog.SetHidden(false)
-		s.board.SetHidden(true)
+		s.dialog.Show()
+		s.board.Hide()
 	})
 	s.topBar.SetUseStopwatch()
-	s.topBar.SetTitleCoverArea(0.5)
 	s.Add(s.topBar)
 	s.dialog = NewDialog("Запустить игру", func(dlg *eui.Button) {
-		if dlg.GetText() == app.BNew {
+		if dlg.Text() == app.BNew {
 			s.board.NewGame(s.dialog.diff)
 		}
-		s.dialog.SetHidden(true)
-		s.board.SetHidden(false)
+		s.dialog.Hide()
+		s.board.Show()
 	})
 	s.Add(s.dialog)
 	s.board = NewBoard(s.dialog.diff)
 	s.Add(s.board)
 	return s
-}
-
-func (s *SceneGame) Entered() {
-	s.dialog.comboSelGameDiff.SetValue(app.FieldSizeNormal)
-	s.dialog.diff = s.dialog.comboSelGameDiff.Value().(int)
 }
 
 func (s *SceneGame) SetRect(rect eui.Rect[int]) {
