@@ -8,8 +8,8 @@ import (
 
 type SpreadsheetView struct {
 	*eui.Container
-	curCellLbl *eui.Text
-	input      *eui.InputBox2
+	curCellLbl *eui.Label
+	input      *eui.TextInputLine
 	layFooter  *eui.Container
 	laySheet   *eui.ListView
 	sheet      *sheet.Sheet
@@ -19,10 +19,10 @@ type SpreadsheetView struct {
 func NewSpreadSheetView(row, column int) *SpreadsheetView {
 	sv := SpreadsheetView{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	sv.layFooter = eui.NewContainer(eui.NewVBoxLayout(1))
-	sv.curCellLbl = eui.NewText("empty")
+	sv.curCellLbl = eui.NewLabel("empty")
 	sv.layFooter.Add(sv.curCellLbl)
-	sv.input = eui.NewInputBox2(func(ib *eui.InputBox2) {
-		value := ib.GetText()
+	sv.input = eui.NewTextInputLine(func(ib *eui.TextInputLine) {
+		value := ib.Text()
 		if ok, res := sv.sheet.IsFormula(sv.activeCell, value); ok {
 			sv.activeCell.Emit(res)
 		} else {
@@ -30,8 +30,6 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 		}
 		sv.laySheet.ImageReset()
 	})
-	sv.input.SetFocus()
-	sv.input.SetAlwaysFocus()
 	sv.layFooter.Add(sv.input)
 	sv.Add(sv.layFooter)
 
@@ -39,14 +37,14 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 	sv.laySheet.Rows(row + 1)
 	sv.Add(sv.laySheet)
 	sv.sheet = sheet.NewSheet()
-	sv.laySheet.AddItem(eui.NewText(" "))
+	sv.laySheet.AddItem(eui.NewLabel(" "))
 	for i := 0; i < row; i++ {
 		grid := sheet.NewGrid(i, 0)
-		sv.laySheet.AddItem(eui.NewText(grid.GetRow()))
+		sv.laySheet.AddItem(eui.NewLabel(grid.GetRow()))
 	}
 	for y := 0; y < column; y++ {
 		grid := sheet.NewGrid(0, y+1)
-		lblCol := eui.NewText(grid.GetColumn())
+		lblCol := eui.NewLabel(grid.GetColumn())
 		sv.laySheet.AddItem(lblCol)
 		for x := 0; x < row; x++ {
 			grid := sheet.NewGrid(x, y+1)
@@ -62,7 +60,7 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 								sv.activeCell.SetInActive()
 								sv.activeCell = nil
 							}
-							sv.input.Reset()
+							sv.input.SetText("")
 						}
 					}
 				}

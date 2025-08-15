@@ -2,6 +2,7 @@ package scenes
 
 import (
 	"log"
+	"strconv"
 
 	"github.com/t0l1k/eui"
 )
@@ -16,8 +17,8 @@ const (
 
 type SceneStopwatch struct {
 	*eui.Scene
-	btnsCont *eui.Container
-	// list           *eui.ListView
+	btnsCont       *eui.Container
+	list           *eui.ListView
 	swMain, swRing *eui.Stopwatch
 	var0, var1     *eui.Signal[string]
 	sBtns          []string
@@ -34,21 +35,17 @@ func NewSceneStopwatch() *SceneStopwatch {
 	s.var0 = eui.NewSignal(func(a, b string) bool { return a == b })
 	s.var1 = eui.NewSignal(func(a, b string) bool { return a == b })
 
-	lblTimeMain := eui.NewText("Нажми старт")
-	lblTimeMain.OnlyOneFontSize(true)
+	lblTimeMain := eui.NewLabel("Нажми старт")
 	s.var0.Connect(func(data string) { lblTimeMain.SetText(data) })
 
-	lblTimeSecond := eui.NewText("0.0")
-	lblTimeSecond.OnlyOneFontSize(true)
+	lblTimeSecond := eui.NewLabel("0.0")
 	s.var1.Connect(func(data string) { lblTimeSecond.SetText(data) })
-	// s.list = eui.NewListView()
+	s.list = eui.NewListView()
 
 	s.btnsCont = eui.NewContainer(eui.NewHBoxLayout(1))
 	s.sBtns = []string{"Обнулить", "Старт", "Круг"}
 	for _, value := range s.sBtns {
-		button := eui.NewButton(value, func(b *eui.Button) {
-			log.Println(b.Text())
-		})
+		button := eui.NewButton(value, s.stopwatchAppLogic)
 		s.btnsCont.Add(button)
 	}
 	s.state = watchStart
@@ -56,7 +53,7 @@ func NewSceneStopwatch() *SceneStopwatch {
 
 	s.Add(lblTimeMain)
 	s.Add(lblTimeSecond)
-	// s.Add(s.list)
+	s.Add(s.list)
 	s.Add(s.btnsCont)
 	return s
 }
@@ -101,10 +98,10 @@ func (s *SceneStopwatch) stopwatchAppLogic(b *eui.Button) {
 		switch s.state {
 		case watchPlay:
 			s.count++
-			// str := strconv.Itoa(s.count) + " R:" + s.swRing.String() + " M:" + s.swMain.String()
+			str := strconv.Itoa(s.count) + " R:" + s.swRing.String() + " M:" + s.swMain.String()
 			s.swRing.Reset()
-			// txt := eui.NewText(str)
-			// s.list.Add(txt)
+			txt := eui.NewLabel(str)
+			s.list.AddItem(txt)
 			s.swRing.Start()
 			s._dirty = true
 		}
@@ -121,7 +118,7 @@ func (s *SceneStopwatch) Update(dt int) {
 			s.btnsCont.Children()[1].(*eui.Button).SetText(s.sBtns[1])
 			s.btnsCont.Children()[0].(*eui.Button).Hide()
 			s.btnsCont.Children()[2].(*eui.Button).Hide()
-			// s.list.Reset()
+			s.list.Reset()
 		case watchPlay:
 			s.btnsCont.Children()[0].(*eui.Button).Hide()
 			s.btnsCont.Children()[2].(*eui.Button).Show()

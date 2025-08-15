@@ -11,13 +11,13 @@ import (
 
 type SnackBar struct {
 	*Drawable
-	msg   *Text
+	msg   *Label
 	timer *Timer
 }
 
 func NewSnackBar(message string) *SnackBar {
 	s := &SnackBar{Drawable: NewDrawable()}
-	s.msg = NewText(message)
+	s.msg = NewLabel(message)
 	s.msg.Bg(colornames.Blue)
 	s.msg.Fg(colornames.Yellow)
 	s.SetRect(NewRect([]int{0, 0, 0, 0}))
@@ -42,7 +42,7 @@ func (s *SnackBar) SetText(value string) *SnackBar {
 func (s *SnackBar) ShowTime(durration time.Duration) *SnackBar {
 	s.Show()
 	s.timer = NewTimer(durration, func() {
-		log.Println("Show snackbar done", s.msg.GetText())
+		log.Println("Show snackbar done", s.msg.Text())
 		GetUi().HideModal()
 	}).On()
 	GetUi().ShowModal(s)

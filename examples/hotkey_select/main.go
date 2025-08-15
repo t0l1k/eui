@@ -15,7 +15,7 @@ const (
 
 type InputKey struct {
 	*eui.Container
-	lbl    *eui.Text
+	lbl    *eui.Label
 	btn    *eui.Button
 	active bool
 	key    *eui.Signal[ebiten.Key]
@@ -24,7 +24,7 @@ type InputKey struct {
 
 func NewInputKey(title string) *InputKey {
 	i := &InputKey{Container: eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{70, 30}, 5)), key: eui.NewSignal(func(a, b ebiten.Key) bool { return a == b })}
-	i.lbl = eui.NewText(title)
+	i.lbl = eui.NewLabel(title)
 	i.Add(i.lbl)
 	i.btn = eui.NewButton("(?)", func(b *eui.Button) {
 		i.active = true
@@ -48,7 +48,7 @@ func (i *InputKey) KeyPressed(kd eui.KeyboardData) {
 	log.Println("InputKey:KeyPressed:", kd)
 }
 func (i *InputKey) String() string {
-	return fmt.Sprintf("%v: %v", i.lbl.GetText(), i.key.Value().String())
+	return fmt.Sprintf("%v: %v", i.lbl.Text(), i.key.Value().String())
 }
 func (i *InputKey) Close() { i.key.Disconnect(i.kId) }
 
@@ -58,7 +58,7 @@ func NewHotkeyDialog() *HotkeyDialog {
 	d := &HotkeyDialog{Container: eui.NewContainer(eui.NewLayoutVerticalPercent([]int{10, 90}, 5))}
 	contInputLines := eui.NewContainer(eui.NewVBoxLayout(10))
 	contTitle := eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{90, 10}, 5))
-	contTitle.Add(eui.NewText(title))
+	contTitle.Add(eui.NewLabel(title))
 	contTitle.Add(eui.NewButton("X", func(b *eui.Button) {
 		d.Hide()
 		for _, v := range contInputLines.Children() {

@@ -4,7 +4,7 @@ type TopBar struct {
 	*Container
 	btnMenu                        *Button
 	btnFunc                        func(b *Button)
-	lblTitle, tmLbl                *Text
+	lblTitle, tmLbl                *Label
 	tmVar                          *Signal[string]
 	Stopwatch                      *Stopwatch
 	useSW, showSW, showTitle, show bool
@@ -29,10 +29,10 @@ func NewTopBar(title string, fn func(b *Button)) *TopBar {
 	}
 	t.btnMenu = NewButton(btnText, t.btnFunc)
 	t.Add(t.btnMenu)
-	t.lblTitle = NewText(title)
+	t.lblTitle = NewLabel(title)
 	t.Add(t.lblTitle)
 	t.Add(NewDrawable())
-	t.tmLbl = NewText("")
+	t.tmLbl = NewLabel("")
 	t.Add(t.tmLbl)
 	t.setTheme()
 	return t

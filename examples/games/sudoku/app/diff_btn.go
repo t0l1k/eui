@@ -7,7 +7,7 @@ import (
 
 type DiffButton struct {
 	*eui.Container
-	title, lblScore *eui.Text
+	title, lblScore *eui.Label
 	btn             *eui.Button
 	dim             game.Dim
 	diff            game.Difficult
@@ -19,9 +19,9 @@ func NewDiffButton(dim game.Dim, diff game.Difficult, fn func(b *eui.Button)) *D
 	d.dim = dim
 	d.diff = diff
 	d.fn = fn
-	d.title = eui.NewText(diff.String())
+	d.title = eui.NewLabel(diff.String())
 	d.Add(d.title)
-	d.lblScore = eui.NewText("")
+	d.lblScore = eui.NewLabel("")
 	d.Add(d.lblScore)
 	d.btn = eui.NewButton("Запустить", fn)
 	d.Add(d.btn)

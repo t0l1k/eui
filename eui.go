@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/t0l1k/eui/res"
 )
 
 var uiInstance *Ui = nil
@@ -24,6 +25,7 @@ func Init(u *Ui) {
 	u.inputMouse = NewMouseListener(u.HandleEvent)
 	u.resizeListener = NewResizeListener(u.HandleEvent)
 	u.focusManager = &FocusManager{}
+	u.resource = NewResourceManager().LoadFont(FontDefault, res.DejaVuSans_ttf, 36)
 }
 
 // Переход в вечный цикл...

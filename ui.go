@@ -24,6 +24,7 @@ type Ui struct {
 	tickListener   *TickListener
 	modal          Drawabler
 	focusManager   *FocusManager
+	resource       *ResourceManager
 }
 
 func (u *Ui) GetStartTime() time.Time          { return u.start }
@@ -38,6 +39,7 @@ func (u *Ui) IsMainScene() bool                { return len(u.scenes) == 0 }
 func (u *Ui) GetTheme() *Theme                 { return u.theme }
 func (u *Ui) SetTheme(value *Theme) *Ui        { u.theme = value; return u }
 func (u *Ui) GetSettings() *Setting            { return u.settings }
+func (u *Ui) FontDefault() *Font               { return u.resource.FontDefault() }
 
 // Отсюда можно следить за изменением размера окна, при изменении обновляются размеры текущей сцены
 func (u *Ui) Layout(w, h int) (int, int) {

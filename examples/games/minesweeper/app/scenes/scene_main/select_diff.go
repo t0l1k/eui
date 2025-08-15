@@ -26,7 +26,7 @@ func NewSelectDiff(title string) *SelectDiff {
 	s.topBar = eui.NewTopBar(title, nil)
 	s.Add(s.topBar)
 	s.frame = eui.NewContainer(eui.NewVBoxLayout(1))
-	lblTitle := eui.NewText("Настрой сложность")
+	lblTitle := eui.NewLabel("Настрой сложность")
 	s.frame.Add(lblTitle)
 	s.column, s.row, s.percent = 5, 5, 15
 

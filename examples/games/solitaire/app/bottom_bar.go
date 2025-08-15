@@ -41,10 +41,10 @@ func (b *BottomBar) Setup(board Sols) {
 	for _, str := range actStrs {
 		b.layout.Add(eui.NewButton(str, b.fn))
 	}
-	movesText := eui.NewText("Ходов:0")
+	movesText := eui.NewLabel("Ходов:0")
 	b.varMoves.Connect(func(data string) { movesText.SetText(data) })
 	b.layout.Add(movesText)
-	swText := eui.NewText("")
+	swText := eui.NewLabel("")
 	b.varSw.Connect(func(data string) { swText.SetText(data) })
 	b.layout.Add(swText)
 }

@@ -35,7 +35,7 @@ func NewSpinBox[T any](
 		min:           0,
 		max:           len(values) - 1,
 	}
-	lbl := NewText(txt)
+	lbl := NewLabel(txt)
 	btnInc := NewButton(string('\u25B2'), func(b *Button) {
 		i := s.index.Value()
 		if i < s.max {

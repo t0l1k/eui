@@ -221,7 +221,7 @@ type SceneAnalogClock struct {
 	*eui.Scene
 	topBar   *eui.TopBar
 	clock    *AnalogClock
-	lblTm    *eui.Text
+	lblTm    *eui.Label
 	tmVar    *eui.Signal[string]
 	checkBox *eui.Checkbox
 }
@@ -234,9 +234,9 @@ func NewSceneAnalogClock() *SceneAnalogClock {
 	s.Add(s.clock)
 	contStatus := eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{30, 40, 30}, 5))
 	s.Add(contStatus)
-	s.lblTm = eui.NewText("")
+	s.lblTm = eui.NewLabel("")
 	contStatus.Add(s.lblTm)
-	contStatus.Add(eui.NewText(""))
+	contStatus.Add(eui.NewLabel(""))
 	s.tmVar = eui.NewSignal(func(a, b string) bool { return a == b })
 	s.tmVar.Connect(func(data string) {
 		s.lblTm.SetText(data)

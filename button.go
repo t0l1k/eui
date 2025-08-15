@@ -1,6 +1,7 @@
 package eui
 
 import (
+	"image/color"
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -10,10 +11,10 @@ import (
 // Умею показать кнопку под мышкой выделенной, или нажатой, или отпущенной(после отпускания исполняется прикрепленный метод)
 type Button struct {
 	*Drawable
-	txt            string
-	onPressed      func(*Button)
-	icons          []*ebiten.Image
-	useIcon, press bool
+	txt       string
+	onPressed func(*Button)
+	icons     []*ebiten.Image
+	useIcon   bool
 }
 
 func NewButton(txt string, fn func(*Button)) *Button {
@@ -21,6 +22,7 @@ func NewButton(txt string, fn func(*Button)) *Button {
 	theme := GetUi().theme
 	b.Bg(theme.Get(ButtonBg))
 	b.Fg(theme.Get(ButtonFg))
+	b.SetShadow(1, color.RGBA{0, 0, 0, 128})
 	return b
 }
 
@@ -40,14 +42,14 @@ func (b *Button) Hit(pt Point[int]) Drawabler {
 }
 func (b *Button) WantBlur() bool { return true }
 func (b *Button) MouseDown(md MouseData) {
-	b.press = true
+	b.pressed = true
 	b.MarkDirty()
 }
 func (b *Button) MouseUp(md MouseData) {
 	if b.onPressed != nil {
 		b.onPressed(b)
 	}
-	b.press = false
+	b.pressed = false
 	log.Println("Button:MouseReleased:", b.txt, b.Rect())
 }
 
@@ -64,7 +66,7 @@ func (b *Button) Layout() {
 
 	if b.useIcon {
 		var icon *Icon
-		if b.press {
+		if b.pressed {
 			icon = NewIcon(b.IconUp())
 		} else {
 			icon = NewIcon(b.IconDown())
@@ -72,19 +74,22 @@ func (b *Button) Layout() {
 		icon.SetRect(NewRect([]int{0, 0, w, h}))
 		icon.Layout()
 		icon.Draw(b.Image())
-		log.Printf("btnStatus: IconUp=%v IconDown=%v useIcon=%v len:%v", b.IconUp(), b.IconDown(), b.useIcon, len(b.icons))
-		log.Println("ButtonIcon:Layout:", b.Rect(), icon.Rect(), b.press, b.State(), icon.State(), icon.Image().Bounds())
 	} else {
-		lbl := NewText(b.txt)
+		lbl := NewLabel(b.txt)
 		margin := int(float64(b.Rect().GetLowestSize()) * 0.03)
-		lbl.SetRect(NewRect([]int{margin, margin, w - margin*2, h - margin*2}))
+		x := margin
+		y := margin
+		if b.pressed {
+			x += margin / 2
+			y += margin / 2
+		}
+		lbl.SetRect(NewRect([]int{x, y, w - margin*2, h - margin*2}))
 		lbl.Bg(b.GetBg())
 		lbl.Fg(b.GetFg())
 		lbl.Layout()
 		lbl.Draw(b.Image())
 		vector.StrokeRect(b.Image(), 0, 0, float32(w), float32(h), float32(margin), b.state.Color(), true)
 	}
-
 	b.ClearDirty()
 }
 

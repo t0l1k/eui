@@ -1,73 +1,113 @@
 package eui
 
 import (
-	"log"
+	"bytes"
+	"strings"
 
-	"github.com/hajimehoshi/ebiten/v2/text"
-	"github.com/t0l1k/eui/res"
-	"golang.org/x/image/font"
-	"golang.org/x/image/font/opentype"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
-func init() {
-	fontsInstance = GetFonts()
+type Font struct {
+	name   string
+	source *text.GoTextFaceSource
+	font   map[int]*text.GoTextFace
 }
 
-var fontsInstance *Fonts = nil
-
-func GetFonts() (f *Fonts) {
-	if fontsInstance == nil {
-		f = &Fonts{}
-	} else {
-		f = fontsInstance
+func NewFont(name string, data []byte, size int) (*Font, error) {
+	s, err := text.NewGoTextFaceSource(bytes.NewReader(data))
+	if err != nil {
+		return nil, err
 	}
+	fnt := &text.GoTextFace{Source: s, Size: float64(size)}
+	fonts := make(map[int]*text.GoTextFace, 0)
+	fonts[size] = fnt
+	f := &Font{
+		name:   name,
+		source: s,
+		font:   fonts,
+	}
+	return f, nil
+}
+
+func (f Font) add(size int) Font {
+	font := &text.GoTextFace{Source: f.source, Size: float64(size)}
+	f.font[size] = font
 	return f
 }
 
-// Храню все когда-то открытые шрифты и кладу в мап, иначе возникает утечка памяти, если постоянно заново открывать.
-type Fonts map[int]font.Face
-
-func (f Fonts) add(size int) {
-	tt, err := opentype.Parse(res.DejaVuSans_ttf)
-	if err != nil {
-		log.Fatal(err)
-	}
-	mplusFont, err := opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    float64(size),
-		DPI:     72,
-		Hinting: font.HintingFull,
-	})
-	if err != nil {
-		log.Fatal(err)
-	}
-	f[size] = mplusFont
-}
-
-func (f Fonts) Get(size int) font.Face {
-	for k, v := range f {
-		if k == size {
-			return v
-		}
+func (f Font) Get(size int) *text.GoTextFace {
+	if font, exists := f.font[size]; exists {
+		return font
 	}
 	f.add(size)
-	return f[size]
+	return f.font[size]
 }
 
-// Вычисляю размер шрифма в 85% от переданого размера меньшей стороны
-func (f Fonts) calcFontSize(txt string, rect Rect[int]) int {
+func (f Font) CalcFontSize(txt string, rect Rect[int]) int {
+	percent := 0.9
+	w0, h0 := rect.Size()
+	sz := min(w0, h0)
 	var fontSize float64
-	percent := 0.85
-	w, h := rect.Size()
-	sz := rect.GetLowestSize()
 	for {
 		fontSize = percent * float64(sz)
 		fnt := f.Get(int(fontSize))
-		defer fnt.Close()
-		bound := text.BoundString(fnt, txt)
-		if w > bound.Max.X && h > bound.Max.Y {
+		w, h := text.Measure(txt, fnt, fnt.Size*1.2)
+		if w0 > int(w) && h0 > int(h) {
 			break
 		}
 		percent -= 0.01
 	}
 	return int(fontSize)
+}
+
+func (f Font) WordWrapText(txt string, fontSize float64, width int) (string, Point[int]) {
+	if len(txt) == 0 {
+		return txt, NewPoint(0, 0)
+	}
+	var (
+		fnt    *text.GoTextFace
+		result strings.Builder
+		maxW   float64
+		lines  int
+	)
+	fnt = f.Get(int(fontSize))
+	origLines := strings.Split(txt, "\n")
+	for li, origLine := range origLines {
+		words := strings.Fields(origLine)
+		line := ""
+		for i, str := range words {
+			testLine := line
+			if testLine != "" {
+				testLine += " "
+			}
+			testLine += str
+			w, _ := text.Measure(testLine, fnt, fnt.Size*1.2)
+			if w > float64(width) && line != "" {
+				result.WriteString(line)
+				result.WriteString("\n")
+				lines++
+				line = str
+			} else {
+				line = testLine
+			}
+			if w > maxW {
+				maxW = w
+			}
+			// Последнее слово в строке
+			if i == len(words)-1 {
+				result.WriteString(line)
+				lines++
+			}
+		}
+		// Если строка была пустой (например, двойной \n)
+		if len(words) == 0 {
+			result.WriteString("\n")
+			lines++
+		}
+		// Не добавлять лишний перенос после последней строки
+		if li < len(origLines)-1 && len(words) > 0 {
+			result.WriteString("\n")
+		}
+	}
+	return result.String(), NewPoint(int(maxW), int(fnt.Size*1.2*float64(lines)))
 }

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/text"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/colornames"
 )
@@ -114,49 +114,79 @@ func (e *TextInputLine) KeyReleased(kd KeyboardData) {
 }
 
 func (e *TextInputLine) Layout() {
+	h := e.rect.H
 	e.Drawable.Layout()
 
-	fontSize := float64(e.rect.GetLowestSize()) * 0.3
-	font := GetFonts().Get(int(fontSize))
+	sz := float64(h) * 0.3
+	fnt := GetUi().FontDefault().Get(int(sz))
 
-	w, h := e.Rect().Size()
-	margin := float64(e.Rect().GetLowestSize()) * 0.03
+	margin := 8.0
+	w := float64(e.rect.W)
+	txt := e.text
 
-	x := margin
-	textBounds := text.BoundString(font, e.text)
-	y := (e.rect.H+textBounds.Dy())/2 - textBounds.Max.Y
-
+	// Определяем ширину текста до курсора
 	cursorSub := ""
-	if e.cursorPos > 0 && e.cursorPos <= len(e.text) {
-		cursorSub = e.text[:e.cursorPos]
+	if e.cursorPos > 0 && e.cursorPos <= len(txt) {
+		cursorSub = txt[:e.cursorPos]
 	}
-	cursorBounds := text.BoundString(font, cursorSub)
-	cursorX := float64(x) + float64(cursorBounds.Dx()) + margin
+	cursorW, _ := text.Measure(cursorSub, fnt, fnt.Size*1.2)
+	cursorX := margin + cursorW
 
-	visibleWidth := float64(w) - margin*4
+	visibleW := w - margin*2
 
+	// Скроллим так, чтобы курсор всегда был видим
 	scrollOffset := 0.0
-	if cursorX > float64(x)+visibleWidth {
-		scrollOffset = cursorX - (float64(x) + visibleWidth)
-	} else if cursorX < float64(x) {
-		scrollOffset = cursorX - float64(x)
+	if cursorX > margin+visibleW {
+		scrollOffset = cursorX - (margin + visibleW)
+	} else if cursorX < margin {
+		scrollOffset = cursorX - margin
 	}
 
-	if e.blink && e.State().IsFocused() {
-		cursorTop := float32(y + textBounds.Min.Y)
-		cursorBottom := float32(y + textBounds.Max.Y)
+	// Обрезаем текст слева, если нужно
+	drawText := txt
+	drawOffset := 0
+	for len(drawText) > 0 {
+		subW, _ := text.Measure(drawText, fnt, fnt.Size*1.2)
+		if float64(subW) > visibleW+scrollOffset {
+			drawText = drawText[1:]
+			drawOffset++
+		} else {
+			break
+		}
+	}
 
-		cursorWidth := float32(fontSize * 0.05)
+	opts := &text.DrawOptions{}
+	opts.GeoM.Translate(margin-scrollOffset, float64(h)/2)
+	opts.PrimaryAlign = text.AlignStart
+	opts.SecondaryAlign = text.AlignCenter
+	opts.ColorScale.ScaleWithColor(e.GetFg())
+
+	text.Draw(e.Image(), txt[drawOffset:], fnt, opts)
+
+	// Курсор
+	if e.State().IsFocused() {
+		// Пересчитаем позицию курсора относительно видимого текста
+		cursorSub := txt[drawOffset:e.cursorPos]
+		cursorW, _ := text.Measure(cursorSub, fnt, fnt.Size*1.2)
+		cursorX := margin + float64(cursorW) - scrollOffset
+
+		cursorColor := e.GetFg()
+		if e.blink {
+			cursorColor = e.GetBg()
+		}
+		cursorHeight := float32(sz * 0.9)
+		cursorWidth := float32(sz * 0.01) // 1% от высоты шрифта
 		if cursorWidth < 1 {
 			cursorWidth = 1
 		}
-		vector.StrokeLine(e.Image(), float32(cursorX-scrollOffset), cursorTop, float32(cursorX-scrollOffset), cursorBottom, cursorWidth, e.GetFg(), true)
+		cursorY := float32(h)/2 - cursorHeight/2
+		vector.StrokeLine(
+			e.Image(),
+			float32(cursorX), cursorY,
+			float32(cursorX), cursorY+cursorHeight,
+			cursorWidth, cursorColor, true,
+		)
 	}
-
-	text.Draw(e.Image(), e.text, font, int(x-scrollOffset), y, e.GetFg())
-
-	vector.StrokeRect(e.Image(), 0, 0, float32(w), float32(h), float32(margin), e.state.Color(), true)
-
 	e.ClearDirty()
 }
 

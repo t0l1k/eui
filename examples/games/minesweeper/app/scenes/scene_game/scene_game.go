@@ -13,7 +13,7 @@ import (
 type SceneGame struct {
 	*eui.Scene
 	game                   *Game
-	lblMines, lblGameTimer *eui.Text
+	lblMines, lblGameTimer *eui.Label
 	btnStatus              *eui.Button
 	btnAF                  *eui.Button
 }
@@ -22,8 +22,8 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 	s := &SceneGame{Scene: eui.NewScene(eui.NewLayoutVerticalPercent([]int{5, 90, 5}, 5))}
 	s.game = newGame(r, c, m)
 	s.game.field.State.Connect(s.UpdateData)
-	s.lblMines = eui.NewText("" + strconv.Itoa(s.game.field.GetTotalMines()))
-	s.lblGameTimer = eui.NewText("00:00")
+	s.lblMines = eui.NewLabel("" + strconv.Itoa(s.game.field.GetTotalMines()))
+	s.lblGameTimer = eui.NewLabel("00:00")
 	s.btnStatus = eui.NewButtonIcon([]*ebiten.Image{res.SmileSprites[1], res.SmileSprites[0]}, func(b *eui.Button) {
 		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 			s.game.New()

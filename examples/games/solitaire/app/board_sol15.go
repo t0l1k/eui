@@ -49,11 +49,11 @@ func (b *BoardSol15) Setup(newDeck bool) {
 		}
 		if (i+1)%3 == 0 && (i > 0 && i < 14) {
 			for i := 0; i < 14; i++ {
-				lbl := eui.NewText(" ")
+				lbl := eui.NewLabel(" ")
 				b.layout.Add(lbl)
 			}
 		} else if i < 14 {
-			lbl := eui.NewText(" ")
+			lbl := eui.NewLabel(" ")
 			b.layout.Add(lbl)
 		}
 	}

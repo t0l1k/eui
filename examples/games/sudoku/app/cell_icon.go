@@ -49,7 +49,7 @@ func (c *CellIcon) Layout() {
 	c.layout.ResetContainer()
 	value := c.cell.GetValue()
 	if value > 0 {
-		lbl := eui.NewText(strconv.Itoa(value))
+		lbl := eui.NewLabel(strconv.Itoa(value))
 		c.layout.Add(lbl)
 		c.layout.SetLayout(eui.NewGridLayout(1, 1, 1))
 		defer lbl.Close()
@@ -68,7 +68,7 @@ func (c *CellIcon) Layout() {
 		notes := c.cell.GetNotes()
 		if c.showNotes && len(notes) > 0 {
 			for i := 0; i < c.dim.Size(); i++ {
-				lbl := eui.NewText("")
+				lbl := eui.NewLabel("")
 				lbl.Bg(colornames.Silver)
 				lbl.Fg(c.GetFg())
 				c.layout.Add(lbl)
@@ -83,10 +83,10 @@ func (c *CellIcon) Layout() {
 					lbl.SetText("")
 				}
 			}
-			c.layout.SetLayout(eui.NewGridLayout(float64(c.dim.W), float64(c.dim.H), 1))
+			c.layout.SetLayout(eui.NewGridLayout(c.dim.W, c.dim.H, 1))
 			// log.Println("Иконка с заметкой", arr1)
 		} else {
-			lbl := eui.NewText("")
+			lbl := eui.NewLabel("")
 			c.layout.Add(lbl)
 			c.layout.SetLayout(eui.NewGridLayout(1, 1, 1))
 			defer lbl.Close()

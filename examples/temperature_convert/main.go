@@ -22,7 +22,7 @@ func NewSceneTemp() *SceneTemp {
 		}
 	})
 	s.Add(a)
-	s.Add(eui.NewText("Celsius ="))
+	s.Add(eui.NewLabel("Celsius ="))
 	c = eui.NewTextInputLine(func(ib *eui.TextInputLine) {
 		if digit, err := ib.Digit(); err == nil {
 			n := GetCelsiusFromFahrenheit(digit)
@@ -31,7 +31,7 @@ func NewSceneTemp() *SceneTemp {
 		}
 	})
 	s.Add(c)
-	s.Add(eui.NewText("Fahrenheit"))
+	s.Add(eui.NewLabel("Fahrenheit"))
 	return s
 }
 

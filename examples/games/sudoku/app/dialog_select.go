@@ -9,9 +9,9 @@ import (
 
 type DialogSelect struct {
 	*eui.Container
-	title      *eui.Text
+	title      *eui.Label
 	btnClose   *eui.Button
-	lblHistory *eui.Text
+	lblHistory *eui.Label
 	history    *eui.ListView
 	cSize      *eui.SpinBox[game.Dim]
 	btnsDiff   []*DiffButton
@@ -23,7 +23,7 @@ type DialogSelect struct {
 func NewDialogSelect(gamesData *game.GamesData, fn func(b *eui.Button)) *DialogSelect {
 	d := &DialogSelect{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	d.gamesData = gamesData
-	d.title = eui.NewText("Выбрать размер поля и сложность")
+	d.title = eui.NewLabel("Выбрать размер поля и сложность")
 	d.Add(d.title)
 	d.btnClose = eui.NewButton("X", func(b *eui.Button) { d.Hide(); eui.GetUi().Pop() })
 	d.Add(d.btnClose)
@@ -70,7 +70,7 @@ func NewDialogSelect(gamesData *game.GamesData, fn func(b *eui.Button)) *DialogS
 		d.btnsDiff = append(d.btnsDiff, btn)
 		d.Add(btn)
 	}
-	d.lblHistory = eui.NewText("История игр")
+	d.lblHistory = eui.NewLabel("История игр")
 	d.Add(d.lblHistory)
 	d.history = eui.NewListView()
 	d.Add(d.history)

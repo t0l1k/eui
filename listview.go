@@ -69,7 +69,7 @@ func (l *ListView) SetupListViewText(list []string, itemSize, rows int, bg, fg c
 	l.rows = rows
 	l.list = list
 	for _, v := range l.list {
-		lbl := NewText(v)
+		lbl := NewLabel(v)
 		l.AddItem(lbl)
 		lbl.Bg(bg)
 		lbl.Fg(fg)
@@ -80,7 +80,7 @@ func (l *ListView) SetupListViewText(list []string, itemSize, rows int, bg, fg c
 func (l *ListView) SetListViewTextWithBgFgColors(list []string, bg, fg []color.Color) {
 	l.list = list
 	for i, str := range l.list {
-		lbl := NewText(str)
+		lbl := NewLabel(str)
 		l.AddItem(lbl)
 		lbl.Bg(bg[i])
 		lbl.Fg(fg[i])
@@ -91,10 +91,10 @@ func (l *ListView) SetListViewTextWithBgFgColors(list []string, bg, fg []color.C
 func (l *ListView) AddBgFg(d Drawabler, bg, fg color.Color) {
 	l.children = append(l.children, d)
 	switch value := d.(type) {
-	case *Text:
+	case *Label:
 		value.Bg(bg)
 		value.Fg(fg)
-		l.list = append(l.list, value.GetText())
+		l.list = append(l.list, value.Text())
 	case *Button:
 		value.Bg(bg)
 		value.Fg(fg)
@@ -159,7 +159,7 @@ func (l *ListView) Layout() {
 	l.contentImage.Fill(colornames.Fuchsia)
 	for _, v := range l.children {
 		switch value := v.(type) {
-		case *Text, *Button, *Checkbox:
+		case *Label, *Button, *Checkbox:
 			value.Draw(l.contentImage)
 		}
 	}
@@ -282,7 +282,7 @@ func (l *ListView) resizeChilds() {
 	col := 1
 	for _, v := range l.children {
 		switch value := v.(type) {
-		case *Text, *Button, *Checkbox:
+		case *Label, *Button, *Checkbox:
 			value.SetRect(NewRect([]int{x, y, w - 1, h - 1}))
 		}
 		x += w

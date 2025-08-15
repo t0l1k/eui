@@ -116,9 +116,10 @@ func (p *Posititon) Blanks() (total int) {
 func (p *Posititon) Code() (value int) {
 	for i := 0; i < p.size; i++ {
 		value = value * 3
-		if p.board[i] == TurnX {
+		switch p.board[i] {
+		case TurnX:
 			value += 1
-		} else if p.board[i] == TurnO {
+		case TurnO:
 			value += 2
 		}
 	}

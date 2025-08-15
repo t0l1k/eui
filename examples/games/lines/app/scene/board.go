@@ -28,7 +28,7 @@ func NewBoard(dim int) *Board {
 	b.table = NewTable()
 	b.Add(b.table)
 	r, c := b.field.Dim()
-	b.gameLayout = eui.NewContainer(eui.NewGridLayout(float64(r), float64(c), 1))
+	b.gameLayout = eui.NewContainer(eui.NewGridLayout(r, c, 1))
 	b.Add(b.gameLayout)
 	b.varScore = eui.NewSignal(func(a, b int) bool { return a == b })
 	b.varScore.Connect(func(data int) {
@@ -87,7 +87,7 @@ func (b *Board) NewGame(dim int) {
 		b.gameLayout.Add(btn)
 	}
 	r, c := b.field.Dim()
-	b.gameLayout.SetLayout(eui.NewGridLayout(float64(r), float64(c), 1))
+	b.gameLayout.SetLayout(eui.NewGridLayout(r, c, 1))
 	b.field.NextMoveBalls()
 	b.field.ShowFilledNext()
 	b.field.NextMoveBalls()

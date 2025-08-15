@@ -14,7 +14,7 @@ type Game struct {
 }
 
 func newGame(r, c, m int) *Game {
-	g := &Game{Container: eui.NewContainer(eui.NewGridLayout(float64(r), float64(c), 1))}
+	g := &Game{Container: eui.NewContainer(eui.NewGridLayout(r, c, 1))}
 	g.field = game.NewMinedField(r, c, m)
 	g.field.State.Connect(g.UpdateData)
 	g.timer = eui.NewStopwatch()

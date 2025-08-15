@@ -255,7 +255,7 @@ type Board struct {
 	varArea   *eui.Signal[string]
 	layout    *eui.Container
 	stopwatch *eui.Stopwatch
-	bottomLbl *eui.Text
+	bottomLbl *eui.Label
 }
 
 func NewBoard() *Board {
@@ -281,10 +281,10 @@ func NewBoard() *Board {
 		log.Println("board got:", value)
 	})
 	r, c := b.field.Dim()
-	b.layout = eui.NewContainer(eui.NewGridLayout(float64(r), float64(c), 1))
+	b.layout = eui.NewContainer(eui.NewGridLayout(r, c, 1))
 	b.Add(b.layout)
 	b.stopwatch = eui.NewStopwatch()
-	b.bottomLbl = eui.NewText("")
+	b.bottomLbl = eui.NewLabel("")
 	b.Add(b.bottomLbl)
 	b.varArea.Connect(func(data string) {
 		b.bottomLbl.SetText(data)
@@ -298,7 +298,7 @@ func (b *Board) NewGame() {
 	b.layout.ResetContainer()
 	b.field.NewGame()
 	r, c := b.field.Dim()
-	b.layout.SetLayout(eui.NewGridLayout(float64(r), float64(c), 1))
+	b.layout.SetLayout(eui.NewGridLayout(r, c, 1))
 	for i := 0; i < len(b.field.field); i++ {
 		btn := NewCellIcon(b.field, b.gameLogic)
 		x, y := b.field.pos(i)
@@ -385,7 +385,7 @@ func (b *Board) SetRect(rect eui.Rect[int]) {
 type Dialog struct {
 	*eui.Container
 	btnQuit, btnNew, btnReset, btnNext, btnCont *eui.Button
-	title, message                              *eui.Text
+	title, message                              *eui.Label
 	dialFunc                                    func(d *eui.Button)
 	board                                       *Board
 }
@@ -394,7 +394,7 @@ func NewDialog(title string, board *Board, f func(d *eui.Button)) *Dialog {
 	t := &Dialog{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	t.board = board
 	t.dialFunc = f
-	t.title = eui.NewText(title)
+	t.title = eui.NewLabel(title)
 	t.Add(t.title)
 	t.btnQuit = eui.NewButton(bQuit, func(b *eui.Button) {
 		eui.GetUi().Pop()
@@ -408,7 +408,7 @@ func NewDialog(title string, board *Board, f func(d *eui.Button)) *Dialog {
 	t.Add(t.btnNext)
 	t.btnCont = eui.NewButton(bCont, f)
 	t.Add(t.btnCont)
-	t.message = eui.NewText("")
+	t.message = eui.NewLabel("")
 	t.Add(t.message)
 	return t
 }

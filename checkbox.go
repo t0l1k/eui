@@ -51,7 +51,7 @@ func (c *Checkbox) Layout() {
 	if c.checked {
 		str = "*"
 	}
-	lblCheck := NewText(str)
+	lblCheck := NewLabel(str)
 	margin := int(float64(c.Rect().GetLowestSize()) * 0.03)
 	r := NewRect([]int{int(margin), int(margin), h - int(margin*2), h - int(margin*2)})
 	lblCheck.SetRect(r)
@@ -60,7 +60,7 @@ func (c *Checkbox) Layout() {
 	lblCheck.Layout()
 	lblCheck.Draw(c.Image())
 
-	lblTxt := NewText(c.txt)
+	lblTxt := NewLabel(c.txt)
 	lblTxt.SetRect(NewRect([]int{h + int(margin), int(margin), (w - h) - int(margin*2), h - int(margin*2)}))
 	lblTxt.Bg(c.GetBg())
 	lblTxt.Fg(c.GetFg())

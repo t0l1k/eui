@@ -76,7 +76,7 @@ func (d *BoardMem) SetupPreparation() {
 func (d *BoardMem) SetupShow() {
 	d.ResetContainer()
 	w, h := d.game.Dim().Width(), d.Game().Dim().Height()
-	d.SetLayout(eui.NewGridLayout(float64(w), float64(h), 1))
+	d.SetLayout(eui.NewGridLayout(w, h, 1))
 	for y := 0; y < d.Game().Dim().Height(); y++ {
 		for x := 0; x < d.game.Dim().Width(); x++ {
 			cell := d.Game().Cell(d.Game().Idx(x, y))
@@ -98,7 +98,7 @@ func (d *BoardMem) SetupShow() {
 func (d *BoardMem) SetupRecolection() {
 	d.ResetContainer()
 	w, h := d.game.Dim().Width(), d.Game().Dim().Height()
-	d.SetLayout(eui.NewGridLayout(float64(w), float64(h), 1))
+	d.SetLayout(eui.NewGridLayout(w, h, 1))
 	for y := 0; y < h; y++ {
 		for x := 0; x < w; x++ {
 			btn := eui.NewButton(" ", d.fn)

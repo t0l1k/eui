@@ -24,35 +24,40 @@ func main() {
 
 			game := pos.NewPosititon(3)
 
-			lblStatus := eui.NewText("")
-			lblStatus.SetText("Turn:" + game.GetTurn())
+			lblStatus := eui.NewLabel("")
+			statusGame := eui.NewSignal(func(a, b string) bool { return a == b })
+			statusGame.ConnectAndFire(func(data string) {
+				lblStatus.SetText(data)
+			}, "Turn:"+game.GetTurn())
 
-			board := eui.NewContainer(eui.NewGridLayout(3, 3, 5))
+			board := eui.NewContainer(eui.NewSquareGridLayout(3, 3, 5))
+
+			move := func(where int, who string) {
+				board.Children()[where].(*eui.Button).SetText(who)
+			}
+
 			for i := range 9 {
 				board.Add(eui.NewButton("", func(b *eui.Button) {
 					if game.IsGameEnd() || game.GetBoard()[i] != pos.TurnEmpty {
 						return
 					}
 					game.Move(i)
-					board.Children()[i].(*eui.Button).SetText(game.GetNextTurn())
+					move(i, game.GetNextTurn())
 					if !game.IsGameEnd() {
 						best := game.BestMove()
 						game.Move(best)
-						board.Children()[best].(*eui.Button).SetText(game.GetNextTurn())
-						lblStatus.SetText("Turn:" + game.GetTurn())
+						move(best, game.GetNextTurn())
 					}
 					if game.IsGameEnd() {
-						str := ""
-						if game.IsGameEnd() {
-							if game.IsWinFor(pos.TurnX) {
-								str += "Won " + string(pos.TurnX)
-							} else if game.IsWinFor(pos.TurnO) {
-								str += "Won " + string(pos.TurnO)
-							} else if game.Blanks() == 0 {
-								str = "Draw!"
-							}
+						if game.IsWinFor(pos.TurnX) {
+							statusGame.Emit("Won " + string(pos.TurnX))
+						} else if game.IsWinFor(pos.TurnO) {
+							statusGame.Emit("Won " + string(pos.TurnO))
+						} else if game.Blanks() == 0 {
+							statusGame.Emit("Draw!")
 						}
-						lblStatus.SetText(str)
+					} else {
+						statusGame.Emit("Turn:" + game.GetTurn())
 					}
 					fmt.Println(game)
 				}))
@@ -61,9 +66,9 @@ func main() {
 			statusLine := eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{30, 70}, 5))
 			statusLine.Add(eui.NewButton("Reset game", func(b *eui.Button) {
 				game.Reset()
-				lblStatus.SetText("Turn:" + game.GetTurn())
-				for _, v := range board.Children() {
-					v.(*eui.Button).SetText(string(pos.TurnEmpty))
+				statusGame.Emit("Turn:" + game.GetTurn())
+				for i := range board.Children() {
+					move(i, string(pos.TurnEmpty))
 				}
 			}))
 			statusLine.Add(lblStatus)

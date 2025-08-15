@@ -10,7 +10,7 @@ import (
 type Dialog struct {
 	*eui.Container
 	btnHide, btnNew  *eui.Button
-	title, message   *eui.Text
+	title, message   *eui.Label
 	comboSelGameDiff *eui.SpinBox[int]
 	diff             int
 	dialogFunc       func(b *eui.Button)
@@ -19,7 +19,7 @@ type Dialog struct {
 func NewDialog(title string, f func(btn *eui.Button)) *Dialog {
 	d := &Dialog{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
 	d.dialogFunc = f
-	d.title = eui.NewText(title)
+	d.title = eui.NewLabel(title)
 	d.Add(d.title)
 	d.btnHide = eui.NewButton("X", func(b *eui.Button) {
 		d.Hide()
@@ -27,7 +27,7 @@ func NewDialog(title string, f func(btn *eui.Button)) *Dialog {
 	d.Add(d.btnHide)
 	d.btnNew = eui.NewButton(app.BNew, f)
 	d.Add(d.btnNew)
-	d.message = eui.NewText("")
+	d.message = eui.NewLabel("")
 	d.Add(d.message)
 	data := []int{app.FieldSizeSmall, app.FieldSizeNormal, app.FieldSizeBig}
 	d.diff = data[1]

@@ -28,7 +28,7 @@ func main() {
 	eui.Run(func() *eui.Scene {
 		counter := NewCount()                                                             // Сигнал подписчикам передать автоматически оповещение при изменении счетчика
 		s := eui.NewScene(eui.NewVBoxLayout(1))                                           // Контейнер сцены по вертикали
-		lblCounter := eui.NewText("Count")                                                // Текстовая метка
+		lblCounter := eui.NewLabel("Count")                                               // Текстовая метка
 		s.Add(lblCounter)                                                                 // Добавить в контейнер текстовую метку
 		counter.ConnectAndFire(func(data int) { lblCounter.SetText(counter.Value()) }, 0) // Подписка на уведомления от счетчика
 		s.Add(eui.NewContainer(                                                           // Добавить в контейнер сцены контейнер кнопок

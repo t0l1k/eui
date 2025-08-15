@@ -17,7 +17,7 @@ func NewSceneMain() *SceneMain {
 	topBar := eui.NewTopBar(title, nil)
 	topBar.SetUseStopwatch()
 	topBar.SetShowStoppwatch(true)
-	lblStatus := eui.NewText("")
+	lblStatus := eui.NewLabel("")
 	var board *BoardMem
 	board = NewBoardMem(func(btn *eui.Button) {
 		if inpututil.IsMouseButtonJustReleased(ebiten.MouseButton0) {

@@ -9,15 +9,15 @@ import (
 
 type Table struct {
 	*eui.Container
-	leftLbl, rightLbl *eui.Text
+	leftLbl, rightLbl *eui.Label
 	nextBallsLayout   *eui.Container
 }
 
 func NewTable() *Table {
 	t := &Table{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
-	t.leftLbl = eui.NewText("0")
+	t.leftLbl = eui.NewLabel("0")
 	t.Add(t.leftLbl)
-	t.rightLbl = eui.NewText("100")
+	t.rightLbl = eui.NewLabel("100")
 	t.Add(t.rightLbl)
 	t.nextBallsLayout = eui.NewContainer(eui.NewHBoxLayout(1))
 	return t

@@ -78,7 +78,7 @@ func (p *Plot) Layout() {
 			vector.StrokeLine(p.Image(), float32(x1), float32(y1), float32(x2), float32(y2), stroke, p.fg, true)
 			boxSize := margin / 2
 			xL, yL, w, h := int(xPos(float64(x))-float64(boxSize)/2), axisRect.Bottom()+boxSize/2, boxSize, boxSize
-			lbl := NewText(strconv.Itoa(p.xArr[i-1]))
+			lbl := NewLabel(strconv.Itoa(p.xArr[i-1]))
 			defer lbl.Close()
 			lbl.Bg(p.bg)
 			lbl.Fg(p.fg)
@@ -87,7 +87,7 @@ func (p *Plot) Layout() {
 		}
 		boxSize := margin
 		xL, yL, w, h := axisRect.Right()-boxSize*3, axisRect.Bottom()-boxSize, boxSize*3, boxSize
-		lbl := NewText(p.xAxisTitle)
+		lbl := NewLabel(p.xAxisTitle)
 		defer lbl.Close()
 		lbl.Bg(p.bg)
 		lbl.Fg(p.fg)
@@ -109,7 +109,7 @@ func (p *Plot) Layout() {
 			vector.StrokeLine(p.Image(), float32(x1), float32(y1), float32(x2), float32(y2), stroke, p.fg, true)
 			boxSize := margin / 2
 			xL, yL, w, h := axisRect.Left()-int(float64(boxSize)*1.5), int(yPos(float64(y))-float64(boxSize)/2), boxSize, boxSize
-			lbl := NewText(strconv.Itoa(p.yArr[i-1]))
+			lbl := NewLabel(strconv.Itoa(p.yArr[i-1]))
 			defer lbl.Close()
 			lbl.Bg(p.bg)
 			lbl.Fg(p.fg)
@@ -118,7 +118,7 @@ func (p *Plot) Layout() {
 		}
 		boxSize := margin
 		xL, yL, w, h := axisRect.Left(), axisRect.Top()-boxSize, boxSize*3, boxSize
-		lbl := NewText(p.yAxisTitle)
+		lbl := NewLabel(p.yAxisTitle)
 		defer lbl.Close()
 		lbl.Bg(p.bg)
 		lbl.Fg(p.fg)
@@ -145,7 +145,7 @@ func (p *Plot) Layout() {
 	{
 		boxSize := margin * 8
 		xL, yL, w, h := axisRect.Right()/2-boxSize/2, axisRect.Top()-boxSize/10, boxSize, boxSize/4
-		lbl := NewText(p.pTitle)
+		lbl := NewLabel(p.pTitle)
 		defer lbl.Close()
 		lbl.Bg(p.bg)
 		lbl.Fg(p.fg)

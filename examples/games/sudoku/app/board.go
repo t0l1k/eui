@@ -54,7 +54,7 @@ func (b *Board) Setup(dim game.Dim, diff game.Difficult) {
 		}
 	}
 	b.grid.Set(float64(b.dim.H), float64(b.dim.W))
-	b.layoutCells.SetLayout(eui.NewSquareGridLayout(float64(b.dim.Size()), float64(b.dim.Size()), float64(b.spacing)))
+	b.layoutCells.SetLayout(eui.NewSquareGridLayout(b.dim.Size(), b.dim.Size(), b.spacing))
 	b.ShowNotes(true)
 	b.isWin = false
 	b.sw.Reset()

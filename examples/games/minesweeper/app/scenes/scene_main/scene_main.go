@@ -18,7 +18,7 @@ func NewSceneSelectGame() *SceneSelectGame {
 	s.topBar.SetUseStopwatch()
 	s.Add(s.topBar)
 	s.frame = eui.NewContainer(eui.NewVBoxLayout(1))
-	lblTitle := eui.NewText("Выбери сложность")
+	lblTitle := eui.NewLabel("Выбери сложность")
 	s.frame.Add(lblTitle)
 	s.sDiff = make(map[string][]int)
 	keys := []string{"Игра новичку", "Игра Легко", "Игра Средне", "Игра Сложно", "Настроить сложность"}
