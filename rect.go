@@ -52,5 +52,5 @@ func (r Rect[T]) Width() T            { return r.W }
 func (r Rect[T]) Height() T           { return r.H }
 func (r Rect[T]) GetLowestSize() T    { return min(r.W, r.H) }
 func (a Rect[T]) Eq(b Rect[T]) bool   { return a.X == b.X && a.Y == b.Y && a.W == b.W && a.H == b.H }
-func (a Rect[T]) IsEmpty() bool       { return a.W == 0 && a.H == 0 }
+func (a Rect[T]) IsEmpty() bool       { return a.W <= 0 && a.H <= 0 || a.W <= 0 || a.H <= 0 }
 func (r Rect[T]) String() string      { return fmt.Sprintf("[%v, %v, %v, %v]", r.X, r.Y, r.W, r.H) }

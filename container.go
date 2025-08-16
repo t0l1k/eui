@@ -1,54 +1,60 @@
 package eui
 
 import (
+	"log"
+
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
 type Container struct {
 	*Drawable
-	container []Drawabler
-	layout    Layouter
+	children []Drawabler
+	layout   Layouter
 }
 
 func NewContainer(layout Layouter) *Container {
 	return &Container{Drawable: NewDrawable(), layout: layout}
 }
-func (c *Container) Children() []Drawabler { return c.container }
+func (c *Container) Children() []Drawabler { return c.children }
 func (c *Container) SetLayout(l Layouter)  { c.layout = l; c.MarkDirty() }
 func (c *Container) Add(d Drawabler) *Container {
-	c.container = append(c.container, d)
+	c.children = append(c.children, d)
 	c.MarkDirty()
 	return c
 }
+
+// ResetContainer после обнуление контейнера, обязательно вызвать func (*Container)Layout()
 func (c *Container) ResetContainer() *Container {
-	for _, v := range c.container {
-		v.Close()
-	}
-	c.container = nil
+	c.Traverse(func(d Drawabler) { d.Close() }, false)
+	c.children = nil
 	c.MarkDirty()
+	log.Println("Container:ResetContainer:", c.Rect(), c.Children())
 	return c
 }
 func (c *Container) Layout() {
+	c.Drawable.SetRect(c.Rect())
+	c.layout.Apply(c.children, c.Rect())
 	if c.layout != nil {
-		c.Drawable.SetRect(c.Rect())
-		c.layout.Apply(c.container, c.Rect())
 		for _, child := range c.Children() {
 			if child.IsDirty() {
 				child.Layout()
 			}
 		}
 	} else {
-		c.Traverse(func(d Drawabler) {
-			if d.IsDirty() {
-				d.Layout()
-			}
-		}, false)
+		panic("Layout nil")
 	}
+	log.Println("Container:Layout:", c.Rect(), c.children)
 	c.ClearDirty()
 }
 func (c *Container) Update(dt int) { c.Traverse(func(d Drawabler) { d.Update(dt) }, false) }
-func (c *Container) Show()         { c.Traverse(func(d Drawabler) { d.Show() }, false) }
-func (c *Container) Hide()         { c.Traverse(func(d Drawabler) { d.Hide() }, false) }
+func (c *Container) Show() {
+	c.Traverse(func(d Drawabler) { d.Show() }, false)
+	c.SetState(StateNormal)
+}
+func (c *Container) Hide() {
+	c.Traverse(func(d Drawabler) { d.Hide() }, false)
+	c.SetState(StateHidden)
+}
 func (c *Container) Draw(surface *ebiten.Image) {
 	if c.IsHidden() {
 		return

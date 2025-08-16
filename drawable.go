@@ -1,6 +1,7 @@
 package eui
 
 import (
+	"fmt"
 	"image/color"
 	"log"
 
@@ -55,7 +56,7 @@ func (s *Drawable) SetImage(image *ebiten.Image) { s.image = image; s.MarkDirty(
 func (s *Drawable) ImageReset()                  { s.image = nil; s.MarkDirty() }
 func (s *Drawable) Layout() {
 	if s.Rect().IsEmpty() {
-		panic("Drawable:Layout:Image:Rect.empty")
+		panic(fmt.Sprintf("Drawable:Layout:Image:Rect.empty[%v]", s.Rect()))
 	}
 	w, h := s.Rect().Size()
 	if s.Image() == nil {

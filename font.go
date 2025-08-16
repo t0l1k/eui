@@ -2,6 +2,7 @@ package eui
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
@@ -44,6 +45,9 @@ func (f Font) Get(size int) *text.GoTextFace {
 }
 
 func (f Font) CalcFontSize(txt string, rect Rect[int]) int {
+	if rect.IsEmpty() {
+		panic(fmt.Sprintln("Empty rect", txt, rect))
+	}
 	percent := 0.9
 	w0, h0 := rect.Size()
 	sz := min(w0, h0)

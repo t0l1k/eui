@@ -110,6 +110,10 @@ func (b *StackLayout) Apply(children []Drawabler, rect Rect[int]) {
 		h := rect.H - b.spacing*2
 		c.SetRect(NewRect([]int{x, y, w, h}))
 	}
+	children[0].Show()
+	for i := 1; i < len(children); i++ {
+		children[i].Hide()
+	}
 	log.Println("StackLayout:Apply:", children, rect)
 }
 
