@@ -1,8 +1,6 @@
 package eui
 
 import (
-	"log"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
@@ -100,7 +98,6 @@ func (l *Label) Layout() {
 	} else {
 		text.Draw(l.Image(), l.txt, fnt, l.options)
 	}
-	log.Println("Label:Layout:", txt, l.Rect(), l.fontSize, l.align)
 	l.ClearDirty()
 }
 

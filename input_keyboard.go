@@ -1,7 +1,6 @@
 package eui
 
 import (
-	"log"
 	"slices"
 	"time"
 
@@ -56,16 +55,13 @@ func (s *KeyboardInput) update() {
 		if !s.timer.IsOn() {
 			s.Emit(NewEvent(EventKeyPressed, kd))
 			s.timer.On()
-			log.Println("KeyboardInput:Emit:pressed", kd, s.timer.String())
 		}
 		if s.timer.IsDone() {
 			s.Emit(NewEvent(EventKeyPressed, kd))
 			s.timer.Reset()
-			log.Println("KeyboardInput:Timer:repeat", kd, s.timer.String())
 		}
 	}
 	if len(keysR) > 0 {
 		s.Emit(NewEvent(EventKeyReleased, kd))
-		log.Println("KeyboardInput:Emit:released", kd, s.timer.String())
 	}
 }

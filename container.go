@@ -1,8 +1,6 @@
 package eui
 
 import (
-	"log"
-
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
@@ -28,7 +26,6 @@ func (c *Container) ResetContainer() *Container {
 	c.Traverse(func(d Drawabler) { d.Close() }, false)
 	c.children = nil
 	c.MarkDirty()
-	log.Println("Container:ResetContainer:", c.Rect(), c.Children())
 	return c
 }
 func (c *Container) Layout() {
@@ -43,7 +40,6 @@ func (c *Container) Layout() {
 	} else {
 		panic("Layout nil")
 	}
-	log.Println("Container:Layout:", c.Rect(), c.children)
 	c.ClearDirty()
 }
 func (c *Container) Update(dt int) { c.Traverse(func(d Drawabler) { d.Update(dt) }, false) }
@@ -76,7 +72,6 @@ func traverse(d Drawabler, action func(d Drawabler), reverse bool) {
 	if container, ok := d.(interface{ Children() []Drawabler }); ok {
 		for _, v := range container.Children() {
 			traverse(v, action, reverse)
-			// log.Println("traverse:check:", v.Rect())
 		}
 	}
 	if !reverse {

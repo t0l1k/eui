@@ -45,7 +45,6 @@ func (u *Ui) FontDefault() *Font               { return u.resource.FontDefault()
 func (u *Ui) Layout(w, h int) (int, int) {
 	if w != u.size.X || h != u.size.Y {
 		u.resizeListener.Emit(NewEvent(EventResize, NewRect([]int{0, 0, w, h})))
-		log.Println("Emit:Resize:")
 	}
 	return w, h
 }
@@ -70,9 +69,6 @@ func (u *Ui) HandleEvent(ev Event) {
 	}
 	u.HandleKeybordEvent(ev)
 	u.HandleMouseEvent(ev)
-	if !(ev.Type == EventTick || ev.Type == EventMouseMovement) {
-		log.Println("Ui:HandleEvent:", ev)
-	}
 }
 
 func (u *Ui) HandleKeybordEvent(ev Event) {
@@ -88,7 +84,6 @@ func (u *Ui) HandleKeybordEvent(ev Event) {
 		if kh, ok := d.(interface{ KeyPressed(KeyboardData) }); ok {
 			kh.KeyPressed(kd)
 		}
-		log.Println("Ui:HandleEvent:EventKeyPressed", ev)
 	case EventKeyReleased:
 		kd := ev.Value.(KeyboardData)
 		if kd.IsReleased(ebiten.KeyF12) {
@@ -103,7 +98,6 @@ func (u *Ui) HandleKeybordEvent(ev Event) {
 		if kh, ok := d.(interface{ KeyReleased(KeyboardData) }); ok {
 			kh.KeyReleased(kd)
 		}
-		log.Println("Ui:HandleEvent:EventKeyReleased", ev)
 	}
 }
 
@@ -125,7 +119,6 @@ func (u *Ui) HandleMouseEvent(ev Event) {
 			if mp, ok := pressed.(interface{ MouseDown(MouseData) }); ok {
 				mp.MouseDown(md)
 			}
-			log.Println("Ui:HandleMouseEvent:01", md)
 		} else {
 			u.focusManager.Blur()
 		}
@@ -141,7 +134,6 @@ func (u *Ui) HandleMouseEvent(ev Event) {
 					u.focusManager.Blur()
 				}
 			}
-			log.Println("Ui:HandleMouseEvent:02", md)
 		}
 	case EventMouseWheel:
 		var wheel Drawabler
@@ -158,7 +150,6 @@ func (u *Ui) HandleMouseEvent(ev Event) {
 			if m, ok := wheel.(interface{ MouseWheel(MouseData) }); ok {
 				m.MouseWheel(md)
 			}
-			log.Println("Ui:HandleMouseEvent:04", wheel.Rect())
 		}
 	case EventMouseMovement, EventMouseDrag:
 		var hovered Drawabler
@@ -176,13 +167,11 @@ func (u *Ui) HandleMouseEvent(ev Event) {
 					if m, ok := hovered.(interface{ MouseLeave() }); ok {
 						m.MouseLeave()
 					}
-					log.Println("Ui:HandleMouseEvent:05")
 				}
 				if hovered != nil {
 					if m, ok := hovered.(interface{ MouseEnter() }); ok {
 						m.MouseEnter()
 					}
-					log.Println("Ui:HandleMouseEvent:06", hovered.Rect())
 				}
 				u.focusManager.SetHovered(hovered)
 			}
@@ -193,12 +182,10 @@ func (u *Ui) HandleMouseEvent(ev Event) {
 					if m, ok := hovered.(interface{ MouseDrag(MouseData) }); ok {
 						m.MouseDrag(md)
 					}
-					log.Println("Ui:HandleMouseEvent:07", hovered.Rect())
 				} else {
 					if m, ok := hovered.(interface{ MouseMotion(MouseData) }); ok {
 						m.MouseMotion(md)
 					}
-					log.Println("Ui:HandleMouseEvent:08", hovered.Rect())
 				}
 			}
 		}

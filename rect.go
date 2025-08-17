@@ -17,9 +17,16 @@ func (p Point[T]) Get() (T, T)            { return p.X, p.Y }
 func (p Point[T]) In(r Rect[T]) bool {
 	return r.Left() <= p.X && p.X < r.Right() && r.Top() <= p.Y && p.Y < r.Bottom()
 }
-func (p Point[T]) Eq(value Point[T]) bool      { return p.X == value.X && p.Y == value.Y }
-func (p Point[T]) Offset(a Point[T]) *Point[T] { return &Point[T]{p.X - a.X, p.Y - a.Y} }
-func (p Point[T]) String() string              { return fmt.Sprintf("[%.2v, %.2v]", p.X, p.Y) }
+func (p Point[T]) Eq(value Point[T]) bool     { return p.X == value.X && p.Y == value.Y }
+func (p Point[T]) Offset(a Point[T]) Point[T] { return Point[T]{p.X - a.X, p.Y - a.Y} }
+func (p Point[T]) Area() T                    { return p.X * p.Y }
+func (p Point[T]) String() string             { return fmt.Sprintf("[%.2v, %.2v]", p.X, p.Y) }
+
+type PointByArea[T Numbers] []Point[T]
+
+func (ds PointByArea[T]) Len() int           { return len(ds) }
+func (ds PointByArea[T]) Less(i, j int) bool { return ds[i].Area() < ds[j].Area() }
+func (ds PointByArea[T]) Swap(i, j int)      { ds[i], ds[j] = ds[j], ds[i] }
 
 type Rect[T Numbers] struct{ X, Y, W, H T }
 

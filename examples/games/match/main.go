@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"sort"
 	"time"
 
 	"github.com/t0l1k/eui"
@@ -74,6 +75,62 @@ func (c *Cell) String() string {
 	}
 }
 
+type GamesData map[eui.Point[int]][]GameData
+
+func NewGamesData() *GamesData {
+	games := make(GamesData)
+	for h := 2; h <= 20; h++ {
+		for w := h; w <= 20; w++ {
+			if (w*h)%2 == 0 {
+				dim := eui.Point[int]{X: w, Y: h}
+				games[dim] = []GameData{}
+			}
+		}
+	}
+	return &games
+}
+
+func (g GamesData) AddGame(dim eui.Point[int], game GameData) {
+	game.id = len(g[dim])
+	g[dim] = append(g[dim], game)
+	for k, g := range g {
+		for _, v := range g {
+			log.Println("GamesData:AddGame:", k.String(), v.String())
+		}
+	}
+}
+func (g GamesData) NextLevel(i *int) eui.Point[int] {
+	var (
+		dims []eui.Point[int]
+	)
+	for k := range g {
+		dims = append(dims, k)
+	}
+	sort.Sort(eui.PointByArea[int](dims))
+	log.Println("Sorted:", dims)
+	return func() eui.Point[int] {
+		value := dims[*i]
+		*i++
+		return value
+	}()
+}
+
+type GameData struct {
+	id       int
+	dt       time.Time
+	duration time.Duration
+	click    int
+}
+
+func NewGameData() GameData { return GameData{dt: time.Now()} }
+func (g *GameData) AddScore(click int, duration time.Duration) {
+	g.click = click
+	g.duration = duration
+}
+func (g *GameData) String() string {
+	return fmt.Sprintf("#%v solved after %v clicks in a %v", g.id, g.click, g.duration)
+}
+
 type Game struct {
 	state        *eui.Signal[GameState]
 	status       *eui.Signal[string]
@@ -85,9 +142,10 @@ type Game struct {
 }
 
 func NewGame() *Game {
-	return &Game{dim: eui.NewPoint(3, 2), state: eui.NewSignal(func(a, b GameState) bool { return a == b }), status: eui.NewSignal(func(a, b string) bool { return a == b }), sw: eui.NewStopwatch()}
+	return &Game{state: eui.NewSignal(func(a, b GameState) bool { return a == b }), status: eui.NewSignal(func(a, b string) bool { return a == b }), sw: eui.NewStopwatch()}
 }
-func (g *Game) New() {
+func (g *Game) New(dim eui.Point[int]) {
+	g.dim = dim
 	g.state.Emit(GameStart)
 	g.field = nil
 	value, i := 1, 0
@@ -109,17 +167,19 @@ func (g *Game) New() {
 }
 
 func (g *Game) Reset() {
-	g.state.Emit(GameStart)
-	for y := range g.dim.Y {
-		for x := range g.dim.X {
-			g.field[g.idx(x, y)].Close()
+	if len(g.field) > 0 {
+		g.state.Emit(GameStart)
+		for _, cell := range g.field {
+			cell.Close()
 		}
+		g.clickCount = 0
+		g.moves = nil
+		g.sw.Reset()
+		g.status.Emit(g.gameStatus())
+		log.Println("Game:Reset:", g.field)
+	} else {
+		g.New(g.dim)
 	}
-	g.clickCount = 0
-	g.moves = nil
-	g.sw.Reset()
-	g.status.Emit(g.gameStatus())
-	log.Println("Game:Reset:", g.field)
 }
 
 func (g *Game) NextLevel() {
@@ -149,7 +209,7 @@ func (g *Game) shuffle() {
 
 func (g *Game) open(x, y int) {
 	cell := g.field[g.idx(x, y)]
-	if cell.IsOpen() {
+	if cell.IsOpen() || cell.IsMatch() {
 		return
 	}
 	cell.Open()
@@ -216,23 +276,25 @@ func (g *Game) String() (result string) {
 
 type Board struct {
 	*eui.Container
-	game *Game
-	fn   func(*eui.Button)
+	game     *Game
+	gameData GameData
+	fn       func(*eui.Button)
 }
 
 func NewBoard(fn func(*eui.Button)) *Board {
-	b := &Board{Container: eui.NewContainer(eui.NewGridLayout(3, 2, 10)), fn: fn}
+	b := &Board{Container: eui.NewContainer(eui.NewGridLayout(2, 2, 10)), fn: fn}
 	b.game = NewGame()
 	log.Println("Board:Init", b.game)
 	return b
 }
 
-func (b *Board) New() {
-	b.game.New()
+func (b *Board) New(dim eui.Point[int]) {
+	b.game.dim = dim
+	b.game.New(b.game.dim)
 	b.ResetContainer()
 
 	w, h := b.game.dim.X, b.game.dim.Y
-	b.SetLayout(eui.NewGridLayout(w, h, 10))
+	b.SetLayout(eui.NewSquareGridLayout(w, h, 10))
 
 	for _, cell := range b.game.field {
 		icon := eui.NewButton(cell.String(), b.fn)
@@ -260,22 +322,17 @@ func (b *Board) New() {
 	b.MarkDirty()
 	b.Layout()
 	log.Println("Board:New", b.game, b.Children())
-	for _, v := range b.Children() {
-		log.Println("B:", b.Rect(), v.(*eui.Button).Text(), v.Rect())
-	}
 }
 
 func (b *Board) Reset() {
-	b.game.Reset()
-	w, h := b.game.dim.X, b.game.dim.Y
-	for i := range w * h {
-		x, y := b.game.pos(i)
-		value := b.game.Cell(x, y).String()
-		b.Children()[i].(*eui.Button).SetText(value)
-	}
-	log.Println("Board:Reset", b.game, b.Children())
-	for _, v := range b.Children() {
-		log.Println("B:", v.(*eui.Button).Text(), v.Rect())
+	if len(b.Children()) > 0 {
+		b.game.Reset()
+		for i, cell := range b.game.field {
+			b.Children()[i].(*eui.Button).SetText(cell.String())
+		}
+		log.Println("Board:Reset", b.game, b.Children())
+	} else {
+		b.New(b.game.dim)
 	}
 }
 
@@ -352,6 +409,8 @@ func main() {
 
 		statusLbl := eui.NewLabel("StatusLine")
 
+		gamesData := NewGamesData()
+
 		board = NewBoard(func(b *eui.Button) {
 			for i, v := range board.Children() {
 				x, y := board.game.pos(i)
@@ -378,11 +437,14 @@ func main() {
 		board.game.state.Connect(func(data GameState) {
 			switch data {
 			case GameStart:
+				board.gameData = NewGameData()
 			case GamePlay:
 			case GamePause:
 				board.game.sw.Stop()
 				board.Hide()
 			case GameWin:
+				board.gameData.AddScore(board.game.clickCount, board.game.sw.Duration())
+				gamesData.AddGame(board.game.dim, board.gameData)
 				board.Hide()
 				dialog.Show()
 			}
@@ -393,20 +455,26 @@ func main() {
 			dialog.msg.SetText(board.game.gameStatus())
 		})
 
+		level := 0
 		dialog = NewDialog("Select", "Press New Game", func(b *eui.Button) {
+			dim := board.game.dim
+			if len(board.game.field) == 0 {
+				dim = gamesData.NextLevel(&level)
+			}
 			switch b.Text() {
 			case bNew:
-				board.New()
-				dialog.Hide()
-				board.Show()
+				board.New(dim)
 			case bReset:
 				board.Reset()
 			case bNext:
 				if board.game.completed {
-					board.game.NextLevel()
-					board.New()
+					dim = gamesData.NextLevel(&level)
 				}
+				board.New(dim)
 			case bCont:
+				if len(board.game.field) == 0 {
+					board.New(dim)
+				}
 			}
 			dialog.Hide()
 			board.Show()

@@ -1,8 +1,6 @@
 package eui
 
 import (
-	"log"
-
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
@@ -32,7 +30,6 @@ func (c *Checkbox) Hit(pt Point[int]) Drawabler {
 	if !pt.In(c.rect) {
 		return nil
 	}
-	log.Println("Checkbox:Hit:", c.Text(), c.checked, c.Rect(), pt)
 	return c
 }
 func (c *Checkbox) MouseUp(md MouseData) {

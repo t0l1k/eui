@@ -2,7 +2,6 @@ package eui
 
 import (
 	"image/color"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -37,7 +36,6 @@ func (b *Button) Hit(pt Point[int]) Drawabler {
 	if !pt.In(b.rect) || b.IsHidden() {
 		return nil
 	}
-	log.Println("Button:Hit:", b.txt, b.Rect(), pt)
 	return b
 }
 func (b *Button) WantBlur() bool { return true }
@@ -50,7 +48,6 @@ func (b *Button) MouseUp(md MouseData) {
 		b.onPressed(b)
 	}
 	b.pressed = false
-	log.Println("Button:MouseReleased:", b.txt, b.Rect())
 }
 
 func (b *Button) SetIcons(icons []*ebiten.Image) { b.icons = icons; b.MarkDirty() }

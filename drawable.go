@@ -3,7 +3,6 @@ package eui
 import (
 	"fmt"
 	"image/color"
-	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -61,7 +60,7 @@ func (s *Drawable) Layout() {
 	w, h := s.Rect().Size()
 	if s.Image() == nil {
 		s.image = ebiten.NewImage(w, h)
-		log.Println("Drawable:Layout:Image:nil", s.Rect())
+		// log.Println("Drawable:Layout:Image:nil", s.Rect())
 	} else {
 		s.image.Clear()
 		// log.Println("Drawable:Layout:Image:clear", s.Rect())

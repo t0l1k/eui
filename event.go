@@ -2,7 +2,6 @@ package eui
 
 import (
 	"fmt"
-	"log"
 )
 
 type EventType int
@@ -45,7 +44,7 @@ type Event struct {
 func NewEvent(t EventType, v any) Event {
 	e := Event{Type: t, Value: v}
 	if !(e.Type == EventTick || e.Type == EventMouseMovement) {
-		log.Println("New:", e.String())
+		// log.Println("New:", e.String())
 	}
 	return e
 }
