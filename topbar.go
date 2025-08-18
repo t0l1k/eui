@@ -94,5 +94,5 @@ func (t *TopBar) Update(dt int) {
 	if !t.useSW {
 		return
 	}
-	t.tmVar.Emit(t.Stopwatch.StringShort())
+	t.tmVar.Emit(FormatSmartDuration(t.Stopwatch.Duration(), false))
 }

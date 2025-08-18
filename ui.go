@@ -58,6 +58,9 @@ func (u *Ui) HandleEvent(ev Event) {
 				t.Tick(tc)
 			}
 		}, false)
+		if t, ok := u.currentScene.(interface{ Tick(TickData) }); ok {
+			t.Tick(tc)
+		}
 	case EventResize:
 		r := ev.Value.(Rect[int])
 		u.SetSize(r.W, r.H)

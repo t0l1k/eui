@@ -67,21 +67,25 @@ func FormatSmartDuration(dur time.Duration, showMS bool) string {
 	}
 
 	// Отображаем секунды, если они > 0 или были минуты/часы
-	if s > 0 || m > 0 || h > 0 {
+	if s >= 0 || m > 0 || h > 0 {
 		fmt.Fprintf(&sb, "%02d", s)
 	}
 
 	// Отображаем миллисекунды:
 	if showMS {
-		if s > 0 || m > 0 || h > 0 {
+		if s >= 0 || m > 0 || h > 0 {
 			sb.WriteString(",")
 		}
 		fmt.Fprintf(&sb, "%02d", ms)
 	}
 
 	// Если вообще ничего не отображено кроме миллисекунд
-	if sb.Len() == 0 && showMS {
-		fmt.Fprintf(&sb, "%02d", ms)
+	if sb.Len() == 0 {
+		if showMS {
+			fmt.Fprintf(&sb, "%02d", ms)
+		} else {
+			fmt.Fprintf(&sb, "00")
+		}
 	}
 
 	return sb.String()

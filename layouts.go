@@ -18,39 +18,55 @@ func (a *AbsoluteLayout) Apply(d []Drawabler, r Rect[int]) {
 	log.Println("AbsoluteLayout:Apply:", d, r)
 }
 
-// Умею размеры виджетов во мне разделить одинаково по горизонтали или по вертикали
-type BoxLayout struct {
-	dir Orientation
-	// horizontal bool
-	spacing float64
+type LayoutBox struct {
+	dir     Orientation
+	Spacing int // промежуток между элементами (px)
 }
 
-func NewHBoxLayout(spacing float64) *BoxLayout { return &BoxLayout{dir: Horizontal, spacing: spacing} }
-func NewVBoxLayout(spacing float64) *BoxLayout {
-	return &BoxLayout{dir: Vertical, spacing: spacing}
-}
-func (l *BoxLayout) Apply(widgets []Drawabler, rect Rect[int]) {
-	count := len(widgets)
-	if count == 0 {
+func NewVBoxLayout(spacing int) *LayoutBox { return &LayoutBox{dir: Vertical, Spacing: spacing} }
+func NewHBoxLayout(spacing int) *LayoutBox { return &LayoutBox{dir: Horizontal, Spacing: spacing} }
+
+func (b *LayoutBox) Apply(children []Drawabler, parentRect Rect[int]) {
+	// 1. Фоновые
+	// for _, v := range children {
+	// 	if v.ViewType().IsBackground() {
+	// 		v.SetRect(parentRect)
+	// 	}
+	// }
+	// 2. Обычные
+	var normal []Drawabler
+	for _, v := range children {
+		// if !v.ViewType().IsBackground() {
+		normal = append(normal, v)
+		// }
+	}
+	n := len(normal)
+	if n == 0 {
 		return
 	}
-	x0, y0 := rect.Pos()
-	if l.dir == Horizontal {
-		width := float64(rect.Width()-(count-1)*int(l.spacing)) / float64(count)
-		w, h := width, rect.Height()
-		for i, v := range widgets {
-			x, y := w*float64(i)+l.spacing, l.spacing
-			v.SetRect(NewRect([]int{x0 + int(x), y0 + int(y), int(w), h}))
+	w, h := parentRect.Width()-b.Spacing*2, parentRect.Height()-b.Spacing*2
+	if b.dir == Vertical {
+		totalSpacing := b.Spacing * (n - 1)
+		cellH := (h - totalSpacing) / n
+		x := parentRect.X + b.Spacing
+		y := parentRect.Y + b.Spacing
+		for _, c := range normal {
+			r := NewRect([]int{x, y, w, cellH})
+			c.SetRect(r)
+			y += cellH + b.Spacing
 		}
 	} else {
-		height := (float64(rect.Height()) - float64(count-1)*l.spacing) / float64(count)
-		w, h := rect.Width(), height
-		for i, v := range widgets {
-			x, y := l.spacing, h*float64(i)+l.spacing
-			v.SetRect(NewRect([]int{x0 + int(x), y0 + int(y), w, int(h)}))
+		totalSpacing := b.Spacing * (n - 1)
+		cellW := (w - totalSpacing) / n
+		x := parentRect.X + b.Spacing
+		y := parentRect.Y + b.Spacing
+		for _, c := range normal {
+			r := NewRect([]int{x, y, cellW, h})
+			c.SetRect(r)
+			x += cellW + b.Spacing
 		}
 	}
-	log.Println("BoxLayout:Apply", count, widgets, rect)
+	log.Println("LayoutBox:Apply:", parentRect, children)
 }
 
 type GridLayout struct {

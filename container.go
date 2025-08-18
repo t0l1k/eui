@@ -94,3 +94,29 @@ func traverse(d Drawabler, action func(d Drawabler), reverse bool) {
 // 	}
 // 	return c
 // }
+
+type ContainerVisibleByFilter struct {
+	*Container
+	items  *Container
+	filter func(Drawabler, ViewState) bool
+}
+
+func NewContainerVisibleByFilter(l Layouter, items *Container, fn func(Drawabler, ViewState) bool) *ContainerVisibleByFilter {
+	return &ContainerVisibleByFilter{Container: NewContainer(l), items: items, filter: fn}
+}
+func (c *ContainerVisibleByFilter) UpdateBy(s ViewState) {
+	c.ResetContainer()
+	for _, item := range c.items.Children() {
+		item.SetState(StateHidden)
+		match := c.filter(item, s)
+		if match {
+			item.SetState(StateNormal)
+			c.Add(item)
+		}
+	}
+	c.MarkDirty()
+	if c.Rect().IsEmpty() {
+		return
+	}
+	c.Layout()
+}

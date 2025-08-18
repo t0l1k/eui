@@ -62,7 +62,7 @@ func (b *BottomBar) Update(dt int) {
 	for _, v := range b.layout.Children() {
 		v.Update(dt)
 	}
-	b.varSw.Emit(b.board.Stopwatch().StringShort())
+	b.varSw.Emit(eui.FormatSmartDuration(b.board.Stopwatch().Duration(), true))
 }
 
 func (b *BottomBar) Draw(surface *ebiten.Image) {

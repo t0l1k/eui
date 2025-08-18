@@ -52,7 +52,7 @@ func (b *BottomBar) Setup(board *Board) {
 	swStr := eui.NewLabel("")
 	b.varSw = eui.NewSignal(func(a, b string) bool { return a == b })
 	b.varSw.Connect(func(data string) { swStr.SetText(data) })
-	b.varSw.Emit(b.board.sw.StringShort())
+	b.varSw.Emit(eui.FormatSmartDuration(b.board.sw.Duration(), false))
 	b.layoutActs.Add(swStr)
 	b.actBtns = nil
 	if b.board.diff.String() == game.Manual.String() {
@@ -169,7 +169,7 @@ func (b *BottomBar) Update(dt int) {
 		return
 	}
 	if b.board.sw.IsRun() {
-		b.varSw.Emit(b.board.sw.StringShort())
+		b.varSw.Emit(eui.FormatSmartDuration(b.board.sw.Duration(), false))
 	}
 }
 
