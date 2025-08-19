@@ -31,8 +31,8 @@ func NewCardIcon(cell *sols.Cell, f func(b *eui.Button)) *CardIcon {
 		str = c.cell.GetCard().StringShort()
 	}
 	c.btn = eui.NewButton(str, f)
-	c.btn.Bg(colornames.White)
-	c.btn.Fg(col)
+	c.btn.SetBg(colornames.White)
+	c.btn.SetFg(col)
 	c.Add(c.btn)
 	// c.Hide()
 	return c
@@ -41,19 +41,19 @@ func NewCardIcon(cell *sols.Cell, f func(b *eui.Button)) *CardIcon {
 func (c *CardIcon) UpdateData(value *deck.Card) {
 	if value == nil {
 		c.btn.SetText(" ")
-		c.btn.Fg(colornames.Blue)
+		c.btn.SetFg(colornames.Blue)
 	} else {
 		c.btn.SetText(value.StringShort())
-		c.btn.Fg(c.cell.GetCard().Color())
+		c.btn.SetFg(c.cell.GetCard().Color())
 	}
 	c.MarkDirty()
 }
 
-func (d *CardIcon) Update(dt int) {
+func (d *CardIcon) Update() {
 	if d.IsHidden() {
 		return
 	}
-	d.btn.Update(dt)
+	d.btn.Update()
 }
 
 func (c *CardIcon) IsHidden() bool       { return c.show }

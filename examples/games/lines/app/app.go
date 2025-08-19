@@ -20,6 +20,6 @@ func NewGameLines() *eui.Ui {
 	k := 60
 	w, h := 9*k, 6*k
 	u.SetSize(w, h)
-	u.GetTheme().Set(eui.ViewBg, colornames.Black)
+	u.Theme().Set(eui.ViewBg, colornames.Black)
 	return u
 }

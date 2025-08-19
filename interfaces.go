@@ -25,7 +25,7 @@ type Drawabler interface {
 }
 
 type Spriter interface {
-	Update(dt int)
+	Update()
 	Draw(*ebiten.Image)
 }
 

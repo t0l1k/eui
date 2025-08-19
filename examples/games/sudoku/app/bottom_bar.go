@@ -91,20 +91,20 @@ func (b *BottomBar) SetAct(btn *eui.Button) (result bool) {
 	switch btnStr {
 	case aAccept:
 		b.actAccept = true
-		btn.Bg(colornames.Yellow)
+		btn.SetBg(colornames.Yellow)
 		result = false
 	case aUndo:
 		b.actUndo = true
-		btn.Bg(colornames.Yellow)
+		btn.SetBg(colornames.Yellow)
 		result = false
 	case aDel:
 		b.actDel = true
-		btn.Bg(colornames.Yellow)
+		btn.SetBg(colornames.Yellow)
 		result = false
 	case aNote:
 		b.actNotes = !b.actNotes
 		if b.actNotes {
-			btn.Bg(colornames.Yellow)
+			btn.SetBg(colornames.Yellow)
 		}
 		result = false
 	default:
@@ -128,9 +128,9 @@ func (b *BottomBar) setBtnClrs() {
 		switch vv := v.(type) {
 		case *eui.Button:
 			if vv.Text() == aNote && b.actNotes {
-				vv.Bg(colornames.Yellow)
-			} else if vv.GetBg() == colornames.Yellow {
-				vv.Bg(colornames.Silver)
+				vv.SetBg(colornames.Yellow)
+			} else if vv.Bg() == colornames.Yellow {
+				vv.SetBg(colornames.Silver)
 			}
 		case *BottomBarNr:
 			if vv.GetBg() == colornames.Yellow {
@@ -163,8 +163,8 @@ func (b *BottomBar) UpdateUndoBtn(count int) {
 	}
 }
 
-func (b *BottomBar) Update(dt int) {
-	b.Container.Update(dt)
+func (b *BottomBar) Update() {
+	b.Container.Update()
 	if b.board == nil {
 		return
 	}

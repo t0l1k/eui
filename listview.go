@@ -35,8 +35,8 @@ func (l *ListView) SetupListViewButtons(list []string, itemSize, rows int, bg, f
 	for _, v := range l.list {
 		btn := NewButton(v, f)
 		l.AddItem(btn)
-		btn.Bg(bg)
-		btn.Fg(fg)
+		btn.SetBg(bg)
+		btn.SetFg(fg)
 	}
 	l.resizeChilds()
 }
@@ -48,8 +48,8 @@ func (l *ListView) SetupListViewCheckBoxs(list []string, itemSize, rows int, bg,
 	for _, v := range l.list {
 		chkBox := NewCheckbox(v, f)
 		l.AddItem(chkBox)
-		chkBox.Bg(bg)
-		chkBox.Fg(fg)
+		chkBox.SetBg(bg)
+		chkBox.SetFg(fg)
 	}
 	l.resizeChilds()
 }
@@ -71,8 +71,8 @@ func (l *ListView) SetupListViewText(list []string, itemSize, rows int, bg, fg c
 	for _, v := range l.list {
 		lbl := NewLabel(v)
 		l.AddItem(lbl)
-		lbl.Bg(bg)
-		lbl.Fg(fg)
+		lbl.SetBg(bg)
+		lbl.SetFg(fg)
 	}
 	l.resizeChilds()
 }
@@ -82,8 +82,8 @@ func (l *ListView) SetListViewTextWithBgFgColors(list []string, bg, fg []color.C
 	for i, str := range l.list {
 		lbl := NewLabel(str)
 		l.AddItem(lbl)
-		lbl.Bg(bg[i])
-		lbl.Fg(fg[i])
+		lbl.SetBg(bg[i])
+		lbl.SetFg(fg[i])
 	}
 	l.resizeChilds()
 }
@@ -92,16 +92,16 @@ func (l *ListView) AddBgFg(d Drawabler, bg, fg color.Color) {
 	l.children = append(l.children, d)
 	switch value := d.(type) {
 	case *Label:
-		value.Bg(bg)
-		value.Fg(fg)
+		value.SetBg(bg)
+		value.SetFg(fg)
 		l.list = append(l.list, value.Text())
 	case *Button:
-		value.Bg(bg)
-		value.Fg(fg)
+		value.SetBg(bg)
+		value.SetFg(fg)
 		l.list = append(l.list, value.Text())
 	case *Checkbox:
-		value.Bg(bg)
-		value.Fg(fg)
+		value.SetBg(bg)
+		value.SetFg(fg)
 		l.list = append(l.list, value.Text())
 	}
 	l.resizeChilds()

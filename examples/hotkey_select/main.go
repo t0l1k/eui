@@ -28,14 +28,14 @@ func NewInputKey(title string) *InputKey {
 	i.Add(i.lbl)
 	i.btn = eui.NewButton("(?)", func(b *eui.Button) {
 		i.active = true
-		i.btn.Bg(colornames.Yellow)
+		i.btn.SetBg(colornames.Yellow)
 	})
 	i.Add(i.btn)
 	i.kId = i.key.Connect(func(key ebiten.Key) {
 		i.active = false
 		i.btn.SetText(key.String())
-		i.btn.Bg(colornames.Navy)
-		i.btn.Fg(colornames.Yellow)
+		i.btn.SetBg(colornames.Navy)
+		i.btn.SetFg(colornames.Yellow)
 	})
 	return i
 }

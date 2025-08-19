@@ -126,21 +126,20 @@ func (b *Board) setWayCells(col game.BallColor, way []int) {
 	log.Println("set way colors done", way, col)
 }
 
-func (b *Board) Update(dt int) {
+func (b *Board) Tick(td eui.TickData) {
 	if b.field.GetScore() > b.varScoreBest.Value() {
 		b.varScoreBest.Emit(b.field.GetScore())
 	}
 	b.varScore.Emit(b.field.GetScore())
 	if b.showWay {
 		if b.showWayDt > 0 {
-			b.showWayDt -= dt
+			b.showWayDt -= int(td.Duration())
 		} else {
 			b.drawCellIcons()
 			log.Println("restore board after anime way")
 			b.showWay = false
 		}
 	}
-	b.Container.Update(dt)
 }
 
 func (b *Board) drawCellIcons() {

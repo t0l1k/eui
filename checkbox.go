@@ -16,8 +16,8 @@ func NewCheckbox(txt string, fn func(c *Checkbox)) *Checkbox {
 	c := &Checkbox{Drawable: NewDrawable(), onClick: NewSignal[*Checkbox](), txt: txt}
 	c.onClick.Connect(fn)
 	theme := GetUi().theme
-	c.Bg(theme.Get(CheckboxBg))
-	c.Fg(theme.Get(CheckboxFg))
+	c.SetBg(theme.Get(CheckboxBg))
+	c.SetFg(theme.Get(CheckboxFg))
 	return c
 }
 
@@ -52,15 +52,15 @@ func (c *Checkbox) Layout() {
 	margin := int(float64(c.Rect().GetLowestSize()) * 0.03)
 	r := NewRect([]int{int(margin), int(margin), h - int(margin*2), h - int(margin*2)})
 	lblCheck.SetRect(r)
-	lblCheck.Bg(c.GetFg())
-	lblCheck.Fg(c.GetBg())
+	lblCheck.SetBg(c.Fg())
+	lblCheck.SetFg(c.Bg())
 	lblCheck.Layout()
 	lblCheck.Draw(c.Image())
 
 	lblTxt := NewLabel(c.txt)
 	lblTxt.SetRect(NewRect([]int{h + int(margin), int(margin), (w - h) - int(margin*2), h - int(margin*2)}))
-	lblTxt.Bg(c.GetBg())
-	lblTxt.Fg(c.GetFg())
+	lblTxt.SetBg(c.Bg())
+	lblTxt.SetFg(c.Fg())
 	lblTxt.Layout()
 	lblTxt.Draw(c.Image())
 

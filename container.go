@@ -42,7 +42,7 @@ func (c *Container) Layout() {
 	}
 	c.ClearDirty()
 }
-func (c *Container) Update(dt int) { c.Traverse(func(d Drawabler) { d.Update(dt) }, false) }
+func (c *Container) Update() { c.Traverse(func(d Drawabler) { d.Update() }, false) }
 func (c *Container) Show() {
 	c.Traverse(func(d Drawabler) { d.Show() }, false)
 	c.SetState(StateNormal)

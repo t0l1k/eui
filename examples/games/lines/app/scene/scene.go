@@ -7,7 +7,7 @@ import (
 
 type SceneGame struct {
 	*eui.Scene
-	topBar *eui.TopBar
+	topBar *eui.Topbar
 	board  *Board
 	dialog *Dialog
 }
@@ -18,8 +18,7 @@ func NewSceneGame() *SceneGame {
 		s.dialog.SetTitle("Выбор новой игры")
 		s.dialog.Show()
 		s.board.Hide()
-	})
-	s.topBar.SetUseStopwatch()
+	}).SetUseStopwatch()
 	s.Add(s.topBar)
 	s.dialog = NewDialog("Запустить игру", func(dlg *eui.Button) {
 		if dlg.Text() == app.BNew {

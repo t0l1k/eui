@@ -9,7 +9,7 @@ import (
 
 type SceneMain struct {
 	*eui.Scene
-	topBar    *eui.TopBar
+	topBar    *eui.Topbar
 	boards    []Sols
 	boardIdx  int
 	current   Sols

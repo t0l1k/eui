@@ -25,10 +25,10 @@ func NewDrawable() *Drawable {
 func (s *Drawable) State() ViewState         { return s.state }
 func (s *Drawable) SetState(value ViewState) { s.state = value; s.MarkDirty() }
 
-func (s *Drawable) GetBg() color.Color         { return s.bg }
-func (s *Drawable) Bg(value color.Color)       { s.bg = value; s.MarkDirty() }
-func (s *Drawable) GetFg() color.Color         { return s.fg }
-func (s *Drawable) Fg(value color.Color)       { s.fg = value; s.MarkDirty() }
+func (s *Drawable) Bg() color.Color            { return s.bg }
+func (s *Drawable) SetBg(value color.Color)    { s.bg = value; s.MarkDirty() }
+func (s *Drawable) Fg() color.Color            { return s.fg }
+func (s *Drawable) SetFg(value color.Color)    { s.fg = value; s.MarkDirty() }
 func (s *Drawable) Shadow() (int, color.Color) { return s.shadowSize, s.shadowColor }
 func (s *Drawable) SetShadow(size int, color color.Color) {
 	s.shadowSize = size
@@ -78,7 +78,7 @@ func (s *Drawable) Layout() {
 	s.ClearDirty()
 }
 
-func (s *Drawable) Update(dt int) {
+func (s *Drawable) Update() {
 	if s.IsDisabled() {
 		return
 	}

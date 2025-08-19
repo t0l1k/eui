@@ -7,7 +7,7 @@ import (
 
 type SceneSelectGame struct {
 	*eui.Scene
-	topBar *eui.TopBar
+	topBar *eui.Topbar
 	frame  *eui.Container
 	sDiff  map[string][]int
 }

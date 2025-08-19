@@ -1,6 +1,6 @@
 package eui
 
-type TopBar struct {
+type Topbar struct {
 	*Container
 	btnMenu                        *Button
 	btnFunc                        func(b *Button)
@@ -11,8 +11,8 @@ type TopBar struct {
 }
 
 // Умею показать вверху строку с меткой текста с кнопкой выход из сцены(если nil) или переопределенной функцией(для вызова диалога, например) в параметре и секундомером нахождения на сцене
-func NewTopBar(title string, fn func(b *Button)) *TopBar {
-	t := &TopBar{Container: NewContainer(NewLayoutHorizontalPercent([]int{5, 30, 50, 15}, 1))}
+func NewTopBar(title string, fn func(b *Button)) *Topbar {
+	t := &Topbar{Container: NewContainer(NewLayoutHorizontalPercent([]int{5, 30, 55, 10}, 1))}
 	t.show = true
 	t.showTitle = true
 	t.useSW = false
@@ -38,12 +38,12 @@ func NewTopBar(title string, fn func(b *Button)) *TopBar {
 	return t
 }
 
-func (t *TopBar) SetTitle(text string)            { t.lblTitle.SetText(text) }
-func (t *TopBar) SetButtonText(text string)       { t.btnMenu.SetText(text) }
-func (t *TopBar) SetButtonFunc(f func(b *Button)) { t.btnFunc = f }
+func (t *Topbar) SetTitle(text string)            { t.lblTitle.SetText(text) }
+func (t *Topbar) SetButtonText(text string)       { t.btnMenu.SetText(text) }
+func (t *Topbar) SetButtonFunc(f func(b *Button)) { t.btnFunc = f }
 
-func (t *TopBar) setTheme() {
-	theme := GetUi().GetTheme()
+func (t *Topbar) setTheme() {
+	theme := GetUi().Theme()
 	t.bg = theme.Get(TopBarBg)
 	t.btnMenu.bg = theme.Get(TopBarQuitBg)
 	t.btnMenu.fg = theme.Get(TopBarQuitFg)
@@ -51,46 +51,48 @@ func (t *TopBar) setTheme() {
 	t.lblTitle.fg = theme.Get(TopBarTitleFg)
 }
 
-func (t *TopBar) initStopwatch() {
+func (t *Topbar) initStopwatch() {
 	t.Stopwatch = NewStopwatch()
 	t.tmVar = NewSignal(func(a, b string) bool { return a == b })
 	t.tmLbl.SetText("00:00")
-	theme := GetUi().GetTheme()
+	theme := GetUi().Theme()
 	t.tmLbl.bg = theme.Get(TopBarStopwatchBg)
 	t.tmLbl.fg = theme.Get(TopBarStopwatchFg)
 	t.tmVar.Connect(func(data string) { t.tmLbl.SetText(data) })
 	t.Stopwatch.Start()
 }
 
-func (t *TopBar) SetShowStoppwatch(value bool) {
+func (t *Topbar) SetShowStoppwatch(value bool) *Topbar {
 	t.showSW = value
 	if t.showSW {
 		t.tmLbl.Show()
 	} else {
 		t.tmLbl.Hide()
 	}
+	return t
 }
 
-func (t *TopBar) SetUseStopwatch() {
+func (t *Topbar) SetUseStopwatch() *Topbar {
 	t.useSW = !t.useSW
 	if t.useSW {
 		t.initStopwatch()
 	} else {
 		t.Stopwatch.Stop()
 	}
+	return t
 }
 
-func (t *TopBar) SetShowTitle(value bool) {
+func (t *Topbar) SetShowTitle(value bool) *Topbar {
 	t.showTitle = value
 	if t.showTitle {
 		t.lblTitle.Show()
 	} else {
 		t.lblTitle.Hide()
 	}
+	return t
 }
 
-func (t *TopBar) Update(dt int) {
-	t.Container.Update(dt)
+func (t *Topbar) Tick(TickData) {
 	if !t.useSW {
 		return
 	}

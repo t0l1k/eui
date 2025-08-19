@@ -83,7 +83,7 @@ func (d *BoardMem) SetupShow() {
 			btn := eui.NewButton(" ", d.fn)
 			btn.Disable()
 			if cell.IsReadOnly() {
-				btn.Bg(colornames.Orange)
+				btn.SetBg(colornames.Orange)
 			}
 			d.Add(btn)
 		}
@@ -156,7 +156,7 @@ func (d *BoardMem) setupScoreBtn() *eui.Button {
 	return btn
 }
 
-func (d *BoardMem) Update(dt int) {
+func (d *BoardMem) Update() {
 	if d.IsHidden() {
 		return
 	}
@@ -168,7 +168,7 @@ func (d *BoardMem) Update(dt int) {
 		d.SetupConclusion()
 	}
 	for _, v := range d.Children() {
-		v.Update(dt)
+		v.Update()
 	}
-	d.Container.Update(dt)
+	d.Container.Update()
 }

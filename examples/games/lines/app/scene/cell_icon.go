@@ -42,8 +42,8 @@ func NewCellIcon(cell *game.Cell, f func(b *eui.Button)) *CellIcon {
 	return c
 }
 
-func (c *CellIcon) Update(dt int) {
-	c.btn.Update(dt)
+func (c *CellIcon) Tick(td eui.TickData) {
+	dt := int(td.Duration())
 	if c.anim == BallAnimFilledNext && !c.animStatus.IsMedium() {
 		c.jumpDt += dt
 		if c.jumpDt > 250 {

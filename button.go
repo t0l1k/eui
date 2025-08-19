@@ -19,8 +19,8 @@ type Button struct {
 func NewButton(txt string, fn func(*Button)) *Button {
 	b := &Button{Drawable: NewDrawable(), txt: txt, onPressed: fn}
 	theme := GetUi().theme
-	b.Bg(theme.Get(ButtonBg))
-	b.Fg(theme.Get(ButtonFg))
+	b.SetBg(theme.Get(ButtonBg))
+	b.SetFg(theme.Get(ButtonFg))
 	b.SetShadow(1, color.RGBA{0, 0, 0, 128})
 	return b
 }
@@ -81,8 +81,8 @@ func (b *Button) Layout() {
 			y += margin / 2
 		}
 		lbl.SetRect(NewRect([]int{x, y, w - margin*2, h - margin*2}))
-		lbl.Bg(b.GetBg())
-		lbl.Fg(b.GetFg())
+		lbl.SetBg(b.Bg())
+		lbl.SetFg(b.Fg())
 		lbl.Layout()
 		lbl.Draw(b.Image())
 		vector.StrokeRect(b.Image(), 0, 0, float32(w), float32(h), float32(margin), b.state.Color(), true)

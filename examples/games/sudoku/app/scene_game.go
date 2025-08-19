@@ -10,7 +10,7 @@ import (
 
 type SceneSudoku struct {
 	*eui.Scene
-	topBar       *eui.TopBar
+	topBar       *eui.Topbar
 	dialogSelect *DialogSelect
 	board        *Board
 	bottomBar    *BottomBar

@@ -38,9 +38,9 @@ func NewSceneMain() *SceneMain {
 					switch board.Game().Stage() {
 					case mem.Recollection:
 						if board.game.Move(i) {
-							v.(*eui.Button).Bg(colornames.Aqua)
+							v.(*eui.Button).SetBg(colornames.Aqua)
 						} else {
-							v.(*eui.Button).Bg(colornames.Orange)
+							v.(*eui.Button).SetBg(colornames.Orange)
 						}
 					}
 				}
@@ -49,8 +49,8 @@ func NewSceneMain() *SceneMain {
 	})
 	board.varMsg.Connect(func(data string) { lblStatus.SetText(data) })
 	board.varColor.Connect(func(arr []color.Color) {
-		lblStatus.Bg(arr[0])
-		lblStatus.Fg(arr[1])
+		lblStatus.SetBg(arr[0])
+		lblStatus.SetFg(arr[1])
 	})
 	lblStatus.SetText(board.Game().String())
 	s.Add(topBar)

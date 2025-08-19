@@ -45,14 +45,14 @@ func NewLabel(txt string) *Label {
 		dynamicFontSize: true,
 	}
 	theme := GetUi().theme
-	l.Bg(theme.Get(TextBg))
-	l.Fg(theme.Get(TextFg))
+	l.SetBg(theme.Get(TextBg))
+	l.SetFg(theme.Get(TextFg))
 	return l
 }
 func (l *Label) setupOptions() {
 	l.options = &text.DrawOptions{}
 	l.options.ColorScale.Reset()
-	l.options.ColorScale.ScaleWithColor(l.GetFg())
+	l.options.ColorScale.ScaleWithColor(l.Fg())
 	l.options.LineSpacing = l.fontSize * 1.2
 	l.MarkDirty()
 }

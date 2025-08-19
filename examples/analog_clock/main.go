@@ -25,8 +25,8 @@ type Hand struct {
 
 func NewHand(bg, fg color.Color) *Hand {
 	h := &Hand{Drawable: eui.NewDrawable()}
-	h.Bg(color.Transparent)
-	h.Fg(fg)
+	h.SetBg(color.Transparent)
+	h.SetFg(fg)
 	return h
 }
 
@@ -64,7 +64,7 @@ func (h *Hand) Layout() {
 	y1 := h.Rect().CenterY()
 	x2 := int(h.tip.X)
 	y2 := int(h.tip.Y)
-	vector.StrokeLine(h.Image(), float32(x1), float32(y1), float32(x2), float32(y2), float32(h.thickness), h.GetFg(), true)
+	vector.StrokeLine(h.Image(), float32(x1), float32(y1), float32(x2), float32(y2), float32(h.thickness), h.Fg(), true)
 	h.ClearDirty()
 }
 
@@ -89,7 +89,7 @@ type AnalogClock struct {
 }
 
 func NewAnalogClock() *AnalogClock {
-	theme := eui.GetUi().GetTheme()
+	theme := eui.GetUi().Theme()
 	bg := theme.Get(AppfaceBg)
 	a := &AnalogClock{
 		Container:  eui.NewContainer(eui.NewAbsoluteLayout()),
@@ -107,7 +107,7 @@ func NewAnalogClock() *AnalogClock {
 
 func (a *AnalogClock) Layout() {
 	a.Drawable.Layout()
-	a.Image().Fill(a.GetBg())
+	a.Image().Fill(a.Bg())
 	a.drawClockFace()
 	log.Println("update analog clock layout done")
 	a.ClearDirty()
@@ -116,7 +116,7 @@ func (a *AnalogClock) Layout() {
 func (a *AnalogClock) drawClockFace() {
 	x, y := a.Rect().Center()
 	m := float64(a.Rect().GetLowestSize()) * 0.01
-	vector.DrawFilledCircle(a.Image(), float32(x), float32(y), float32(m)*3, a.GetBg(), true)
+	vector.DrawFilledCircle(a.Image(), float32(x), float32(y), float32(m)*3, a.Bg(), true)
 	center := eui.Point[float64]{X: float64(x), Y: float64(y)}
 	vector.DrawFilledCircle(a.Image(), float32(center.X), float32(center.Y), float32(m)*2, a.FaceBg, true)
 	vector.DrawFilledCircle(a.Image(), float32(center.X), float32(center.Y), float32(m), a.FaceFg, true)
@@ -149,7 +149,7 @@ func (g *AnalogClock) getTime() (msec, sec, min, hour int) {
 	return
 }
 
-func (g *AnalogClock) Update(dt int) {
+func (g *AnalogClock) Update() {
 	msec, sec, minute, hour := g.getTime()
 	g.MsHand.Set(float64(msec) / 1000.0)
 	g.secHand.Set((float64(sec) + g.MsHand.Get()) / 60.0)
@@ -193,7 +193,7 @@ func (a *AnalogClock) setupHands() {
 	center := eui.NewPoint(float64(x), float64(y))
 	lenght := float64(sz/2) - m*4
 
-	conf := eui.GetUi().GetSettings()
+	conf := eui.GetUi().Settings()
 	a.MsHand.Setup(center, lenght, 1, conf.Get(ShowMSecondHand).(bool))
 	a.secHand.Setup(center, lenght, 3, true)
 	lenght = float64(sz/2) - m*8
@@ -219,7 +219,7 @@ func GetAngle(percent float64) float64 {
 
 type SceneAnalogClock struct {
 	*eui.Scene
-	topBar   *eui.TopBar
+	topBar   *eui.Topbar
 	clock    *AnalogClock
 	lblTm    *eui.Label
 	tmVar    *eui.Signal[string]
@@ -241,7 +241,7 @@ func NewSceneAnalogClock() *SceneAnalogClock {
 	s.tmVar.Connect(func(data string) {
 		s.lblTm.SetText(data)
 	})
-	conf := eui.GetUi().GetSettings()
+	conf := eui.GetUi().Settings()
 	s.checkBox = eui.NewCheckbox("MSecond View?", func(c *eui.Checkbox) {
 		s.clock.MsHand.ToggleVisible()
 		conf.Set(ShowMSecondHand, c.IsChecked())
@@ -253,22 +253,22 @@ func NewSceneAnalogClock() *SceneAnalogClock {
 }
 
 func (s *SceneAnalogClock) setupTheme() {
-	theme := eui.GetUi().GetTheme()
-	s.topBar.Bg(theme.Get(AppBg))
-	s.topBar.Fg(theme.Get(AppFg))
-	s.clock.Bg(theme.Get(AppBg))
-	s.clock.Fg(theme.Get(AppFg))
+	theme := eui.GetUi().Theme()
+	s.topBar.SetBg(theme.Get(AppBg))
+	s.topBar.SetFg(theme.Get(AppFg))
+	s.clock.SetBg(theme.Get(AppBg))
+	s.clock.SetFg(theme.Get(AppFg))
 	s.clock.FaceBg = theme.Get(AppfaceBg)
 	s.clock.FaceFg = theme.Get(AppfaceFg)
-	s.lblTm.Bg(theme.Get(ApplblBg))
-	s.lblTm.Fg(theme.Get(ApplblFg))
+	s.lblTm.SetBg(theme.Get(ApplblBg))
+	s.lblTm.SetFg(theme.Get(ApplblFg))
 }
 
-func (s *SceneAnalogClock) Update(dt int) {
+func (s *SceneAnalogClock) Update() {
 	dtFormat := "2006-01-02 15:04:05"
 	tm := time.Now().Format(dtFormat)
 	s.tmVar.Emit(tm)
-	s.Scene.Update(dt)
+	s.Scene.Update()
 }
 
 const (
@@ -287,7 +287,7 @@ const (
 )
 
 func setAppTheme() {
-	theme := eui.GetUi().GetTheme()
+	theme := eui.GetUi().Theme()
 	theme.Set(AppBg, colornames.Silver)
 	theme.Set(AppFg, colornames.Black)
 	theme.Set(ApplblBg, colornames.Greenyellow)
@@ -303,8 +303,8 @@ func setAppTheme() {
 func main() {
 	eui.Init(func() *eui.Ui {
 		u := eui.GetUi().SetTitle("Analog Clock").SetSize(800, 600)
-		u.GetSettings().Set(eui.UiFullscreen, false)
-		u.GetSettings().Set(ShowMSecondHand, false)
+		u.Settings().Set(eui.UiFullscreen, false)
+		u.Settings().Set(ShowMSecondHand, false)
 		setAppTheme()
 		return u
 	}())

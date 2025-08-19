@@ -18,19 +18,19 @@ type SnackBar struct {
 func NewSnackBar(message string) *SnackBar {
 	s := &SnackBar{Drawable: NewDrawable()}
 	s.msg = NewLabel(message)
-	s.msg.Bg(colornames.Blue)
-	s.msg.Fg(colornames.Yellow)
+	s.msg.SetBg(colornames.Blue)
+	s.msg.SetFg(colornames.Yellow)
 	s.SetRect(NewRect([]int{0, 0, 0, 0}))
 	return s
 }
 
 func (s *SnackBar) Bg(value color.Color) *SnackBar {
-	s.msg.Bg(value)
+	s.msg.SetBg(value)
 	return s
 }
 
 func (s *SnackBar) Fg(value color.Color) *SnackBar {
-	s.msg.Fg(value)
+	s.msg.SetFg(value)
 	return s
 }
 

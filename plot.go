@@ -80,8 +80,8 @@ func (p *Plot) Layout() {
 			xL, yL, w, h := int(xPos(float64(x))-float64(boxSize)/2), axisRect.Bottom()+boxSize/2, boxSize, boxSize
 			lbl := NewLabel(strconv.Itoa(p.xArr[i-1]))
 			defer lbl.Close()
-			lbl.Bg(p.bg)
-			lbl.Fg(p.fg)
+			lbl.SetBg(p.bg)
+			lbl.SetFg(p.fg)
 			lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 			lbl.Draw(p.Image())
 		}
@@ -89,8 +89,8 @@ func (p *Plot) Layout() {
 		xL, yL, w, h := axisRect.Right()-boxSize*3, axisRect.Bottom()-boxSize, boxSize*3, boxSize
 		lbl := NewLabel(p.xAxisTitle)
 		defer lbl.Close()
-		lbl.Bg(p.bg)
-		lbl.Fg(p.fg)
+		lbl.SetBg(p.bg)
+		lbl.SetFg(p.fg)
 		lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 		lbl.Draw(p.Image())
 	}
@@ -111,8 +111,8 @@ func (p *Plot) Layout() {
 			xL, yL, w, h := axisRect.Left()-int(float64(boxSize)*1.5), int(yPos(float64(y))-float64(boxSize)/2), boxSize, boxSize
 			lbl := NewLabel(strconv.Itoa(p.yArr[i-1]))
 			defer lbl.Close()
-			lbl.Bg(p.bg)
-			lbl.Fg(p.fg)
+			lbl.SetBg(p.bg)
+			lbl.SetFg(p.fg)
 			lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 			lbl.Draw(p.Image())
 		}
@@ -120,8 +120,8 @@ func (p *Plot) Layout() {
 		xL, yL, w, h := axisRect.Left(), axisRect.Top()-boxSize, boxSize*3, boxSize
 		lbl := NewLabel(p.yAxisTitle)
 		defer lbl.Close()
-		lbl.Bg(p.bg)
-		lbl.Fg(p.fg)
+		lbl.SetBg(p.bg)
+		lbl.SetFg(p.fg)
 		lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 		lbl.Draw(p.Image())
 	}
@@ -147,8 +147,8 @@ func (p *Plot) Layout() {
 		xL, yL, w, h := axisRect.Right()/2-boxSize/2, axisRect.Top()-boxSize/10, boxSize, boxSize/4
 		lbl := NewLabel(p.pTitle)
 		defer lbl.Close()
-		lbl.Bg(p.bg)
-		lbl.Fg(p.fg)
+		lbl.SetBg(p.bg)
+		lbl.SetFg(p.fg)
 		lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 		lbl.Draw(p.Image())
 	}

@@ -27,8 +27,8 @@ func NewTextInputLine(onReturn func(*TextInputLine)) *TextInputLine {
 		onReturn: onReturn,
 		maxLen:   0,
 	}
-	e.Bg(colornames.Navy)
-	e.Fg(colornames.Yellow)
+	e.SetBg(colornames.Navy)
+	e.SetFg(colornames.Yellow)
 	return e
 }
 
@@ -159,7 +159,7 @@ func (e *TextInputLine) Layout() {
 	opts.GeoM.Translate(margin-scrollOffset, float64(h)/2)
 	opts.PrimaryAlign = text.AlignStart
 	opts.SecondaryAlign = text.AlignCenter
-	opts.ColorScale.ScaleWithColor(e.GetFg())
+	opts.ColorScale.ScaleWithColor(e.Fg())
 
 	text.Draw(e.Image(), txt[drawOffset:], fnt, opts)
 
@@ -170,9 +170,9 @@ func (e *TextInputLine) Layout() {
 		cursorW, _ := text.Measure(cursorSub, fnt, fnt.Size*1.2)
 		cursorX := margin + float64(cursorW) - scrollOffset
 
-		cursorColor := e.GetFg()
+		cursorColor := e.Fg()
 		if e.blink {
-			cursorColor = e.GetBg()
+			cursorColor = e.Bg()
 		}
 		cursorHeight := float32(sz * 0.9)
 		cursorWidth := float32(sz * 0.01) // 1% от высоты шрифта

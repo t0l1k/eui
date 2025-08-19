@@ -29,11 +29,11 @@ func NewCellIcon(dim game.Dim, cell *game.Cell, f func(b *eui.Button), bg, fg co
 	c.f = f
 	c.btn = eui.NewButton("0", f)
 	c.Add(c.btn)
-	c.Bg(bg)
+	c.SetBg(bg)
 	if c.cell.IsReadOnly() {
-		c.Fg(colornames.Blue)
+		c.SetFg(colornames.Blue)
 	} else {
-		c.Fg(fg)
+		c.SetFg(fg)
 	}
 	c.Add(c.layout)
 	return c
@@ -45,7 +45,7 @@ func (c *CellIcon) UpdateData(value int) { c.MarkDirty() }
 
 func (c *CellIcon) Layout() {
 	c.Drawable.Layout()
-	c.Image().Fill(c.GetBg())
+	c.Image().Fill(c.Bg())
 	c.layout.ResetContainer()
 	value := c.cell.GetValue()
 	if value > 0 {
@@ -54,14 +54,14 @@ func (c *CellIcon) Layout() {
 		c.layout.SetLayout(eui.NewGridLayout(1, 1, 1))
 		defer lbl.Close()
 		if value == c.highlight {
-			lbl.Bg(colornames.Yellow)
+			lbl.SetBg(colornames.Yellow)
 		} else {
-			lbl.Bg(colornames.Silver)
+			lbl.SetBg(colornames.Silver)
 		}
 		if c.cell.IsReadOnly() {
-			lbl.Fg(colornames.Blue)
+			lbl.SetFg(colornames.Blue)
 		} else {
-			lbl.Fg(c.GetFg())
+			lbl.SetFg(c.Fg())
 		}
 		// log.Println("Иконка с цифрой", c.cell.GetValue())
 	} else {
@@ -69,15 +69,15 @@ func (c *CellIcon) Layout() {
 		if c.showNotes && len(notes) > 0 {
 			for i := 0; i < c.dim.Size(); i++ {
 				lbl := eui.NewLabel("")
-				lbl.Bg(colornames.Silver)
-				lbl.Fg(c.GetFg())
+				lbl.SetBg(colornames.Silver)
+				lbl.SetFg(c.Fg())
 				c.layout.Add(lbl)
 				found := notes.IsContain(i + 1)
 				if found {
 					idx, _ := notes.Index(i + 1)
 					lbl.SetText(strconv.Itoa(notes[idx]))
 					if i+1 == c.highlight {
-						lbl.Bg(colornames.Yellow)
+						lbl.SetBg(colornames.Yellow)
 					}
 				} else {
 					lbl.SetText("")
@@ -91,22 +91,22 @@ func (c *CellIcon) Layout() {
 			c.layout.SetLayout(eui.NewGridLayout(1, 1, 1))
 			defer lbl.Close()
 			if len(notes) == 0 {
-				lbl.Bg(colornames.Orange)
+				lbl.SetBg(colornames.Orange)
 			} else {
-				lbl.Bg(colornames.Silver)
+				lbl.SetBg(colornames.Silver)
 			}
-			lbl.Fg(c.GetFg())
+			lbl.SetFg(c.Fg())
 			// log.Println("Иконка без заметок", c.cell.GetValue())
 		}
 	}
 	c.ClearDirty()
 }
 
-func (d *CellIcon) Update(dt int) {
+func (d *CellIcon) Update() {
 	if d.IsHidden() {
 		return
 	}
-	d.btn.Update(dt)
+	d.btn.Update()
 }
 
 func (d *CellIcon) Draw(surface *ebiten.Image) {

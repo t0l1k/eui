@@ -86,7 +86,7 @@ func (g *Game) gameLogic(b *eui.Button) {
 	}
 }
 
-func (g *Game) Update(dt int) {
+func (g *Game) Update() {
 	switch g.field.State.Value() {
 	case game.GameStart, game.GamePlay:
 		if !ebiten.IsFocused() && g.field.State.Value() == game.GamePlay {
@@ -105,7 +105,7 @@ func (g *Game) Update(dt int) {
 			}
 		}
 	}
-	g.Container.Update(dt)
+	g.Container.Update()
 }
 
 func (g *Game) UpdateData(value string) {

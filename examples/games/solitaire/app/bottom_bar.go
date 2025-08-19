@@ -55,13 +55,7 @@ func (s *BottomBar) UpdateMoveCount() bool {
 	return moves == 0
 }
 
-func (b *BottomBar) Update(dt int) {
-	if b.IsHidden() {
-		return
-	}
-	for _, v := range b.layout.Children() {
-		v.Update(dt)
-	}
+func (b *BottomBar) Tick(td eui.TickData) {
 	b.varSw.Emit(eui.FormatSmartDuration(b.board.Stopwatch().Duration(), true))
 }
 

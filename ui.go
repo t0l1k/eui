@@ -28,17 +28,19 @@ type Ui struct {
 }
 
 func (u *Ui) GetStartTime() time.Time          { return u.start }
-func (u *Ui) GetInputMouse() *MouseListener    { return u.inputMouse }
-func (u *Ui) GetInputKeyboard() *KeyboardInput { return u.inputKeyboard }
-func (u *Ui) GetTitle() string                 { return u.title }
+func (u *Ui) MouseListener() *MouseListener    { return u.inputMouse }
+func (u *Ui) KeyboardListener() *KeyboardInput { return u.inputKeyboard }
+func (u *Ui) TickListener() *TickListener      { return u.tickListener }
+func (u *Ui) ResizeListener() *ResizeListener  { return u.resizeListener }
+func (u *Ui) Title() string                    { return u.title }
 func (u *Ui) SetTitle(value string) *Ui        { u.title = value; return u }
 func (u *Ui) SetFullscreen(value bool)         { u.settings.Set(UiFullscreen, value) }
 func (u *Ui) Size() (int, int)                 { return u.size.X, u.size.Y }
 func (u *Ui) SetSize(w, h int) *Ui             { u.size = NewPoint(w, h); return u }
 func (u *Ui) IsMainScene() bool                { return len(u.scenes) == 0 }
-func (u *Ui) GetTheme() *Theme                 { return u.theme }
+func (u *Ui) Theme() *Theme                    { return u.theme }
 func (u *Ui) SetTheme(value *Theme) *Ui        { u.theme = value; return u }
-func (u *Ui) GetSettings() *Setting            { return u.settings }
+func (u *Ui) Settings() *Setting               { return u.settings }
 func (u *Ui) FontDefault() *Font               { return u.resource.FontDefault() }
 
 // Отсюда можно следить за изменением размера окна, при изменении обновляются размеры текущей сцены
@@ -196,13 +198,12 @@ func (u *Ui) HandleMouseEvent(ev Event) {
 }
 
 func (u *Ui) Update() error {
-	tick := u.getTick()
 	u.tickListener.update()
 	u.inputMouse.update()
 	u.inputKeyboard.update()
-	u.currentScene.Update(tick)
+	u.currentScene.Update()
 	if u.modal != nil {
-		u.modal.Update(tick)
+		u.modal.Update()
 	}
 	return nil
 }
@@ -234,19 +235,6 @@ func (a *Ui) ToggleFullscreen() {
 	ebiten.SetFullscreen(fullscreen)
 	a.settings.Set(UiFullscreen, fullscreen)
 	log.Println("Toggle FullScreen", a.size)
-}
-
-// Определяю дельту от последнего обновления в миллисекундах
-func (u *Ui) getTick() (ticks int) {
-	tm := time.Now()
-	dt := tm.Nanosecond() / 1e6
-	if dt < u.tick {
-		ticks = 999 - u.tick + dt
-	} else {
-		ticks = dt - u.tick
-	}
-	u.tick = dt
-	return ticks
 }
 
 // Добавить сцену и сделать текущей

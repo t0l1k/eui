@@ -14,7 +14,7 @@ import (
 type SelectDiff struct {
 	*eui.Scene
 	frame                *eui.Container
-	topBar               *eui.TopBar
+	topBar               *eui.Topbar
 	cRow, cCol, cPerc    *eui.SpinBox[int]
 	btnExec              *eui.Button
 	percent, row, column int
@@ -85,7 +85,7 @@ func NewSelectDiff(title string) *SelectDiff {
 	})
 	s.frame.Add(s.btnExec)
 	s.Add(s.frame)
-	s.kId = eui.GetUi().GetInputKeyboard().Connect(s.UpdateInput)
+	s.kId = eui.GetUi().KeyboardListener().Connect(s.UpdateInput)
 	return s
 }
 
@@ -101,7 +101,7 @@ func (s *SelectDiff) runGame() {
 	str := "Игра на " + strconv.Itoa(s.column) + " столбиков" + strconv.Itoa(s.row) + " рядов " + strconv.Itoa(mines) + " мин"
 	game := scene_game.NewSceneGame(str, s.row, s.column, mines)
 	eui.GetUi().Push(game)
-	eui.GetUi().GetInputKeyboard().Disconnect(s.kId)
+	eui.GetUi().KeyboardListener().Disconnect(s.kId)
 	log.Println("run game", s.row, s.column, mines, s.percent)
 }
 

@@ -15,6 +15,6 @@ func NewApp() *eui.Ui {
 	k := 80
 	w, h := 9*k, 6*k
 	u.SetSize(w, h)
-	u.GetTheme().Set(eui.ViewBg, colornames.Navy)
+	u.Theme().Set(eui.ViewBg, colornames.Navy)
 	return u
 }

@@ -53,9 +53,9 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 				for _, v := range sv.laySheet.Items() {
 					switch vv := v.(type) {
 					case *eui.Button:
-						if vv.GetBg() == colornames.Aqua {
-							vv.Bg(colornames.Gray)
-							vv.Fg(colornames.Yellow)
+						if vv.Bg() == colornames.Aqua {
+							vv.SetBg(colornames.Gray)
+							vv.SetFg(colornames.Yellow)
 							if sv.activeCell.IsActive() {
 								sv.activeCell.SetInActive()
 								sv.activeCell = nil
@@ -64,8 +64,8 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 						}
 					}
 				}
-				b.Bg(colornames.Aqua)
-				b.Fg(colornames.Black)
+				b.SetBg(colornames.Aqua)
+				b.SetFg(colornames.Black)
 				if cell.IsContainFormula() {
 					sv.input.SetText(cell.GetFormula().String())
 				} else {
@@ -83,10 +83,6 @@ func NewSpreadSheetView(row, column int) *SpreadsheetView {
 		}
 	}
 	return &sv
-}
-
-func (s *SpreadsheetView) Update(dt int) {
-	s.Container.Update(dt)
 }
 
 func (s *SpreadsheetView) SetRect(rect eui.Rect[int]) {

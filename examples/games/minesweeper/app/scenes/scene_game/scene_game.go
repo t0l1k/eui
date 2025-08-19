@@ -56,12 +56,12 @@ func NewSceneGame(title string, r, c, m int) *SceneGame {
 	return s
 }
 
-func (s *SceneGame) Update(dt int) {
+func (s *SceneGame) Update() {
 	s.checkBtnStatus()
 	s.lblGameTimer.SetText(eui.FormatSmartDuration(s.game.timer.Duration(), false))
 	str := strconv.Itoa(s.game.field.GetMarkedMines()) + "/" + strconv.Itoa(s.game.field.GetTotalMines())
 	s.lblMines.SetText(str)
-	s.Scene.Update(dt)
+	s.Scene.Update()
 }
 
 func (s *SceneGame) checkBtnStatus() {

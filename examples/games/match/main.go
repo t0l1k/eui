@@ -304,17 +304,17 @@ func (b *Board) New(dim eui.Point[int]) {
 			switch state {
 			case CellClose:
 				icon.SetText(cell.String())
-				icon.Bg(colornames.Gray)
-				icon.Fg(colornames.Yellow)
+				icon.SetBg(colornames.Gray)
+				icon.SetFg(colornames.Yellow)
 
 			case CellOpen:
 				icon.SetText(cell.String())
-				icon.Bg(colornames.Teal)
-				icon.Fg(colornames.Yellow)
+				icon.SetBg(colornames.Teal)
+				icon.SetFg(colornames.Yellow)
 			case CellMatch:
 				icon.SetText(cell.String())
-				icon.Bg(colornames.Greenyellow)
-				icon.Fg(colornames.Black)
+				icon.SetBg(colornames.Greenyellow)
+				icon.SetFg(colornames.Black)
 			}
 		})
 	}
@@ -336,7 +336,7 @@ func (b *Board) Reset() {
 	}
 }
 
-func (b *Board) Update(int) {
+func (b *Board) Update() {
 	b.game.status.Emit(b.game.gameStatus())
 	if b.IsHidden() && b.game.state.Value() == GamePlay {
 		b.game.state.Emit(GamePause)
@@ -365,36 +365,6 @@ func NewDialog(title, message string, fn func(*eui.Button)) *Dialog {
 	d.Add(btnsContainer)
 	return d
 }
-
-type TopBar struct {
-	*eui.Container
-	timerVar *eui.Signal[time.Duration]
-}
-
-func NewTopbar(title string, fn func(*eui.Button)) *TopBar {
-	t := &TopBar{Container: eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{5, 25, 60, 10}, 1))}
-
-	tmLbl := eui.NewLabel("-:--")
-	t.timerVar = eui.NewSignal(func(a, b time.Duration) bool { return a == b })
-	t.timerVar.ConnectAndFire(func(data time.Duration) {
-		tmLbl.SetText(eui.FormatSmartDuration(data, false))
-	}, 0)
-
-	btnLbl := "X"
-	if fn != nil {
-		btnLbl = "Menu"
-	} else {
-		fn = func(b *eui.Button) {
-			eui.GetUi().Pop()
-		}
-	}
-	t.Add(eui.NewButton(btnLbl, fn))
-	t.Add(eui.NewLabel(title))
-	t.Add(eui.NewDrawable())
-	t.Add(tmLbl)
-	return t
-}
-func (t *TopBar) Tick(td eui.TickData) { t.timerVar.Emit(t.timerVar.Value() + td.Duration()) }
 
 func main() {
 	eui.Init(func() *eui.Ui {
@@ -483,10 +453,10 @@ func main() {
 		boardContainer := eui.NewContainer(eui.NewStackLayout(5))
 		boardContainer.Add(dialog)
 		boardContainer.Add(board)
-		s.Add(NewTopbar(title, func(b *eui.Button) {
+		s.Add(eui.NewTopBar(title, func(b *eui.Button) {
 			board.Hide()
 			dialog.Show()
-		}))
+		}).SetShowStoppwatch(true).SetUseStopwatch())
 		s.Add(boardContainer)
 		s.Add(statusLbl)
 		return s

@@ -19,13 +19,13 @@ func NewBtn(fn func(btn *eui.Button)) *BottomBarNr {
 	b.valueBtn = eui.NewButton("", fn)
 	b.Add(b.valueBtn)
 	b.countLbl = eui.NewLabel("")
-	b.countLbl.Fg(colornames.Black)
+	b.countLbl.SetFg(colornames.Black)
 	b.Add(b.countLbl)
 	return b
 }
 
-func (b *BottomBarNr) GetBg() color.Color   { return b.valueBtn.GetBg() }
-func (b *BottomBarNr) Bg(value color.Color) { b.valueBtn.Bg(value) }
+func (b *BottomBarNr) GetBg() color.Color   { return b.valueBtn.Bg() }
+func (b *BottomBarNr) Bg(value color.Color) { b.valueBtn.SetBg(value) }
 func (b *BottomBarNr) GetText() string      { return b.valueBtn.Text() }
 func (b *BottomBarNr) GetValue() string     { return b.valueBtn.Text() }
 func (b *BottomBarNr) SetValue(value int)   { b.valueBtn.SetText(strconv.Itoa(value)) }
@@ -34,9 +34,9 @@ func (b *BottomBarNr) SetCount(value int) {
 	nr := strconv.Itoa(value)
 	b.countLbl.SetText(nr)
 	if value == 0 {
-		b.countLbl.Bg(colornames.Silver)
+		b.countLbl.SetBg(colornames.Silver)
 	} else {
-		b.countLbl.Bg(colornames.Yellow)
+		b.countLbl.SetBg(colornames.Yellow)
 	}
 }
 
