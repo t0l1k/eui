@@ -35,7 +35,7 @@ func main() {
 			eui.NewHBoxLayout(1)).                                          // Контейнер кнопок по горизонтали
 			Add(eui.NewButton("+", func(b *eui.Button) { counter.Inc() })). // Добавить в контейнер кнопку увеличить на единицу и передать подписчикам об этом
 			Add(eui.NewButton("-", func(b *eui.Button) { counter.Dec() }))) // Добавить в контейнер кнопку уменьшить на единицу и передать подписчикам об этом
-		eui.NewSnackBar("Test Counter! Click Escape to quit").ShowTime(3 * time.Second) // Показать сообщение 3 секунды после запуска
+		eui.NewSnackBar("Test Counter! Click Escape to quit").ShowTime(30 * time.Second) // Показать сообщение на 30 секунд после запуска, отменить нажав закрыть
 		return s
 	}())
 	eui.Quit(func() {}) // Завершить приложение

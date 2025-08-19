@@ -34,6 +34,8 @@ func main() {
 				i = 0
 			}
 		}))
+		back := eui.NewGridBackground(50)
+		a.Add(back)
 		return a
 	}())
 	eui.Quit(func() {})

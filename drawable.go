@@ -9,6 +9,7 @@ import (
 )
 
 type Drawable struct {
+	dType          ViewType
 	state          ViewState
 	rect           Rect[int]
 	dirty, pressed bool
@@ -19,8 +20,10 @@ type Drawable struct {
 }
 
 func NewDrawable() *Drawable {
-	return &Drawable{state: StateNormal, dirty: true, bg: color.Transparent, fg: color.Black, shadowSize: 0, shadowColor: color.RGBA{0, 0, 0, 128}}
+	return &Drawable{dType: ViewNormal, state: StateNormal, dirty: true, bg: color.Transparent, fg: color.Black, shadowSize: 0, shadowColor: color.RGBA{0, 0, 0, 128}}
 }
+func (s *Drawable) ViewType() ViewType         { return s.dType }
+func (s *Drawable) SetViewType(value ViewType) { s.dType = value; s.MarkDirty() }
 
 func (s *Drawable) State() ViewState         { return s.state }
 func (s *Drawable) SetState(value ViewState) { s.state = value; s.MarkDirty() }

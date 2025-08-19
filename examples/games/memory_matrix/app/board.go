@@ -120,10 +120,10 @@ func (d *BoardMem) SetupConclusion() {
 	sb := eui.NewSnackBar("")
 	if d.Game().Win {
 		str = "Winner"
-		sb.Bg(colornames.Blue)
+		sb.SetBg(colornames.Blue)
 	} else if d.Game().GameOver {
 		str = "Game Over"
-		sb.Bg(colornames.Red)
+		sb.SetBg(colornames.Red)
 	}
 	sb.SetText(str + " " + d.Game().String()).ShowTime(3 * time.Second)
 	d.varMsg.Emit(d.gamesData.String())

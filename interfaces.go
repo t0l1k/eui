@@ -6,6 +6,8 @@ import (
 
 type Drawabler interface {
 	Spriter
+	ViewType() ViewType
+	SetViewType(ViewType)
 	State() ViewState
 	SetState(ViewState)
 	IsHidden() bool

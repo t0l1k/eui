@@ -10,37 +10,42 @@ import (
 )
 
 type SnackBar struct {
-	*Drawable
-	msg   *Label
-	timer *Timer
+	*Container
+	msg     *Label
+	quitBtn *Button
+	timer   *Timer
 }
 
 func NewSnackBar(message string) *SnackBar {
-	s := &SnackBar{Drawable: NewDrawable()}
+	s := &SnackBar{Container: NewContainer(NewLayoutHorizontalPercent([]int{10, 90}, 3))}
+	s.quitBtn = NewButton("X", func(b *Button) {
+		GetUi().HideModal()
+		log.Println("SnackBar:Close")
+	})
 	s.msg = NewLabel(message)
 	s.msg.SetBg(colornames.Blue)
 	s.msg.SetFg(colornames.Yellow)
-	s.SetRect(NewRect([]int{0, 0, 0, 0}))
+	s.SetViewType(ViewModal)
+	s.Add(s.quitBtn)
+	s.Add(s.msg)
 	return s
 }
 
-func (s *SnackBar) Bg(value color.Color) *SnackBar {
-	s.msg.SetBg(value)
-	return s
+func (b *SnackBar) Hit(pt Point[int]) Drawabler {
+	if !pt.In(b.rect) || b.IsHidden() {
+		return nil
+	}
+	if pt.In(b.quitBtn.Rect()) {
+		log.Println("SnackBar:Hit:", b.Rect(), b.msg.Text())
+		return b.quitBtn
+	}
+	return nil
 }
 
-func (s *SnackBar) Fg(value color.Color) *SnackBar {
-	s.msg.SetFg(value)
-	return s
-}
-
-func (s *SnackBar) SetText(value string) *SnackBar {
-	s.msg.SetText(value)
-	return s
-}
-
+func (s *SnackBar) SetBg(value color.Color) *SnackBar { s.msg.SetBg(value); return s }
+func (s *SnackBar) SetFg(value color.Color) *SnackBar { s.msg.SetFg(value); return s }
+func (s *SnackBar) SetText(value string) *SnackBar    { s.msg.SetText(value); return s }
 func (s *SnackBar) ShowTime(durration time.Duration) *SnackBar {
-	s.Show()
 	s.timer = NewTimer(durration, func() {
 		log.Println("Show snackbar done", s.msg.Text())
 		GetUi().HideModal()
@@ -49,23 +54,9 @@ func (s *SnackBar) ShowTime(durration time.Duration) *SnackBar {
 	log.Println("Begin show snackbar", s)
 	return s
 }
-
 func (s *SnackBar) Draw(surface *ebiten.Image) {
 	if s.timer != nil {
-		s.msg.Draw(surface)
+		s.Container.Draw(surface)
 	}
 }
-
-func (s *SnackBar) SetRect(r Rect[int]) {
-	w0, h0 := GetUi().Size()
-	rect := NewRect([]int{0, 0, w0, h0})
-	sz := int(float64(rect.GetLowestSize()) * 0.1)
-	x, y := rect.X+((w0-sz*8)/2), rect.Y+rect.Bottom()-sz*2
-	w, h := w0-sz*8, sz
-	s.msg.SetRect(NewRect([]int{x, y, w, h}))
-}
-
-func (s *SnackBar) Close() {
-	s.timer = nil
-	s.ImageReset()
-}
+func (s *SnackBar) Close() { s.timer = nil; s.ImageReset() }

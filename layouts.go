@@ -14,8 +14,13 @@ const (
 type AbsoluteLayout struct{}
 
 func NewAbsoluteLayout() *AbsoluteLayout { return &AbsoluteLayout{} }
-func (a *AbsoluteLayout) Apply(d []Drawabler, r Rect[int]) {
-	log.Println("AbsoluteLayout:Apply:", d, r)
+func (a *AbsoluteLayout) Apply(children []Drawabler, r Rect[int]) {
+	for _, c := range children {
+		if c.ViewType().IsBackground() {
+			c.SetRect(r)
+		}
+	}
+	log.Println("AbsoluteLayout:Apply:", children, r)
 }
 
 type LayoutBox struct {
@@ -28,17 +33,17 @@ func NewHBoxLayout(spacing int) *LayoutBox { return &LayoutBox{dir: Horizontal, 
 
 func (b *LayoutBox) Apply(children []Drawabler, parentRect Rect[int]) {
 	// 1. Фоновые
-	// for _, v := range children {
-	// 	if v.ViewType().IsBackground() {
-	// 		v.SetRect(parentRect)
-	// 	}
-	// }
+	for _, v := range children {
+		if v.ViewType().IsBackground() {
+			v.SetRect(parentRect)
+		}
+	}
 	// 2. Обычные
 	var normal []Drawabler
 	for _, v := range children {
-		// if !v.ViewType().IsBackground() {
-		normal = append(normal, v)
-		// }
+		if !v.ViewType().IsBackground() {
+			normal = append(normal, v)
+		}
 	}
 	n := len(normal)
 	if n == 0 {
@@ -88,6 +93,21 @@ func (l *GridLayout) Apply(components []Drawabler, rect Rect[int]) {
 	if count == 0 || l.Rows == 0 || l.Columns == 0 {
 		return
 	}
+
+	// 1. Фоновые
+	for _, v := range components {
+		if v.ViewType().IsBackground() {
+			v.SetRect(rect)
+		}
+	}
+	// 2. Обычные
+	var normal []Drawabler
+	for _, v := range components {
+		if !v.ViewType().IsBackground() {
+			normal = append(normal, v)
+		}
+	}
+
 	cellW := float64(rect.Width()-(l.Rows-1)*l.Spacing) / float64(l.Rows)
 	cellH := float64(rect.Height()-(l.Columns-1)*l.Spacing) / float64(l.Columns)
 	if l.square {
@@ -101,7 +121,7 @@ func (l *GridLayout) Apply(components []Drawabler, rect Rect[int]) {
 	offsetX := float64(rect.X) + (float64(rect.Width())-gridW)/2
 	offsetY := float64(rect.Y) + (float64(rect.Height())-gridH)/2
 
-	for i, comp := range components {
+	for i, comp := range normal {
 		row := i % l.Rows
 		col := i / l.Rows
 		x := offsetX + float64(row)*(cellW+float64(l.Spacing))
@@ -109,7 +129,7 @@ func (l *GridLayout) Apply(components []Drawabler, rect Rect[int]) {
 		r := NewRect([]int{int(x), int(y), int(cellW), int(cellH)})
 		comp.SetRect(r)
 	}
-	log.Printf("GridLayout(%v,%v):Apply(%v)%v", l.Rows, l.Columns, len(components), rect)
+	log.Printf("GridLayout(%v,%v):Apply(%v)%v", l.Rows, l.Columns, len(normal), rect)
 }
 
 type StackLayout struct{ spacing int }
@@ -120,15 +140,27 @@ func (b *StackLayout) Apply(children []Drawabler, rect Rect[int]) {
 		return
 	}
 	for _, c := range children {
+		if c.ViewType().IsBackground() {
+			c.SetRect(rect)
+			continue
+		}
 		x := rect.X + b.spacing
 		y := rect.Y + b.spacing
 		w := rect.W - b.spacing*2
 		h := rect.H - b.spacing*2
 		c.SetRect(NewRect([]int{x, y, w, h}))
 	}
-	children[0].Show()
-	for i := 1; i < len(children); i++ {
-		children[i].Hide()
+	found := false
+	for _, c := range children {
+		if c.ViewType().IsBackground() {
+			continue
+		}
+		if !found {
+			c.Show()
+			found = true
+			continue
+		}
+		c.Hide()
 	}
 	log.Println("StackLayout:Apply:", children, rect)
 }
@@ -146,11 +178,24 @@ func NewLayoutHorizontalPercent(parts []int, spacing int) *LayoutPercent {
 	return &LayoutPercent{dir: Horizontal, Parts: parts, Spacing: spacing}
 }
 func (l *LayoutPercent) Apply(children []Drawabler, parentRect Rect[int]) {
-	n := len(children)
+	// 1. Сначала фоновые виджеты
+	for _, v := range children {
+		if v.ViewType().IsBackground() {
+			v.SetRect(parentRect)
+		}
+	}
+	// 2. Обычные виджеты
+	var normal []Drawabler
+	for _, v := range children {
+		if !v.ViewType().IsBackground() {
+			normal = append(normal, v)
+		}
+	}
+	n := len(normal)
 	if n == 0 || len(l.Parts) != n {
 		return
 	}
-	w, h := parentRect.W-l.Spacing*2, parentRect.H-l.Spacing*2
+	w, h := parentRect.Width()-l.Spacing*2, parentRect.Height()-l.Spacing*2
 	total := 0
 	for _, p := range l.Parts {
 		total += p
@@ -161,14 +206,14 @@ func (l *LayoutPercent) Apply(children []Drawabler, parentRect Rect[int]) {
 	x, y := parentRect.X+l.Spacing, parentRect.Y+l.Spacing
 	if l.dir == Horizontal {
 		avail := w - l.Spacing*(n-1)
-		for i, c := range children {
+		for i, c := range normal {
 			pw := avail * l.Parts[i] / total
 			c.SetRect(NewRect([]int{x, y, pw, h}))
 			x += pw + l.Spacing
 		}
 	} else {
 		avail := h - l.Spacing*(n-1)
-		for i, c := range children {
+		for i, c := range normal {
 			ph := avail * l.Parts[i] / total
 			c.SetRect(NewRect([]int{x, y, w, ph}))
 			y += ph + l.Spacing

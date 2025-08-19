@@ -435,6 +435,9 @@ func main() {
 			case bNew:
 				board.New(dim)
 			case bReset:
+				if len(board.game.field) == 0 {
+					board.New(dim)
+				}
 				board.Reset()
 			case bNext:
 				if board.game.completed {
@@ -459,6 +462,7 @@ func main() {
 		}).SetShowStoppwatch(true).SetUseStopwatch())
 		s.Add(boardContainer)
 		s.Add(statusLbl)
+		s.Add(eui.NewGridBackground(80))
 		return s
 	}())
 }

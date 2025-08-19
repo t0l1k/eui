@@ -107,11 +107,17 @@ func (u *Ui) HandleKeybordEvent(ev Event) {
 }
 
 func (u *Ui) HandleMouseEvent(ev Event) {
+	var root Drawabler
+	if u.modal != nil {
+		root = u.modal
+	} else if u.currentScene != nil {
+		root = u.currentScene
+	}
 	switch ev.Type {
 	case EventMouseDown:
 		var pressed Drawabler
 		md := ev.Value.(MouseData)
-		u.currentScene.Traverse(func(d Drawabler) {
+		root.Traverse(func(d Drawabler) {
 			if mh, ok := d.(interface{ Hit(Point[int]) Drawabler }); ok {
 				if mh.Hit(md.pos) != nil && pressed == nil {
 					pressed = d
@@ -143,7 +149,7 @@ func (u *Ui) HandleMouseEvent(ev Event) {
 	case EventMouseWheel:
 		var wheel Drawabler
 		md := ev.Value.(MouseData)
-		u.currentScene.Traverse(func(d Drawabler) {
+		root.Traverse(func(d Drawabler) {
 			if mh, ok := d.(interface{ Hit(Point[int]) Drawabler }); ok {
 				if mh.Hit(md.pos) != nil && wheel == nil {
 					wheel = d
@@ -159,7 +165,7 @@ func (u *Ui) HandleMouseEvent(ev Event) {
 	case EventMouseMovement, EventMouseDrag:
 		var hovered Drawabler
 		md := ev.Value.(MouseData)
-		u.currentScene.Traverse(func(d Drawabler) {
+		root.Traverse(func(d Drawabler) {
 			if mh, ok := d.(interface{ Hit(Point[int]) Drawabler }); ok {
 				if mh.Hit(md.pos) != nil && hovered == nil {
 					hovered = d
@@ -216,7 +222,16 @@ func (u *Ui) Draw(screen *ebiten.Image) {
 	}
 }
 
-func (u *Ui) ShowModal(d Drawabler) {
+func (u *Ui) ShowModal(d interface{ Drawabler }) {
+	w0, h0 := u.Size()
+	r := NewRect([]int{0, 0, w0, h0})
+	if snack, ok := d.(*SnackBar); ok {
+		w, h := float64(w0)*0.8, float64(h0)*0.1
+		x, y := (w0-int(w))/2, h0-int(h*1.5)
+		rect := NewRect([]int{x, y, int(w), int(h)})
+		log.Println(r, rect)
+		snack.SetRect(rect)
+	}
 	u.modal = d
 	u.modal.Show()
 }

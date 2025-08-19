@@ -46,3 +46,17 @@ func (s ViewState) String() string {
 		"Hidden",
 	}[s]
 }
+
+type ViewType int
+
+const (
+	ViewNormal ViewType = iota
+	ViewModal
+	ViewSystem
+	ViewBackground
+)
+
+func (s ViewType) IsNormal() bool     { return s == ViewNormal }
+func (s ViewType) IsModal() bool      { return s == ViewModal }
+func (s ViewType) IsSystem() bool     { return s == ViewSystem }
+func (s ViewType) IsBackground() bool { return s == ViewBackground }

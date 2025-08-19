@@ -228,7 +228,7 @@ type SceneAnalogClock struct {
 
 func NewSceneAnalogClock() *SceneAnalogClock {
 	s := &SceneAnalogClock{Scene: eui.NewScene(eui.NewLayoutVerticalPercent([]int{5, 90, 5}, 5))}
-	s.topBar = eui.NewTopBar("Analog Clock Example", nil)
+	s.topBar = eui.NewTopBar("Analog Clock Example", nil).SetUseStopwatch()
 	s.Add(s.topBar)
 	s.clock = NewAnalogClock()
 	s.Add(s.clock)
@@ -248,6 +248,7 @@ func NewSceneAnalogClock() *SceneAnalogClock {
 	})
 	contStatus.Add(s.checkBox)
 	s.checkBox.SetChecked(conf.Get(ShowMSecondHand).(bool))
+	s.Add(eui.NewGridBackground(50))
 	s.setupTheme()
 	return s
 }
@@ -288,16 +289,16 @@ const (
 
 func setAppTheme() {
 	theme := eui.GetUi().Theme()
-	theme.Set(AppBg, colornames.Silver)
+	theme.Set(AppBg, color.Transparent)
 	theme.Set(AppFg, colornames.Black)
 	theme.Set(ApplblBg, colornames.Greenyellow)
 	theme.Set(ApplblFg, colornames.Black)
 	theme.Set(AppfaceBg, colornames.Navy)
 	theme.Set(AppfaceFg, colornames.Greenyellow)
-	theme.Set(AppMsSecondHandFg, colornames.Black)
+	theme.Set(AppMsSecondHandFg, colornames.Yellow)
 	theme.Set(AppSecondHandFg, colornames.Red)
-	theme.Set(AppMinuteHandFg, colornames.Blue)
-	theme.Set(AppHourHandFg, colornames.Navy)
+	theme.Set(AppMinuteHandFg, colornames.Magenta)
+	theme.Set(AppHourHandFg, colornames.Aqua)
 }
 
 func main() {

@@ -184,6 +184,7 @@ func NewSwScene() *SwScene {
 	s.Add(lblRingSw)
 	s.Add(listRing)
 	s.Add(visibleBtnsContainer)
+	s.Add(eui.NewGridBackground(30))
 
 	return s
 }

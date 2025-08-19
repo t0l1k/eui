@@ -33,7 +33,10 @@ func main() {
 			board := eui.NewContainer(eui.NewSquareGridLayout(3, 3, 5))
 
 			move := func(where int, who string) {
-				board.Children()[where].(*eui.Button).SetText(who)
+				b, ok := board.Children()[where].(*eui.Button)
+				if ok {
+					b.SetText(who)
+				}
 			}
 
 			for i := range 9 {
@@ -73,9 +76,11 @@ func main() {
 			}))
 			statusLine.Add(lblStatus)
 
-			s.Add(eui.NewTopBar(title, nil))
+			s.Add(eui.NewTopBar(title, nil).SetUseStopwatch())
+			board.Add(eui.NewGridBackground(80))
 			s.Add(board)
 			s.Add(statusLine)
+			s.Add(eui.NewGridBackground(50))
 			return s
 		}())
 	eui.Quit(func() {})

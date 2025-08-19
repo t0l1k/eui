@@ -58,7 +58,16 @@ func (c *Container) Draw(surface *ebiten.Image) {
 	if c.IsDirty() {
 		c.Layout()
 	}
-	c.Traverse(func(d Drawabler) { d.Draw(surface) }, false)
+	c.Traverse(func(d Drawabler) {
+		if d.ViewType().IsBackground() {
+			d.Draw(surface)
+		}
+	}, false)
+	c.Traverse(func(d Drawabler) {
+		if !d.ViewType().IsBackground() {
+			d.Draw(surface)
+		}
+	}, false)
 }
 func (c *Container) Traverse(action func(d Drawabler), reverse bool) {
 	for _, d := range c.Children() {
