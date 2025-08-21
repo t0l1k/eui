@@ -46,6 +46,8 @@ func (b *Board) Setup(dim game.Dim, diff game.Difficult) {
 	b.game = game.NewGame(b.dim)
 	b.game.Load(diff)
 	b.layoutCells.ResetContainer()
+	b.grid.Set(float64(b.dim.H), float64(b.dim.W))
+	b.layoutCells.SetLayout(eui.NewSquareGridLayout(b.dim.Size(), b.dim.Size(), b.spacing))
 	for y := 0; y < b.dim.Size(); y++ {
 		for x := 0; x < b.dim.Size(); x++ {
 			btn := NewCellIcon(b.dim, b.game.Cell(x, y), b.fn, colornames.Silver, colornames.Black)
@@ -53,14 +55,18 @@ func (b *Board) Setup(dim game.Dim, diff game.Difficult) {
 			b.layoutCells.Add(btn)
 		}
 	}
-	b.grid.Set(float64(b.dim.H), float64(b.dim.W))
-	b.layoutCells.SetLayout(eui.NewSquareGridLayout(b.dim.Size(), b.dim.Size(), b.spacing))
 	b.ShowNotes(true)
 	b.isWin = false
 	b.sw.Reset()
 	if !(b.diff.String() == game.Manual.String()) {
 		b.sw.Start()
 	}
+	b.SetRect(b.Rect())
+	// if b.layoutCells.Rect().IsEmpty() {
+	// 	return
+	// }
+	// b.layoutCells.Layout()
+	b.Layout()
 }
 
 func (b *Board) GetDiffStr() string {

@@ -89,6 +89,7 @@ func (b *BoardFreecell) Setup(resetDeck bool) {
 	b.backupGame()
 	b.sw.Start()
 	b.SetRect(b.Rect()) // обязательно после обнуления контейнеров
+	b.Layout()
 }
 
 func (b *BoardFreecell) MakeMove(move sols.Column) {

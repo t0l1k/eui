@@ -62,6 +62,10 @@ func (b *BoardSol15) Setup(newDeck bool) {
 	b.backupGame()
 	b.sw.Start()
 	b.SetRect(b.Rect()) // обязательно после обнуления контейнеров
+	if b.Rect().IsEmpty() {
+		return
+	}
+	b.Layout()
 }
 
 func (b *BoardSol15) MakeMove(move sols.Column) {

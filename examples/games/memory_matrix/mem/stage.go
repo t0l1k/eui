@@ -1,9 +1,5 @@
 package mem
 
-import (
-	"log"
-)
-
 type GameStage int
 
 const (
@@ -21,34 +17,21 @@ func (g GameStage) IsRecollection() bool { return g == Recollection }
 func (g GameStage) IsConclusion() bool   { return g == Conclusion }
 func (g GameStage) IsRestart() bool      { return g == Restart }
 func (g GameStage) Next() GameStage {
-	switch g {
-	case Preparation:
-		g = Show
-	case Show:
-		g = Recollection
-	case Recollection:
-		g = Conclusion
-	case Conclusion:
-		g = Restart
-	case Restart:
-		g = Preparation
-	}
-	log.Println("set next srate:", g)
-	return g
+	return []GameStage{
+		Show,
+		Recollection,
+		Conclusion,
+		Restart,
+		Preparation,
+	}[g]
 }
 
-func (g GameStage) String() (result string) {
-	switch g {
-	case Preparation:
-		result = "Preparation"
-	case Show:
-		result = "Show"
-	case Recollection:
-		result = "Recollection"
-	case Conclusion:
-		result = "Conclusion"
-	case Restart:
-		result = "Restart"
-	}
-	return result
+func (g GameStage) String() string {
+	return []string{
+		"Preparation",
+		"Show",
+		"Recollection",
+		"Conclusion",
+		"Restart",
+	}[g]
 }

@@ -47,6 +47,10 @@ func (b *BottomBar) Setup(board Sols) {
 	swText := eui.NewLabel("")
 	b.varSw.Connect(func(data string) { swText.SetText(data) })
 	b.layout.Add(swText)
+	if b.Rect().IsEmpty() {
+		return
+	}
+	b.Layout()
 }
 
 func (s *BottomBar) UpdateMoveCount() bool {

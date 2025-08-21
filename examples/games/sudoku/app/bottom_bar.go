@@ -74,6 +74,9 @@ func (b *BottomBar) Setup(board *Board) {
 	}
 	b.SetRect(b.Rect()) // обязательно после обнуления контейнеров
 	b.setBtnClrs()
+	b.layoutActs.Layout()
+	b.layoutNums.Layout()
+	b.Layout()
 }
 
 func (b *BottomBar) IsActAccept() bool    { return b.actAccept }

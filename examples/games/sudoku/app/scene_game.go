@@ -3,6 +3,8 @@ package app
 import (
 	"log"
 
+	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/sudoku/game"
 	"golang.org/x/image/colornames"
@@ -18,7 +20,7 @@ type SceneSudoku struct {
 
 func NewSceneSudoku() *SceneSudoku {
 	gamesData := game.NewGamesData()
-	s := &SceneSudoku{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
+	s := &SceneSudoku{Scene: eui.NewScene(eui.NewLayoutVerticalPercent([]int{5, 95}, 5))}
 	s.topBar = eui.NewTopBar(Title, func(b *eui.Button) {
 		s.dialogSelect.Show()
 		s.board.Hide()
@@ -26,15 +28,12 @@ func NewSceneSudoku() *SceneSudoku {
 		s.topBar.SetTitle(Title)
 		s.topBar.SetShowTitle(false)
 		s.topBar.SetShowStoppwatch(false)
-	})
-	s.topBar.SetUseStopwatch()
-	s.Add(s.topBar)
+	}).SetUseStopwatch()
 	s.dialogSelect = NewDialogSelect(gamesData, func(b *eui.Button) {
 		for _, v := range s.dialogSelect.btnsDiff {
 			newVar, newVar1 := v.GetData()
 			log.Println(b.Rect(), v.Rect(), b.Text(), newVar, newVar1, v.State(), b.State(), v.Rect().InRect(b.Rect().Pos()))
-			// if v.btn.IsPressed() {
-			if v.Rect().InRect(b.Rect().Pos()) {
+			if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
 				dim, diff := v.GetData()
 				s.topBar.SetTitle("Sudoku " + dim.String() + diff.String())
 				s.dialogSelect.Hide()
@@ -49,7 +48,6 @@ func NewSceneSudoku() *SceneSudoku {
 			}
 		}
 	})
-	s.Add(s.dialogSelect)
 	s.dialogSelect.Show()
 	s.board = NewBoard(func(btn *eui.Button) {
 		for i := range s.board.layoutCells.Children() {
@@ -91,7 +89,6 @@ func NewSceneSudoku() *SceneSudoku {
 			}
 		}
 	})
-	s.Add(s.board)
 	s.bottomBar = NewBottomBar(func(btn *eui.Button) {
 		if s.bottomBar.SetAct(btn) {
 			s.board.Highlight(btn.Text())
@@ -117,17 +114,16 @@ func NewSceneSudoku() *SceneSudoku {
 			}
 		}
 	})
-	s.Add(s.bottomBar)
-	return s
-}
 
-func (s *SceneSudoku) SetRect(rect eui.Rect[int]) {
-	w0, h0 := rect.Size()
-	s.Scene.SetRect(rect)
-	hT := int(float64(rect.GetLowestSize()) * 0.1)
-	s.topBar.SetRect(eui.NewRect([]int{0, 0, w0, hT}))
-	s.dialogSelect.SetRect(eui.NewRect([]int{hT / 2, hT + hT/2, w0 - hT, h0 - hT*2}))
-	w1 := (w0 - hT) / 3
-	s.board.SetRect(eui.NewRect([]int{hT, 0, w1 * 2, h0}))
-	s.bottomBar.SetRect(eui.NewRect([]int{hT + w1*2, 0, w1, h0}))
+	s.Add(s.topBar)
+	contBoard := eui.NewContainer(eui.NewStackLayout(5))
+	contBoard.Add(s.dialogSelect)
+
+	contGame := eui.NewContainer(eui.NewLayoutVerticalPercent([]int{95, 5}, 1))
+	contGame.Add(s.board)
+	contGame.Add(s.bottomBar)
+
+	contBoard.Add(contGame)
+	s.Add(contBoard)
+	return s
 }
