@@ -34,7 +34,7 @@ func NewTextInputLine(onReturn func(*TextInputLine)) *TextInputLine {
 
 func (b *TextInputLine) WantBlur() bool { return false }
 func (e *TextInputLine) Tick(td TickData) {
-	if !e.State().IsFocused() {
+	if !e.State().IsFocused() || e.IsHidden() {
 		return
 	}
 	e.tick += td.Duration()
@@ -46,7 +46,7 @@ func (e *TextInputLine) Tick(td TickData) {
 }
 
 func (e *TextInputLine) Hit(pt Point[int]) Drawabler {
-	if !pt.In(e.rect) {
+	if !pt.In(e.rect) || e.IsHidden() {
 		return nil
 	}
 	return e

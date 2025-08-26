@@ -158,13 +158,10 @@ func (d *BoardMem) setupScoreBtn() *eui.Button {
 	}
 	levels = d.gamesData.Levels()
 	plot := eui.NewPlot(xArr, yArr, levels, "Memory Matrix", "Game", "Level")
-	log.Println("d.Rect()=", d.Rect())
 	plot.SetRect(d.Rect())
-	log.Println("plot.Rect()=", plot.Rect())
 	plot.Layout()
-	log.Println("plot.Image().Bounds()=", plot.Image().Bounds())
 	btn := eui.NewButtonIcon([]*ebiten.Image{plot.Image(), plot.Image()}, d.fn)
-	log.Println("BoardMem:setupScoreBtn done", btn.Rect(), d.Rect(), plot.Rect())
+	log.Println("BoardMem:setupScoreBtn done", btn.Rect(), d.Rect(), plot.Rect(), d.gamesData.String())
 	return btn
 }
 

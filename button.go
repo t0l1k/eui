@@ -10,14 +10,14 @@ import (
 // Умею показать кнопку под мышкой выделенной, или нажатой, или отпущенной(после отпускания исполняется прикрепленный метод)
 type Button struct {
 	*Drawable
-	txt       string
-	onPressed func(*Button)
-	icons     []*ebiten.Image
-	useIcon   bool
+	txt        string
+	onReleased func(*Button)
+	icons      []*ebiten.Image
+	useIcon    bool
 }
 
 func NewButton(txt string, fn func(*Button)) *Button {
-	b := &Button{Drawable: NewDrawable(), txt: txt, onPressed: fn}
+	b := &Button{Drawable: NewDrawable(), txt: txt, onReleased: fn}
 	theme := GetUi().theme
 	b.SetBg(theme.Get(ButtonBg))
 	b.SetFg(theme.Get(ButtonFg))
@@ -26,26 +26,28 @@ func NewButton(txt string, fn func(*Button)) *Button {
 }
 
 func NewButtonIcon(icons []*ebiten.Image, fn func(*Button)) *Button {
-	return &Button{Drawable: NewDrawable(), icons: icons, onPressed: fn, useIcon: true}
+	return &Button{Drawable: NewDrawable(), icons: icons, onReleased: fn, useIcon: true}
 }
 
 func (b *Button) Text() string         { return b.txt }
 func (b *Button) SetText(value string) { b.txt = value; b.MarkDirty() }
 
 func (b *Button) Hit(pt Point[int]) Drawabler {
-	if !pt.In(b.rect) || b.IsHidden() {
+	if !pt.In(b.rect) || b.IsHidden() || b.IsDisabled() {
 		return nil
 	}
 	return b
 }
-func (b *Button) WantBlur() bool { return true }
+func (b *Button) WantBlur() bool  { return true }
+func (b *Button) IsPressed() bool { return b.pressed }
+
 func (b *Button) MouseDown(md MouseData) {
 	b.pressed = true
 	b.MarkDirty()
 }
 func (b *Button) MouseUp(md MouseData) {
-	if b.onPressed != nil {
-		b.onPressed(b)
+	if b.onReleased != nil {
+		b.onReleased(b)
 	}
 	b.pressed = false
 }
@@ -64,9 +66,9 @@ func (b *Button) Layout() {
 	if b.useIcon {
 		var icon *Icon
 		if b.pressed {
-			icon = NewIcon(b.IconUp())
-		} else {
 			icon = NewIcon(b.IconDown())
+		} else {
+			icon = NewIcon(b.IconUp())
 		}
 		icon.SetRect(NewRect([]int{0, 0, w, h}))
 		icon.Layout()
@@ -101,11 +103,17 @@ func (b *Button) Draw(surface *ebiten.Image) {
 }
 
 func (d *Button) MouseEnter() {
+	if d.IsDisabled() {
+		return
+	}
 	if !d.State().IsHovered() {
 		d.SetState(StateHover)
 	}
 }
 func (d *Button) MouseLeave() {
+	if d.IsDisabled() {
+		return
+	}
 	if d.State().IsHovered() {
 		d.SetState(StateNormal)
 	}

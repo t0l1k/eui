@@ -155,7 +155,7 @@ func (b *StackLayout) Apply(children []Drawabler, rect Rect[int]) {
 		if c.ViewType().IsBackground() {
 			continue
 		}
-		if !found {
+		if !c.IsHidden() && !found {
 			c.Show()
 			found = true
 			continue

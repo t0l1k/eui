@@ -51,6 +51,10 @@ func (c *Container) Hide() {
 	c.Traverse(func(d Drawabler) { d.Hide() }, false)
 	c.SetState(StateHidden)
 }
+func (c *Container) Disable() {
+	c.Traverse(func(d Drawabler) { d.Disable() }, false)
+	c.SetState(StateDisabled)
+}
 func (c *Container) Draw(surface *ebiten.Image) {
 	if c.IsHidden() {
 		return
