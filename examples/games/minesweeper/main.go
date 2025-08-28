@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"image"
 	"log"
 	"math/rand"
 	"strconv"
@@ -21,7 +22,8 @@ const (
 	Hard       = "Сложно"
 	Custom     = "Настрой сложность"
 	QuitDialog = "<"
-	PlayAgain  = "Play Again"
+	PlayAgain  = "Игра новая"
+	PlayRepeat = "Игру повторить"
 )
 
 type CellState rune
@@ -616,7 +618,8 @@ func (g *GameView) Update() {
 
 type DialogGameEnd struct {
 	*eui.Container
-	title *eui.Label
+	title        *eui.Label
+	lastGameIcon *eui.Icon
 }
 
 func NewDialogGameEnd(fn func(*eui.Button)) *DialogGameEnd {
@@ -626,10 +629,13 @@ func NewDialogGameEnd(fn func(*eui.Button)) *DialogGameEnd {
 	c.title = eui.NewLabel("")
 	contTitle.Add(c.title)
 	c.Add(contTitle)
-	c.Add(eui.NewDrawable())
+	c.lastGameIcon = eui.NewIcon(res.SmileSprites[0])
+	c.Add(c.lastGameIcon)
 	contBtns := eui.NewContainer(eui.NewHBoxLayout(5))
 	contBtns.Add(eui.NewButton(PlayAgain, fn))
+	contBtns.Add(eui.NewButton(PlayRepeat, fn))
 	c.Add(contBtns)
+	c.Add(eui.NewGridBackground(50))
 	return c
 }
 
@@ -752,6 +758,13 @@ func main() {
 		runDialogGameEnd := func() {
 			gameView.topbar.Hide()
 			gameView.board.Disable()
+			w0, h0 := eui.GetUi().Size()
+			r := gameView.board.Rect()
+			cameraRect := image.Rect(r.X, r.Y, r.Right(), r.Bottom())
+			contentImg := ebiten.NewImage(w0, h0)
+			gameView.board.Draw(contentImg)
+			gameView.Hide()
+			dialogGameEnd.lastGameIcon.SetIcon(contentImg.SubImage(cameraRect).(*ebiten.Image))
 			dialogGameEnd.Show()
 		}
 
@@ -811,8 +824,10 @@ func main() {
 			case PlayAgain:
 				gameView.HardReset()
 				runGame()
+			case PlayRepeat:
+				gameView.Reset()
+				runGame()
 			}
-
 		})
 
 		board := eui.NewContainer(eui.NewStackLayout(5))
@@ -821,6 +836,7 @@ func main() {
 		board.Add(dialogCustom)
 		board.Add(dialogGameEnd)
 		s.Add(board)
+		s.Add(eui.NewGridBackground(100))
 		return s
 	}())
 }
