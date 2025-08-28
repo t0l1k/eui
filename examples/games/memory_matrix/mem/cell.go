@@ -1,15 +1,18 @@
 package mem
 
-import "github.com/t0l1k/eui"
+import (
+	"github.com/t0l1k/eui"
+)
 
 const (
-	CellEmpty  = " "
+	CellEmpty  = "."
 	CellFilled = "*"
+	CellFail   = "-"
 )
 
 type Cell struct {
 	*eui.Signal[string]
-	readonly, marked bool
+	readonly, marked, fail bool
 }
 
 func NewCell() *Cell {
@@ -23,10 +26,18 @@ func (c *Cell) IsReadOnly() bool { return c.readonly }
 func (c *Cell) SetReadOnly()     { c.readonly = true }
 func (c *Cell) IsMarked() bool   { return c.marked }
 func (c *Cell) SetMarked()       { c.marked = true }
+func (c *Cell) IsFail() bool     { return c.fail }
+func (c *Cell) SetFail()         { c.fail = true }
 func (c *Cell) Move()            { c.Emit(CellFilled) }
 func (c *Cell) String() string {
-	if c.IsEmpty() {
+	switch {
+	case c.IsMarked():
+		return CellFilled
+	case c.IsFail():
+		return CellFail
+	case !c.IsMarked() && c.IsReadOnly():
+		return CellFail
+	default:
 		return CellEmpty
 	}
-	return CellFilled
 }

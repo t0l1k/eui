@@ -51,6 +51,7 @@ func (g *Game) Move(idx int) bool {
 	case Show:
 	case Recollection:
 		if g.Cell(idx).IsEmpty() {
+			g.Cell(idx).SetFail()
 			g.GameOver = true
 			g.SetNextStage()
 			return false
@@ -107,7 +108,7 @@ func (g *Game) String() (result string) {
 
 func (g *Game) StringFull() (result string) {
 	result += g.String() + "\n"
-	result += g.stage.String()
+	result += g.stage.String() + "\n"
 	for y := 0; y < g.dim.Height(); y++ {
 		for x := 0; x < g.dim.Width(); x++ {
 			result += g.field.cell(g.Idx(x, y)).String()

@@ -31,18 +31,18 @@ func NewTimer(duration time.Duration, fn func()) *Timer {
 	})
 	return t
 }
-func (t *Timer) SetOnDoneFunc(value func())      { t.onDone = value }
-func (t *Timer) SetDuration(value time.Duration) { t.duration = value }
-func (t *Timer) Reset()                          { t.left = t.duration }
-func (t *Timer) IsOn() bool                      { return t.run }
-func (t *Timer) IsOff() bool                     { return !t.run }
-func (t *Timer) IsDone() bool                    { return !(t.left > 0) }
+func (t *Timer) SetOnDoneFunc(value func()) *Timer      { t.onDone = value; return t }
+func (t *Timer) SetDuration(value time.Duration) *Timer { t.duration = value; return t }
+func (t *Timer) Reset() *Timer                          { t.left = t.duration; return t }
+func (t *Timer) IsOn() bool                             { return t.run }
+func (t *Timer) IsOff() bool                            { return !t.run }
+func (t *Timer) IsDone() bool                           { return !(t.left > 0) }
 func (t *Timer) On() *Timer {
 	t.Reset()
 	t.run = true
 	return t
 }
-func (t *Timer) Off()                      { t.run = false }
+func (t *Timer) Off() *Timer               { t.run = false; return t }
 func (t *Timer) TimePassed() time.Duration { return t.duration - t.left }
 func (t *Timer) TimeLeft() time.Duration   { return t.left }
 func (t *Timer) String() string            { return t.left.String() }

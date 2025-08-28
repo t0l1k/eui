@@ -1,6 +1,7 @@
 package main
 
 import (
+	"image"
 	"image/color"
 	"log"
 	"time"
@@ -18,12 +19,13 @@ const (
 
 type BoardMem struct {
 	*eui.Container
-	game      *mem.Game
-	gamesData *mem.GamesData
-	showTimer *eui.Timer
-	fn        func(*eui.Button)
-	varMsg    *eui.Signal[string]
-	varColor  *eui.Signal[[]color.Color]
+	game                       *mem.Game
+	gamesData                  *mem.GamesData
+	showTimer, conclusionTimer *eui.Timer
+	fn                         func(*eui.Button)
+	varMsg                     *eui.Signal[string]
+	varColor                   *eui.Signal[[]color.Color]
+	conclusionBoard, scoreBtn  eui.Drawabler
 }
 
 func NewBoardMem(fn func(*eui.Button)) *BoardMem {
@@ -59,6 +61,14 @@ func NewBoardMem(fn func(*eui.Button)) *BoardMem {
 		d.Game().SetNextStage()
 		d.SetupRecolection()
 	})
+	d.conclusionBoard = eui.NewDrawable()
+	d.conclusionBoard.Hide()
+	d.scoreBtn = eui.NewDrawable()
+	d.scoreBtn.Hide()
+	d.conclusionTimer = eui.NewTimer(3000*time.Millisecond, func() {
+		d.conclusionBoard.Hide()
+		d.scoreBtn.Show()
+	})
 	d.fn = fn
 	d.SetupPreparation()
 	return d
@@ -86,8 +96,8 @@ func (d *BoardMem) SetupShow() {
 	d.ResetContainer()
 	w, h := d.game.Dim().Width(), d.Game().Dim().Height()
 	d.SetLayout(eui.NewSquareGridLayout(w, h, 1))
-	for y := 0; y < d.Game().Dim().Height(); y++ {
-		for x := 0; x < d.game.Dim().Width(); x++ {
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
 			cell := d.Game().Cell(d.Game().Idx(x, y))
 			btn := eui.NewButton(" ", d.fn)
 			btn.Disable()
@@ -139,11 +149,49 @@ func (d *BoardMem) SetupConclusion() {
 	sb.SetText(str + " " + d.Game().String()).ShowTime(3 * time.Second)
 	d.varMsg.Emit(d.gamesData.String())
 	d.varColor.Emit([]color.Color{colornames.Fuchsia, colornames.Black})
-	btn := d.setupScoreBtn()
-	d.Add(btn)
-	d.SetRect(d.Rect())
+	contConclusion := eui.NewContainer(eui.NewStackLayout(5))
+	d.conclusionBoard = d.setupConclusionBoard()
+	d.scoreBtn = d.setupScoreBtn()
+	contConclusion.Add(d.conclusionBoard)
+	contConclusion.Add(d.scoreBtn)
+	d.Add(contConclusion)
 	d.Layout()
-	log.Println("Setup Conclusion done", d.game.String(), d.Rect(), btn.Rect())
+	d.conclusionTimer.Reset().On()
+	log.Println("Setup Conclusion done", d.game.StringFull())
+}
+
+func (d *BoardMem) setupConclusionBoard() *eui.Button {
+	w0, h0 := eui.GetUi().Size()
+	w, h := d.game.Dim().Width(), d.Game().Dim().Height()
+	cont := eui.NewContainer(eui.NewSquareGridLayout(w, h, 1))
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			cell := d.Game().Cell(d.Game().Idx(x, y))
+			btn := eui.NewButton(" ", d.fn)
+			btn.Disable()
+			switch {
+			case cell.IsMarked():
+				btn.SetBg(colornames.Orchid)
+			case cell.IsFail():
+				btn.SetBg(colornames.Red)
+			case !cell.IsMarked() && cell.IsReadOnly():
+				btn.SetBg(colornames.Orange)
+			default:
+				btn.SetBg(colornames.Silver)
+			}
+			cont.Add(btn)
+		}
+	}
+
+	cont.SetRect(d.Rect())
+	r := cont.Rect()
+	cameraRect := image.Rect(r.X, r.Y, r.Right(), r.Bottom())
+	contentImg := ebiten.NewImage(w0, h0)
+	cont.Layout()
+	cont.Draw(contentImg)
+	img := contentImg.SubImage(cameraRect).(*ebiten.Image)
+
+	return eui.NewButtonIcon([]*ebiten.Image{img, img}, d.fn)
 }
 
 func (d *BoardMem) setupScoreBtn() *eui.Button {
