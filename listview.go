@@ -22,6 +22,7 @@ type ListView struct {
 	isDragging         bool
 	dragStartY         int
 	dragStartOffset    int
+	longText           bool
 }
 
 func NewListView() *ListView { return &ListView{Drawable: NewDrawable(), rows: 1, itemSize: 30} }
@@ -88,6 +89,14 @@ func (l *ListView) SetListViewTextWithBgFgColors(list []string, bg, fg []color.C
 	l.resizeChilds()
 }
 
+func (l *ListView) AddLongText(txt *Label) {
+	l.longText = true
+	l.rows = 1
+	l.itemSize = 30
+	l.AddItem(txt)
+	l.resizeChilds()
+}
+
 func (l *ListView) AddBgFg(d Drawabler, bg, fg color.Color) {
 	l.children = append(l.children, d)
 	switch value := d.(type) {
@@ -150,6 +159,13 @@ func (l *ListView) Layout() {
 	}
 	l.Drawable.Layout()
 	w0, h0 := l.contentRect.Size()
+	if l.longText {
+		if len(l.children) > 0 {
+			lbl := l.children[0]
+			w0, h0 = lbl.Rect().Size()
+			l.contentRect = lbl.Rect()
+		}
+	}
 	if l.contentImage == nil || w0 != l.contentImage.Bounds().Dx() || h0 != l.contentImage.Bounds().Dy() {
 		l.contentImage = nil
 		l.contentImage = ebiten.NewImage(w0, h0)
@@ -170,7 +186,6 @@ func (l *ListView) Hit(pt Point[int]) Drawabler {
 	if !pt.In(l.rect) || l.IsHidden() {
 		return nil
 	}
-	log.Println("ListView:Hit:", l.Rect(), pt)
 	return l
 }
 
@@ -278,6 +293,9 @@ func (l *ListView) SetRect(r Rect[int]) {
 func (l *ListView) resizeChilds() {
 	x, y := 0, 0
 	w, h := l.rect.W/l.rows, l.itemSize
+	if l.longText {
+		h = l.rect.H
+	}
 	row := 0
 	col := 1
 	for _, v := range l.children {

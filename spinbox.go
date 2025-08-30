@@ -49,7 +49,7 @@ func NewSpinBox[T any](
 		}
 	})
 
-	var tf *TextInputLine
+	var tf Drawabler
 	if enableInput {
 		tf = NewTextInputLine(func(ti *TextInputLine) {
 			// Пример для int, для других типов — свой парсер
@@ -83,16 +83,20 @@ func NewSpinBox[T any](
 				s.index.Emit(closestIdx)
 			}
 		})
-		tf.SetMaxLen(width)
+		tf.(*TextInputLine).SetMaxLen(width)
 	} else {
-		tf = NewTextInputLine(nil)
-		tf.SetMaxLen(0)
+		tf = NewLabel("--")
 	}
 
 	s.index.ConnectAndFire(func(idx int) {
 		val := s.values[idx]
 		s.SelectedValue.Emit(val)
-		tf.SetText(s.toStr(val))
+		switch d := tf.(type) {
+		case *Label:
+			d.SetText(s.toStr(val))
+		case *TextInputLine:
+			d.SetText(s.toStr(val))
+		}
 	}, index)
 
 	s.Add(btnInc)

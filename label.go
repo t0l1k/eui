@@ -29,11 +29,13 @@ func (a LabelAlign) String() string {
 
 type Label struct {
 	*Drawable
-	txt             string
-	options         *text.DrawOptions
-	align           LabelAlign
-	fontSize        float64
-	dynamicFontSize bool
+	txt              string
+	options          *text.DrawOptions
+	align            LabelAlign
+	font             *text.GoTextFace
+	fontSize, margin float64
+	dynamicFontSize  bool
+	txtPos           Point[float64]
 }
 
 func NewLabel(txt string) *Label {
@@ -44,6 +46,7 @@ func NewLabel(txt string) *Label {
 		fontSize:        12,
 		dynamicFontSize: true,
 	}
+	l.font = GetUi().FontDefault().Get(int(l.fontSize))
 	theme := GetUi().theme
 	l.SetBg(theme.Get(TextBg))
 	l.SetFg(theme.Get(TextFg))
@@ -57,70 +60,67 @@ func (l *Label) setupOptions() {
 	l.MarkDirty()
 }
 func (l *Label) Layout() {
-	fnt := GetUi().FontDefault().Get(int(l.fontSize))
 	var txt string
-
-	if l.dynamicFontSize {
-		sz := GetUi().FontDefault().CalcFontSize(l.txt, l.Rect())
-		if sz != int(l.fontSize) {
-			fnt = GetUi().FontDefault().Get(int(sz))
-			l.fontSize = float64(sz)
-			l.options = nil
+	if l.Image() == nil {
+		l.margin = float64(l.Rect().GetLowestSize()) * 0.03
+		if l.dynamicFontSize {
+			sz := GetUi().FontDefault().CalcFontSize(l.txt, l.Rect())
+			if sz != int(l.fontSize) {
+				l.fontSize = float64(sz)
+			}
 		}
-	} else {
+		l.font = GetUi().FontDefault().Get(int(l.fontSize))
 		txt, _ = GetUi().FontDefault().WordWrapText(l.txt, l.fontSize, l.rect.Width())
-
 		w0, h0 := l.Rect().Size()
-		w, h := text.Measure(txt, fnt, fnt.Size*1.2)
+		w, h := text.Measure(txt, l.font, l.font.Size*1.2)
 		if w > float64(w0) || h > float64(h0) {
-			l.image = nil
 			x, y := l.Rect().Pos()
 			l.SetRect(NewRect([]int{x, y, int(w0), int(h)}))
 		}
+		l.options = nil
 	}
-
 	if l.options == nil {
 		l.setupOptions()
+		l.txtPos.X, l.txtPos.Y = l.calcAlign()
 	}
-	x, y := l.calcAlign()
-	margin := float64(l.Rect().GetLowestSize()) * 0.03
+	x, y := l.txtPos.Get()
 	if l.pressed {
-		x += margin / 2
-		y += margin / 2
+		x += l.margin / 2
+		y += l.margin / 2
 	}
-
 	l.Drawable.Layout()
-
 	l.options.GeoM.Reset()
 	l.options.GeoM.Translate(x, y)
 	if l.txt != txt && len(txt) > 0 {
-		text.Draw(l.Image(), txt, fnt, l.options)
+		text.Draw(l.Image(), txt, l.font, l.options)
 	} else {
-		text.Draw(l.Image(), l.txt, fnt, l.options)
+		text.Draw(l.Image(), l.txt, l.font, l.options)
 	}
 	l.ClearDirty()
 }
 
 func (l *Label) Text() string { return l.txt }
-func (l *Label) SetText(value string) Drawabler {
+func (l *Label) SetText(value string) *Label {
 	if value == l.txt {
 		return l
 	}
 	l.txt = value
-	l.MarkDirty()
+	l.ImageReset()
 	return l
 }
 
-func (l *Label) SetFontSize(value float64) Drawabler {
+func (l *Label) FontSize() float64 { return l.fontSize }
+func (l *Label) SetFontSize(value float64) *Label {
 	l.fontSize = value
 	l.SetUseDynamicFont(false)
-	l.MarkDirty()
+	l.ImageReset()
 	return l
 }
 
-func (l *Label) SetUseDynamicFont(value bool) {
+func (l *Label) SetUseDynamicFont(value bool) *Label {
 	l.dynamicFontSize = value
-	l.MarkDirty()
+	l.ImageReset()
+	return l
 }
 
 func (l *Label) Draw(screen *ebiten.Image) {
@@ -133,11 +133,10 @@ func (l *Label) Draw(screen *ebiten.Image) {
 	l.Drawable.Draw(screen)
 }
 
-func (s *Label) SetRect(rect Rect[int]) { s.rect = rect; s.ImageReset() }
-
-func (l *Label) SetAlign(value LabelAlign) {
+func (l *Label) SetAlign(value LabelAlign) *Label {
 	l.align = value
-	l.MarkDirty()
+	l.ImageReset()
+	return l
 }
 
 func (l *Label) calcAlign() (x, y float64) {

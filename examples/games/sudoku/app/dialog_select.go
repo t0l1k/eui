@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/sudoku/game"
 )
@@ -44,7 +42,7 @@ func NewDialogSelect(gamesData *game.GamesData, fn func(b *eui.Button)) *DialogS
 	})
 	d.modes.Emit(data[idx])
 	d.cSize = eui.NewSpinBox(
-		fmt.Sprintf("Размер поля %v", data[idx]),
+		"Размер поля",
 		data,
 		0,
 		func(d game.Dim) string { return d.String() },
