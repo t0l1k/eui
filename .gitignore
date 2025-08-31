@@ -4,3 +4,4 @@ go.sum
 *.jar
 .idea/*
 mobile/*
+*.DS_Store
