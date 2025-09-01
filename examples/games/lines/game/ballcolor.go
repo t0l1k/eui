@@ -22,51 +22,31 @@ const (
 )
 
 func (b BallColor) String() string {
-	switch b {
-	case BallBrown:
-		return "Brown"
-	case BallYellow:
-		return "Yellow"
-	case BallGreen:
-		return "Green"
-	case BallRed:
-		return "Red"
-	case BallAqua:
-		return "Aqua"
-	case BallBlue:
-		return "Blue"
-	case BallMagenta:
-		return "Magenta"
-	case BallPurple:
-		return "Purple"
-	case BallOrange:
-		return "Orange"
-	default:
-		return "None"
-	}
+	return []string{
+		"None",
+		"Brown",
+		"Yellow",
+		"Green",
+		"Red",
+		"Aqua",
+		"Blue",
+		"Magenta",
+		"Purple",
+		"Orange",
+	}[b]
 }
 
-func (b BallColor) Color() color.RGBA {
-	switch b {
-	case BallBrown:
-		return colornames.Maroon
-	case BallYellow:
-		return colornames.Yellow
-	case BallGreen:
-		return colornames.Green
-	case BallRed:
-		return colornames.Red
-	case BallAqua:
-		return colornames.Aqua
-	case BallBlue:
-		return colornames.Blue
-	case BallMagenta:
-		return colornames.Fuchsia
-	case BallPurple:
-		return colornames.Purple
-	case BallOrange:
-		return colornames.Orange
-	default:
-		return colornames.Silver
-	}
+func (b BallColor) Color() color.Color {
+	return []color.Color{
+		colornames.Silver,
+		colornames.Maroon,
+		colornames.Yellow,
+		colornames.Green,
+		colornames.Red,
+		colornames.Aqua,
+		colornames.Blue,
+		colornames.Fuchsia,
+		colornames.Purple,
+		colornames.Orange,
+	}[b]
 }

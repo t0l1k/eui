@@ -14,19 +14,14 @@ const (
 )
 
 func (c CellStateType) String() (res string) {
-	switch c {
-	case CellEmpty:
-		res = "empty"
-	case CellFilledNext:
-		res = "filled next"
-	case CellFilled:
-		res = "filled next"
-	case CellMarkedForMove:
-		res = "marked for move"
-	case CellMarkedForDelete:
-		res = "marked for del"
-	}
-	return res
+	return []string{
+		"empty",
+		"filled next",
+		"filled next",
+		"marked for move",
+		"marked for del",
+	}[c]
+
 }
 
 type CellData struct {

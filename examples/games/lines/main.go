@@ -47,11 +47,11 @@ const (
 
 type BallStatusType int
 
-func (j *BallStatusType) IsHidden() bool { return *j == BallHidden }
-func (j *BallStatusType) IsSmall() bool  { return *j == BallSmall }
-func (j *BallStatusType) IsMedium() bool { return *j == BallMedium }
-func (j *BallStatusType) IsNormal() bool { return *j == BallNormal }
-func (j *BallStatusType) IsBig() bool    { return *j == BallBig }
+func (j BallStatusType) IsSmall() bool  { return j == BallSmall }
+func (j BallStatusType) IsHidden() bool { return j == BallHidden }
+func (j BallStatusType) IsMedium() bool { return j == BallMedium }
+func (j BallStatusType) IsNormal() bool { return j == BallNormal }
+func (j BallStatusType) IsBig() bool    { return j == BallBig }
 
 func (j *BallStatusType) FilledNext() {
 	switch *j {
@@ -87,37 +87,27 @@ func (j *BallStatusType) Delete() {
 }
 
 func (j BallStatusType) String() (res string) {
-	switch j {
-	case BallHidden:
-		res = "ball hidden"
-	case BallSmall:
-		res = "ball small"
-	case BallMedium:
-		res = "ball mediun"
-	case BallNormal:
-		res = "ball normal"
-	case BallBig:
-		res = "ball big"
-	case BallJumpDown:
-		res = "jump down"
-	case BallJumpCenter:
-		res = "jump center"
-	case BallJumpUp:
-		res = "jump up"
-	default:
-		res = strconv.Itoa(int(j)) + "!"
-	}
-	return res
+	return []string{
+		"ball hidden",
+		"ball small",
+		"ball mediun",
+		"ball normal",
+		"ball big",
+		"jump down",
+		"jump center",
+		"jump up",
+		strconv.Itoa(int(j)) + "!",
+	}[j]
 }
 
 type BallIcon struct {
 	*eui.Drawable
 	size   float32
 	status BallStatusType
-	bg, fg color.RGBA
+	bg, fg color.Color
 }
 
-func NewBallIcon(status BallStatusType, bg, fg color.RGBA) *BallIcon {
+func NewBallIcon(status BallStatusType, bg, fg color.Color) *BallIcon {
 	i := &BallIcon{
 		Drawable: eui.NewDrawable(),
 		bg:       bg,
@@ -128,7 +118,7 @@ func NewBallIcon(status BallStatusType, bg, fg color.RGBA) *BallIcon {
 	return i
 }
 
-func (i *BallIcon) setup(status BallStatusType, bg, fg color.RGBA) {
+func (i *BallIcon) setup(status BallStatusType, bg, fg color.Color) {
 	i.status = status
 	switch status {
 	case BallHidden:
@@ -178,18 +168,18 @@ func (i *BallIcon) GetImage() *ebiten.Image {
 }
 
 type CellIcon struct {
-	eui.Drawable
+	*eui.Drawable
 	btn        *eui.Button
 	cell       *game.Cell
 	anim       BallAnimType
 	animStatus BallStatusType
 	jumpDt     int
 	icon       *BallIcon
-	fg         color.RGBA
+	fg         color.Color
 }
 
 func NewCellIcon(cell *game.Cell, fn func(b *eui.Button)) *CellIcon {
-	c := &CellIcon{}
+	c := &CellIcon{Drawable: eui.NewDrawable()}
 	c.cell = cell
 	c.icon = NewBallIcon(BallHidden, game.BallNoColor.Color(), game.BallNoColor.Color())
 	c.icon.SetRect(eui.NewRect([]int{0, 0, 1, 1}))
@@ -197,6 +187,20 @@ func NewCellIcon(cell *game.Cell, fn func(b *eui.Button)) *CellIcon {
 	c.anim = BallAnimNo
 	c.animStatus = BallHidden
 	return c
+}
+
+func (b *CellIcon) Hit(pt eui.Point[int]) eui.Drawabler {
+	if !pt.In(b.Rect()) || b.IsHidden() || b.IsDisabled() {
+		return nil
+	}
+	log.Println("CellIcon:Hit:", b.Rect(), b.cell.String())
+	return b
+}
+func (b *CellIcon) WantBlur() bool { return true }
+
+func (b *CellIcon) MouseUp(md eui.MouseData) {
+	b.btn.MouseUp(md)
+	log.Println("CellIcon:MouseUp", b.Rect(), b.cell.String(), b.btn)
 }
 
 func (c *CellIcon) Tick(td eui.TickData) {
@@ -309,7 +313,7 @@ func (t *Table) Setup(balls int) {
 }
 
 func (t *Table) SetNextMoveBalls(cells []*game.Cell) {
-	var bg, fg color.RGBA
+	var bg, fg color.Color
 	size := BallMedium
 	if len(cells) == 0 {
 		size = BallHidden
@@ -526,7 +530,7 @@ func NewDialog(title string, fn func(btn *eui.Button)) *Dialog {
 func (d *Dialog) SetTitle(title string) { d.title.SetText(title) }
 
 func main() {
-	eui.Init(func() *eui.Ui { return eui.GetUi().SetTitle(GameTitle).SetSize(800, 600) }())
+	eui.Init(eui.GetUi().SetTitle(GameTitle).SetSize(800, 600))
 	eui.Run(func() *eui.Scene {
 		var (
 			board  *Board
