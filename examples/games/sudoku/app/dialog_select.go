@@ -15,7 +15,6 @@ type DialogSelect struct {
 	btnsDiff   []*DiffButton
 	modes      *eui.Signal[game.Dim]
 	gamesData  *game.GamesData
-	margin     int
 }
 
 func NewDialogSelect(gamesData *game.GamesData, fn func(b *eui.Button)) *DialogSelect {

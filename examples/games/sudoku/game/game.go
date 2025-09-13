@@ -3,7 +3,6 @@ package game
 import (
 	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 
 	"github.com/t0l1k/eui/utils"
@@ -74,7 +73,7 @@ func (g *Game) shuffle() {
 			if idx >= g.Size()*g.Size() {
 				idx = 0
 			}
-			fmt.Printf("%v,%v сделан ход на поле\n%v", count, idx, g.String())
+			// fmt.Printf("%v,%v сделан ход на поле\n%v", count, idx, g.String())
 		} else {
 			switch err.Error() {
 			case err03:
@@ -92,7 +91,7 @@ func (g *Game) shuffle() {
 				}
 			}
 			g.UpdateAllFieldNotes()
-			fmt.Printf("%v,%v на поле есть пустые заметки\n%v\n%v\n", count, idx, g.String(), err)
+			// fmt.Printf("%v,%v на поле есть пустые заметки\n%v\n%v\n", count, idx, g.String(), err)
 		}
 		count++
 	}
@@ -107,7 +106,7 @@ func (g *Game) guess(idx int) error {
 	for _, v := range cell.GetNotes() {
 		if g.path[idx].IsContain(v) {
 			notes, _ = notes.RemoveValue(v)
-			fmt.Printf("Удаляем метку:%v из заметок:[%v] рузультат пути:[%v]", v, notes, g.path)
+			// fmt.Printf("Удаляем метку:%v из заметок:[%v] рузультат пути:[%v]", v, notes, g.path)
 		}
 	}
 	if len(notes) == 0 {
@@ -116,9 +115,9 @@ func (g *Game) guess(idx int) error {
 	note := g.getRndNote(notes)
 	x, y := g.Pos(idx)
 	g.MakeMove(x, y, note)
-	fmt.Printf("%v ход %v ячейка[%v] успешен на поле\n%v\n", idx, note, cell, g.String())
+	// fmt.Printf("%v ход %v ячейка[%v] успешен на поле\n%v\n", idx, note, cell, g.String())
 	if err := g.isFoundEmptyNotes(idx); err != nil {
-		fmt.Printf("%v ход %v ячейка[%v]есть пустая клетка на поле\n%v\n%v\n", idx, note, cell, g.String(), err)
+		// fmt.Printf("%v ход %v ячейка[%v]есть пустая клетка на поле\n%v\n%v\n", idx, note, cell, g.String(), err)
 		return err
 	}
 	return nil
@@ -179,17 +178,17 @@ func (g *Game) MakeMove(x, y, note int) bool {
 	idx := g.Idx(x, y)
 	if !g.inGame {
 		g.path[idx] = append(g.path[idx], note)
-		fmt.Printf("Ход %v метка:%v путь %v\n", idx, note, g.path)
+		// fmt.Printf("Ход %v метка:%v путь %v\n", idx, note, g.path)
 	} else {
 		g.history = g.history.Add(idx)
 	}
 	cell := g.field.cell(idx)
 	if !cell.add(note) {
-		fmt.Println("move on read-only cell")
+		// fmt.Println("move on read-only cell")
 		return true
 	}
 	count := g.UpdateAllFieldNotes()
-	fmt.Printf("Ход %v метка:%v обновленно меток:%v в истории ходов:%v\n", idx, note, count, len(g.history))
+	// fmt.Printf("Ход %v метка:%v обновленно меток:%v в истории ходов:%v\n", idx, note, count, len(g.history))
 	return count > 0
 }
 
@@ -200,7 +199,7 @@ func (g *Game) Undo() {
 	x, y := g.LastMovePos()
 	g.ResetCell(x, y)
 	g.history = g.history.Pop()
-	log.Printf("Undo move[%v,%v]%v в истории ходов:%v\n", x, y, g.Cell(x, y), len(g.history))
+	// log.Printf("Undo move[%v,%v]%v в истории ходов:%v\n", x, y, g.Cell(x, y), len(g.history))
 }
 
 func (g *Game) LastMovePos() (int, int) { return g.Pos(g.history[g.history.Size()-1]) }

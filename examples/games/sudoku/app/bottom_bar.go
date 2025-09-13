@@ -29,7 +29,7 @@ type BottomBar struct {
 }
 
 func NewBottomBar(fn func(*eui.Button)) *BottomBar {
-	b := &BottomBar{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
+	b := &BottomBar{Container: eui.NewContainer(eui.NewVBoxLayout(5))}
 	b.fn = fn
 	b.layoutActs = eui.NewContainer(eui.NewVBoxLayout(1))
 	b.Add(b.layoutActs)
@@ -72,11 +72,9 @@ func (b *BottomBar) Setup(board *Board) {
 		b.layoutNums.Add(btn)
 		b.actBtns = append(b.actBtns, btn)
 	}
-	b.SetRect(b.Rect()) // обязательно после обнуления контейнеров
 	b.setBtnClrs()
 	b.layoutActs.Layout()
 	b.layoutNums.Layout()
-	b.Layout()
 }
 
 func (b *BottomBar) IsActAccept() bool    { return b.actAccept }
@@ -166,23 +164,11 @@ func (b *BottomBar) UpdateUndoBtn(count int) {
 	}
 }
 
-func (b *BottomBar) Update() {
-	b.Container.Update()
+func (b *BottomBar) Tick(eui.TickData) {
 	if b.board == nil {
 		return
 	}
 	if b.board.sw.IsRun() {
 		b.varSw.Emit(eui.FormatSmartDuration(b.board.sw.Duration(), false))
 	}
-}
-
-func (b *BottomBar) SetRect(rect eui.Rect[int]) {
-	b.Container.SetRect(rect)
-	w0, h0 := b.Rect().Size()
-	x, y := b.Rect().Pos()
-	h1 := h0 / 2
-	b.layoutActs.SetRect(eui.NewRect([]int{x, y, w0, h1}))
-	y += h1
-	b.layoutNums.SetRect(eui.NewRect([]int{x, y, w0, h1}))
-	b.ImageReset()
 }

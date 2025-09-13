@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/sudoku/game"
 	"golang.org/x/image/colornames"
@@ -26,7 +25,7 @@ type Board struct {
 
 func NewBoard(fn func(b *eui.Button)) *Board {
 	b := &Board{Container: eui.NewContainer(eui.NewAbsoluteLayout())}
-	b.layoutCells = eui.NewContainer(eui.NewSquareGridLayout(2, 2, 1))
+	b.layoutCells = eui.NewContainer(eui.NewGridLayout(2, 2, 1))
 	b.Add(b.layoutCells)
 	b.fn = fn
 	b.grid = eui.NewGridView(2, 2)
@@ -47,7 +46,7 @@ func (b *Board) Setup(dim game.Dim, diff game.Difficult) {
 	b.game.Load(diff)
 	b.layoutCells.ResetContainer()
 	b.grid.Set(float64(b.dim.H), float64(b.dim.W))
-	b.layoutCells.SetLayout(eui.NewSquareGridLayout(b.dim.Size(), b.dim.Size(), b.spacing))
+	b.layoutCells.SetLayout(eui.NewGridLayout(b.dim.Size(), b.dim.Size(), b.spacing))
 	for y := 0; y < b.dim.Size(); y++ {
 		for x := 0; x < b.dim.Size(); x++ {
 			btn := NewCellIcon(b.dim, b.game.Cell(x, y), b.fn, colornames.Silver, colornames.Black)
@@ -61,11 +60,7 @@ func (b *Board) Setup(dim game.Dim, diff game.Difficult) {
 	if !(b.diff.String() == game.Manual.String()) {
 		b.sw.Start()
 	}
-	b.SetRect(b.Rect())
-	// if b.layoutCells.Rect().IsEmpty() {
-	// 	return
-	// }
-	// b.layoutCells.Layout()
+	b.layoutCells.Layout()
 	b.Layout()
 }
 
@@ -117,18 +112,9 @@ func (b *Board) Highlight(value string) {
 	}, false)
 }
 
-func (d *Board) Draw(surface *ebiten.Image) {
-	if d.IsDirty() {
-		d.Layout()
-	}
-	d.Traverse(func(d eui.Drawabler) { d.Draw(surface) }, false)
-}
-
 func (b *Board) SetRect(rect eui.Rect[int]) {
 	b.Container.SetRect(rect)
-	x, y, w, h := b.Rect().GetRect()
-	b.layoutCells.SetRect(eui.NewRect([]int{x + int(b.spacing/2), y + int(b.spacing/2), w, h}))
-	x1, y1, w1, h1 := b.Rect().GetRect()
-	b.grid.SetRect(eui.NewRect([]int{x1 - int(b.spacing/2), y1 - int(b.spacing/2), w1, h1}))
+	b.layoutCells.SetRect(rect)
+	b.grid.SetRect(rect)
 	b.grid.SetStrokewidth(float64(b.spacing))
 }

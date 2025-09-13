@@ -99,14 +99,8 @@ func (c *CellIcon) Layout() {
 			// log.Println("Иконка без заметок", c.cell.GetValue())
 		}
 	}
+	c.layout.Layout()
 	c.ClearDirty()
-}
-
-func (d *CellIcon) Update() {
-	if d.IsHidden() {
-		return
-	}
-	d.btn.Update()
 }
 
 func (d *CellIcon) Draw(surface *ebiten.Image) {

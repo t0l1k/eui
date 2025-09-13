@@ -22,29 +22,31 @@ func NewSceneSudoku() *SceneSudoku {
 	gamesData := game.NewGamesData()
 	s := &SceneSudoku{Scene: eui.NewScene(eui.NewLayoutVerticalPercent([]int{5, 95}, 5))}
 	s.topBar = eui.NewTopBar(Title, func(b *eui.Button) {
-		s.dialogSelect.Show()
 		s.board.Hide()
 		s.bottomBar.Hide()
 		s.topBar.SetTitle(Title)
 		s.topBar.SetShowTitle(false)
 		s.topBar.SetShowStoppwatch(false)
+		s.dialogSelect.Show()
 	}).SetUseStopwatch()
 	s.dialogSelect = NewDialogSelect(gamesData, func(b *eui.Button) {
 		for _, v := range s.dialogSelect.btnsDiff {
 			newVar, newVar1 := v.GetData()
 			log.Println(b.Rect(), v.Rect(), b.Text(), newVar, newVar1, v.State(), b.State(), v.Rect().InRect(b.Rect().Pos()))
-			if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) {
+			x, y := ebiten.CursorPosition()
+			pos := eui.NewPoint(x, y)
+			if inpututil.IsMouseButtonJustReleased(ebiten.MouseButtonLeft) && pos.In(v.Rect()) {
 				dim, diff := v.GetData()
 				s.topBar.SetTitle("Sudoku " + dim.String() + diff.String())
 				s.dialogSelect.Hide()
 				s.board.Setup(dim, diff)
 				s.topBar.SetShowTitle(false)
-				s.board.Show()
 				s.bottomBar.Setup(s.board)
-				s.bottomBar.Show()
 				s.bottomBar.UpdateNrs(s.board.game.ValuesCount())
 				s.bottomBar.ShowNotes(s.board.IsShowNotes())
 				s.topBar.SetShowStoppwatch(false)
+				s.board.Show()
+				s.bottomBar.Show()
 			}
 		}
 	})
@@ -69,9 +71,8 @@ func NewSceneSudoku() *SceneSudoku {
 					}
 					if s.board.isWin {
 						gamesData.AddGameResult(s.board.dim, s.board.diff, s.board.sw.Duration())
-						margin := s.dialogSelect.margin
 						s.dialogSelect.history.Reset()
-						s.dialogSelect.history.SetupListViewText(gamesData.GamesPlayed(), margin, 1, colornames.Aqua, colornames.Black)
+						s.dialogSelect.history.SetupListViewText(gamesData.GamesPlayed(), 30, 1, colornames.Aqua, colornames.Black)
 						for _, v := range s.dialogSelect.btnsDiff {
 							if v.diff.Eq(s.board.diff) && v.dim.Eq(s.board.dim) {
 								value := gamesData.GetLastBest(s.board.dim, s.board.diff)
@@ -115,15 +116,15 @@ func NewSceneSudoku() *SceneSudoku {
 		}
 	})
 
-	s.Add(s.topBar)
-	contBoard := eui.NewContainer(eui.NewStackLayout(5))
-	contBoard.Add(s.dialogSelect)
-
-	contGame := eui.NewContainer(eui.NewLayoutVerticalPercent([]int{95, 5}, 1))
+	contGame := eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{70, 30}, 1))
 	contGame.Add(s.board)
 	contGame.Add(s.bottomBar)
 
+	contBoard := eui.NewContainer(eui.NewStackLayout(5))
+	contBoard.Add(s.dialogSelect)
 	contBoard.Add(contGame)
+
+	s.Add(s.topBar)
 	s.Add(contBoard)
 	return s
 }
