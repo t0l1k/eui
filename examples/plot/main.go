@@ -1,43 +1,31 @@
 package main
 
 import (
+	"log"
+
 	"github.com/t0l1k/eui"
 )
 
-type SceneTestPlot struct {
-	*eui.Scene
-	plot *eui.Plot
-}
-
-func NewSceneTestPlot() *SceneTestPlot {
-	s := &SceneTestPlot{Scene: eui.NewScene(eui.NewAbsoluteLayout())}
-	xArr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	yArr := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	values := []int{1, 2, 3, 4, 5, 5, 6, 7, 7, 8}
-	s.plot = eui.NewPlot(xArr, yArr, values, "Game Score", "Game", "Level")
-	s.Add(s.plot)
-	return s
-}
-
-func (s *SceneTestPlot) SetRect(rect eui.Rect[int]) {
-	w0, h0 := rect.Size()
-	margin := int(float64(rect.GetLowestSize()) * 0.1)
-	x, y := margin, margin
-	w, h := w0-margin*2, h0-margin*2
-	s.plot.SetRect(eui.NewRect([]int{x, y, w, h}))
-}
-
-func NewGame() *eui.Ui {
-	u := eui.GetUi()
-	u.SetTitle("Test Plot")
-	k := 30
-	w, h := 9*k, 6*k
-	u.SetSize(w, h)
-	return u
-}
-
 func main() {
-	eui.Init(NewGame())
-	eui.Run(NewSceneTestPlot())
+	eui.Init(eui.GetUi().SetTitle("Test Plot").SetSize(400, 400))
+	eui.Run(func() *eui.Scene {
+		s := eui.NewScene(eui.NewStackLayout(50))
+		xArr := []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+		yArr := []float64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+		values := []float64{1, 2, 3, 4, 5, 5, 6, 7, 7, 8}
+		plot := eui.NewPlot(xArr, yArr, values, "Game Score", "Game", "Level").
+			AddValues([]float64{0, 1, 2, 3, 4, 4, 5, 6, 6, 7}).
+			AddValues(func() (result []float64) {
+				sum := 0.0
+				for i, v := range values {
+					sum += v
+					result = append(result, sum/float64(i+1))
+				}
+				log.Println("res:", values, result)
+				return result
+			}())
+		s.Add(plot)
+		return s
+	}())
 	eui.Quit(func() {})
 }

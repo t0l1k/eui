@@ -10,7 +10,7 @@ func (g GamesData) Add(dt GameData) *GamesData { g = append(g, dt); return &g }
 func (g GamesData) IsEmpty() bool              { return len(g) == 0 }
 func (g GamesData) Size() int                  { return len(g) }
 
-func (g GamesData) Max() (max int) {
+func (g GamesData) Max() (max float64) {
 	for _, v := range g {
 		if v.level > max {
 			max = v.level
@@ -29,14 +29,14 @@ func (g GamesData) Average() (value float64) {
 	return value / float64(g.Size())
 }
 
-func (g GamesData) Score() (score int) {
+func (g GamesData) Score() (score float64) {
 	for _, v := range g {
 		score += v.score
 	}
 	return score
 }
 
-func (g GamesData) Levels() (result []int) {
+func (g GamesData) Levels() (result []float64) {
 	for _, v := range g {
 		result = append(result, v.level)
 	}

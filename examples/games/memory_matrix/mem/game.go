@@ -9,7 +9,7 @@ type Game struct {
 	level         Level
 	dim           Dim
 	stage         GameStage
-	moveCount     int
+	moveCount     float64
 	Win, GameOver bool
 	gameData      *GameData
 }
@@ -21,7 +21,7 @@ func NewGame(level Level) *Game {
 	g.field = newField().Shuffle(int(level), g.dim)
 	g.stage = NewGameStage()
 	g.moveCount = 0
-	g.gameData = NewGameData(int(level))
+	g.gameData = NewGameData(float64(level))
 	return g
 }
 
@@ -41,7 +41,7 @@ func (g *Game) NextLevel() {
 	g.moveCount = 0
 	g.dim = GetDimForLevel(g.level)
 	g.field = newField().Shuffle(int(g.level), g.dim)
-	g.gameData = NewGameData(int(g.level))
+	g.gameData = NewGameData(float64(g.level))
 }
 
 func (g *Game) Move(idx int) bool {
@@ -57,10 +57,10 @@ func (g *Game) Move(idx int) bool {
 			return false
 		} else {
 			if !g.Cell(idx).IsMarked() {
-				g.moveCount++
+				g.moveCount += 1
 				g.Cell(idx).SetMarked()
 			}
-			if g.moveCount == int(g.level) {
+			if g.moveCount == float64(g.level) {
 				g.Win = true
 				g.SetNextStage()
 			}

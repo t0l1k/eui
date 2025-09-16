@@ -196,16 +196,33 @@ func (d *BoardMem) setupConclusionBoard() *eui.Button {
 
 func (d *BoardMem) setupScoreBtn() *eui.Button {
 	level := d.gamesData.Max()
-	count := d.gamesData.Size()
-	var xArr, yArr, levels []int
-	for i := 0; i < count; i++ {
-		xArr = append(xArr, i+1)
-	}
-	for i := 0; i < level; i++ {
-		yArr = append(yArr, i+1)
-	}
-	levels = d.gamesData.Levels()
-	plot := eui.NewPlot(xArr, yArr, levels, "Memory Matrix", "Game", "Level")
+	count := float64(d.gamesData.Size())
+	levels := d.gamesData.Levels()
+	plot := eui.NewPlot(
+		func() (result []float64) {
+			for i := 0.0; i < count; i++ {
+				result = append(result, i+1)
+			}
+			return result
+		}(),
+		func() (result []float64) {
+			for i := 0.0; i < level; i++ {
+				result = append(result, i+1)
+			}
+			return result
+		}(),
+		d.gamesData.Levels(),
+		"Memory Matrix",
+		"Game",
+		"Level").
+		AddValues(func() (result []float64) {
+			sum := 0.0
+			for i, v := range levels {
+				sum += v
+				result = append(result, sum/float64(i+1))
+			}
+			return result
+		}())
 	plot.SetRect(d.Rect())
 	plot.Layout()
 	btn := eui.NewButtonIcon([]*ebiten.Image{plot.Image(), plot.Image()}, d.fn)
