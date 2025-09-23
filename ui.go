@@ -2,13 +2,11 @@ package eui
 
 import (
 	"log"
-	"os"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// Умею иницализировать для Ebitenengine приложение, затем запускается сцена в которой отслеживаются через подписку от клавиатуры, мыши, касания экрана события и передаются структуре View, InputBox(клавиатуры, пока только цифры). Остальным виджетам это текстовая метка(Text) и изображение(Image) встаивается структура View, которая определяет события от мыши(InputState) и меняет состояние виджета это при наведении, в фокусе, покидание курсором виджета. Все происходит в сцене, где есть обновление и дельта от последнего обновления и рисование, затем уже сцена передает внутри себя виджетам события. После создания сцены по умолчанию создается раскладка по вертикали и при переопределении метода Resize уже в нем производится раскладка виджетов внутри сцены.
 type Ui struct {
 	title          string
 	scenes         []Sceneer
@@ -25,6 +23,7 @@ type Ui struct {
 	modal          Drawabler
 	focusManager   *FocusManager
 	resource       *ResourceManager
+	quit           bool
 }
 
 func (u *Ui) GetStartTime() time.Time          { return u.start }
@@ -211,6 +210,9 @@ func (u *Ui) Update() error {
 	if u.modal != nil {
 		u.modal.Update()
 	}
+	if u.quit {
+		return ebiten.Termination
+	}
 	return nil
 }
 
@@ -270,7 +272,8 @@ func (u *Ui) Pop() error {
 		log.Println("App Pop Scene Quit done.", u.scenes)
 		if u.IsMainScene() {
 			log.Printf("App Quit.")
-			os.Exit(0)
+			u.quit = true
+			return ebiten.Termination
 		}
 		u.currentScene = GetUi().scenes[len(GetUi().scenes)-1]
 		u.currentScene.Entered()

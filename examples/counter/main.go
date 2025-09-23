@@ -3,6 +3,7 @@
 package main
 
 import (
+	"log"
 	"strconv"
 	"time"
 
@@ -24,7 +25,7 @@ func main() {
 	eui.Init( // Перед запуском настроить приложение
 		eui.GetUi(). // Получить экземляр gui
 				SetTitle("Counter"). // Текст окна приложения
-				SetSize(320, 200))   // Размер окна приложения <F12> тумблер окно на/из полный экран
+				SetSize(800, 400))   // Размер окна приложения <F12> тумблер окно на/из полный экран
 	eui.Run(func() *eui.Scene {
 		counter := NewCount()                                                             // Сигнал подписчикам передать автоматически оповещение при изменении счетчика
 		s := eui.NewScene(eui.NewVBoxLayout(1))                                           // Контейнер сцены по вертикали
@@ -35,8 +36,10 @@ func main() {
 			eui.NewHBoxLayout(1)).                                          // Контейнер кнопок по горизонтали
 			Add(eui.NewButton("+", func(b *eui.Button) { counter.Inc() })). // Добавить в контейнер кнопку увеличить на единицу и передать подписчикам об этом
 			Add(eui.NewButton("-", func(b *eui.Button) { counter.Dec() }))) // Добавить в контейнер кнопку уменьшить на единицу и передать подписчикам об этом
-		eui.NewSnackBar("Test Counter! Click Escape to quit").ShowTime(30 * time.Second) // Показать сообщение на 30 секунд после запуска, отменить нажав закрыть
+		eui.NewSnackBar("Снакбар! Нажми \"X\" на снакбаре начать тестировать счетчик! <Escape> выход").ShowTime(30 * time.Second) // Показать сообщение на 30 секунд после запуска, отменить нажав закрыть
 		return s
 	}())
-	eui.Quit(func() {}) // Завершить приложение
+	eui.Quit(func() {
+		log.Println("Завершаем тестирование!")
+	}) // Завершить приложение
 }
