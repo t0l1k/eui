@@ -11,12 +11,13 @@
   * [график](examples/plot/main.go)
   * [таблица эксель](examples/spreadsheet/main.go)(только формула сложения)
   
-  Игры:
-    * [Крестики-нолики](examples/games/ttt/main.go)
-    * [Найти пару](examples/games/match/main.go)
-    * [Вспомни матрицу](examples/games/memory_matrix/main.go)
-    * [Собери линию](examples/games/lines/main.go)
-    * [Сапер](examples/games/minesweeper/main.go)
-    * [Пасьянс 13](examples/games/solitaire/main.go)
-    * [Судоку](examples/games/sudoku/main.go)
+Игры:
+* [Крестики-нолики](examples/games/ttt/main.go)
+* [Найти пару](examples/games/match/main.go)
+* [Вспомни матрицу](examples/games/memory_matrix/main.go)
+* [Собери линию](examples/games/lines/main.go)
+* [Сапер](examples/games/minesweeper/main.go)
+* [Пасьянс 13](examples/games/solitaire/main.go)
+* [Судоку](examples/games/sudoku/main.go)
+* [Пятнашки](examples/games/fifteen/main.go)
 
