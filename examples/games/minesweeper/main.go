@@ -12,6 +12,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/games/minesweeper/res"
+	"github.com/t0l1k/eui/utils"
 	"golang.org/x/image/colornames"
 )
 
@@ -347,9 +348,10 @@ func (g GameState) String() string {
 type Dim struct{ row, column, mines int }
 
 func NewDim(r, c, m int) Dim { return Dim{row: r, column: c, mines: m} }
-func (d Dim) Percent() int   { return int(percentOf(float64(d.mines), float64(d.row*d.column))) }
+func (d Dim) Percent() int   { return int(utils.PercentOf(float64(d.mines), float64(d.row*d.column))) }
 func (d *Dim) SetMines(value float64) {
-	d.mines = int(valueFromPercent(value, float64(d.row*d.column)))
+	d.mines = int(utils.ValueFromPercent(value, float64(d.row*d.column)))
+
 }
 func (d Dim) Empty() bool    { return d.row == 0 || d.column == 0 || d.mines == 0 }
 func (d Dim) String() string { return fmt.Sprintf("Dim:%v %v %v", d.row, d.column, d.mines) }
@@ -692,7 +694,7 @@ func NewDialogCustom(diff map[string]Dim, fn func(*eui.Button)) *eui.Container {
 		row := cRow.SelectedValue.Value()
 		col := cCol.SelectedValue.Value()
 		perc := cMines.SelectedValue.Value()
-		mines := valueFromPercent(float64(perc), float64(row*col))
+		mines := utils.ValueFromPercent(float64(perc), float64(row*col))
 		diff[Custom] = NewDim(row, col, int(mines))
 		return strconv.Itoa(row) + ":" + strconv.Itoa(col) + ":" + strconv.Itoa(int(mines))
 	}
@@ -840,6 +842,3 @@ func main() {
 		return s
 	}())
 }
-
-func valueFromPercent(percent, total float64) float64 { return percent * total / 100 }
-func percentOf(value, total float64) float64          { return 100 * value / total }

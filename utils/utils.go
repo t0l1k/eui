@@ -1,19 +1,14 @@
 package utils
 
-import (
-	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/vector"
-	"github.com/t0l1k/eui"
-	"golang.org/x/image/colornames"
-)
+func ValueFromPercent(percent, total float64) float64 { return percent * total / 100 }
+func PercentOf(value, total float64) float64          { return 100 * value / total }
 
-func DrawDebugLines(surface *ebiten.Image, rect *eui.Rect[int]) {
-	x0, y0 := rect.Pos()
-	w0, h0 := rect.BottomRight()
-	x, y := float32(x0), float32(y0)
-	w, h := float32(w0), float32(h0)
-	vector.StrokeLine(surface, x, y, w, h, 2, colornames.Red, true)
-	vector.StrokeLine(surface, x, h, w, y, 1, colornames.Red, true)
-	vector.StrokeLine(surface, x, h/2, w, h/2, 1, colornames.Red, true)
-	vector.StrokeLine(surface, w/2, h, w/2, y, 1, colornames.Red, true)
+func Clamp(value, min, max float64) float64 {
+	if value < min {
+		return min
+	}
+	if value > max {
+		return max
+	}
+	return value
 }

@@ -92,22 +92,6 @@ func traverse(d Drawabler, action func(d Drawabler), reverse bool) {
 	}
 }
 
-// func (c *Container) Hit(value Point[int]) Drawabler {
-// 	if !value.In(c.rect) || c.state.IsHidden() {
-// 		return nil
-// 	}
-// 	for i := len(c.Children()) - 1; i >= 0; i-- {
-// 		c := c.Children()[i]
-// 		if mh, ok := c.(interface{ Hit(Point[int]) Drawabler }); ok {
-// 			if hit := mh.Hit(value); hit != nil {
-// 				return hit
-// 			}
-// 		}
-
-// 	}
-// 	return c
-// }
-
 type ContainerVisibleByFilter struct {
 	*Container
 	items  *Container
