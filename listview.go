@@ -14,6 +14,7 @@ type ListView struct {
 	*Drawable
 	children           []Drawabler
 	list               []string
+	index              int
 	itemSize, rows     int
 	contentRect        Rect[int]
 	contentImage       *ebiten.Image
@@ -190,11 +191,11 @@ func (l *ListView) Hit(pt Point[int]) Drawabler {
 }
 
 func (l *ListView) MouseDown(md MouseData) {
+	l.dragStartY = md.Pos().Y
 	if l.contentRect.H <= l.rect.H {
 		return
 	}
 	l.isDragging = true
-	l.dragStartY = md.Pos().Y
 	l.dragStartOffset = l.cameraRect.Min.Y
 	log.Println("ListView:MouseDown:", l.Rect(), l.cameraRect.String(), l.isDragging, l.dragStartY, l.dragStartOffset, md)
 }

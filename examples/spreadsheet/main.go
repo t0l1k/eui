@@ -20,7 +20,7 @@ func main() {
 			laySheet := eui.NewListView()
 			sh := sheet.NewSheet()
 			var activeCell *sheet.Cell
-			input := eui.NewTextInputLine(func(ib *eui.TextInputLine) {
+			input := eui.NewInputLine(func(ib *eui.InputLine) {
 				value := ib.Text()
 				if ok, res := sh.IsFormula(activeCell, value); ok {
 					activeCell.Emit(res)

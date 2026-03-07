@@ -12,9 +12,8 @@ import (
 type Slider struct {
 	*Drawable
 	min, max               float64
-	value                  *Signal[float64]
+	OnChange               *Signal[float64]
 	orientation            Orientation
-	OnChange               SlotFunc[float64]
 	thumbOn                bool
 	thumbSize              float64
 	valueColor, thumbColor color.Color
@@ -23,9 +22,8 @@ type Slider struct {
 
 // Умею показать прогресс от 0 до 1, горизонтально/вертикально с подпиской при обновлении значения
 func NewProgress(min, max, initial float64, o Orientation, fn SlotFunc[float64]) *Slider {
-	p := &Slider{Drawable: NewDrawable(), min: min, max: max, value: NewSignal(func(a, b float64) bool { return a == b }), orientation: o, thumbOn: false}
-	p.value.Emit(initial)
-	p.value.Connect(fn)
+	p := &Slider{Drawable: NewDrawable(), min: min, max: max, OnChange: NewSignal(func(a, b float64) bool { return a == b }), orientation: o, thumbOn: false}
+	p.OnChange.ConnectAndFire(fn, initial)
 	p.SetBg(colornames.Navy)
 	p.SetFg(colornames.Orange)
 	p.valueColor = colornames.Fuchsia
@@ -33,6 +31,7 @@ func NewProgress(min, max, initial float64, o Orientation, fn SlotFunc[float64])
 	return p
 }
 
+// Умею показать слайдер от 0 до 1, горизонтально/вертикально с подпиской при обновлении значения
 func NewSlider(min, max, initial float64, o Orientation, fn SlotFunc[float64]) *Slider {
 	s := NewProgress(min, max, initial, o, fn)
 	s.thumbOn = true
@@ -63,14 +62,14 @@ func (b *Slider) MouseDrag(md MouseData) {
 		b.updateValue(md.pos)
 	}
 }
-func (s *Slider) Value() float64 { return s.value.Value() }
+func (s *Slider) Value() float64 { return s.OnChange.Value() }
 func (s *Slider) SetValue(value float64) *Slider {
 	if value > 1.0 {
-		s.value.Emit(1.0)
+		s.OnChange.Emit(1.0)
 		s.MarkDirty()
 		return s
 	}
-	s.value.Emit(utils.Clamp(value, s.min, s.max))
+	s.OnChange.Emit(utils.Clamp(value, s.min, s.max))
 	s.MarkDirty()
 	return s
 }

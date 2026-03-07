@@ -38,9 +38,9 @@ func NewTopBar(title string, fn func(b *Button)) *Topbar {
 	return t
 }
 
-func (t *Topbar) SetTitle(text string)            { t.lblTitle.SetText(text) }
-func (t *Topbar) SetButtonText(text string)       { t.btnMenu.SetText(text) }
-func (t *Topbar) SetButtonFunc(f func(b *Button)) { t.btnFunc = f }
+func (t *Topbar) SetTitle(text string) *Topbar            { t.lblTitle.SetText(text); return t }
+func (t *Topbar) SetButtonText(text string) *Topbar       { t.btnMenu.SetText(text); return t }
+func (t *Topbar) SetButtonFunc(f func(b *Button)) *Topbar { t.btnFunc = f; return t }
 
 func (t *Topbar) setTheme() {
 	theme := GetUi().Theme()

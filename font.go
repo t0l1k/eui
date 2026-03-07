@@ -3,8 +3,10 @@ package eui
 import (
 	"bytes"
 	"fmt"
+	"image/color"
 	"strings"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
@@ -114,4 +116,41 @@ func (f Font) WordWrapText(txt string, fontSize float64, width int) (string, Poi
 		}
 	}
 	return result.String(), NewPoint(int(maxW), int(fnt.Size*1.2*float64(lines)))
+}
+
+func (f Font) DrawString(surface *ebiten.Image, txt string, fontSize int, rect Rect[int], hAlign text.Align, vAlign text.Align, fg color.Color, wordWrap bool) {
+	var (
+		x, y, w, h float64
+	)
+	x, y = float64(rect.X), float64(rect.Y)
+	w, h = float64(rect.Width()), float64(rect.Height())
+	switch hAlign {
+	case text.AlignStart:
+		x += 0
+	case text.AlignCenter:
+		x += w / 2
+	case text.AlignEnd:
+		x += w
+	}
+	switch vAlign {
+	case text.AlignStart:
+		y += 0
+	case text.AlignCenter:
+		y += h / 2
+	case text.AlignEnd:
+		y += h
+	}
+	if fontSize == 0 && !wordWrap {
+		fontSize = f.CalcFontSize(txt, rect)
+	}
+	if wordWrap {
+		txt, _ = f.WordWrapText(txt, float64(fontSize), rect.W)
+	}
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(x, y)
+	op.ColorScale.ScaleWithColor(fg)
+	op.LineSpacing = float64(fontSize) * 1.2
+	op.PrimaryAlign = hAlign
+	op.SecondaryAlign = vAlign
+	text.Draw(surface, txt, f.Get(fontSize), op)
 }

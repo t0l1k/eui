@@ -51,7 +51,7 @@ func NewSpinBox[T any](
 
 	var tf Drawabler
 	if enableInput {
-		tf = NewTextInputLine(func(ti *TextInputLine) {
+		tf = NewInputLine(func(ti *InputLine) {
 			// Пример для int, для других типов — свой парсер
 			var input T
 			ok := false
@@ -83,7 +83,7 @@ func NewSpinBox[T any](
 				s.index.Emit(closestIdx)
 			}
 		})
-		tf.(*TextInputLine).SetMaxLen(width)
+		tf.(*InputLine).SetMaxLen(width)
 	} else {
 		tf = NewLabel("--")
 	}
@@ -94,7 +94,7 @@ func NewSpinBox[T any](
 		switch d := tf.(type) {
 		case *Label:
 			d.SetText(s.toStr(val))
-		case *TextInputLine:
+		case *InputLine:
 			d.SetText(s.toStr(val))
 		}
 	}, index)

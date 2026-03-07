@@ -66,11 +66,7 @@ func (s *Signal[T]) ConnectAndFire(slot SlotFunc[T], value T) int64 {
 	slot(value)
 	return id
 }
-
-func (s *Signal[T]) Disconnect(id int64) {
-	delete(s.slots, id)
-}
-
+func (s *Signal[T]) Disconnect(id int64) { delete(s.slots, id) }
 func (s *Signal[T]) Emit(value T) {
 	if s.equalFunc != nil && s.equalFunc(s.lastVal, value) {
 		return
@@ -85,5 +81,4 @@ func (s *Signal[T]) Emit(value T) {
 	}
 	// log.Println("Signal:Emit:", value)
 }
-
 func (s *Signal[T]) Value() T { return s.lastVal }

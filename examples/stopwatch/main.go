@@ -145,7 +145,9 @@ func NewSwScene() *SwScene {
 				log.Println("Sw", SwReset.String())
 			case SwRing.String():
 				if entry := swRing(); entry.lap > 0 {
-					listRing.AddItem(eui.NewLabel(entry.String()))
+					listRing.AddItem(eui.NewButton(entry.String(), func(b *eui.Button) {
+						log.Println("Selected:", b.Text())
+					}))
 				}
 				log.Println("Sw", SwRing.String())
 			}

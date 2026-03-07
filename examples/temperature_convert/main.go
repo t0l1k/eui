@@ -12,9 +12,9 @@ func GetFahrenheitFromCelsius(c float64) float64 { return c*9/5 + 32 }
 type SceneTemp struct{ *eui.Scene }
 
 func NewSceneTemp() *SceneTemp {
-	var a, c *eui.TextInputLine
+	var a, c *eui.InputLine
 	s := &SceneTemp{Scene: eui.NewScene(eui.NewHBoxLayout(2))}
-	a = eui.NewTextInputLine(func(ib *eui.TextInputLine) {
+	a = eui.NewInputLine(func(ib *eui.InputLine) {
 		if digit, err := ib.Digit(); err == nil {
 			n := GetFahrenheitFromCelsius(digit)
 			c.SetText(fmt.Sprintf("%.2f", n))
@@ -23,7 +23,7 @@ func NewSceneTemp() *SceneTemp {
 	})
 	s.Add(a)
 	s.Add(eui.NewLabel("Celsius ="))
-	c = eui.NewTextInputLine(func(ib *eui.TextInputLine) {
+	c = eui.NewInputLine(func(ib *eui.InputLine) {
 		if digit, err := ib.Digit(); err == nil {
 			n := GetCelsiusFromFahrenheit(digit)
 			a.SetText(fmt.Sprintf("%.2f", n))

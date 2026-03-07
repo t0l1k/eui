@@ -10,30 +10,33 @@ import (
 	"golang.org/x/image/colornames"
 )
 
-// === TextInputLine ===
-type TextInputLine struct {
+// === InputLine ===
+type InputLine struct {
 	*Drawable
-	text      string
-	onReturn  func(*TextInputLine)
-	cursorPos int
-	blink     bool
-	tick      time.Duration
-	maxLen    int
+	text        string
+	textChanged *Signal[string]
+	onReturn    SlotFunc[*InputLine]
+	cursorPos   int
+	blink       bool
+	tick        time.Duration
+	maxLen      int
+	placeHolder string
 }
 
-func NewTextInputLine(onReturn func(*TextInputLine)) *TextInputLine {
-	e := &TextInputLine{
-		Drawable: NewDrawable(),
-		onReturn: onReturn,
-		maxLen:   0,
+func NewInputLine(onReturn SlotFunc[*InputLine]) *InputLine {
+	e := &InputLine{
+		Drawable:    NewDrawable(),
+		onReturn:    onReturn,
+		maxLen:      0,
+		textChanged: NewSignal(func(a, b string) bool { return a == b }),
 	}
-	e.SetBg(colornames.Navy)
+	e.SetBg(colornames.Blue)
 	e.SetFg(colornames.Yellow)
 	return e
 }
 
-func (b *TextInputLine) WantBlur() bool { return false }
-func (e *TextInputLine) Tick(td TickData) {
+func (b *InputLine) WantBlur() bool { return false }
+func (e *InputLine) Tick(td TickData) {
 	if !e.State().IsFocused() || e.IsHidden() {
 		return
 	}
@@ -45,24 +48,26 @@ func (e *TextInputLine) Tick(td TickData) {
 	}
 }
 
-func (e *TextInputLine) Hit(pt Point[int]) Drawabler {
+func (e *InputLine) Hit(pt Point[int]) Drawabler {
 	if !pt.In(e.rect) || e.IsHidden() {
 		return nil
 	}
 	return e
 }
 
-func (e *TextInputLine) Text() string { return e.text }
-func (e *TextInputLine) SetText(value string) {
+func (e *InputLine) OnReturn() SlotFunc[*InputLine] { return e.onReturn }
+func (e *InputLine) TextChanged() *Signal[string]   { return e.textChanged }
+func (e *InputLine) Text() string                   { return e.text }
+func (e *InputLine) SetText(value string) {
 	e.text = value
 	e.cursorPos = len(e.text)
 	e.MarkDirty()
 }
+func (e *InputLine) SetPlaceholder(value string) *InputLine { e.placeHolder = value; return e }
+func (e *InputLine) MaxLen() int                            { return e.maxLen }
+func (e *InputLine) SetMaxLen(value int)                    { e.maxLen = value }
 
-func (e *TextInputLine) MaxLen() int         { return e.maxLen }
-func (e *TextInputLine) SetMaxLen(value int) { e.maxLen = value }
-
-func (e *TextInputLine) KeyPressed(kd KeyboardData) {
+func (e *InputLine) KeyPressed(kd KeyboardData) {
 	if !e.State().IsFocused() {
 		return
 	}
@@ -79,11 +84,12 @@ func (e *TextInputLine) KeyPressed(kd KeyboardData) {
 		}
 		e.text = e.text[:e.cursorPos] + string(r) + e.text[e.cursorPos:]
 		e.cursorPos++
+		e.textChanged.Emit(e.Text())
 	}
 	e.MarkDirty()
 }
 
-func (e *TextInputLine) KeyReleased(kd KeyboardData) {
+func (e *InputLine) KeyReleased(kd KeyboardData) {
 	if !e.State().IsFocused() {
 		return
 	}
@@ -96,10 +102,12 @@ func (e *TextInputLine) KeyReleased(kd KeyboardData) {
 		if e.cursorPos > 0 && len(e.text) > 0 {
 			e.text = e.text[:e.cursorPos-1] + e.text[e.cursorPos:]
 			e.cursorPos--
+			e.textChanged.Emit(e.Text())
 		}
 	case kd.IsReleased(ebiten.KeyDelete):
 		if e.cursorPos < len(e.text) && len(e.text) > 0 {
 			e.text = e.text[:e.cursorPos] + e.text[e.cursorPos+1:]
+			e.textChanged.Emit(e.Text())
 		}
 	case kd.IsReleased(ebiten.KeyArrowLeft):
 		if e.cursorPos > 0 {
@@ -113,7 +121,7 @@ func (e *TextInputLine) KeyReleased(kd KeyboardData) {
 	e.MarkDirty()
 }
 
-func (e *TextInputLine) Layout() {
+func (e *InputLine) Layout() {
 	h := e.rect.H
 	e.Drawable.Layout()
 
@@ -123,6 +131,9 @@ func (e *TextInputLine) Layout() {
 	margin := 8.0
 	w := float64(e.rect.W)
 	txt := e.text
+	if txt == "" && !e.state.IsFocused() {
+		txt = e.placeHolder
+	}
 
 	// Определяем ширину текста до курсора
 	cursorSub := ""
@@ -190,7 +201,7 @@ func (e *TextInputLine) Layout() {
 	e.ClearDirty()
 }
 
-func (w *TextInputLine) Draw(screen *ebiten.Image) {
+func (w *InputLine) Draw(screen *ebiten.Image) {
 	if w.IsHidden() {
 		return
 	}
@@ -202,7 +213,7 @@ func (w *TextInputLine) Draw(screen *ebiten.Image) {
 	screen.DrawImage(w.Image(), op)
 }
 
-func (t *TextInputLine) Digit() (float64, error) {
+func (t *InputLine) Digit() (float64, error) {
 	if len(t.text) == 0 {
 		return 0, nil
 	}
