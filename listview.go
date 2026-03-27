@@ -140,13 +140,21 @@ func (l *ListView) Rows(rows int) {
 	l.MarkDirty()
 }
 
-func (l *ListView) Reset() {
-	l.list = nil
-	for _, v := range l.children {
-		v.Close()
+func (l *ListView) Close() {
+	for i := range l.children {
+		if l.children[i] != nil {
+			l.children[i].Close()
+			l.children[i] = nil
+		}
 	}
 	l.children = nil
+	l.list = nil
 	l.contentImage = nil
+	l.Drawable.Close()
+}
+
+func (l *ListView) Reset() {
+	l.Close()
 	l.offset = 0
 	l.lastOffset = 0
 	l.cameraRect = image.Rect(0, 0, l.rect.W, l.rect.H)

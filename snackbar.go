@@ -59,4 +59,4 @@ func (s *SnackBar) Draw(surface *ebiten.Image) {
 		s.Container.Draw(surface)
 	}
 }
-func (s *SnackBar) Close() { s.timer = nil; s.ImageReset() }
+func (s *SnackBar) Close() { s.timer = nil; s.Container.Close() }

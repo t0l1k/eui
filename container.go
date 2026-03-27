@@ -28,6 +28,21 @@ func (c *Container) ResetContainer() *Container {
 	c.MarkDirty()
 	return c
 }
+
+func (c *Container) Remove(d Drawabler) {
+	for i, child := range c.children {
+		if child == d {
+			child.Close() // Освобождаем ebiten.Image
+			// Удаляем из среза, предотвращая утечку памяти в самом слайсе
+			copy(c.children[i:], c.children[i+1:])
+			c.children[len(c.children)-1] = nil
+			c.children = c.children[:len(c.children)-1]
+			c.MarkDirty() // Перерисовываем контейнер
+			return
+		}
+	}
+}
+
 func (c *Container) Layout() {
 	c.Drawable.SetRect(c.Rect())
 	c.layout.Apply(c.children, c.Rect())
@@ -73,12 +88,12 @@ func (c *Container) Draw(surface *ebiten.Image) {
 		}
 	}, false)
 }
-func (c *Container) Traverse(action func(d Drawabler), reverse bool) {
+func (c *Container) Traverse(action func(Drawabler), reverse bool) {
 	for _, d := range c.Children() {
 		traverse(d, action, reverse)
 	}
 }
-func traverse(d Drawabler, action func(d Drawabler), reverse bool) {
+func traverse(d Drawabler, action func(Drawabler), reverse bool) {
 	if reverse {
 		action(d)
 	}

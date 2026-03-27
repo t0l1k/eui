@@ -98,11 +98,11 @@ func (p *Plot) Layout() {
 			boxSize := margin / 2
 			xL, yL, w, h := int(xPos(float64(x))-float64(boxSize)/2), axisRect.Bottom()+boxSize/2, boxSize, boxSize
 			lbl := NewLabel(strconv.FormatFloat(p.xArr[i-1], 'f', 1, 64))
-			defer lbl.Close()
 			lbl.SetBg(color.Transparent)
 			lbl.SetFg(p.fg)
 			lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 			lbl.Draw(p.Image())
+			lbl.Close() // Закрываем сразу после отрисовки
 		}
 		boxSize := margin
 		xL, yL, w, h := axisRect.Right()-boxSize*3, axisRect.Bottom()-boxSize, boxSize*3, boxSize
@@ -129,11 +129,11 @@ func (p *Plot) Layout() {
 			boxSize := margin / 2
 			xL, yL, w, h := axisRect.Left()-int(float64(boxSize)*1.5), int(yPos(float64(y))-float64(boxSize)/2), boxSize, boxSize
 			lbl := NewLabel(strconv.FormatFloat(p.yArr[i-1], 'f', 1, 64))
-			defer lbl.Close()
 			lbl.SetBg(color.Transparent)
 			lbl.SetFg(p.fg)
 			lbl.SetRect(NewRect([]int{xL, yL, w, h}))
 			lbl.Draw(p.Image())
+			lbl.Close()
 		}
 		boxSize := margin
 		xL, yL, w, h := axisRect.Left(), axisRect.Top()-boxSize, boxSize*3, boxSize

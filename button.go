@@ -87,6 +87,7 @@ func (b *Button) Layout() {
 		lbl.SetFg(b.Fg())
 		lbl.Layout()
 		lbl.Draw(b.Image())
+		lbl.Close()
 		vector.StrokeRect(b.Image(), 0, 0, float32(w), float32(h), float32(margin), b.state.Color(), true)
 	}
 	b.ClearDirty()

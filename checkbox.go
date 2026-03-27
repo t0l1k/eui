@@ -56,6 +56,7 @@ func (c *Checkbox) Layout() {
 	lblCheck.SetFg(c.Bg())
 	lblCheck.Layout()
 	lblCheck.Draw(c.Image())
+	lblCheck.Close()
 
 	lblTxt := NewLabel(c.txt)
 	lblTxt.SetRect(NewRect([]int{h + int(margin), int(margin), (w - h) - int(margin*2), h - int(margin*2)}))
@@ -63,6 +64,7 @@ func (c *Checkbox) Layout() {
 	lblTxt.SetFg(c.Fg())
 	lblTxt.Layout()
 	lblTxt.Draw(c.Image())
+	lblTxt.Close()
 
 	vector.StrokeRect(c.Image(), 0, 0, float32(w), float32(h), float32(margin), c.State().Color(), true)
 

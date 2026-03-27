@@ -3,6 +3,7 @@ package eui
 import (
 	"fmt"
 	"image/color"
+	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
@@ -28,11 +29,11 @@ func (s *Drawable) SetViewType(value ViewType) { s.dType = value; s.MarkDirty() 
 func (s *Drawable) State() ViewState         { return s.state }
 func (s *Drawable) SetState(value ViewState) { s.state = value; s.MarkDirty() }
 
-func (s *Drawable) Bg() color.Color            { return s.bg }
-func (s *Drawable) SetBg(value color.Color)    { s.bg = value; s.MarkDirty() }
-func (s *Drawable) Fg() color.Color            { return s.fg }
-func (s *Drawable) SetFg(value color.Color)    { s.fg = value; s.MarkDirty() }
-func (s *Drawable) Shadow() (int, color.Color) { return s.shadowSize, s.shadowColor }
+func (s *Drawable) Bg() color.Color                   { return s.bg }
+func (s *Drawable) SetBg(value color.Color) *Drawable { s.bg = value; s.MarkDirty(); return s }
+func (s *Drawable) Fg() color.Color                   { return s.fg }
+func (s *Drawable) SetFg(value color.Color) *Drawable { s.fg = value; s.MarkDirty(); return s }
+func (s *Drawable) Shadow() (int, color.Color)        { return s.shadowSize, s.shadowColor }
 func (s *Drawable) SetShadow(size int, color color.Color) {
 	s.shadowSize = size
 	s.shadowColor = color
@@ -63,7 +64,7 @@ func (s *Drawable) Layout() {
 	w, h := s.Rect().Size()
 	if s.Image() == nil {
 		s.image = ebiten.NewImage(w, h)
-		// log.Println("Drawable:Layout:Image:nil", s.Rect())
+		log.Println("Drawable:Layout:Image:nil", s.Rect())
 	} else {
 		s.image.Clear()
 		// log.Println("Drawable:Layout:Image:clear", s.Rect())
@@ -102,4 +103,7 @@ func (s *Drawable) Draw(surface *ebiten.Image) {
 func (s *Drawable) Rect() Rect[int]        { return s.rect }
 func (s *Drawable) SetRect(rect Rect[int]) { s.rect = rect; s.ImageReset() }
 
-func (s *Drawable) Close() {}
+func (s *Drawable) Close() {
+	s.image = nil
+	s.MarkDirty()
+}

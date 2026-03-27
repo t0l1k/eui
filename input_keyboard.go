@@ -2,7 +2,6 @@ package eui
 
 import (
 	"slices"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
@@ -24,22 +23,14 @@ func (k *KeyboardData) IsPressed(value ebiten.Key) bool  { return slices.Contain
 func (k *KeyboardData) IsReleased(value ebiten.Key) bool { return slices.Contains(k.keysR, value) }
 
 // Умею передать подписчикам события от клавиатуры. При нажатой клавише, более 250 мс символ дублируется.
-type KeyboardInput struct {
-	*Signal[Event]
-	timer *Timer
-}
+type KeyboardInput struct{ *Signal[Event] }
 
 // Пауза 250мс до следующего нажатия
 func NewKeyboardListener(fn SlotFunc[Event]) *KeyboardInput {
-	k := &KeyboardInput{
-		Signal: NewSignal[Event](),
-		timer:  NewTimer(250*time.Millisecond, nil),
-	}
+	k := &KeyboardInput{Signal: NewSignal[Event]()}
 	k.Connect(fn)
 	return k
 }
-
-func (s *KeyboardInput) SetKeypressDelay(value time.Duration) { s.timer.SetDuration(value) }
 
 // Передать новое или повторное нажатие клавиши после истечения паузы, для символов([]rune) повтор не работает
 func (s *KeyboardInput) update() {
@@ -47,19 +38,8 @@ func (s *KeyboardInput) update() {
 	keysR := inpututil.AppendJustReleasedKeys(nil)
 	runes := ebiten.AppendInputChars(nil)
 	kd := NewKeyboardData(keysP, keysR, runes)
-	if len(keysP) == 0 && len(keysR) == 0 {
-		s.timer.Off()
-		return
-	}
 	if len(keysP) > 0 {
-		if !s.timer.IsOn() {
-			s.Emit(NewEvent(EventKeyPressed, kd))
-			s.timer.On()
-		}
-		if s.timer.IsDone() {
-			s.Emit(NewEvent(EventKeyPressed, kd))
-			s.timer.Reset()
-		}
+		s.Emit(NewEvent(EventKeyPressed, kd))
 	}
 	if len(keysR) > 0 {
 		s.Emit(NewEvent(EventKeyReleased, kd))
