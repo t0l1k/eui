@@ -28,7 +28,6 @@ const (
 )
 
 type Player struct {
-	*eui.Drawable
 	hit                   *eui.Signal[bool]
 	speed                 float64
 	x, y                  float64
@@ -36,21 +35,21 @@ type Player struct {
 	color                 color.Color
 	last                  time.Time
 	left, right, up, down bool
+	hidden                bool
 }
 
 func NewPlayer() *Player {
 	p := &Player{
-		Drawable: eui.NewDrawable(),
-		hit:      eui.NewSignal(func(a, b bool) bool { return a == b }),
-		width:    32,
-		color:    colornames.Blueviolet,
-		speed:    400,
+		hit:   eui.NewSignal(func(a, b bool) bool { return a == b }),
+		width: 32,
+		color: colornames.Aqua,
+		speed: 400,
 	}
 	p.Hide()
-	p.SetViewType(eui.ViewBackground)
-
 	return p
 }
+func (p *Player) Show() { p.hidden = false }
+func (p *Player) Hide() { p.hidden = true }
 
 func (p *Player) Reset() {
 	p.hit.Emit(false)
@@ -94,23 +93,8 @@ func (p *Player) Update() {
 		p.y = float64(screenHeight)
 	}
 }
-func (p *Player) KeyPressed(kd eui.KeyboardData) {
-	for _, v := range kd.GetKeysPressed() {
-		switch v {
-		case ebiten.KeyArrowLeft:
-			p.left = true
-		case ebiten.KeyArrowRight:
-			p.right = true
-		case ebiten.KeyArrowUp:
-			p.up = true
-		case ebiten.KeyArrowDown:
-			p.down = true
-		}
-	}
-}
-func (s *Player) Layout() {}
 func (p *Player) Draw(surface *ebiten.Image) {
-	if p.IsHidden() {
+	if p.hidden {
 		return
 	}
 	x := p.x - p.width/2
@@ -184,33 +168,85 @@ func NewMob() *Mob {
 	angle := math.Atan2(vy, vx)
 
 	m := &Mob{
-		Drawable: eui.NewDrawable(),
-		X:        x,
-		Y:        y,
-		VX:       vx,
-		VY:       vy,
+		X:  x,
+		Y:  y,
+		VX: vx,
+		VY: vy,
 		// Frames: frames,
 		Frame: 0,
 		Size:  size,
 		Angle: angle,
 		color: colornames.Red,
 	}
-	m.SetViewType(eui.ViewBackground)
 	return m
 }
 func (p *Mob) Update() {
 	p.X += p.VX
 	p.Y += p.VY
 }
-func (s *Mob) Layout() {}
 func (p *Mob) Draw(surface *ebiten.Image) {
 	if p.Hidden {
 		return
 	}
 	x := p.X - 32/2
 	y := p.Y - 32/2
-	// ebitenutil.DrawRect(surface, x, y, p.Size, p.Size, p.color)
 	vector.FillRect(surface, float32(x), float32(y), float32(32), float32(32), p.color, true)
+}
+
+// GameArea — специальный UI элемент, который рисует игру внутри себя
+type GameArea struct {
+	*eui.Drawable
+	player *Player
+	mobs   map[int]*Mob
+}
+
+func NewGameArea(p *Player, mobs map[int]*Mob) *GameArea {
+	ga := &GameArea{Drawable: eui.NewDrawable(), player: p, mobs: mobs}
+	ga.SetViewType(eui.ViewBackground)
+	return ga
+}
+
+func (g *GameArea) KeyPressed(kd eui.KeyboardData) {
+	for _, v := range kd.GetKeysPressed() {
+		switch v {
+		case ebiten.KeyArrowLeft:
+			g.player.left = true
+		case ebiten.KeyArrowRight:
+			g.player.right = true
+		case ebiten.KeyArrowUp:
+			g.player.up = true
+		case ebiten.KeyArrowDown:
+			g.player.down = true
+		}
+	}
+}
+
+func (g *GameArea) Draw(surface *ebiten.Image) {
+	if g.IsHidden() {
+		return
+	}
+	if g.IsDirty() {
+		g.Layout()
+	}
+	// Рисуем игрока
+	g.player.Draw(surface)
+	// Рисуем всех крипов одним циклом без рекурсии Traverse
+	if g.mobs != nil {
+		for _, mob := range g.mobs {
+			mob.Draw(surface)
+		}
+	}
+}
+
+func isOut(mob *Mob, sz float64) bool {
+	return mob.X < -sz || mob.X > float64(screenWidth)+sz || mob.Y < -sz || mob.Y > float64(screenHeight)+sz
+}
+
+func intersects(ax, ay, as, bx, by, bs float64) bool {
+	return ax < bx+bs &&
+		ax+as > bx &&
+		ay < by+bs &&
+		ay+as > by
 }
 
 func NewMain() *eui.Scene {
@@ -236,6 +272,12 @@ func NewMain() *eui.Scene {
 		log.Println("Start pressed")
 	})
 	player = NewPlayer()
+	if mobs == nil {
+		mobs = make(map[int]*Mob)
+	}
+
+	gameArea := NewGameArea(player, mobs)
+
 	player.hit.Connect(func(data bool) {
 		if data {
 			state.Emit(StateGameOver)
@@ -257,6 +299,10 @@ func NewMain() *eui.Scene {
 			score.Emit(0)
 			log.Println("StateMenu")
 		case StateStarting:
+			for k := range mobs {
+				delete(mobs, k)
+			}
+			mobId = 0
 			player.Reset()
 			startTimer.On()
 			lblStatus.SetText("Приготовиться").SetFontSize(40)
@@ -264,12 +310,6 @@ func NewMain() *eui.Scene {
 			player.Show()
 			log.Println("StateStarting")
 		case StatePlaying:
-			// Очищаем старых крипов со сцены перед началом новой игры
-			for _, mob := range mobs {
-				m.Remove(mob)
-			}
-			mobs = nil
-			mobId = 0
 			lblStatus.Hide()
 			scoreTimer.On()
 			mobTimer.On()
@@ -287,14 +327,10 @@ func NewMain() *eui.Scene {
 	mobTimer = eui.NewTimer(500*time.Millisecond, func() {
 		if state.Value() == StatePlaying {
 			mob := NewMob()
-			if mobs == nil {
-				mobs = make(map[int]*Mob)
-			}
 			mobs[mobId] = mob
 			mobId++
 			mobTimer.On()
-			m.Add(mob)
-			log.Println("Новый крип", mobId)
+			log.Println("Новый крип", mobId, len(mobs))
 		}
 	})
 	scoreTimer = eui.NewTimer(1*time.Second, func() {
@@ -313,15 +349,15 @@ func NewMain() *eui.Scene {
 	})
 	eui.GetUi().TickListener().Connect(func(data eui.Event) {
 		if state.Value() != StateMenu {
+			player.Update()
 			for id, mob := range mobs {
-				// Двигаем крипа
+				mob.Update()
 				if intersects(player.x, player.y, player.width, mob.X, mob.Y, mob.Size) {
 					player.hit.Emit(true)
 					break
 				}
 				sz := mob.Size
 				if isOut(mob, sz) {
-					m.Remove(mob) // Удаляем визуальный объект со сцены
 					delete(mobs, id)
 					log.Println("Крип вышел за экран", id, mob.X, mob.Y, len(mobs), mobId)
 				}
@@ -330,7 +366,7 @@ func NewMain() *eui.Scene {
 	})
 	eui.GetUi().KeyboardListener().Connect(func(data eui.Event) {
 		kd := data.Value.(eui.KeyboardData)
-		if kd.IsReleased(ebiten.KeySpace) {
+		if kd.IsReleased(ebiten.KeySpace) && state.Value() == StateMenu {
 			state.Emit(StateStarting)
 		}
 	})
@@ -341,25 +377,14 @@ func NewMain() *eui.Scene {
 	})
 	m.SetBg(colornames.Teal)
 	m.Add(lblScore)
+	m.Add(gameArea) // Теперь это единственный игровой объект в дереве UI
 	m.Add(lblStatus)
 	m.Add(btnStart)
 	m.Add(eui.NewDrawable())
-	m.Add(player)
 
 	theme := eui.GetUi().Theme()
 	theme.Set(eui.SceneBg, colornames.Teal)
 	return m
-}
-
-func isOut(mob *Mob, sz float64) bool {
-	return mob.X < -sz || mob.X > float64(screenWidth)+sz || mob.Y < -sz || mob.Y > float64(screenHeight)+sz
-}
-
-func intersects(ax, ay, as, bx, by, bs float64) bool {
-	return ax < bx+bs &&
-		ax+as > bx &&
-		ay < by+bs &&
-		ay+as > by
 }
 
 func main() {

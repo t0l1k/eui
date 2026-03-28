@@ -1,4 +1,4 @@
-Простой комплект виджетов, для быстрого встраивания в игры. 
+Простой пример использования комплекса виджетов, для быстрого встраивания в игры. 
 Модель простая создается сцена и в неё добавляются элементы сцены. Подробнее описано в примере ["счетчик"](examples/counter/main.go). 
 
 Примеры: 
@@ -20,4 +20,5 @@
 * [Пасьянс 13](examples/games/solitaire/main.go)
 * [Судоку](examples/games/sudoku/main.go)
 * [Пятнашки](examples/games/fifteen/main.go)
+* [Увернись от Крипов](examples/games/dodge_the_creeps) Пример вдохновлен туториалом из [Godot](https://docs.godotengine.org/ru/4.x/getting_started/first_2d_game/index.html)
 

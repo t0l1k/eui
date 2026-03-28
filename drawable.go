@@ -9,19 +9,28 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
+type DirtyFlag int
+
+const (
+	Clean        DirtyFlag = iota
+	DirtyContent           // Нужно перерисовать содержимое на существующем холсте
+	DirtyLayout            // Изменились размеры, нужен новый холст и пересчет макета
+)
+
 type Drawable struct {
-	dType          ViewType
-	state          ViewState
-	rect           Rect[int]
-	dirty, pressed bool
-	image          *ebiten.Image
-	bg, fg         color.Color
-	shadowSize     int
-	shadowColor    color.Color
+	dType       ViewType
+	state       ViewState
+	rect        Rect[int]
+	dirty       DirtyFlag
+	pressed     bool
+	image       *ebiten.Image
+	bg, fg      color.Color
+	shadowSize  int
+	shadowColor color.Color
 }
 
 func NewDrawable() *Drawable {
-	return &Drawable{dType: ViewNormal, state: StateNormal, dirty: true, bg: color.Transparent, fg: color.Black, shadowSize: 0, shadowColor: color.RGBA{0, 0, 0, 128}}
+	return &Drawable{dType: ViewNormal, state: StateNormal, dirty: DirtyLayout, bg: color.Transparent, fg: color.Black, shadowSize: 0, shadowColor: color.RGBA{0, 0, 0, 128}}
 }
 func (s *Drawable) ViewType() ViewType         { return s.dType }
 func (s *Drawable) SetViewType(value ViewType) { s.dType = value; s.MarkDirty() }
@@ -48,15 +57,16 @@ func (s *Drawable) IsDisabled() bool { return s.state.IsDisabled() }
 func (s *Drawable) Enable()          { s.SetState(StateNormal); s.MarkDirty() }
 func (s *Drawable) Disable()         { s.SetState(StateDisabled); s.MarkDirty() }
 
-func (s *Drawable) IsDirty() bool { return s.dirty }
-func (s *Drawable) MarkDirty()    { s.dirty = true }
-func (s *Drawable) ClearDirty()   { s.dirty = false }
+func (s *Drawable) IsDirty() bool    { return s.dirty != Clean }
+func (s *Drawable) MarkDirty()       { s.dirty = DirtyContent }
+func (s *Drawable) MarkDirtyLayout() { s.dirty = DirtyLayout }
+func (s *Drawable) ClearDirty()      { s.dirty = Clean }
 
 func (c *Drawable) Traverse(action func(d Drawabler), reverse bool) { action(c) }
 
 func (s *Drawable) Image() *ebiten.Image         { return s.image }
 func (s *Drawable) SetImage(image *ebiten.Image) { s.image = image; s.MarkDirty() }
-func (s *Drawable) ImageReset()                  { s.image = nil; s.MarkDirty() }
+func (s *Drawable) ImageReset()                  { s.image = nil; s.MarkDirtyLayout() }
 func (s *Drawable) Layout() {
 	if s.Rect().IsEmpty() {
 		panic(fmt.Sprintf("Drawable:Layout:Image:Rect.empty[%v]", s.Rect()))
@@ -100,8 +110,20 @@ func (s *Drawable) Draw(surface *ebiten.Image) {
 	surface.DrawImage(s.Image(), op)
 }
 
-func (s *Drawable) Rect() Rect[int]        { return s.rect }
-func (s *Drawable) SetRect(rect Rect[int]) { s.rect = rect; s.ImageReset() }
+func (s *Drawable) Rect() Rect[int] { return s.rect }
+func (s *Drawable) SetRect(rect Rect[int]) {
+	if s.rect.Eq(rect) {
+		return
+	}
+	w1, h1 := s.rect.Size()
+	w2, h2 := rect.Size()
+	s.rect = rect
+	if w1 != w2 || h1 != h2 {
+		s.ImageReset()
+	}
+	// Если изменились только координаты (X,Y), мы не вызываем ImageReset.
+	// Холст остается прежним, просто в Draw() он отрисуется со смещением.
+}
 
 func (s *Drawable) Close() {
 	s.image = nil

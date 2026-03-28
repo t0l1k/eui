@@ -17,7 +17,7 @@ func (c *Container) Children() []Drawabler { return c.children }
 func (c *Container) SetLayout(l Layouter)  { c.layout = l; c.MarkDirty() }
 func (c *Container) Add(d Drawabler) *Container {
 	c.children = append(c.children, d)
-	c.MarkDirty()
+	c.MarkDirtyLayout()
 	return c
 }
 
@@ -37,14 +37,13 @@ func (c *Container) Remove(d Drawabler) {
 			copy(c.children[i:], c.children[i+1:])
 			c.children[len(c.children)-1] = nil
 			c.children = c.children[:len(c.children)-1]
-			c.MarkDirty() // Перерисовываем контейнер
+			c.MarkDirtyLayout() // Требуется пересчет макета
 			return
 		}
 	}
 }
 
 func (c *Container) Layout() {
-	c.Drawable.SetRect(c.Rect())
 	c.layout.Apply(c.children, c.Rect())
 	if c.layout != nil {
 		for _, child := range c.Children() {
