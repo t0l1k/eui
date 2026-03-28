@@ -7,6 +7,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/t0l1k/eui"
 	"golang.org/x/image/colornames"
 )
@@ -353,7 +354,7 @@ func NewDialog(title, message string, fn func(*eui.Button)) *Dialog {
 	titleContainer := eui.NewContainer(eui.NewLayoutHorizontalPercent([]int{10, 90}, 1))
 	titleContainer.Add(eui.NewButton("X", func(b *eui.Button) { eui.GetUi().Pop() }))
 	titleLbl := eui.NewLabel(title)
-	titleLbl.SetAlign(eui.LabelAlignLeft)
+	titleLbl.SetAlign(text.AlignStart, text.AlignCenter)
 	titleContainer.Add(titleLbl)
 	d.Add(titleContainer)
 	d.msg = eui.NewLabel(message)

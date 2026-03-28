@@ -5,36 +5,15 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 )
 
-type LabelAlign int
-
-const (
-	LabelAlignLeft LabelAlign = iota
-	LabelAlignCenter
-	LabelAlignRight
-	LabelAlignUp
-	LabelAlignDown
-	LabelAlignLeftUp
-)
-
-func (a LabelAlign) String() string {
-	return [...]string{
-		"Align Left",
-		"Align Center",
-		"Align Right",
-		"Align Up",
-		"Align Down",
-		"Align LeftUp",
-	}[a]
-}
-
 type Label struct {
 	*Drawable
 	txt              string
 	options          *text.DrawOptions
-	align            LabelAlign
+	hAlign, vAlign   text.Align
 	font             *text.GoTextFace
 	fontSize, margin float64
 	dynamicFontSize  bool
+	wrappedTxt       string
 	txtPos           Point[float64]
 }
 
@@ -42,7 +21,8 @@ func NewLabel(txt string) *Label {
 	l := &Label{
 		Drawable:        NewDrawable(),
 		txt:             txt,
-		align:           LabelAlignCenter,
+		hAlign:          text.AlignCenter,
+		vAlign:          text.AlignCenter,
 		fontSize:        12,
 		dynamicFontSize: true,
 	}
@@ -52,50 +32,30 @@ func NewLabel(txt string) *Label {
 	l.SetFg(theme.Get(TextFg))
 	return l
 }
-func (l *Label) setupOptions() {
-	l.options = &text.DrawOptions{}
-	l.options.ColorScale.Reset()
-	l.options.ColorScale.ScaleWithColor(l.Fg())
-	l.options.LineSpacing = l.fontSize * 1.2
-	l.MarkDirty()
-}
 func (l *Label) Layout() {
-	var txt string
-	if l.Image() == nil {
-		l.margin = float64(l.Rect().GetLowestSize()) * 0.03
-		if l.dynamicFontSize {
-			sz := GetUi().FontDefault().CalcFontSize(l.txt, l.Rect())
-			if sz != int(l.fontSize) {
-				l.fontSize = float64(sz)
-			}
-		}
-		l.font = GetUi().FontDefault().Get(int(l.fontSize))
-		txt, _ = GetUi().FontDefault().WordWrapText(l.txt, l.fontSize, l.rect.Width())
-		w0, h0 := l.Rect().Size()
-		w, h := text.Measure(txt, l.font, l.font.Size*1.2)
-		if w > float64(w0) || h > float64(h0) {
-			x, y := l.Rect().Pos()
-			l.SetRect(NewRect([]int{x, y, int(w0), int(h)}))
-		}
-		l.options = nil
+	if !l.IsDirty() && l.Image() != nil {
+		return
 	}
-	if l.options == nil {
-		l.setupOptions()
-		l.txtPos.X, l.txtPos.Y = l.calcAlign()
+
+	// 1. Подготовка параметров шрифта
+	if l.dynamicFontSize {
+		l.fontSize = float64(GetUi().FontDefault().CalcFontSize(l.txt, l.Rect(), true))
 	}
-	x, y := l.txtPos.Get()
-	if l.pressed {
-		x += l.margin / 2
-		y += l.margin / 2
-	}
+
+	// 2. Подготовка холста (Drawable.Layout создаст/очистит l.image)
 	l.Drawable.Layout()
-	l.options.GeoM.Reset()
-	l.options.GeoM.Translate(x, y)
-	if l.txt != txt && len(txt) > 0 {
-		text.Draw(l.Image(), txt, l.font, l.options)
-	} else {
-		text.Draw(l.Image(), l.txt, l.font, l.options)
+
+	w, h := l.Rect().Size()
+	renderRect := NewRect([]int{0, 0, w, h})
+
+	if l.pressed {
+		l.margin = float64(l.Rect().GetLowestSize()) * 0.03
+		renderRect.X += int(l.margin / 2)
+		renderRect.Y += int(l.margin / 2)
 	}
+
+	GetUi().FontDefault().DrawString(l.Image(), l.txt, int(l.fontSize), renderRect, l.hAlign, l.vAlign, l.Fg(), true)
+
 	l.ClearDirty()
 }
 
@@ -105,7 +65,7 @@ func (l *Label) SetText(value string) *Label {
 		return l
 	}
 	l.txt = value
-	l.ImageReset()
+	l.MarkDirty()
 	return l
 }
 
@@ -133,50 +93,9 @@ func (l *Label) Draw(screen *ebiten.Image) {
 	l.Drawable.Draw(screen)
 }
 
-func (l *Label) SetAlign(value LabelAlign) *Label {
-	l.align = value
+func (l *Label) SetAlign(horizontal, vertical text.Align) *Label {
+	l.hAlign = horizontal
+	l.vAlign = vertical
 	l.ImageReset()
 	return l
-}
-
-func (l *Label) calcAlign() (x, y float64) {
-	switch l.align {
-	case LabelAlignCenter:
-		x, y = float64(l.rect.Width())/2, float64(l.rect.Height())/2
-		l.options.GeoM.Reset()
-		l.options.GeoM.Translate(x, y)
-		l.options.PrimaryAlign = text.AlignCenter
-		l.options.SecondaryAlign = text.AlignCenter
-	case LabelAlignDown:
-		x, y = float64(l.rect.Width())/2, float64(l.rect.Height())
-		l.options.GeoM.Reset()
-		l.options.GeoM.Translate(x, y)
-		l.options.PrimaryAlign = text.AlignCenter
-		l.options.SecondaryAlign = text.AlignEnd
-	case LabelAlignLeft:
-		x, y = 0, float64(l.rect.Height())/2
-		l.options.GeoM.Reset()
-		l.options.GeoM.Translate(x, y)
-		l.options.PrimaryAlign = text.AlignStart
-		l.options.SecondaryAlign = text.AlignCenter
-	case LabelAlignLeftUp:
-		x, y = 0, 0
-		l.options.GeoM.Reset()
-		l.options.GeoM.Translate(x, y)
-		l.options.PrimaryAlign = text.AlignStart
-		l.options.SecondaryAlign = text.AlignStart
-	case LabelAlignRight:
-		x, y = float64(l.rect.Width()), float64(l.rect.Height())/2
-		l.options.GeoM.Reset()
-		l.options.GeoM.Translate(x, y)
-		l.options.PrimaryAlign = text.AlignEnd
-		l.options.SecondaryAlign = text.AlignCenter
-	case LabelAlignUp:
-		x, y = float64(l.rect.Width())/2, 0
-		l.options.GeoM.Reset()
-		l.options.GeoM.Translate(x, y)
-		l.options.PrimaryAlign = text.AlignCenter
-		l.options.SecondaryAlign = text.AlignStart
-	}
-	return x, y
 }

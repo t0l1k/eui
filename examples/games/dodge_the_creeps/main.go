@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/t0l1k/eui"
 	"golang.org/x/image/colornames"
@@ -263,7 +264,7 @@ func NewMain() *eui.Scene {
 	m := eui.NewScene(eui.NewLayoutVerticalPercent([]int{40, 20, 20, 20}, 10))
 	lblScore = eui.NewLabel("0")
 	lblScore.SetFontSize(50)
-	lblScore.SetAlign(eui.LabelAlignUp)
+	lblScore.SetAlign(text.AlignCenter, text.AlignStart)
 	lblScore.SetBg(color.Transparent)
 	lblStatus = eui.NewLabel("")
 	lblStatus.SetBg(color.Transparent)

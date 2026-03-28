@@ -2,6 +2,7 @@ package eui
 
 import (
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -48,24 +49,14 @@ func (c *Checkbox) Layout() {
 	if c.checked {
 		str = "*"
 	}
-	lblCheck := NewLabel(str)
 	margin := int(float64(c.Rect().GetLowestSize()) * 0.03)
-	r := NewRect([]int{int(margin), int(margin), h - int(margin*2), h - int(margin*2)})
-	lblCheck.SetRect(r)
-	lblCheck.SetBg(c.Fg())
-	lblCheck.SetFg(c.Bg())
-	lblCheck.Layout()
-	lblCheck.Draw(c.Image())
-	lblCheck.Close()
+	rCheck := NewRect([]int{int(margin), int(margin), h - int(margin*2), h - int(margin*2)})
+	GetUi().FontDefault().DrawString(c.Image(), str, 0, rCheck, text.AlignCenter, text.AlignCenter, c.Fg(), false)
 
-	lblTxt := NewLabel(c.txt)
-	lblTxt.SetRect(NewRect([]int{h + int(margin), int(margin), (w - h) - int(margin*2), h - int(margin*2)}))
-	lblTxt.SetBg(c.Bg())
-	lblTxt.SetFg(c.Fg())
-	lblTxt.Layout()
-	lblTxt.Draw(c.Image())
-	lblTxt.Close()
+	rTxt := NewRect([]int{h + int(margin), int(margin), (w - h) - int(margin*2), h - int(margin*2)})
+	GetUi().FontDefault().DrawString(c.Image(), c.txt, 0, rTxt, text.AlignStart, text.AlignCenter, c.Fg(), true)
 
+	vector.StrokeRect(c.Image(), float32(margin), float32(margin), float32(h-margin*2), float32(h-margin*2), float32(margin*2), c.Fg(), true)
 	vector.StrokeRect(c.Image(), 0, 0, float32(w), float32(h), float32(margin), c.State().Color(), true)
 
 	c.ClearDirty()

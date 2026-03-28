@@ -45,7 +45,7 @@ type Theme map[ThemeValue]color.Color
 
 func DefaultTheme() *Theme {
 	t := NewTheme()
-	t.Set(ButtonFg, colornames.Black)
+	t.Set(ButtonFg, colornames.Yellow)
 	t.Set(ButtonBg, colornames.Silver)
 	t.Set(ButtonHover, colornames.Yellow)
 	t.Set(ButtonFocus, colornames.Red)

@@ -1,6 +1,11 @@
 package main
 
-import "github.com/t0l1k/eui"
+import (
+	"log"
+
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
+	"github.com/t0l1k/eui"
+)
 
 const title = "Text Align Demo"
 
@@ -15,27 +20,32 @@ func main() {
 	}())
 	eui.Run(func() *eui.Scene {
 		a := eui.NewScene(eui.NewLayoutVerticalPercent([]int{5, 70, 15, 10}, 5))
-		a.Add(eui.NewTopBar(title, nil))
 		gridCont := eui.NewContainer(eui.NewGridLayout(2, 2, 5))
 		gridCont.Add(eui.NewLabel("1" + title).SetFontSize(12))
 		gridCont.Add(eui.NewLabel("1" + title + " 2" + title).SetFontSize(18))
 		gridCont.Add(eui.NewLabel("1" + title + " 2" + title + " 3" + title).SetFontSize(24))
 		gridCont.Add(eui.NewLabel("1" + title + " 2" + title + " 3" + title + " 4" + title).SetFontSize(30))
-		a.Add(gridCont)
-		a.Add(eui.NewLabel(eui.LabelAlignCenter.String()))
+		hAlign := []string{"Left", "Center", "Right"}
+		vAlign := []string{"Up", "Center", "Down"}
 		i := 0
-		a.Add(eui.NewButton("Next align", func(b *eui.Button) {
+		btn := eui.NewButton("Next align", func(b *eui.Button) {
+			x, y := i%3, i/3
 			for _, lbl := range gridCont.Children() {
-				lbl.(*eui.Label).SetAlign(eui.LabelAlign(i))
+				lbl.(*eui.Label).SetAlign(text.Align(x), text.Align(y))
 			}
-			a.Children()[2].(*eui.Label).SetText(eui.LabelAlign(i).String())
+			a.Children()[2].(*eui.Label).SetText(hAlign[x] + " " + vAlign[y])
+			log.Println("align", i, x, y, hAlign[x], vAlign[y])
 			i++
-			if i > 5 {
+			if i > 8 {
 				i = 0
 			}
-		}))
-		back := eui.NewGridBackground(50)
-		a.Add(back)
+		})
+
+		a.Add(eui.NewTopBar(title, nil))
+		a.Add(gridCont)
+		a.Add(eui.NewLabel(hAlign[1] + " " + vAlign[1]))
+		a.Add(btn)
+		a.Add(eui.NewGridBackground(50))
 		return a
 	}())
 	eui.Quit(func() {})

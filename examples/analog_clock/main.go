@@ -5,7 +5,6 @@ package main
 
 import (
 	"image/color"
-	"log"
 	"math"
 	"time"
 
@@ -17,73 +16,49 @@ import (
 
 // Стрелка часов с рисованием прозрачного фона и самой стрелки, можно напрямую рисовать через draw, только стрелку, но так элегантнее, все через макет и уже в контейнере обновить и перерисовать
 type Hand struct {
-	*eui.Drawable
 	faceCenter, tip          eui.Point[float64]
 	value, lenght, thickness float64
-	show                     bool
+	hidden                   bool
+	bg, fg                   color.Color
+	rect                     eui.Rect[int]
 }
 
 func NewHand(bg, fg color.Color) *Hand {
-	h := &Hand{Drawable: eui.NewDrawable()}
-	h.SetBg(color.Transparent)
-	h.SetFg(fg)
+	h := &Hand{}
+	h.bg = color.Transparent
+	h.fg = fg
 	return h
 }
-
-func (h *Hand) Setup(center eui.Point[float64], lenght float64, thickness float64, visible bool) {
+func (h *Hand) Setup(center eui.Point[float64], lenght float64, thickness float64, isHidden bool) {
 	h.faceCenter = center
 	h.lenght = lenght
 	h.thickness = thickness
-	h.show = !visible
-	h.ToggleVisible()
+	h.hidden = isHidden
 }
-
-func (h *Hand) ToggleVisible() {
-	h.show = !h.show
-	if h.show {
-		h.Show()
-	} else {
-		h.Hide()
-	}
-	h.MarkDirty()
-}
-
-func (h *Hand) Get() float64 { return h.value }
+func (h *Hand) ToggleVisible() { h.hidden = !h.hidden }
+func (h *Hand) Get() float64   { return h.value }
 func (h *Hand) Set(value float64) {
 	if h.value == value {
 		return
 	}
 	h.value = value
 	h.tip = GetTip(h.faceCenter, h.value, h.lenght, 0, 0)
-	h.MarkDirty()
 }
-
-func (h *Hand) Layout() {
-	h.Drawable.Layout() // подготовить холст
-	x1 := h.Rect().CenterX()
-	y1 := h.Rect().CenterY()
-	x2 := int(h.tip.X)
-	y2 := int(h.tip.Y)
-	vector.StrokeLine(h.Image(), float32(x1), float32(y1), float32(x2), float32(y2), float32(h.thickness), h.Fg(), true)
-	h.ClearDirty()
-}
-
 func (h *Hand) Draw(surface *ebiten.Image) {
-	if h.IsHidden() || h.IsDisabled() || !h.show {
+	if h.hidden {
 		return
 	}
-	if h.IsDirty() {
-		h.Layout()
-	}
-	op := &ebiten.DrawImageOptions{}
-	x, y := h.Rect().Pos()
-	op.GeoM.Translate(float64(x), float64(y))
-	surface.DrawImage(h.Image(), op)
+	x1 := h.rect.CenterX() + h.rect.X
+	y1 := h.rect.CenterY() + h.rect.Y
+	x2 := int(h.tip.X) + h.rect.X
+	y2 := int(h.tip.Y) + h.rect.Y
+	vector.StrokeLine(surface, float32(x1), float32(y1), float32(x2), float32(y2), float32(h.thickness), h.fg, true)
 }
+func (a *Hand) SetRect(r eui.Rect[int]) { a.rect = r }
 
 // Сами часы, рисуется "лицо часов", а поверх него стрелки в порядке добавления друг поверх друга.
 type AnalogClock struct {
-	*eui.Container
+	*eui.Drawable
 	MsHand, secHand, minuteHand, hourHand *Hand
 	FaceBg, FaceFg                        color.Color
 }
@@ -92,34 +67,33 @@ func NewAnalogClock() *AnalogClock {
 	theme := eui.GetUi().Theme()
 	bg := theme.Get(AppfaceBg)
 	a := &AnalogClock{
-		Container:  eui.NewContainer(eui.NewAbsoluteLayout()),
+		Drawable:   eui.NewDrawable(),
 		MsHand:     NewHand(bg, theme.Get(AppMsSecondHandFg)),
 		secHand:    NewHand(bg, theme.Get(AppSecondHandFg)),
 		minuteHand: NewHand(bg, theme.Get(AppMinuteHandFg)),
 		hourHand:   NewHand(bg, theme.Get(AppHourHandFg)),
 	}
-	a.Add(a.hourHand)
-	a.Add(a.minuteHand)
-	a.Add(a.secHand)
-	a.Add(a.MsHand)
 	return a
 }
 
 func (a *AnalogClock) Layout() {
-	a.Drawable.Layout()
-	a.Image().Fill(a.Bg())
-	a.drawClockFace()
-	log.Println("update analog clock layout done")
+	a.Drawable.Layout()        // Подготавливает a.image (создает или очищает)
+	a.drawClockFace(a.Image()) // Отрисовывает статический циферблат в кеш
 	a.ClearDirty()
 }
 
-func (a *AnalogClock) drawClockFace() {
-	x, y := a.Rect().Center()
+func (a *AnalogClock) drawClockFace(surface *ebiten.Image) {
+	cx, cy := a.Rect().Center()
+	x, y := float32(cx), float32(cy) // Рисуем относительно (0,0) внутреннего холста
 	m := float64(a.Rect().GetLowestSize()) * 0.01
-	vector.DrawFilledCircle(a.Image(), float32(x), float32(y), float32(m)*3, a.Bg(), true)
-	center := eui.Point[float64]{X: float64(x), Y: float64(y)}
-	vector.DrawFilledCircle(a.Image(), float32(center.X), float32(center.Y), float32(m)*2, a.FaceBg, true)
-	vector.DrawFilledCircle(a.Image(), float32(center.X), float32(center.Y), float32(m), a.FaceFg, true)
+
+	// Рисуем фон циферблата, если он задан
+	if a.Bg() != color.Transparent {
+		vector.FillCircle(surface, x, y, float32(m)*3, a.Bg(), true)
+	}
+
+	vector.FillCircle(surface, x, y, float32(m)*2, a.FaceBg, true)
+	vector.FillCircle(surface, x, y, float32(m), a.FaceFg, true)
 	for i := 0; i < 60; i++ {
 		var (
 			tip eui.Point[float64]
@@ -130,13 +104,10 @@ func (a *AnalogClock) drawClockFace() {
 		} else {
 			rad = m
 		}
-		sz := center.Y
-		if center.Y > center.X {
-			sz = center.X
-		}
-		tip = GetTip(center, float64(i)/60, sz-m*4, 0, 0)
-		vector.DrawFilledCircle(a.Image(), float32(tip.X), float32(tip.Y), float32(rad), a.FaceBg, true)
-		vector.DrawFilledCircle(a.Image(), float32(tip.X), float32(tip.Y), float32(rad)/2, a.FaceFg, true)
+		sz := float64(min(cx, cy))
+		tip = GetTip(eui.Point[float64]{X: float64(x), Y: float64(y)}, float64(i)/60, sz-m*4, 0, 0)
+		vector.FillCircle(surface, float32(tip.X), float32(tip.Y), float32(rad), a.FaceBg, true)
+		vector.FillCircle(surface, float32(tip.X), float32(tip.Y), float32(rad)/2, a.FaceFg, true)
 	}
 }
 
@@ -163,27 +134,24 @@ func (t *AnalogClock) Draw(surface *ebiten.Image) {
 	}
 	if t.IsDirty() {
 		t.Layout()
-		for _, c := range t.Children() {
-			c.Layout()
-		}
 	}
-	op := &ebiten.DrawImageOptions{}
-	x, y := t.Rect().Pos()
-	op.GeoM.Translate(float64(x), float64(y))
-	surface.DrawImage(t.Image(), op)
-	for _, v := range t.Children() {
-		v.Draw(surface)
-	}
+	t.Drawable.Draw(surface) // Отрисовка закешированного изображения циферблата
+	t.hourHand.Draw(surface)
+	t.minuteHand.Draw(surface)
+	t.secHand.Draw(surface)
+	t.MsHand.Draw(surface)
 }
 
 func (a *AnalogClock) SetRect(r eui.Rect[int]) {
+	if a.Rect().Eq(r) {
+		return
+	}
 	a.Drawable.SetRect(r)
 	a.MsHand.SetRect(r)
 	a.secHand.SetRect(r)
 	a.minuteHand.SetRect(r)
 	a.hourHand.SetRect(r)
 	a.setupHands()
-	a.ImageReset()
 }
 
 func (a *AnalogClock) setupHands() {
@@ -195,11 +163,11 @@ func (a *AnalogClock) setupHands() {
 
 	conf := eui.GetUi().Settings()
 	a.MsHand.Setup(center, lenght, 1, conf.Get(ShowMSecondHand).(bool))
-	a.secHand.Setup(center, lenght, 3, true)
+	a.secHand.Setup(center, lenght, 3, false)
 	lenght = float64(sz/2) - m*8
-	a.minuteHand.Setup(center, lenght, 5, true)
+	a.minuteHand.Setup(center, lenght, 5, false)
 	lenght = float64(sz/2) - m*12
-	a.hourHand.Setup(center, lenght, 8, true)
+	a.hourHand.Setup(center, lenght, 8, false)
 }
 
 func GetTip(center eui.Point[float64], percent, lenght, width, height float64) (tip eui.Point[float64]) {
@@ -244,10 +212,10 @@ func NewSceneAnalogClock() *SceneAnalogClock {
 	conf := eui.GetUi().Settings()
 	s.checkBox = eui.NewCheckbox("MSecond View?", func(c *eui.Checkbox) {
 		s.clock.MsHand.ToggleVisible()
-		conf.Set(ShowMSecondHand, c.IsChecked())
+		conf.Set(ShowMSecondHand, !c.IsChecked())
 	})
 	contStatus.Add(s.checkBox)
-	s.checkBox.SetChecked(conf.Get(ShowMSecondHand).(bool))
+	s.checkBox.SetChecked(!conf.Get(ShowMSecondHand).(bool))
 	s.Add(eui.NewGridBackground(50))
 	s.setupTheme()
 	return s

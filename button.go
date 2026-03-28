@@ -4,6 +4,7 @@ import (
 	"image/color"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 )
 
@@ -74,20 +75,14 @@ func (b *Button) Layout() {
 		icon.Layout()
 		icon.Draw(b.Image())
 	} else {
-		lbl := NewLabel(b.txt)
 		margin := int(float64(b.Rect().GetLowestSize()) * 0.03)
-		x := margin
-		y := margin
+		x, y := margin, margin
 		if b.pressed {
 			x += margin / 2
 			y += margin / 2
 		}
-		lbl.SetRect(NewRect([]int{x, y, w - margin*2, h - margin*2}))
-		lbl.SetBg(b.Bg())
-		lbl.SetFg(b.Fg())
-		lbl.Layout()
-		lbl.Draw(b.Image())
-		lbl.Close()
+		r := NewRect([]int{x, y, w - margin*2, h - margin*2})
+		GetUi().FontDefault().DrawString(b.Image(), b.txt, 0, r, text.AlignCenter, text.AlignCenter, b.Fg(), false)
 		vector.StrokeRect(b.Image(), 0, 0, float32(w), float32(h), float32(margin), b.state.Color(), true)
 	}
 	b.ClearDirty()

@@ -47,6 +47,10 @@ func main() {
 		}
 
 		setSliderLbls := func(float64) {
+			// Защита от паники: прерываем выполнение, если слайдеры еще не созданы
+			if r == nil || g == nil || b == nil || a == nil {
+				return
+			}
 			rLbl.SetText(fmt.Sprintf("R:%.0f", utils.ValueFromPercent(r.Value()*100, 255)))
 			gLbl.SetText(fmt.Sprintf("G:%.0f", utils.ValueFromPercent(g.Value()*100, 255)))
 			bLbl.SetText(fmt.Sprintf("B:%.0f", utils.ValueFromPercent(b.Value()*100, 255)))
@@ -63,7 +67,9 @@ func main() {
 		b = eui.NewSlider(0, 255, 0.5, eui.Horizontal, func(data float64) {
 			setSliderLbls(data)
 		})
-		a = eui.NewProgress(0, 255, 1, eui.Horizontal, func(data float64) {})
+		a = eui.NewProgress(0, 255, 1, eui.Horizontal, func(data float64) {
+			setSliderLbls(data)
+		})
 
 		setSliderLbls(0)
 

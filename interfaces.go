@@ -20,6 +20,7 @@ type Drawabler interface {
 	Rect() Rect[int]
 	SetRect(Rect[int])
 	IsDirty() bool
+	MarkDirtyLayout()
 	MarkDirty()
 	ClearDirty()
 	Traverse(func(d Drawabler), bool)

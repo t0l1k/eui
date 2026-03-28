@@ -46,22 +46,31 @@ func (f Font) Get(size int) *text.GoTextFace {
 	return f.font[size]
 }
 
-func (f Font) CalcFontSize(txt string, rect Rect[int]) int {
+func (f Font) CalcFontSize(txt string, rect Rect[int], wordWrap bool) int {
 	if rect.IsEmpty() {
 		panic(fmt.Sprintln("Empty rect", txt, rect))
 	}
-	percent := 0.9
 	w0, h0 := rect.Size()
-	sz := min(w0, h0)
-	var fontSize float64
-	for {
-		fontSize = percent * float64(sz)
+
+	// Начинаем с высоты контейнера (максимально возможный размер)
+	// Для обычного текста без переноса ограничением будет минимальная сторона
+	startSize := float64(h0)
+	if !wordWrap {
+		startSize = float64(min(w0, h0))
+	}
+	fontSize := startSize * 0.95
+
+	for fontSize > 4 {
 		fnt := f.Get(int(fontSize))
-		w, h := text.Measure(txt, fnt, fnt.Size*1.2)
-		if w0 > int(w) && h0 > int(h) {
+		testTxt := txt
+		if wordWrap {
+			testTxt, _ = f.WordWrapText(txt, fontSize, w0)
+		}
+		w, h := text.Measure(testTxt, fnt, fnt.Size*1.2)
+		if int(w) <= w0 && int(h) <= h0 {
 			break
 		}
-		percent -= 0.01
+		fontSize -= 1.0
 	}
 	return int(fontSize)
 }
@@ -140,8 +149,8 @@ func (f Font) DrawString(surface *ebiten.Image, txt string, fontSize int, rect R
 	case text.AlignEnd:
 		y += h
 	}
-	if fontSize == 0 && !wordWrap {
-		fontSize = f.CalcFontSize(txt, rect)
+	if fontSize == 0 {
+		fontSize = f.CalcFontSize(txt, rect, wordWrap)
 	}
 	if wordWrap {
 		txt, _ = f.WordWrapText(txt, float64(fontSize), rect.W)

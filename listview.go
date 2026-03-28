@@ -7,23 +7,26 @@ import (
 	"log"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/vector"
 	"golang.org/x/image/colornames"
 )
 
 type ListView struct {
 	*Drawable
-	children           []Drawabler
-	list               []string
-	index              int
-	itemSize, rows     int
-	contentRect        Rect[int]
-	contentImage       *ebiten.Image
-	offset, lastOffset int
-	cameraRect         image.Rectangle
-	isDragging         bool
-	dragStartY         int
-	dragStartOffset    int
-	longText           bool
+	children            []Drawabler
+	list                []string
+	index               int
+	itemSize, rows      int
+	contentRect         Rect[int]
+	contentImage        *ebiten.Image
+	offset, lastOffset  int
+	cameraRect          image.Rectangle
+	isDragging          bool
+	dragStartY          int
+	dragStartOffset     int
+	longText            bool
+	isHoveringScrollbar bool
+	isDraggingScrollbar bool
 }
 
 func NewListView() *ListView { return &ListView{Drawable: NewDrawable(), rows: 1, itemSize: 30} }
@@ -168,13 +171,6 @@ func (l *ListView) Layout() {
 	}
 	l.Drawable.Layout()
 	w0, h0 := l.contentRect.Size()
-	if l.longText {
-		if len(l.children) > 0 {
-			lbl := l.children[0]
-			w0, h0 = lbl.Rect().Size()
-			l.contentRect = lbl.Rect()
-		}
-	}
 	if l.contentImage == nil || w0 != l.contentImage.Bounds().Dx() || h0 != l.contentImage.Bounds().Dy() {
 		l.contentImage = nil
 		l.contentImage = ebiten.NewImage(w0, h0)
@@ -199,16 +195,30 @@ func (l *ListView) Hit(pt Point[int]) Drawabler {
 }
 
 func (l *ListView) MouseDown(md MouseData) {
-	l.dragStartY = md.Pos().Y
+	l.dragStartY = md.Pos().Y // Сохраняем всегда для корректной обработки кликов в MouseUp
+
+	// Проверяем, попал ли клик в зону полосы прокрутки (последние 12 пикселей справа)
+	sbClickZone := 12
+	if md.Pos().X >= l.rect.X+l.rect.W-sbClickZone {
+		if l.contentRect.H > l.rect.H {
+			l.isDraggingScrollbar = true
+			l.scrollTo(md.Pos().Y)
+			return
+		}
+	}
+
 	if l.contentRect.H <= l.rect.H {
 		return
 	}
 	l.isDragging = true
 	l.dragStartOffset = l.cameraRect.Min.Y
-	log.Println("ListView:MouseDown:", l.Rect(), l.cameraRect.String(), l.isDragging, l.dragStartY, l.dragStartOffset, md)
 }
 
 func (l *ListView) MouseDrag(md MouseData) {
+	if l.isDraggingScrollbar {
+		l.scrollTo(md.Pos().Y)
+		return
+	}
 	if !l.isDragging {
 		return
 	}
@@ -223,12 +233,31 @@ func (l *ListView) MouseDrag(md MouseData) {
 	}
 	l.cameraRect = image.Rect(0, newY, l.rect.W, newY+l.rect.H)
 	l.MarkDirty()
-	log.Println("ListView:MouseDrag:", delta, newY, maxY, l.cameraRect)
+}
+
+func (l *ListView) MouseMotion(md MouseData) {
+	sbClickZone := 12
+	isOver := md.Pos().X >= l.rect.X+l.rect.W-sbClickZone && l.contentRect.H > l.rect.H
+	if isOver != l.isHoveringScrollbar {
+		l.isHoveringScrollbar = isOver
+		l.MarkDirty()
+	}
+}
+
+func (l *ListView) MouseLeave() {
+	if l.isHoveringScrollbar {
+		l.isHoveringScrollbar = false
+		l.MarkDirty()
+	}
 }
 
 func (l *ListView) MouseUp(md MouseData) {
+	wasDraggingSB := l.isDraggingScrollbar
 	l.isDragging = false
-	if md.Pos().Y != l.dragStartY {
+	l.isDraggingScrollbar = false
+
+	// Если мы прокручивали список (ползунком или контентом), не обрабатываем клик по элементам
+	if wasDraggingSB || md.Pos().Y != l.dragStartY {
 		return
 	}
 
@@ -290,6 +319,65 @@ func (l *ListView) Draw(surface *ebiten.Image) {
 	x0, y0 := l.rect.Pos()
 	op.GeoM.Translate(float64(x0), float64(y0))
 	surface.DrawImage(l.contentImage.SubImage(l.cameraRect).(*ebiten.Image), op)
+
+	// Рисуем полосу прокрутки
+	l.drawScrollbar(surface)
+}
+
+func (l *ListView) scrollTo(mouseY int) {
+	contentH := float64(l.contentRect.H)
+	visibleH := float64(l.rect.H)
+	if contentH <= visibleH {
+		return
+	}
+
+	// Вычисляем процент прокрутки на основе положения мыши относительно высоты виджета
+	percent := float64(mouseY-l.rect.Y) / visibleH
+	newY := int(percent * (contentH - visibleH))
+
+	maxY := int(contentH - visibleH)
+	if newY < 0 {
+		newY = 0
+	} else if newY > maxY {
+		newY = maxY
+	}
+	l.cameraRect = image.Rect(0, newY, l.rect.W, newY+l.rect.H)
+	l.MarkDirty()
+}
+
+func (l *ListView) drawScrollbar(surface *ebiten.Image) {
+	if l.contentRect.H <= l.rect.H {
+		return
+	}
+
+	// Настройки внешнего вида
+	sbWidth := 6.0
+	padding := 2.0
+
+	visibleH := float64(l.rect.H)
+	contentH := float64(l.contentRect.H)
+
+	// Расчет высоты ползунка (пропорционально видимой области)
+	thumbH := (visibleH / contentH) * visibleH
+	if thumbH < 20 {
+		thumbH = 20 // Минимальная высота ползунка
+	}
+
+	// Расчет позиции ползунка
+	// Процент прокрутки от 0.0 до 1.0
+	scrollPercent := float64(l.cameraRect.Min.Y) / (contentH - visibleH)
+
+	// Доступный путь для перемещения ползунка внутри видимой области
+	trackH := visibleH - thumbH
+	thumbY := float64(l.rect.Y) + (scrollPercent * trackH)
+	thumbX := float64(l.rect.X+l.rect.W) - sbWidth - padding
+
+	// Отрисовка ползунка (используем Fg цвет темы)
+	thumbColor := l.Fg()
+	if l.isHoveringScrollbar || l.isDraggingScrollbar {
+		thumbColor = colornames.White
+	}
+	vector.FillRect(surface, float32(thumbX), float32(thumbY), float32(sbWidth), float32(thumbH), thumbColor, true)
 }
 
 func (l *ListView) SetRect(r Rect[int]) {
@@ -300,34 +388,42 @@ func (l *ListView) SetRect(r Rect[int]) {
 }
 
 func (l *ListView) resizeChilds() {
+	if l.rect.IsEmpty() {
+		return
+	}
 	x, y := 0, 0
 	w, h := l.rect.W/l.rows, l.itemSize
-	if l.longText {
-		h = l.rect.H
-	}
-	row := 0
-	col := 1
-	for _, v := range l.children {
-		switch value := v.(type) {
-		case *Label, *Button, *Checkbox:
-			value.SetRect(NewRect([]int{x, y, w - 1, h - 1}))
+	if l.longText && len(l.children) > 0 {
+		if lbl, ok := l.children[0].(*Label); ok {
+			// Вычисляем высоту текста заранее, зная доступную ширину
+			fnt := GetUi().FontDefault()
+			_, size := fnt.WordWrapText(lbl.Text(), lbl.FontSize(), l.rect.W)
+			h = size.Y
+			lbl.SetRect(NewRect([]int{0, 0, l.rect.W, h}))
+			y = h
 		}
-		x += w
-		row++
-		if row > l.rows-1 {
-			row = 0
-			x = 0
-			y += h
-			col++
-		}
-	}
-	if y == 0 {
-		y = l.rect.H
 	} else {
-		if len(l.children)%l.rows == 0 {
-			col--
+		row := 0
+		col := 1
+		for _, v := range l.children {
+			v.SetRect(NewRect([]int{x, y, w - 1, h - 1}))
+			x += w
+			row++
+			if row > l.rows-1 {
+				row = 0
+				x = 0
+				y += h
+				col++
+			}
 		}
-		y = col * l.itemSize
+		if y == 0 {
+			y = l.rect.H
+		} else {
+			if len(l.children)%l.rows == 0 {
+				col--
+			}
+			y = col * l.itemSize
+		}
 	}
 	l.contentRect = NewRect([]int{0, 0, l.rect.W, y})
 	l.MarkDirty()
