@@ -30,7 +30,7 @@ type Drawable struct {
 }
 
 func NewDrawable() *Drawable {
-	return &Drawable{dType: ViewNormal, state: StateNormal, dirty: DirtyLayout, bg: color.Transparent, fg: color.Black, shadowSize: 0, shadowColor: color.RGBA{0, 0, 0, 128}}
+	return &Drawable{dType: ViewNormal, state: StateNormal, dirty: DirtyLayout, bg: color.Transparent, fg: color.Black, shadowSize: 0, shadowColor: color.RGBA{32, 32, 32, 32}}
 }
 func (s *Drawable) ViewType() ViewType         { return s.dType }
 func (s *Drawable) SetViewType(value ViewType) { s.dType = value; s.MarkDirty() }
@@ -87,7 +87,7 @@ func (s *Drawable) Layout() {
 			x += off
 			y += off
 		}
-		vector.DrawFilledRect(s.Image(), float32(x), float32(y), float32(w), float32(h), s.shadowColor, true)
+		vector.FillRect(s.Image(), float32(x), float32(y), float32(w), float32(h), s.shadowColor, true)
 	}
 	s.ClearDirty()
 }

@@ -12,17 +12,18 @@ import (
 type Button struct {
 	*Drawable
 	txt        string
+	fontName   string
 	onReleased func(*Button)
 	icons      []*ebiten.Image
 	useIcon    bool
 }
 
 func NewButton(txt string, fn func(*Button)) *Button {
-	b := &Button{Drawable: NewDrawable(), txt: txt, onReleased: fn}
+	b := &Button{Drawable: NewDrawable(), txt: txt, onReleased: fn, fontName: FontDefault}
 	theme := GetUi().theme
 	b.SetBg(theme.Get(ButtonBg))
 	b.SetFg(theme.Get(ButtonFg))
-	b.SetShadow(1, color.RGBA{0, 0, 0, 128})
+	b.SetShadow(1, color.RGBA{32, 32, 32, 32})
 	return b
 }
 
@@ -32,6 +33,12 @@ func NewButtonIcon(icons []*ebiten.Image, fn func(*Button)) *Button {
 
 func (b *Button) Text() string         { return b.txt }
 func (b *Button) SetText(value string) { b.txt = value; b.MarkDirty() }
+
+func (b *Button) SetFontFace(name string, data []byte) {
+	b.fontName = name
+	GetUi().RM().LoadFont(name, data, 0)
+	b.ImageReset()
+}
 
 func (b *Button) Hit(pt Point[int]) Drawabler {
 	if !pt.In(b.rect) || b.IsHidden() || b.IsDisabled() {
@@ -82,7 +89,7 @@ func (b *Button) Layout() {
 			y += margin / 2
 		}
 		r := NewRect([]int{x, y, w - margin*2, h - margin*2})
-		GetUi().FontDefault().DrawString(b.Image(), b.txt, 0, r, text.AlignCenter, text.AlignCenter, b.Fg(), false)
+		GetUi().RM().GetFont(b.fontName).DrawString(b.Image(), b.txt, 0, r, text.AlignCenter, text.AlignCenter, b.Fg(), false)
 		vector.StrokeRect(b.Image(), 0, 0, float32(w), float32(h), float32(margin), b.state.Color(), true)
 	}
 	b.ClearDirty()

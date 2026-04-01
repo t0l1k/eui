@@ -10,7 +10,7 @@ type Label struct {
 	txt              string
 	options          *text.DrawOptions
 	hAlign, vAlign   text.Align
-	font             *text.GoTextFace
+	fontName         string
 	fontSize, margin float64
 	dynamicFontSize  bool
 	wrappedTxt       string
@@ -23,10 +23,10 @@ func NewLabel(txt string) *Label {
 		txt:             txt,
 		hAlign:          text.AlignCenter,
 		vAlign:          text.AlignCenter,
-		fontSize:        12,
+		fontSize:        0,
 		dynamicFontSize: true,
+		fontName:        FontDefault,
 	}
-	l.font = GetUi().FontDefault().Get(int(l.fontSize))
 	theme := GetUi().theme
 	l.SetBg(theme.Get(TextBg))
 	l.SetFg(theme.Get(TextFg))
@@ -39,7 +39,7 @@ func (l *Label) Layout() {
 
 	// 1. Подготовка параметров шрифта
 	if l.dynamicFontSize {
-		l.fontSize = float64(GetUi().FontDefault().CalcFontSize(l.txt, l.Rect(), true))
+		l.fontSize = float64(GetUi().RM().GetFont(l.fontName).CalcFontSize(l.txt, l.Rect(), true))
 	}
 
 	// 2. Подготовка холста (Drawable.Layout создаст/очистит l.image)
@@ -54,7 +54,7 @@ func (l *Label) Layout() {
 		renderRect.Y += int(l.margin / 2)
 	}
 
-	GetUi().FontDefault().DrawString(l.Image(), l.txt, int(l.fontSize), renderRect, l.hAlign, l.vAlign, l.Fg(), true)
+	GetUi().RM().GetFont(l.fontName).DrawString(l.Image(), l.txt, int(l.fontSize), renderRect, l.hAlign, l.vAlign, l.Fg(), true)
 
 	l.ClearDirty()
 }
@@ -73,6 +73,13 @@ func (l *Label) FontSize() float64 { return l.fontSize }
 func (l *Label) SetFontSize(value float64) *Label {
 	l.fontSize = value
 	l.SetUseDynamicFont(false)
+	l.ImageReset()
+	return l
+}
+
+func (l *Label) SetFontFace(name string, data []byte) *Label {
+	l.fontName = name
+	GetUi().RM().LoadFont(name, data, int(l.fontSize))
 	l.ImageReset()
 	return l
 }

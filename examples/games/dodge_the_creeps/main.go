@@ -12,6 +12,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/text/v2"
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/t0l1k/eui"
+	"github.com/t0l1k/eui/examples/games/dodge_the_creeps/assets"
 	"golang.org/x/image/colornames"
 )
 
@@ -29,22 +30,40 @@ const (
 )
 
 type Player struct {
-	hit                   *eui.Signal[bool]
-	speed                 float64
-	x, y                  float64
-	width                 float64
-	color                 color.Color
-	last                  time.Time
-	left, right, up, down bool
-	hidden                bool
+	playerFramesWalk []*ebiten.Image
+	playerFramesFly  []*ebiten.Image
+	playerFrames     []*ebiten.Image
+	playerFrame      int
+	frameTick        time.Duration
+	lastFrame        time.Time
+
+	hit                       *eui.Signal[bool]
+	speed                     float64
+	x, y                      float64
+	lastTick                  time.Time
+	left, right, up, down     bool
+	hidden                    bool
+	dirX, dirY                float64 // Зеркальное отражение: -1 или 1
+	visualWidth, visualHeight float64 // Реальные визуальные размеры после масштабирования
+	isColliding               bool
 }
 
-func NewPlayer() *Player {
+func NewPlayer(frameWalk, framesFly []*ebiten.Image) *Player {
+	scale := 0.5
+	bounds := frameWalk[0].Bounds()
+	visualWidth := float64(bounds.Dx()) * scale
+	visualHeight := float64(bounds.Dy()) * scale
 	p := &Player{
-		hit:   eui.NewSignal(func(a, b bool) bool { return a == b }),
-		width: 32,
-		color: colornames.Aqua,
-		speed: 400,
+		playerFramesWalk: frameWalk,
+		playerFramesFly:  framesFly,
+		playerFrames:     frameWalk,
+		hit:              eui.NewSignal(func(a, b bool) bool { return a == b }),
+		speed:            400,
+		frameTick:        100 * time.Millisecond,
+		dirX:             1,
+		dirY:             1,
+		visualWidth:      visualWidth,
+		visualHeight:     visualHeight,
 	}
 	p.Hide()
 	return p
@@ -56,27 +75,40 @@ func (p *Player) Reset() {
 	p.hit.Emit(false)
 	p.x = float64(screenWidth)/2 - 16
 	p.y = float64(screenHeight)/2 - 16
-	p.last = time.Now()
+	now := time.Now()
+	p.lastTick = now
+	p.lastFrame = now
 }
 
 func (p *Player) Update() {
+	p.isColliding = false
 	now := time.Now()
-	dt := now.Sub(p.last).Seconds()
-	p.last = now
+	dt := now.Sub(p.lastTick).Seconds()
+	if p.left || p.right { //walk
+		p.playerFrames = p.playerFramesWalk
+	} else if p.up || p.down { //fly
+		p.playerFrames = p.playerFramesFly
+	}
 	if p.left {
 		p.x -= p.speed * dt
+		p.dirY = 1
+		p.dirX = -1 // Нормально
 		p.left = false
 	}
 	if p.right {
 		p.x += p.speed * dt
+		p.dirY = 1
+		p.dirX = 1 // Зеркально отразить по горизонтали
 		p.right = false
 	}
 	if p.up {
 		p.y -= p.speed * dt
+		p.dirY = 1 // Нормально
 		p.up = false
 	}
 	if p.down {
 		p.y += p.speed * dt
+		p.dirY = -1 // Зеркально отразить по вертикали
 		p.down = false
 	}
 
@@ -93,34 +125,56 @@ func (p *Player) Update() {
 	if p.y >= float64(screenHeight) {
 		p.y = float64(screenHeight)
 	}
+
+	frameDt := now.Sub(p.lastFrame)
+	if frameDt > p.frameTick {
+		p.playerFrame = (p.playerFrame + 1) % len(p.playerFramesWalk)
+		p.lastFrame = now
+	}
+	p.lastTick = now
 }
 func (p *Player) Draw(surface *ebiten.Image) {
 	if p.hidden {
 		return
 	}
-	x := p.x - p.width/2
-	y := p.y - p.width/2
-	// ebitenutil.DrawRect(surface, x, y, p.width, p.width, p.color)
-	vector.FillRect(surface, float32(x), float32(y), float32(p.width), float32(p.width), p.color, true)
+	img := p.playerFrames[p.playerFrame]
+	bounds := img.Bounds()
+	w := float64(bounds.Dx())
+	h := float64(bounds.Dy())
+
+	scale := 0.5
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(-w/2, -h/2)                   // Переместить центр в начало координат
+	op.GeoM.Scale(scale*p.dirX, scale*p.dirY)       // Масштаб с зеркальным отражением
+	op.GeoM.Translate(p.x+w*scale/2, p.y+h*scale/2) // Разместить в финальную позицию
+	surface.DrawImage(img, op)
+	rectColor := colornames.Green
+	if p.isColliding {
+		rectColor = colornames.Red
+	}
+	vector.StrokeRect(surface, float32(p.x), float32(p.y), float32(p.visualWidth), float32(p.visualHeight), 1, rectColor, true)
 }
 
-type Mob struct {
+type Creep struct {
 	*eui.Drawable
-	X, Y   float64
-	VX, VY float64
-	Frames []*ebiten.Image
-	Frame  int
-	Size   float64
-	Angle  float64
-	Hidden bool
-	color  color.Color
+	X, Y                      float64
+	VX, VY                    float64
+	Frames                    []*ebiten.Image
+	Frame                     int
+	Angle                     float64
+	Hidden                    bool
+	frameTick                 time.Duration
+	lastFrame                 time.Time
+	visualWidth, visualHeight float64 // Реальные визуальные размеры после масштабирования
+	isColliding               bool
 }
 
-func NewMob() *Mob {
-	size := 32.0
+func NewCreep(creepTypes [][]*ebiten.Image) *Creep {
 
 	// случайный набор кадров
-	// frames := creepTypes[rand.Intn(len(creepTypes))]
+	scale := 0.5
+	frames := creepTypes[rand.Intn(len(creepTypes))]
+	w, h := float64(frames[0].Bounds().Dx())*scale, float64(frames[0].Bounds().Dy())*scale
 
 	// случайный край
 	side := rand.Intn(4)
@@ -129,15 +183,15 @@ func NewMob() *Mob {
 	switch side {
 	case 0:
 		x = rand.Float64() * float64(screenWidth)
-		y = -size
+		y = -h
 	case 1:
 		x = rand.Float64() * float64(screenWidth)
-		y = float64(screenHeight) + size
+		y = float64(screenHeight) + h
 	case 2:
-		x = -size
+		x = -w
 		y = rand.Float64() * float64(screenHeight)
 	case 3:
-		x = float64(screenWidth) + size
+		x = float64(screenWidth) + w
 		y = rand.Float64() * float64(screenHeight)
 	}
 
@@ -168,40 +222,65 @@ func NewMob() *Mob {
 
 	angle := math.Atan2(vy, vx)
 
-	m := &Mob{
-		X:  x,
-		Y:  y,
-		VX: vx,
-		VY: vy,
-		// Frames: frames,
-		Frame: 0,
-		Size:  size,
-		Angle: angle,
-		color: colornames.Red,
+	m := &Creep{
+		X:            x,
+		Y:            y,
+		VX:           vx,
+		VY:           vy,
+		Frames:       frames,
+		Frame:        0,
+		visualWidth:  w,
+		visualHeight: h,
+		Angle:        angle,
+		lastFrame:    time.Now(),
+		frameTick:    100 * time.Millisecond,
 	}
 	return m
 }
-func (p *Mob) Update() {
+func (p *Creep) Update() {
+	p.isColliding = false
 	p.X += p.VX
 	p.Y += p.VY
+
+	now := time.Now()
+	frameDt := now.Sub(p.lastFrame)
+	if frameDt > p.frameTick {
+		p.Frame = (p.Frame + 1) % len(p.Frames)
+		p.lastFrame = now
+	}
 }
-func (p *Mob) Draw(surface *ebiten.Image) {
+func (p *Creep) Draw(surface *ebiten.Image) {
 	if p.Hidden {
 		return
 	}
-	x := p.X - 32/2
-	y := p.Y - 32/2
-	vector.FillRect(surface, float32(x), float32(y), float32(32), float32(32), p.color, true)
+	img := p.Frames[p.Frame]
+	bounds := img.Bounds()
+	w := float64(bounds.Dx())
+	h := float64(bounds.Dy())
+
+	scale := 0.5
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(-w/2, -h/2)                   // Переместить центр в начало координат
+	op.GeoM.Scale(scale, scale)                     // Масштаб
+	op.GeoM.Rotate(p.Angle)                         // Повернуть относительно центра
+	op.GeoM.Translate(p.X+w*scale/2, p.Y+h*scale/2) // Разместить в финальную позицию
+	surface.DrawImage(img, op)
+
+	rectColor := colornames.Green
+	if p.isColliding {
+		rectColor = colornames.Red
+	}
+	vector.StrokeRect(surface, float32(p.X), float32(p.Y), float32(p.visualWidth), float32(p.visualHeight), 1, rectColor, true)
 }
 
 // GameArea — специальный UI элемент, который рисует игру внутри себя
 type GameArea struct {
 	*eui.Drawable
 	player *Player
-	mobs   map[int]*Mob
+	mobs   map[int]*Creep
 }
 
-func NewGameArea(p *Player, mobs map[int]*Mob) *GameArea {
+func NewGameArea(p *Player, mobs map[int]*Creep) *GameArea {
 	ga := &GameArea{Drawable: eui.NewDrawable(), player: p, mobs: mobs}
 	ga.SetViewType(eui.ViewBackground)
 	return ga
@@ -239,15 +318,12 @@ func (g *GameArea) Draw(surface *ebiten.Image) {
 	}
 }
 
-func isOut(mob *Mob, sz float64) bool {
+func isOut(mob *Creep, sz float64) bool {
 	return mob.X < -sz || mob.X > float64(screenWidth)+sz || mob.Y < -sz || mob.Y > float64(screenHeight)+sz
 }
 
-func intersects(ax, ay, as, bx, by, bs float64) bool {
-	return ax < bx+bs &&
-		ax+as > bx &&
-		ay < by+bs &&
-		ay+as > by
+func intersects(ax, ay, aw, ah, bx, by, bw, bh float64) bool {
+	return ax < bx+bw && ax+aw > bx && ay < by+bh && ay+ah > by
 }
 
 func NewMain() *eui.Scene {
@@ -258,23 +334,42 @@ func NewMain() *eui.Scene {
 		startTimer, scoreTimer, mobTimer *eui.Timer
 		state                            *eui.Signal[GameState]
 		player                           *Player
-		mobs                             map[int]*Mob
+		mobs                             map[int]*Creep
 		mobId                            int
 	)
 	m := eui.NewScene(eui.NewLayoutVerticalPercent([]int{40, 20, 20, 20}, 10))
 	lblScore = eui.NewLabel("0")
+	lblScore.SetFontFace(assets.XoloniumRegular, assets.XoloniumRegular_ttf)
 	lblScore.SetFontSize(50)
 	lblScore.SetAlign(text.AlignCenter, text.AlignStart)
 	lblScore.SetBg(color.Transparent)
 	lblStatus = eui.NewLabel("")
+	lblStatus.SetFontFace(assets.XoloniumRegular, assets.XoloniumRegular_ttf)
 	lblStatus.SetBg(color.Transparent)
 	btnStart = eui.NewButton("Старт", func(b *eui.Button) {
 		state.Emit(StateStarting)
 		log.Println("Start pressed")
 	})
-	player = NewPlayer()
+	btnStart.SetFontFace(assets.XoloniumRegular, assets.XoloniumRegular_ttf)
+	framesWalk := []*ebiten.Image{
+		eui.GetUi().RM().LoadImage(assets.PlayerGrey_walk1_png),
+		eui.GetUi().RM().LoadImage(assets.PlayerGrey_walk2_png)}
+	framesFly := []*ebiten.Image{
+		eui.GetUi().RM().LoadImage(assets.PlayerGrey_up1_png),
+		eui.GetUi().RM().LoadImage(assets.PlayerGrey_up2_png)}
+	player = NewPlayer(framesWalk, framesFly)
+
+	creepWalk := []*ebiten.Image{
+		eui.GetUi().RM().LoadImage(assets.EnemyWalking_1_png),
+		eui.GetUi().RM().LoadImage(assets.EnemyWalking_2_png)}
+	creepFly := []*ebiten.Image{
+		eui.GetUi().RM().LoadImage(assets.EnemyFlyingAlt_1_png),
+		eui.GetUi().RM().LoadImage(assets.EnemyFlyingAlt_2_png)}
+	creepSwim := []*ebiten.Image{
+		eui.GetUi().RM().LoadImage(assets.EnemySwimming_1_png),
+		eui.GetUi().RM().LoadImage(assets.EnemySwimming_2_png)}
 	if mobs == nil {
-		mobs = make(map[int]*Mob)
+		mobs = make(map[int]*Creep)
 	}
 
 	gameArea := NewGameArea(player, mobs)
@@ -293,7 +388,7 @@ func NewMain() *eui.Scene {
 	state.ConnectAndFire(func(data GameState) {
 		switch data {
 		case StateMenu:
-			lblStatus.SetText(title).SetFontSize(50)
+			lblStatus.SetText(title)
 			lblStatus.Show()
 			lblScore.Show()
 			btnStart.Show()
@@ -306,7 +401,7 @@ func NewMain() *eui.Scene {
 			mobId = 0
 			player.Reset()
 			startTimer.On()
-			lblStatus.SetText("Приготовиться").SetFontSize(40)
+			lblStatus.SetText("Приготовиться")
 			btnStart.Hide()
 			player.Show()
 			log.Println("StateStarting")
@@ -327,7 +422,7 @@ func NewMain() *eui.Scene {
 
 	mobTimer = eui.NewTimer(500*time.Millisecond, func() {
 		if state.Value() == StatePlaying {
-			mob := NewMob()
+			mob := NewCreep([][]*ebiten.Image{creepFly, creepSwim, creepWalk})
 			mobs[mobId] = mob
 			mobId++
 			mobTimer.On()
@@ -353,11 +448,14 @@ func NewMain() *eui.Scene {
 			player.Update()
 			for id, mob := range mobs {
 				mob.Update()
-				if intersects(player.x, player.y, player.width, mob.X, mob.Y, mob.Size) {
+				if intersects(player.x, player.y, player.visualWidth, player.visualHeight,
+					mob.X, mob.Y, mob.visualWidth, mob.visualHeight) {
+					player.isColliding = true
+					mob.isColliding = true
 					player.hit.Emit(true)
 					break
 				}
-				sz := mob.Size
+				sz := mob.visualWidth
 				if isOut(mob, sz) {
 					delete(mobs, id)
 					log.Println("Крип вышел за экран", id, mob.X, mob.Y, len(mobs), mobId)
@@ -378,7 +476,7 @@ func NewMain() *eui.Scene {
 	})
 	m.SetBg(colornames.Teal)
 	m.Add(lblScore)
-	m.Add(gameArea) // Теперь это единственный игровой объект в дереве UI
+	m.Add(gameArea)
 	m.Add(lblStatus)
 	m.Add(btnStart)
 	m.Add(eui.NewDrawable())

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"log"
-
 	"github.com/t0l1k/eui"
 )
 
@@ -21,7 +19,6 @@ func main() {
 					sum += v
 					result = append(result, sum/float64(i+1))
 				}
-				log.Println("res:", values, result)
 				return result
 			}())
 		s.Add(plot)

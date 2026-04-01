@@ -46,10 +46,7 @@ func Quit(fn func()) {
 // Одиночка
 func GetUi() (u *Ui) {
 	if uiInstance == nil {
-		tm := time.Now()
 		u = &Ui{
-			start:    time.Now(),
-			tick:     tm.Nanosecond() / 1e6,
 			scenes:   []Sceneer{},
 			theme:    DefaultTheme(),
 			settings: DefaultSettings(),

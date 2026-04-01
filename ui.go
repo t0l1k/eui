@@ -2,7 +2,6 @@ package eui
 
 import (
 	"log"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -13,8 +12,6 @@ type Ui struct {
 	currentScene   Sceneer
 	theme          *Theme
 	settings       *Setting
-	tick           int
-	start          time.Time
 	size           Point[int]
 	inputMouse     *MouseListener
 	inputKeyboard  *KeyboardInput
@@ -26,7 +23,6 @@ type Ui struct {
 	quit           bool
 }
 
-func (u *Ui) GetStartTime() time.Time          { return u.start }
 func (u *Ui) MouseListener() *MouseListener    { return u.inputMouse }
 func (u *Ui) KeyboardListener() *KeyboardInput { return u.inputKeyboard }
 func (u *Ui) TickListener() *TickListener      { return u.tickListener }
@@ -40,7 +36,8 @@ func (u *Ui) IsMainScene() bool                { return len(u.scenes) == 0 }
 func (u *Ui) Theme() *Theme                    { return u.theme }
 func (u *Ui) SetTheme(value *Theme) *Ui        { u.theme = value; return u }
 func (u *Ui) Settings() *Setting               { return u.settings }
-func (u *Ui) FontDefault() *Font               { return u.resource.FontDefault() }
+func (u *Ui) FontDefault() *Font               { return u.resource.SystemFont() }
+func (u *Ui) RM() *ResourceManager             { return u.resource }
 
 // Отсюда можно следить за изменением размера окна, при изменении обновляются размеры текущей сцены
 func (u *Ui) Layout(w, h int) (int, int) {
