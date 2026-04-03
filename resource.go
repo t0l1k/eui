@@ -4,8 +4,12 @@ import (
 	"bytes"
 	"image"
 	"log"
+	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
+	"github.com/hajimehoshi/ebiten/v2/audio"
+	"github.com/hajimehoshi/ebiten/v2/audio/vorbis"
+	"github.com/hajimehoshi/ebiten/v2/audio/wav"
 )
 
 const (
@@ -35,4 +39,38 @@ func (r *ResourceManager) LoadImage(value []byte) *ebiten.Image {
 		panic(err)
 	}
 	return ebiten.NewImageFromImage(img)
+}
+
+func (r *ResourceManager) LoadOGG(value []byte) (*audio.Player, time.Duration, error) {
+	if audio.CurrentContext() == nil {
+		audio.NewContext(48000)
+	}
+	d, err := vorbis.DecodeWithSampleRate(audio.CurrentContext().SampleRate(), bytes.NewReader(value))
+	if err != nil {
+		return nil, 0, err
+	}
+	p, err := audio.CurrentContext().NewPlayer(d)
+	if err != nil {
+		return nil, 0, err
+	}
+	// Конвертация байтов в Duration: bytes / (channels * bytesPerSample * sampleRate)
+	// Ebiten использует 16-bit (2 bytes) stereo (2 channels) = 4 bytes per frame
+	duration := time.Duration(d.Length()) * time.Second / (time.Duration(audio.CurrentContext().SampleRate()) * 4)
+	return p, duration, nil
+}
+
+func (r *ResourceManager) LoadWAV(value []byte) (*audio.Player, time.Duration, error) {
+	if audio.CurrentContext() == nil {
+		audio.NewContext(48000)
+	}
+	d, err := wav.DecodeWithSampleRate(audio.CurrentContext().SampleRate(), bytes.NewReader(value))
+	if err != nil {
+		return nil, 0, err
+	}
+	p, err := audio.CurrentContext().NewPlayer(d)
+	if err != nil {
+		return nil, 0, err
+	}
+	duration := time.Duration(d.Length()) * time.Second / (time.Duration(audio.CurrentContext().SampleRate()) * 4)
+	return p, duration, nil
 }

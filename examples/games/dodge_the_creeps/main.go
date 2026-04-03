@@ -372,6 +372,11 @@ func NewMain() *eui.Scene {
 		mobs = make(map[int]*Creep)
 	}
 
+	music, _, _ := eui.GetUi().RM().LoadOGG(assets.HouseInAForestLoop_ogg)
+	music.Play()
+
+	gameOverSfx, _, _ := eui.GetUi().RM().LoadWAV(assets.Gameover_wav)
+
 	gameArea := NewGameArea(player, mobs)
 
 	player.hit.Connect(func(data bool) {
@@ -404,6 +409,8 @@ func NewMain() *eui.Scene {
 			lblStatus.SetText("Приготовиться")
 			btnStart.Hide()
 			player.Show()
+			music.Rewind()
+			music.Play()
 			log.Println("StateStarting")
 		case StatePlaying:
 			lblStatus.Hide()
@@ -411,6 +418,11 @@ func NewMain() *eui.Scene {
 			mobTimer.On()
 			log.Println("StatePlaying")
 		case StateGameOver:
+			if music.IsPlaying() {
+				music.Pause()
+			}
+			gameOverSfx.Rewind()
+			gameOverSfx.Play()
 			player.Hide()
 			scoreTimer.Off()
 			mobTimer.Off()
@@ -459,6 +471,12 @@ func NewMain() *eui.Scene {
 				if isOut(mob, sz) {
 					delete(mobs, id)
 					log.Println("Крип вышел за экран", id, mob.X, mob.Y, len(mobs), mobId)
+				}
+			}
+			if state.Value() == StatePlaying {
+				if !music.IsPlaying() {
+					music.Rewind()
+					music.Play()
 				}
 			}
 		}
