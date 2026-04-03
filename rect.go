@@ -34,6 +34,9 @@ func NewRect[T Numbers](arr []T) Rect[T] { return Rect[T]{X: arr[0], Y: arr[1], 
 func (r Rect[T]) InRect(x, y T) bool {
 	return r.Left() <= x && r.Right() >= x && r.Top() <= y && r.Bottom() >= y
 }
+func (a Rect[T]) Intersects(b Rect[T]) bool {
+	return a.X < b.X+b.W && a.X+a.W > b.X && a.Y < b.Y+b.H && a.Y+a.H > b.Y
+}
 func (r Rect[T]) Pos() (T, T)           { return r.X, r.Y }
 func (r Rect[T]) Size() (T, T)          { return r.W, r.H }
 func (r Rect[T]) GetArr() []T           { return []T{r.X, r.Y, r.W, r.H} }
@@ -60,4 +63,16 @@ func (r Rect[T]) Height() T           { return r.H }
 func (r Rect[T]) GetLowestSize() T    { return min(r.W, r.H) }
 func (a Rect[T]) Eq(b Rect[T]) bool   { return a.X == b.X && a.Y == b.Y && a.W == b.W && a.H == b.H }
 func (a Rect[T]) IsEmpty() bool       { return a.W <= 0 && a.H <= 0 || a.W <= 0 || a.H <= 0 }
-func (r Rect[T]) String() string      { return fmt.Sprintf("[%v, %v, %v, %v]", r.X, r.Y, r.W, r.H) }
+
+// Inflated возвращает новый прямоугольник, увеличенный на v со всех сторон.
+func (r Rect[T]) Inflated(v T) Rect[T] {
+	return Rect[T]{X: r.X - v, Y: r.Y - v, W: r.W + v*2, H: r.H + v*2}
+}
+
+// IsOutside возвращает true, если прямоугольник r полностью находится за пределами прямоугольника other.
+func (r Rect[T]) IsOutside(other Rect[T]) bool {
+	return r.Right() < other.Left() || r.Left() > other.Right() ||
+		r.Bottom() < other.Top() || r.Top() > other.Bottom()
+}
+
+func (r Rect[T]) String() string { return fmt.Sprintf("[%v, %v, %v, %v]", r.X, r.Y, r.W, r.H) }
