@@ -46,7 +46,7 @@ func (f Font) Get(size int) *text.GoTextFace {
 	return f.font[size]
 }
 
-func (f Font) CalcFontSize(txt string, rect Rect[int], wordWrap bool) int {
+func (f Font) MeasureFittingFontSize(txt string, rect Rect[int], wordWrap bool) int {
 	if rect.IsEmpty() {
 		panic(fmt.Sprintln("Empty rect", txt, rect))
 	}
@@ -79,52 +79,59 @@ func (f Font) WordWrapText(txt string, fontSize float64, width int) (string, Poi
 	if len(txt) == 0 {
 		return txt, NewPoint(0, 0)
 	}
-	var (
-		fnt    *text.GoTextFace
-		result strings.Builder
-		maxW   float64
-		lines  int
-	)
-	fnt = f.Get(int(fontSize))
-	origLines := strings.Split(txt, "\n")
-	for li, origLine := range origLines {
-		words := strings.Fields(origLine)
-		line := ""
-		for i, str := range words {
-			testLine := line
+
+	fnt := f.Get(int(fontSize))
+	lineSpacing := fnt.Size * 1.2
+	var result strings.Builder
+	var maxW float64
+	totalLines := 0
+
+	paragraphs := strings.Split(txt, "\n")
+	for i, p := range paragraphs {
+		words := strings.Fields(p)
+		if len(words) == 0 {
+			if i < len(paragraphs)-1 {
+				result.WriteString("\n")
+				totalLines++
+			}
+			continue
+		}
+
+		currentLine := ""
+		for j, word := range words {
+			testLine := currentLine
 			if testLine != "" {
 				testLine += " "
 			}
-			testLine += str
-			w, _ := text.Measure(testLine, fnt, fnt.Size*1.2)
-			if w > float64(width) && line != "" {
-				result.WriteString(line)
+			testLine += word
+
+			w, _ := text.Measure(testLine, fnt, lineSpacing)
+			if w > float64(width) && currentLine != "" {
+				result.WriteString(currentLine)
 				result.WriteString("\n")
-				lines++
-				line = str
+				totalLines++
+				currentLine = word
+				// Пересчитываем ширину для новой строки, начавшейся с текущего слова
+				w, _ = text.Measure(currentLine, fnt, lineSpacing)
 			} else {
-				line = testLine
+				currentLine = testLine
 			}
+
 			if w > maxW {
 				maxW = w
 			}
-			// Последнее слово в строке
-			if i == len(words)-1 {
-				result.WriteString(line)
-				lines++
+
+			if j == len(words)-1 {
+				result.WriteString(currentLine)
+				totalLines++
 			}
 		}
-		// Если строка была пустой (например, двойной \n)
-		if len(words) == 0 {
-			result.WriteString("\n")
-			lines++
-		}
-		// Не добавлять лишний перенос после последней строки
-		if li < len(origLines)-1 && len(words) > 0 {
+
+		if i < len(paragraphs)-1 {
 			result.WriteString("\n")
 		}
 	}
-	return result.String(), NewPoint(int(maxW), int(fnt.Size*1.2*float64(lines)))
+	return result.String(), NewPoint(int(maxW), int(lineSpacing*float64(totalLines)))
 }
 
 func (f Font) DrawString(surface *ebiten.Image, txt string, fontSize int, rect Rect[int], hAlign text.Align, vAlign text.Align, fg color.Color, wordWrap bool) {
@@ -150,7 +157,7 @@ func (f Font) DrawString(surface *ebiten.Image, txt string, fontSize int, rect R
 		y += h
 	}
 	if fontSize == 0 {
-		fontSize = f.CalcFontSize(txt, rect, wordWrap)
+		fontSize = f.MeasureFittingFontSize(txt, rect, wordWrap)
 	}
 	if wordWrap {
 		txt, _ = f.WordWrapText(txt, float64(fontSize), rect.W)

@@ -39,7 +39,7 @@ func (l *Label) Layout() {
 
 	// 1. Подготовка параметров шрифта
 	if l.dynamicFontSize {
-		l.fontSize = float64(GetUi().RM().GetFont(l.fontName).CalcFontSize(l.txt, l.Rect(), true))
+		l.fontSize = float64(GetUi().RM().GetFont(l.fontName).MeasureFittingFontSize(l.txt, l.Rect(), true))
 	}
 
 	// 2. Подготовка холста (Drawable.Layout создаст/очистит l.image)
