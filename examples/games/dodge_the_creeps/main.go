@@ -30,12 +30,9 @@ const (
 )
 
 type Player struct {
-	playerFramesWalk []*ebiten.Image
-	playerFramesFly  []*ebiten.Image
-	playerFrames     []*ebiten.Image
-	playerFrame      int
-	frameTick        time.Duration
-	lastFrame        time.Time
+	anim       *eui.Animation
+	framesWalk []*ebiten.Image
+	framesFly  []*ebiten.Image
 
 	hit                   *eui.Signal[bool]
 	lastTick              time.Time
@@ -43,7 +40,6 @@ type Player struct {
 	hidden                bool
 	speed                 float64
 	rect                  eui.Rect[float64]
-	dirX, dirY            float64 // Зеркальное отражение: -1 или 1
 	isColliding           bool
 }
 
@@ -52,16 +48,15 @@ func NewPlayer(frameWalk, framesFly []*ebiten.Image) *Player {
 	bounds := frameWalk[0].Bounds()
 	visualWidth := float64(bounds.Dx()) * scale
 	visualHeight := float64(bounds.Dy()) * scale
+	a := eui.NewAnimation(frameWalk, 100*time.Millisecond)
+	a.SetScale(scale).SetAngle(0).SetPos(eui.NewPoint(0.0, 0.0))
 	p := &Player{
-		playerFramesWalk: frameWalk,
-		playerFramesFly:  framesFly,
-		playerFrames:     frameWalk,
-		hit:              eui.NewSignal(func(a, b bool) bool { return a == b }),
-		speed:            400,
-		frameTick:        100 * time.Millisecond,
-		dirX:             1,
-		dirY:             1,
-		rect:             eui.NewRect([]float64{0, 0, visualWidth, visualHeight}),
+		anim:       a,
+		framesWalk: frameWalk,
+		framesFly:  framesFly,
+		hit:        eui.NewSignal(func(a, b bool) bool { return a == b }),
+		speed:      400,
+		rect:       eui.NewRect([]float64{0, 0, visualWidth, visualHeight}),
 	}
 	p.Hide()
 	return p
@@ -73,40 +68,43 @@ func (p *Player) Reset() {
 	p.hit.Emit(false)
 	p.rect.X = float64(screenWidth)/2 - p.rect.W/2
 	p.rect.Y = float64(screenHeight)/2 - p.rect.H/2
+	p.anim.SetPos(eui.NewPoint(p.rect.X, p.rect.Y))
 	now := time.Now()
 	p.lastTick = now
-	p.lastFrame = now
+	p.anim.Reset()
 }
 
 func (p *Player) Update() {
 	p.isColliding = false
 	now := time.Now()
 	dt := now.Sub(p.lastTick).Seconds()
+
 	if p.left || p.right { //walk
-		p.playerFrames = p.playerFramesWalk
+		p.anim.SetFrames(p.framesWalk)
 	} else if p.up || p.down { //fly
-		p.playerFrames = p.playerFramesFly
+		p.anim.SetFrames(p.framesFly)
 	}
+
 	if p.left {
 		p.rect.X -= p.speed * dt
-		p.dirY = 1
-		p.dirX = -1 // Нормально
+		p.anim.FlipY = false
+		p.anim.FlipX = true // Зеркально для влево (по умолчанию вправо)
 		p.left = false
 	}
 	if p.right {
 		p.rect.X += p.speed * dt
-		p.dirY = 1
-		p.dirX = 1 // Зеркально отразить по горизонтали
+		p.anim.FlipY = false
+		p.anim.FlipX = false // Нормально для вправо
 		p.right = false
 	}
 	if p.up {
 		p.rect.Y -= p.speed * dt
-		p.dirY = 1 // Нормально
+		p.anim.FlipY = false // Нормально для вверх
 		p.up = false
 	}
 	if p.down {
 		p.rect.Y += p.speed * dt
-		p.dirY = -1 // Зеркально отразить по вертикали
+		p.anim.FlipY = true // Зеркально для вниз
 		p.down = false
 	}
 
@@ -124,44 +122,29 @@ func (p *Player) Update() {
 		p.rect.Y = float64(screenHeight)
 	}
 
-	frameDt := now.Sub(p.lastFrame)
-	if frameDt > p.frameTick {
-		p.playerFrame = (p.playerFrame + 1) % len(p.playerFramesWalk)
-		p.lastFrame = now
-	}
+	p.anim.SetPos(eui.NewPoint(p.rect.X, p.rect.Y))
+	p.anim.Update()
 	p.lastTick = now
 }
 func (p *Player) Draw(surface *ebiten.Image) {
 	if p.hidden {
 		return
 	}
-	img := p.playerFrames[p.playerFrame]
-	x, y := p.rect.Pos()
-	w, h := float64(img.Bounds().Dx()), float64(img.Bounds().Dy())
+	p.anim.Draw(surface)
 
-	scale := 0.5
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-w/2, -h/2)               // Переместить центр в начало координат
-	op.GeoM.Scale(scale*p.dirX, scale*p.dirY)   // Масштаб с зеркальным отражением
-	op.GeoM.Translate(x+w*scale/2, y+h*scale/2) // Разместить в финальную позицию
-	surface.DrawImage(img, op)
 	rectColor := colornames.Green
 	if p.isColliding {
 		rectColor = colornames.Red
 	}
-	vector.StrokeRect(surface, float32(x), float32(y), float32(p.rect.W), float32(p.rect.H), 1, rectColor, true)
+	vector.StrokeRect(surface, float32(p.rect.X), float32(p.rect.Y), float32(p.rect.W), float32(p.rect.H), 1, rectColor, true)
 }
 
 type Creep struct {
 	*eui.Drawable
 	rect        eui.Rect[float64]
 	VX, VY      float64
-	Frames      []*ebiten.Image
-	Frame       int
-	Angle       float64
+	anim        *eui.Animation
 	Hidden      bool
-	frameTick   time.Duration
-	lastFrame   time.Time
 	isColliding bool
 }
 
@@ -217,15 +200,13 @@ func NewCreep(creepTypes [][]*ebiten.Image) *Creep {
 
 	angle := math.Atan2(vy, vx)
 
+	a := eui.NewAnimation(frames, 100*time.Millisecond)
+	a.SetAngle(angle).SetScale(scale).SetPos(eui.NewPoint(x, y))
 	m := &Creep{
-		rect:      eui.NewRect([]float64{x, y, w, h}),
-		VX:        vx,
-		VY:        vy,
-		Frames:    frames,
-		Frame:     0,
-		Angle:     angle,
-		lastFrame: time.Now(),
-		frameTick: 100 * time.Millisecond,
+		rect: eui.NewRect([]float64{x, y, w, h}),
+		VX:   vx,
+		VY:   vy,
+		anim: a,
 	}
 	return m
 }
@@ -233,30 +214,14 @@ func (p *Creep) Update() {
 	p.isColliding = false
 	p.rect.X += p.VX
 	p.rect.Y += p.VY
-
-	now := time.Now()
-	frameDt := now.Sub(p.lastFrame)
-	if frameDt > p.frameTick {
-		p.Frame = (p.Frame + 1) % len(p.Frames)
-		p.lastFrame = now
-	}
+	p.anim.SetPos(eui.NewPoint(p.rect.X, p.rect.Y))
+	p.anim.Update()
 }
 func (p *Creep) Draw(surface *ebiten.Image) {
 	if p.Hidden {
 		return
 	}
-	img := p.Frames[p.Frame]
-	bounds := img.Bounds()
-	w := float64(bounds.Dx())
-	h := float64(bounds.Dy())
-
-	scale := 0.5
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-w/2, -h/2)                             // Переместить центр в начало координат
-	op.GeoM.Scale(scale, scale)                               // Масштаб
-	op.GeoM.Rotate(p.Angle)                                   // Повернуть относительно центра
-	op.GeoM.Translate(p.rect.X+w*scale/2, p.rect.Y+h*scale/2) // Разместить в финальную позицию
-	surface.DrawImage(img, op)
+	p.anim.Draw(surface)
 
 	rectColor := colornames.Green
 	if p.isColliding {
