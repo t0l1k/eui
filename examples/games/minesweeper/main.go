@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"image"
-	"log"
 	"math/rand"
 	"strconv"
 	"time"
@@ -178,7 +177,6 @@ func (b *Board) Shuffle(x0, y0 int) {
 	}
 	b.State.Emit(GamePlay)
 	b.Sw.Start()
-	log.Println("Board:Reset:", b.String2())
 }
 
 func (b *Board) Open(x, y int) {
@@ -310,27 +308,6 @@ func (b *Board) String() string {
 	return str
 }
 
-func (b *Board) String2() string {
-	str := strconv.Itoa(b.Conf.dim.row) + ","
-	str += strconv.Itoa(b.Conf.dim.column) + ",("
-	str += strconv.Itoa(0) + "/"
-	str += strconv.Itoa(b.Conf.dim.mines) + ")"
-	str += b.State.Value().String() + "\n"
-	for y := 0; y < b.Conf.dim.column; y++ {
-		for x := 0; x < b.Conf.dim.row; x++ {
-			cell := b.Field.Cell(b.Idx(x, y))
-			if cell.mined {
-				str += "*"
-			} else {
-				str += strconv.Itoa(b.Field[b.Idx(x, y)].count)
-			}
-		}
-		str += "\n"
-	}
-	str += eui.FormatSmartDuration(b.Conf.duration.Value(), false)
-	return str
-}
-
 type GameState int
 
 const (
@@ -351,7 +328,6 @@ func NewDim(r, c, m int) Dim { return Dim{row: r, column: c, mines: m} }
 func (d Dim) Percent() int   { return int(utils.PercentOf(float64(d.mines), float64(d.row*d.column))) }
 func (d *Dim) SetMines(value float64) {
 	d.mines = int(utils.ValueFromPercent(value, float64(d.row*d.column)))
-
 }
 func (d Dim) Empty() bool    { return d.row == 0 || d.column == 0 || d.mines == 0 }
 func (d Dim) String() string { return fmt.Sprintf("Dim:%v %v %v", d.row, d.column, d.mines) }
@@ -411,6 +387,8 @@ type GameView struct {
 	board  *eui.Container
 	game   *Board
 	fn     func(*eui.Button)
+
+	screenShot *ebiten.Image
 }
 
 func NewGameView(fn func(*eui.Button)) *GameView {
@@ -519,6 +497,7 @@ func (g *GameView) New(dim Dim) {
 	g.game.State.Connect(func(data GameState) {
 		switch data {
 		case GameStart:
+			g.screenShot = nil
 			g.game.Sw.Reset()
 			g.game.CountFlagged.Emit(0)
 			g.game.Conf.duration.Emit(0)
@@ -548,6 +527,7 @@ func (g *GameView) New(dim Dim) {
 }
 
 func (g *GameView) Reset() {
+	g.screenShot = nil
 	g.game.Reset()
 	for i, v := range g.board.Children() {
 		v.(*eui.Button).SetText(g.game.Field.Cell(i).String())
@@ -760,14 +740,10 @@ func main() {
 		runDialogGameEnd := func() {
 			gameView.topbar.Hide()
 			gameView.board.Disable()
-			w0, h0 := eui.GetUi().Size()
-			r := gameView.board.Rect()
-			cameraRect := image.Rect(r.X, r.Y, r.Right(), r.Bottom())
-			contentImg := ebiten.NewImage(w0, h0)
-			gameView.board.Draw(contentImg)
 			gameView.Hide()
-			dialogGameEnd.lastGameIcon.SetIcon(contentImg.SubImage(cameraRect).(*ebiten.Image))
 			dialogGameEnd.Show()
+			dialogGameEnd.lastGameIcon.SetIcon(gameView.screenShot)
+			dialogGameEnd.lastGameIcon.Layout()
 		}
 
 		gameView = NewGameView(func(b *eui.Button) {
@@ -784,13 +760,21 @@ func main() {
 			}
 		})
 
+		makeScreenShot := func() {
+			w0, h0 := eui.GetUi().Size()
+			r := gameView.board.Rect()
+			cameraRect := image.Rect(r.X, r.Y, r.Right(), r.Bottom())
+			contentImg := ebiten.NewImage(w0, h0)
+			gameView.Draw(contentImg)
+			gameView.screenShot = contentImg.SubImage(cameraRect).(*ebiten.Image)
+		}
+
 		gameView.game.State.Connect(func(data GameState) {
 			switch data {
-			case GameWin:
-				dialogGameEnd.title.SetText("Game Won!")
-				runDialogGameEnd()
-			case GameGameOver:
-				dialogGameEnd.title.SetText("Game Lost!")
+			case GameWin, GameGameOver:
+				gameView.game.MarkGameAfterEnd()
+				makeScreenShot()
+				dialogGameEnd.title.SetText(gameView.game.Conf.String())
 				runDialogGameEnd()
 			}
 		})

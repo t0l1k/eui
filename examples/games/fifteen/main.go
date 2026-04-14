@@ -306,27 +306,27 @@ func main() {
 		eui.GetUi().KeyboardListener().Connect(func(data eui.Event) {
 			kd := data.Value.(eui.KeyboardData)
 
-			if kd.IsPressed(ebiten.KeySpace) {
+			if kd.IsReleased(ebiten.KeySpace) {
 				game.state.Emit(GamePlay)
 			}
 
-			if kd.IsPressed(ebiten.KeyEnter) {
+			if kd.IsReleased(ebiten.KeyEnter) {
 				nextDim()
 			}
 
 			switch game.state.Value() {
 			case GameStart:
 			case GamePlay:
-				if kd.IsPressed(ebiten.KeyArrowLeft) {
+				if kd.IsReleased(ebiten.KeyArrowLeft) {
 					game.Move(Left)
 				}
-				if kd.IsPressed(ebiten.KeyArrowRight) {
+				if kd.IsReleased(ebiten.KeyArrowRight) {
 					game.Move(Right)
 				}
-				if kd.IsPressed(ebiten.KeyArrowUp) {
+				if kd.IsReleased(ebiten.KeyArrowUp) {
 					game.Move(Up)
 				}
-				if kd.IsPressed(ebiten.KeyArrowDown) {
+				if kd.IsReleased(ebiten.KeyArrowDown) {
 					game.Move(Down)
 				}
 

@@ -22,10 +22,9 @@ func (k *KeyboardData) GetRunes() []rune                 { return k.runes }
 func (k *KeyboardData) IsPressed(value ebiten.Key) bool  { return slices.Contains(k.keysP, value) }
 func (k *KeyboardData) IsReleased(value ebiten.Key) bool { return slices.Contains(k.keysR, value) }
 
-// Умею передать подписчикам события от клавиатуры. При нажатой клавише, более 250 мс символ дублируется.
+// Умею передать подписчикам события от клавиатуры.
 type KeyboardInput struct{ *Signal[Event] }
 
-// Пауза 250мс до следующего нажатия
 func NewKeyboardListener(fn SlotFunc[Event]) *KeyboardInput {
 	k := &KeyboardInput{Signal: NewSignal[Event]()}
 	k.Connect(fn)
