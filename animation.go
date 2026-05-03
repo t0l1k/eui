@@ -8,6 +8,7 @@ import (
 
 // Animation управляет последовательностью кадров и их отображением.
 type Animation struct {
+	*Drawable
 	frames  []*ebiten.Image
 	index   int
 	tick    time.Duration
@@ -22,12 +23,15 @@ type Animation struct {
 
 // NewAnimation создает новую анимацию с заданным интервалом смены кадров.
 func NewAnimation(frames []*ebiten.Image, tick time.Duration) *Animation {
-	return &Animation{
-		frames:  frames,
-		tick:    tick,
-		playing: true,
-		last:    time.Now(),
+	a := &Animation{
+		Drawable: NewDrawable(),
+		frames:   frames,
+		tick:     tick,
+		playing:  true,
+		last:     time.Now(),
 	}
+	a.SetViewType(ViewBackground)
+	return a
 }
 
 // SetFrames меняет текущий набор кадров. Если набор новый, индекс сбрасывается.
