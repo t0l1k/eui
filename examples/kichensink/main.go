@@ -8,10 +8,13 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/t0l1k/eui"
 	"github.com/t0l1k/eui/examples/kichensink/res"
+	"golang.org/x/image/colornames"
 )
 
 func NewTestScene() *eui.Scene {
 	sc := eui.NewScene(eui.NewAbsoluteLayout())
+	theme := eui.GetUi().Theme()
+	theme.Set(eui.SceneBg, colornames.Beige)
 
 	btn1 := eui.NewButton("Alert", func(b *eui.Button) {
 		eui.NewSnackBar("Hello, world!").ShowTime(3 * time.Second)
@@ -50,7 +53,7 @@ func NewTestScene() *eui.Scene {
 		items[i] = fmt.Sprintf("Item %d", i)
 	}
 	list := eui.NewListView()
-	list.SetupListViewButtons(items, 30, 1, eui.GetUi().Theme().Get(eui.ButtonBg), eui.GetUi().Theme().Get(eui.ButtonFg), func(b *eui.Button) {
+	list.SetupListViewButtons(items, 30, 1, theme.Get(eui.ButtonBg), theme.Get(eui.ButtonFg), func(b *eui.Button) {
 		eui.NewSnackBar(fmt.Sprintf("Selected: %s", b.Text())).ShowTime(3 * time.Second)
 	})
 	list.SetRect(eui.NewRect([]int{450 / 2, 10, 150, 170}))
@@ -83,17 +86,17 @@ func NewTestScene() *eui.Scene {
 	sc.Add(tf2)
 
 	logoIcon := eui.NewIcon(eui.GetUi().RM().LoadImage(res.LogoPNG))
-	logoIcon.SetRect(eui.NewRect([]int{450 - 90, 10, 80, 40}))
+	logoIcon.SetRect(eui.NewRect([]int{450, 10, 80, 40}))
 	sc.Add(logoIcon)
 
 	spinner := eui.GetUi().RM().LoadImage(res.SpinnerPNG)
 	loadSpinner := func() []*ebiten.Image {
-		var icons []*ebiten.Image // x:0 y:24 w: 26 h: 26
+		var icons []*ebiten.Image
 		var nImg *ebiten.Image
-		w, h := 26, 26
-		for i := 0; i < 5; i++ {
+		w, h := 23, 24
+		for i := 0; i < 12; i++ {
 			nImg = ebiten.NewImage(w, h)
-			x, y := i*w, 24
+			x, y := i*w, 0
 			x += i
 			nImg.DrawImage(spinner.SubImage(image.Rect(x, y, x+w, y+h)).(*ebiten.Image), &ebiten.DrawImageOptions{})
 			icons = append(icons, nImg)
@@ -101,10 +104,10 @@ func NewTestScene() *eui.Scene {
 		return icons
 	}
 	spinnerIcon := eui.NewAnimation(loadSpinner(), 100*time.Millisecond)
-	spinnerIcon.SetPos(eui.NewPoint[float64](450-74, 600-74))
-	// spinnerIcon.SetRect(eui.NewRect([]int{450 - 74, 600 - 74, 64, 64}))
+	spinnerIcon.SetPos(eui.NewPoint[float64](450, 600-74))
 	sc.Add(spinnerIcon)
-
+	spinnerIcon.Play()
+	// spinnerIcon.Stop()
 	return sc
 }
 

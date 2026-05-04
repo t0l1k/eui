@@ -28,6 +28,7 @@ func NewAnimation(frames []*ebiten.Image, tick time.Duration) *Animation {
 		frames:   frames,
 		tick:     tick,
 		playing:  true,
+		scale:    1.0,
 		last:     time.Now(),
 	}
 	a.SetViewType(ViewBackground)
